@@ -29,7 +29,8 @@ console.log(p1.name, p1.getName());
 // jz jz
 ```
 
-我们创建了PersonFun构造函数，使用new关键字创建了实例p1。可以看到，在构造函数中对this
+我们创建了PersonFun构造函数，使用new关键字创建了实例p1。可以看到，在构造函数中对this增加了属性和方法，最后成为了实例的属性。
+
 
 
 
