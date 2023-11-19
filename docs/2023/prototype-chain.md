@@ -281,6 +281,7 @@ console.log(Array.__proto__ === Function.prototype);
 console.log(String);
 console.log(String.__proto__);
 console.log(String.__proto__ === Function.prototype);
+new Function.prototype();
 // 输出结果:
 // ƒ Number() { [native code] }
 // ƒ () { [native code] }
@@ -291,13 +292,25 @@ console.log(String.__proto__ === Function.prototype);
 // ƒ String() { [native code] }
 // ƒ () { [native code] }
 // true
+// Uncaught TypeError: Function.prototype is not a constructor
 ```
-果然如此，原生类型的构造函数的原型都是同一个。而如上面实验得出的结论，这个原型是一个函数，它没有构造函数，它的原型是`Object.prototype`。
-
+果然如此，原生类型的构造函数的原型都是同一个。而如上面实验得出的结论，这个原型是一个函数，它没有构造函数，它的原型是`Object.prototype`。我还尝试直接用这个构造函数原型创建实例，结果提示这不是一个构造函数。
 
 ## 原型链
-有了上面这些关系，我们发现不同类型对象的原型似乎都是有关系的，好像有一条线可以把他们穿起来。这条线就是我们所说的原型链。
+有了上面这些关系，我们发现不同类型对象的原型似乎都是有关系的，好像有一条线可以把他们穿起来。这条线就是我们所说的原型链。在文章一开始的简介中说过，原型和原型链是JavaScirpt中实现类和继承的一种方式。原型就相当于实例的类，继承就像是原型链。因此，原型的特点也很像父类，即实例可以访问原型的属性，也可以覆盖原型属性。在浏览器的控制台中，我们打印一个对象，展示的`[[Prototype]]`即是它的原型。
 
+### 原型链示意图
+不仅我们自定义的类型有原型链的关系，JS内部的原生类型也存在原型链，且可以和我们自定义的类型串起来。这里我们用一个图片描述原型链之间的关系（图片来源MollyPages.org）：
+
+![](/2023/prototype-1.jpg)
+
+### 原型链文字版
+
+
+
+### 原生类型属于对象类型
+
+正是通过原型链的关系，Function和Number等其它原生类型也都属于对象类型，可以使用对象类型的方法。
 
 
 ## 使用原型链实现各种继承
@@ -315,3 +328,5 @@ https://juejin.cn/post/6984678359275929637
 https://juejin.cn/post/7254443448563040311
 - js从原型链到继承——图解来龙去脉\
 https://juejin.cn/post/7075354546096046087
+- Javascript Object Layout\
+http://www.mollypages.org/tutorials/js.mp
