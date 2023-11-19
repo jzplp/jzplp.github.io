@@ -137,7 +137,7 @@ console.log(obj1.constructor === Object)
 
 可以看到，使用字面量形式和`new Object()`形式，创建出来对象的原型是一样的。既然Object是个构造函数，那么`Object.prototype`即是Object实例的原型对象。
 
-至于`obj.constructor`实际上就是构造函数`Object()`。它是JS引擎实现的，因此这里展示`[native code]`。
+至于`obj.constructor`实际上就是构造函数`Object()`。它是JS内部生成的，因此这里展示`[native code]`。
 
 ### new Function()
 在JS中函数实际上也是个对象。既然它是个对象，那么它应该也有构造函数和原型吧。我们来试验下：
@@ -199,18 +199,106 @@ console.log(PersonFun.constructor === Function)
 
 与对象类似，`Function.prototype`是函数的原型，我们函数字面量的原型都是它。函数的构造函数即是`Function()`。（构造函数与普通函数并无区别，都是函数）。在上面的输出中，函数的原型对象`Function.prototype`也是一个函数：`ƒ () { [native code] }`。关于这点我们会在后面讨论。
 
+## JS中的原型关系
+了解了字面量相关的原型，现在我们再来刨根问底，看看JS中对象的原型关系。
 
-## JS中原生对象的类型
-现在我们再来看看，JS中原生对象的原型关系。
+### 对象的原型关系
+首先看下Object原型的关系。
 
-### Object类型的原型
+#### 对象的尽头
+首先看看对象的尽头。上面讲过字面量对象的原型即是`Object.prototype`。它也是个对象，那么它有没有原型呢？我们试一下：
+```js
+const obj = { a: 1 };
+console.log(obj.__proto__)
+console.log(obj.__proto__.__proto__)
+// 输出结果:
+// {constructor: ƒ, __defineGetter__: ƒ, …}
+// null
+```
+答案是没有的，`Object.prototype`是没有原型的。
 
+#### 自定义构造函数与原生对象的关系
+我们的自定义构造函数与对应的实例原型和`Object.prototype`有关系么？我们试验下：
+```js
+// Person构造函数
+function PersonFun(name) {
+  this.name = name;
+}
+// Person原型对象
+PersonFun.prototype.getName = function() {
+  return this.name;
+}
+console.log(PersonFun.prototype.__proto__);
+console.log(PersonFun.prototype.__proto__ === Object.prototype);
+console.log(PersonFun.prototype.constructor === Object);
+// 输出结果:
+// {constructor: ƒ, __defineGetter__: ƒ, …}
+// true
+// false
+```
 
+可以看到，Person构造函数对应实例的原型对象，它的原型即是`Object.prototype`。但是它与字面量对象不同的是，它的constructor属性表示的是它对应实例的构造函数，而不是字面量对象的`Object()`。
 
+### 原生类型的原型关系
+在前面我们聊过了函数的原型，即是`Function.prototype`。但当时我们输出它，发现它是一个函数，那么它究竟是什么？它还有没有原型？
 
-## 字面量的原型
+```js
+// Person构造函数
+function PersonFun(name) {
+  this.name = name;
+}
+console.log(PersonFun.__proto__);
+console.log(PersonFun.__proto__.__proto__);
+console.log(PersonFun.__proto__.__proto__ === Object.prototype);
+console.log(PersonFun.__proto__.prototype);
+// 输出结果:
+// ƒ () { [native code] }
+// {constructor: ƒ, __defineGetter__: ƒ, …}
+// true
+// undefined
+```
+可以看到，直接打印函数的原型也是一个函数，里面是`[native code]`，即它也是由JS内部生成的。它的再深一层原型，居然又是`Object.prototype`。函数的原型虽然也是个函数，但是它并没有更深一层的prototype。
+
+这时候我们返回去看看对象原型的构造函数，即`Object()`。作为一个函数，它的原型是什么？
+```js
+console.log(Object);
+console.log(Object.__proto__);
+console.log(Object.__proto__ === Function.prototype);
+// 输出结果:
+// ƒ Object() { [native code] }
+// ƒ () { [native code] }
+// true
+```
+
+看来这些原生类型的构造函数的原型，都同一个来源。我们再试一下其他的原生类型：
+```js
+console.log(Number);
+console.log(Number.__proto__);
+console.log(Number.__proto__ === Function.prototype);
+console.log(Array);
+console.log(Array.__proto__);
+console.log(Array.__proto__ === Function.prototype);
+console.log(String);
+console.log(String.__proto__);
+console.log(String.__proto__ === Function.prototype);
+// 输出结果:
+// ƒ Number() { [native code] }
+// ƒ () { [native code] }
+// true
+// ƒ Array() { [native code] }
+// ƒ () { [native code] }
+// true
+// ƒ String() { [native code] }
+// ƒ () { [native code] }
+// true
+```
+果然如此，原生类型的构造函数的原型都是同一个。而如上面实验得出的结论，这个原型是一个函数，它没有构造函数，它的原型是`Object.prototype`。
+
 
 ## 原型链
+有了上面这些关系，我们发现不同类型对象的原型似乎都是有关系的，好像有一条线可以把他们穿起来。这条线就是我们所说的原型链。
+
+
 
 ## 使用原型链实现各种继承
 
