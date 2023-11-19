@@ -11,7 +11,9 @@
 虽然有了class，但是原型链相关的内容我们依然要掌握。不仅是因为作为前端开发者，我们要深入理解语法。而且在查看源码，以及实现一些复杂的面对对象写法时，依然是有用的。因此在这篇文章中，我们一起搞懂JavaScript中的原型和原型链。(这篇文章并不会涉及class相关语法)
 
 ## 构造函数与原型
-在JS中，创建实例的方法是通过构造函数。在构造函数中通过this实现对实例的操控，比如赋值各种属性和方法。我们看个例子：
+
+### 构造函数
+在JS中创建实例的方法是通过构造函数。在构造函数中通过this实现对实例的操控，比如赋值各种属性和方法。我们看个例子：
 
 ```js
 // Person构造函数
@@ -21,7 +23,6 @@ function PersonFun(name) {
     return this.name;
   }
 }
-
 // 创建实例
 const p1 = new PersonFun('jz');
 console.log(p1.name, p1.getName());
@@ -29,7 +30,57 @@ console.log(p1.name, p1.getName());
 // jz jz
 ```
 
-我们创建了PersonFun构造函数，使用new关键字创建了实例p1。可以看到，在构造函数中对this增加了属性和方法，最后成为了实例的属性。
+我们创建了PersonFun构造函数，使用new关键字创建了实例p1。可以看到，在构造函数中对this增加了属性和方法，最后成为了实例的属性。注意构造方法必须使用new调用。但是这样所有的属性都是实例属性，包括那个getName方法：
+```js
+const p1 = new PersonFun('jz');
+const p2 = new PersonFun('jz');
+console.log(p1.getName === p2.getName);
+// 输出结果:
+// false
+```
+
+### 原型对象
+只用上面的构造函数，依然没有“类”的存在。这时候我们增加原型这一概念，可以理解为是实例对象的类。原型对象可以通过构造函数的prototype属性访问。
+
+```js
+// Person构造函数
+function PersonFun(name) {
+  this.name = name;
+}
+// Person原型对象
+PersonFun.prototype.getName = function() {
+  return this.name;
+}
+// 创建实例
+const p1 = new PersonFun('jz');
+const p2 = new PersonFun('jz');
+console.log(p1.name, p1.getName());
+console.log(p1.getName === p2.getName);
+// 输出结果:
+// jz jz
+// true
+```
+
+可以看到，我们没有在构造函数中添加实例对象的属性方法getName，仅仅在原型对象上添加。但实例对象上依然能使用属性方法getName，而且对于不同的实例来说，这个方法是共享的，是同一个。通过原型，我们不仅能共享方法名也能共享属性值：
+
+```js
+// Person原型对象
+PersonFun.prototype.title = 'hello';
+const p1 = new PersonFun('jz');
+const p2 = new PersonFun('jz');
+console.log(p1.title, p1.title);
+p1.title = '你好'
+console.log(p1.title, p1.title);
+// 输出结果:
+// hello hello
+// 你好 你好
+```
+
+可以看到，在实例中修改原型上提供的属性，实际上是修改原型中的属性值，因此这个修改是在实例中共享的。
+
+### 实例/构造函数/原型的关系
+
+
 
 
 
