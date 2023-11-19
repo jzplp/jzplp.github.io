@@ -70,24 +70,147 @@ const p1 = new PersonFun('jz');
 const p2 = new PersonFun('jz');
 console.log(p1.title, p1.title);
 p1.title = '你好'
-console.log(p1.title, p1.title);
+console.log(p1.title, p2.title);
 // 输出结果:
 // hello hello
 // 你好 你好
 ```
 
-可以看到，在实例中修改原型上提供的属性，实际上是修改原型中的属性值，因此这个修改是在实例中共享的。
+可以看到，在实例中修改原型上提供的属性，实际上是增加实例中的属性值，因此这个修改是不在实例中共享的。但如果原型提供的属性是个对象，我们修改对象内部的值，这个值是实例间共享的。
+```js
+PersonFun.prototype.obj = {};
+p1.obj.a = 1;
+console.log(p1.obj.a);
+// 输出结果:
+// 1
+```
 
-### 实例/构造函数/原型的关系
+### 构造函数/原型的获取
+通过上面的描述，我们了解了实例，构造函数和原型对象以及他们之间的关系。那么在代码中，如何获取构造函数和原型对象呢？我们列出了一些方法：
+
+```js
+// 构造函数 PersonFun
+// 获取原型对象
+Person = PersonFun.prototype
+// 创建实例对象
+p1 = new PersonFun()
+
+// 原型对象 Person
+// 获取构造函数
+PersonFun = Person.constructor
+
+// 实例对象 p1
+// 获取原型对象
+Person = p1.__proto__
+Person = Object.getPrototypeOf(p1)
+// 获取构造函数
+PersonFun = p1.constructor
+```
+
+其中的`__proto__`最好使用`Object.getPrototypeOf`代替：
+> `__proto__`并不是语言本身的特性，这是各大厂商具体实现时添加的私有属性，虽然目前很多现代浏览器的JS引擎中都提供了这个私有属性，但依旧不建议在生产中使用该属性，避免对环境产生依赖。(ECMAScript6入门教程 阮一峰)
+
+## 字面量的原型
+
+### 字面量对象的原型
+如果我们创建对象的时候，没有使用构造函数，而是直接是用大括号，以字面量的形式创建的对象，那么它的原型是什么？它有没有构造函数呢？是有的。我们一起来看一下：
+```js
+const obj = { a: 1 };
+console.log(obj.__proto__)
+console.log(obj.constructor)
+// 输出结果:
+// {constructor: ƒ, __defineGetter__: ƒ, …}
+// ƒ Object() { [native code] }
+```
+输出了一些奇怪的东西，我们还是不知道字面量对象的原型是什么。我们换个角度想一想，以字面量形式创建的对象，是不是就相当于直接使用`new Object()`形式创建的对象？这里的Object也是一个构造函数。我们来试验下：
+```js
+const obj1 = { a: 1 };
+const obj2 = new Object({ b: 2 });
+console.log(obj1.__proto__ === obj2.__proto__)
+console.log(Object.prototype === obj1.__proto__)
+console.log(obj1.constructor === Object)
+// 输出结果:
+// true
+// true
+// true
+```
+
+可以看到，使用字面量形式和`new Object()`形式，创建出来对象的原型是一样的。既然Object是个构造函数，那么`Object.prototype`即是Object实例的原型对象。
+
+至于`obj.constructor`实际上就是构造函数`Object()`。它是JS引擎实现的，因此这里展示`[native code]`。
+
+### new Function()
+在JS中函数实际上也是个对象。既然它是个对象，那么它应该也有构造函数和原型吧。我们来试验下：
+```js
+// Person构造函数
+function PersonFun(name) {
+  this.name = name;
+}
+console.log(PersonFun.__proto__)
+console.log(PersonFun.constructor)
+// 输出结果:
+// ƒ () { [native code] }
+// ƒ Function() { [native code] }
+```
+
+又输出了一些奇怪的东西，其中还有个`Function()`。我们继续联想下：对象可以用`new Object()`形式创建，那么函数是不是也可以？可以的！使用`new Function()`可以创建函数。我们来看下：
+
+```js
+const fun = new Function('a', 'b', 'return a + b');
+console.log(fun(1, 2));
+// 输出结果:
+// 3
+```
+
+`new Function()`可以使用字符串作为代码执行的函数体，感觉有点像eval。但是eval是局部作用域，`new Function()`一直都是全局作用域。我们来看下例子：
+```js
+const a = 1;
+function envir() {
+  const a = 2;
+  eval('console.log(a)');
+  const fun = new Function('console.log(a)');
+  fun();
+}
+envir();
+// 输出结果:
+// 2
+// 1
+```
+
+可以看到，eval输出的是局部作用域中的a值2，而`new Function()`虽然在局部作用域的位置中，但是内部获取到的依然是全局的变量。不过这些区别和我们要讨论的原型链无关，因此不再继续讨论。
+
+### 字面量函数的原型
+了解了`new Function()`，我们再回来看看字面量函数的原型。
+
+```js
+// Person构造函数
+function PersonFun(name) {
+  this.name = name;
+}
+const fun = new Function('a', 'b', 'return a + b');
+console.log(PersonFun.__proto__ === fun.__proto__)
+console.log(PersonFun.__proto__ === Function.prototype)
+console.log(PersonFun.constructor === Function)
+// 输出结果:
+// true
+// true
+// true
+```
+
+与对象类似，`Function.prototype`是函数的原型，我们函数字面量的原型都是它。函数的构造函数即是`Function()`。（构造函数与普通函数并无区别，都是函数）。在上面的输出中，函数的原型对象`Function.prototype`也是一个函数：`ƒ () { [native code] }`。关于这点我们会在后面讨论。
+
+
+## JS中原生对象的类型
+现在我们再来看看，JS中原生对象的原型关系。
+
+### Object类型的原型
 
 
 
 
+## 字面量的原型
 
-
-## Function与Object类型
-
-## 字面量的原型链
+## 原型链
 
 ## 使用原型链实现各种继承
 
