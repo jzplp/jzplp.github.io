@@ -80,7 +80,7 @@ console.log(p1.title, p2.title);
 ```js
 PersonFun.prototype.obj = {};
 p1.obj.a = 1;
-console.log(p1.obj.a);
+console.log(p2.obj.a);
 // 输出结果:
 // 1
 ```
@@ -306,16 +306,88 @@ new Function.prototype();
 
 ### 原型链文字版
 
+假设我们有这样一些对象，我们来搞清楚他们的原型关系。
+- 构造函数 PersonFun
+- 实例对象 p1
+- 原型对象(类) Person
 
+```js
+// 构造函数 生成 实例对象
+p1 = new PersonFun()
+// 构造函数 -> 原型对象
+Person = PersonFun.prototype
 
-### 原生类型属于对象类型
+// 实例对象 -> 构造函数
+PersonFun = p1.constructor
+// 实例对象 -> 原型对象
+Person = p1.__proto__
+Person = Object.getPrototypeOf(p1) // 推荐
 
-正是通过原型链的关系，Function和Number等其它原生类型也都属于对象类型，可以使用对象类型的方法。
+// 原型对象 -> 构造函数
+PersonFun = Person.constructor
+```
 
+再看一下字面量的原型关系，以及更深层次的关系：
+- 字面量对象 obj1
+- 字面量函数 fun1
+
+```js
+// 字面量对象 -> Object构造函数
+Object = obj1.constructor
+// 字面量对象 -> Object原型
+Object.prototype = obj1.__proto__
+// Object原型的原型 为 null
+null = Object.prototype.__proto__
+
+// 字面量函数 -> Function构造函数
+Function = fun1.constructor
+// 字面量函数 -> Function原型
+Function.prototype = fun1.__proto__
+// Function原型作为一个构造函数时的实例原型 -> undefined
+undefined = Function.prototype.prototype
+// Function原型的原型 为 Object原型
+Object.prototype = Function.prototype.__proto__
+```
+
+然后我们就可以完整的得到原型链：
+```js
+// 构造函数链
+// 实例对象 -> 构造函数 -> Function构造函数
+PersonFun = p1.constructor
+Function  = p1.constructor.constructor
+Function  = p1.constructor.constructor.constructor
+
+// 原型对象链
+// 实例对象 -> 原型对象 -> Object原型 -> null
+Person            = p1.__proto__
+Object.prototype  = p1.__proto__.__proto__
+null              = p1.__proto__.__proto__.__proto__
+
+// 字面量对象的原型对象链
+// 字面量函数 ->  Object原型 -> null
+Object.prototype  = obj1.__proto__
+null              = obj1.__proto__.__proto__
+
+// 字面量函数的原型对象链
+// 字面量函数 -> Function原型 -> Object原型 -> null
+Function.prototype  = fun1.__proto__
+Object.prototype    = fun1.__proto__.__proto__
+null                = fun1.__proto__.__proto__.__proto__
+
+// Number对象的原型链
+const n1 = new Number(1);
+// Number对象 -> Number原型 -> Object原型 -> null
+Number.prototype  = n1.__proto__
+Object.prototype  = n1.__proto__.__proto__
+null              = n1.__proto__.__proto__.__proto__
+```
 
 ## 使用原型链实现各种继承
 
 ## 总结
+
+通过原型链，我们可以了解JS中一些原生对象的原理和机制，比如为什么Function的实例也是对象，Number的实例也是对象，因为这些对象的原型都继承了Object原型，因此可以使用对象类型的方法。
+
 
 ## 参考
 - Class的基本语法 ECMAScript6入门教程 阮一峰\
