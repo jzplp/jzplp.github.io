@@ -100,7 +100,7 @@ function defineReactive(obj, key, value) {
 我们使用value作为闭包的关键变量。这时即使defineReactive函数结束后，由于内部的get和set函数依然在使用value变量，因此它并不会被销毁。当触发set函数修改属性值时，我们直接更改value为新的值。后续get函数取值时，也能拿到新值。
 
 ### 深度监听嵌套对象
-我们的已经实现的observer函数，只能对于对象的一层属性进行处理，对于多层嵌套对象我们的响应式是失效的，例如这样：
+我们已经实现的observer函数，只能对于对象的一层属性进行处理，对于多层嵌套对象我们的响应式是失效的，例如这样：
 ```js
 const data = {
   a: 1,
