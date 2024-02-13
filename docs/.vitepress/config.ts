@@ -11,6 +11,12 @@ export default defineConfig({
     ],
     sidebar: [
       {
+        text: '2024',
+        items: [
+          { text: 'Vue中的事件总线(EventBus)是什么？', link: '/2024/vue-eventbus' },
+        ]
+      },
+      {
         text: '2023',
         items: [
           { text: '带你搞懂JavaScript中的原型和原型链', link: '/2023/prototype-chain' },
