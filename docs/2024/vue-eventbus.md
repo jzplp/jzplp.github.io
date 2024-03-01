@@ -1,5 +1,4 @@
-
-# Vue中的事件总线(EventBus)是什么？(未完成)
+# Vue中的事件总线(EventBus)是什么？它有什么优点和缺点？
 
 作为一名使用Vue的前端开发者，有时候会听到事件总线(EventBus)这个名词。但可能是我入行比较晚，我在Vue网站中并没有看到过事件总线的介绍，在项目中也没有使用过。那究竟什么是事件总线？事件总线可以解决什么问题？
 
@@ -16,7 +15,7 @@
 ### 创建总线
 首先创建一个Vue2项目，可以使用`Vue CLI`。然后在`src/main.js`中创建一个事件总线。创建的方式有两种：
 
-1. 新创建一个Vue示例
+1. 新创建一个Vue实例
 ```js
 import Vue from 'vue'
 import App from './App.vue'
@@ -25,7 +24,7 @@ Vue.prototype.$EventBus = new Vue()
 new Vue({ render: h => h(App), }).$mount('#app')
 ```
 
-2. 使用已有的Vue示例
+2. 使用已有的Vue实例
 ```js
 import Vue from 'vue'
 import App from './App.vue'
@@ -67,12 +66,17 @@ export default {
 <script>
 export default {
   name: 'HelloWorld',
-  data() { return { sum: 1, } },
+  data() { 
+    return {
+      sum: 1,
+      listenFun: (sum) => { this.sum = sum; }
+    }
+  },
   mounted() {
-    this.$EventBus.$on('add', (sum) => { this.sum = sum })
+    this.$EventBus.$on('add', this.listenFun)
   },
   beforeDestroy() {
-    this.$EventBus.$off('add')
+    this.$EventBus.$off('add', this.listenFun)
   },
 }
 </script>
@@ -105,7 +109,27 @@ Vue2有很多组件间的通信方式，这里总结一下：
 组件通信除了传递数据，另一个作用是实时触发事件，针对事件进行操作。查看上面的组件通信方式，我们发现除事件总线外，全局的通信只是数据的传递，没有事件的触发。通过监听状态管理和Storage数据等，可以变相实现事件的管理，但是并没有事件总线清晰和直接。
 
 ### 缺点
-主要是使用不慎带来的很多问题。例如：
-**销毁事件监听器后，其它组件监听的同名事件也会被销毁。**\
-比如B组件和C组件都监听了同一事件'add'。B组件销毁了'add'
+* **事件监听只能被动接收数据，不能随时获取状态**\
+如果需要随时获取状态，显然还是状态管理工具更适合。
+* **vue3不提供事件总线能力**\
+在vue3中`$on $off`等实例方法已被移除，组件实例不再实现事件触发接口。官方推荐使用 mitt 等外部工具。
 
+还有使用不慎带来的很多问题。例如：
+* **事件名共享同一个命名空间**
+* **不销毁事件监听器**\
+如果在不使用后忘记销毁事件监听器，会造成难以排查的Bug或者引发性能问题。
+* **误销毁同名事件其它监听器**\
+比如多个组件都监听了同一事件'add'。其中某个组件销毁了'add'事件下的所有监听器`this.$EventBus.$off('add')`，就会影响其他的组件。
+* **其它问题** 例如调试困难，耦合性高等等。
+
+## 总结
+事件总线作为一种全局的组件通信方法，符合订阅发布模式，由于其简单有效的使用方式，受到部分开发者的欢迎。但是由于各种使用不慎和维护带来的问题，官方和许多开发者也不推荐使用：
+> 在绝大多数情况下，不鼓励使用全局的事件总线在组件之间进行通信。虽然在短期内往往是最简单的解决方案，但从长期来看，它维护起来总是令人头疼。根据具体情况来看，有多种事件总线的替代方案. —— Vue3迁移指南
+
+但是事件总线就完全不能使用么？也并不是。首先上面说的各种使用问题，可以通过预先制定开发规范+严格代码审核解决。其次，查看上面的通信方法，其实Vue并没有直接的全局事件通知方式，作为一种全局事件通知工具，还是有它独特的作用的。是否可以使用，还是要具体问题具体分析。
+
+## 参考
+- Vue3迁移指南 事件API\
+  https://v3-migration.vuejs.org/zh/breaking-changes/events-api.html
+- mitt —— Tiny 200b functional event emitter / pubsub.\
+  https://github.com/developit/mitt
