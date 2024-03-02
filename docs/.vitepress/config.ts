@@ -80,7 +80,7 @@ export default defineConfig({
       },
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/jzplp/jzplp.github.io' }
+      { icon: 'github', link: 'https://github.com/jzplp' }
     ]
   }
 })
