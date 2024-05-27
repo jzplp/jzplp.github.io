@@ -31,6 +31,7 @@ jzplp.github.io
 ├─pnpm-lock.yaml    # 依赖的锁定版本号
 └─README.md         # 工程说明
 ```
+目录使用mddir生成。
 
 ## 工程开发
 ```shell
