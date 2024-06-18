@@ -13,7 +13,8 @@ export default defineConfig({
       {
         text: '2024',
         items: [
-          { text: 'Webpack分包', link: '/2024/webpack-chunk' },
+          // { text: 'Webpack分包', link: '/2024/webpack-chunk' },
+          // { text: 'CSS优先级', link: '/2024/webpack-chunk' },
           { text: 'Vue中的事件总线(EventBus)是什么？它有什么优点和缺点？', link: '/2024/vue-eventbus' },
         ]
       },

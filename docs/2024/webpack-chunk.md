@@ -74,7 +74,7 @@ module.exports = config;
 // dist/main.js
 (()=>{"use strict";console.log("index.js"),console.log("module1")})();
 ```
-可以看到，webpack确实把入口文件和模块一起打包了。执行成功，说明我们创建项目顺利完成啦。
+可以看到，webpack确实把入口文件和模块一起打包了。再用浏览器打开`dist/index.html`，console中输出了我们执行的代码，这说明我们创建项目顺利完成啦。
 
 ## 参考
 - Webpack官方中文文档\
