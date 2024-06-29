@@ -1,14 +1,33 @@
 <html>
   <body>
-    <p>hello, jzplp</p>
+    <p id="ida" class="a b c">hello, jzplp</p>
+    <p></p>
+    <a class="a b c" href="123" lang="en-US">你好</a>
   </body>
   <style>
-    p {
+    p, #idb.a.b.c, .a, .b.c {
       color: blue;
     }
-    p + p + p{
-      color: green;
-      color: red;
+    #ida {
+      color:red;
     }
+    :root {
+      color: green;
+    }
+    :empty {
+      color: green;
+    }
+    :dir(ltr) {
+      color: green;
+    }
+    :link {
+      color:red;
+    }
+    :lang(en-US) {
+      color: green;
+    }
+    :nth-child(1) {
+        color: green;
+      }
   </style>
 </html>
