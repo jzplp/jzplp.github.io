@@ -15,7 +15,7 @@ CSS的中文名称叫做“层叠样式表”。其中的层叠就是指的根�
 - CSS属性顺序
 - 各种选择器和组合：ID选择器，类选择器，元素选择器等
 - CSS属性继承
-- 内联CSS属性
+- 内联样式
 - 层叠层 @layer
 - 嵌套层叠层
 - 浏览器默认样式
@@ -221,7 +221,6 @@ p {
 通过上面的描述，我们已经知道了基础的优先级比较原则，即根据权重和计算和比较得出。为什么这么设计，实际是遵循了一个原则：选择器越“精确”，优先级越高。这个原则不仅适用于上面的内容，对于后面提到的更多优先级规则也适用。
 
 ## 伪类
-
 ### 普通伪类
 伪类有函数式伪类和非函数式伪类，我们先来说一下非函数式伪类。非函数式伪类与其他选择器一样，也有着优先级权重。权重为： 0-1-0。这些选择器例如：`:root`, `:empty`, `:link` 等等。
 
@@ -359,13 +358,8 @@ p元素内部生成了一个`::after`伪元素，同时也命中了`:not(#ida)`�
       <p>hello, jzplp</p>
   </body>
   <style>
-    ::first-line {
-      content: 'value';
-      color: red;
-    }
-    :not(#ida) {
-      color: blue;
-    }
+    ::first-line { color: red; }
+    :not(#ida) { color: blue; }
   </style>
 </html>
 ```
@@ -373,9 +367,138 @@ p元素内部生成了一个`::after`伪元素，同时也命中了`:not(#ida)`�
 
 ![](/2024/css-12.png)
 
-这说明，虽然伪元素表面上优先级不高，但实际上却能将优先级更高的样式覆盖掉。我们对待伪元素，不能像对待普通选择器那样比较优先级。
+这时候我们再换种测试方式：
 
-## 不会影响CSS优先级的内容
+```html
+<html>
+  <body>
+      <p class="pp"><span class="sss">hello</span>, jzplp</p>
+  </body>
+  <style>
+    .pp::first-line { color: red; }
+    span { color: green; }
+  </style>
+</html>
+```
+
+`.pp::first-line`的优先级毫无疑问比`span`优先级高，但是这时候`span`中的元素却是绿色，没有被更高优先级的覆盖。`span`元素之外的文字却是红色的，说明伪元素是生效的。
+
+这说明，虽然伪元素表面上优先级不高，但在伪元素的“作用范围内”却可能将优先级更高的样式覆盖掉。我们对待伪元素，不能像对待普通选择器那样比较优先级，而是应该具体问题具体分析。
+
+## 内联样式
+上面我们介绍的各类CSS，都是写在单独的`<style>`元素中的，作为选择器对HTML元素进行匹配的，叫做“内部样式表”但是还有一种CSS写法，不需要匹配HTML元素，而是直接在HTML元素上作为style属性出现，这就是内联样式，也叫做行内样式。
+
+由于内联样式不需要匹配，所以在“精确度”上是高于各种选择器的，因此优先级也比“内部样式表”更高。看一个例子：
+
+```html
+<html>
+  <body>
+    <p id="idp" style="color: blue">hello, jzplp</p>
+  </body>
+  <style>
+    #idp { color: red; }
+  </style>
+</html>
+```
+
+虽然`#idp`选择器的优先级是1-0-0，但是依然不如style属性优先级更高。内联样式在Chrome的调试栏中作为`element.style`出现：
+
+![](/2024/css-13.png)
+
+## 继承属性
+在CSS中存在父元素的属性可以被子元素继承的规则，分为默认继承和主动继承，这里分别介绍一下。
+
+### 默认继承
+#### 继承规则
+默认继承指的是需要我们说主动声明继承关系或者操作什么，这是CSS的默认行为。我们来看一个例子：
+
+```html
+<html>
+  <body>
+    <p id="idp"><span>hello, jzplp</span></p>
+  </body>
+  <style>
+    #idp { color: red; }
+  </style>
+</html>
+```
+`<span>`的父元素为`<p>`，虽然`<span>`本身并没有设置颜色，但是父元素设置了颜色，因此`<span>`继承了父元素的红色。在Chrome浏览器的调试栏中，`Inherited from XXX` 就表示该属性继承于元素XXX。
+
+![](/2024/css-14.png)
+
+同时继承也是可以一层一层传递的。我们再来看一个例子：
+```html
+<html>
+  <body>
+    <div id="idp">
+      <p><span>hello, jzplp</span></p>
+    </div>
+  </body>
+  <style>
+    #idp {
+      color: red;
+    }
+  </style>
+</html>
+```
+
+`<span>`以及它的父元素`<p>`都没有color，但是更上层的`<div>`定义了，因此`<div>`继承给`<p>`，`<p>`再继承给`<span>`，因此`<span>`中的内容也是红色。
+
+#### 仅部分属性默认继承
+并不是所有的属性都会被默认继承，而是只有部分属性存在继承现象。这里举几个例子：
+
+* 默认继承的属性：color, font-size, text-align, visibility 等等。
+* 不默认继承的属性：background-color, height, width, overflow, opacity 等等。
+
+属性是否默认继承是由CSS规则决定的，背后的原因是希望CSS在默认情况下使用方便一些：
+>  一些属性是不能继承的 —— 举个例子如果你在一个元素上设置width为50%，所有的后代不会是父元素的宽度的50%。如果这个也可以继承的话，CSS就会很难使用了！
+
+#### 默认继承的优先级
+默认继承的优先级，仅在继承元素未设置该CSS属性时生效，一旦设置了属性，无论权重和高低，优先级都比继承的要高。这个也非常好理解：继承而来的属性，在“精确性”上肯定不如明确设置的属性要高。我们看个例子：
+
+```html
+<html>
+  <body>
+    <div id="idp"> <span>hello, jzplp</span> </div>
+  </body>
+  <style>
+    span { color: blue; }
+    #idp { color: red; }
+  </style>
+</html>
+```
+`#idp`的优先级为1-0-0，由div继承给了span。span自己命中的选择器权重和只有0-0-1，可是依然生效了，优先级比任何继承属性都要高。
+
+![](/2024/css-15.png)
+
+当然，如果父元素就存在CSS样式优先级竞争的情况，那么父元素优先级最高的，也就是父元素生效的属性才会被继承。即自己内部先决出胜负再说。
+
+### 显式继承
+由上面默认继承的部分可知，仅有部分CSS属性可以默认继承，而且继承的优先级是比较低的。那么如果我们希望提高继承的优先级，或者希望继承那些没有默认继承的属性呢？这时候就需要显式继承了。
+
+
+
+
+
+## 浏览器默认样式
+
+## 样式初始值
+
+## all属性
+
+## !important声明
+
+## 外部样式表
+
+## @import
+
+## 用户自定义样式
+
+## 层叠层 @layer
+
+## 嵌套层叠层
+
+## 其他不会影响CSS优先级的内容
 todo 元素接近度
 todo class 顺序
 
@@ -408,5 +531,9 @@ todo class 顺序
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/:has
 - MDN CSS :where()伪类\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/:where
-- MDN CSS nesting\
+- MDN CSS 嵌套\
   https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_nesting
+- MDN CSS 继承\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/Inheritance
+- MDN CSS inherit\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/inherit
