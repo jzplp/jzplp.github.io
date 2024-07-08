@@ -543,9 +543,38 @@ width和border都是不会显式继承的属性，我们显式声明了继承，
 
 ![](/2024/css-17.png)
 
-## 浏览器默认样式
+## 用户代理样式表
+在页面中，不仅开发者自己提供的代码中引入样式，浏览器本身也会提供一些CSS样式，这个样式就叫“用户代理样式表”，英文名叫做“user agent stylesheeet”。这就是浏览器提供的默认样式。例如`<p>`是块级元素，`<i>`中的文字会被展示成斜体，都是用户代理样式表来提供的样式。
+
+CSS官方有推荐浏览器实现的用户代理样式表，这里可以参考一下：[Default style sheet for HTML 4](https://www.w3.org/TR/CSS21/sample.html)。（todo 找更新的）。我们在Chrome浏览器的调试栏中，也是可以直接看到浏览器提供的用户代理样式表的，如下图在样式的右侧标明了“user agent stylesheeet”。
+
+![](/2024/css-18.png)
+
+用户代理样式表既然是浏览器提供的一种默认样式，那么优先级是比较低的：它比开发者明确设置的各类样式优先级低，但是比默认继承的优先级要高。这里我们看个例子：
+
+```html
+<html>
+  <body>
+    <div>
+     <i> hello, jzplp </i>
+    </div>
+  </body>
+  <style>
+    div { font-style: normal; }
+  </style>
+</html>
+```
+
+font-style是一个可以被默认继承的样式，因此`<i>`继承了属性值。但是用户代理样式表也给`<i>`提供了一个不一样的值，这时候用户代理样式表胜出了。
+
+![](/2024/css-19.png)
+
+有很多开发者并不想要浏览器提供的默认样式，这时会使用一个CSS reset样式表把常见的属性值转为确定状态，网络上有一些这类工具或者样式。我们引入后，reset样式表就成为了开发者明确设置的样式，优先级比用户代理样式表更高，因此可以实现覆盖。
 
 ## 样式初始值
+
+
+
 
 ## all属性
 
@@ -561,11 +590,19 @@ width和border都是不会显式继承的属性，我们显式声明了继承，
 
 ## 嵌套层叠层
 
+## 正在动画的样式
+
+## 正在过渡的样式
+
 ## 其他不会影响CSS优先级的内容
 todo 元素接近度
 todo class 顺序
 
 ## 总结
+通过上面这么多部分的描述，可以看到CSS优先级的判断，牵涉了太多CSS中的不同主题。可以说优先级的概念，贯穿了整个CSS领域。
+
+todo  写更多总结
+
 
 
 ## 参考
@@ -601,3 +638,7 @@ todo class 顺序
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Inheritance
 - MDN CSS inherit\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/inherit
+- Default style sheet for HTML 4\
+  https://www.w3.org/TR/CSS21/sample.html
+- MDN CSS 层叠\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/Cascade
