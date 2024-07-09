@@ -571,10 +571,46 @@ font-style是一个可以被默认继承的样式，因此`<i>`继承了属性�
 
 有很多开发者并不想要浏览器提供的默认样式，这时会使用一个CSS reset样式表把常见的属性值转为确定状态，网络上有一些这类工具或者样式。我们引入后，reset样式表就成为了开发者明确设置的样式，优先级比用户代理样式表更高，因此可以实现覆盖。
 
-## 样式初始值
+## 属性初始值
+### 初始值规则
+除了继承和用户代理样式表之外，在CSS中还有一个“默认值”，叫做属性初始值。这个初始值和浏览器无关，也和HTML元素本身无关。每个CSS属性都有一个初始值（当然有些是空）。例如：为什么我们没有配置过color，但是字体颜色还是黑色；为什么我们没有设置过font-size，但是文字却有一个确定的大小。这就是属性初始值的作用。在CSS相关的查询网站上可以查到CSS的初始值，例如font-size和font-style。
 
+![](/2024/css-20.png)
 
+### 初始值优先级
+属性初始值的优先级是非常低的，低于用户代理样式表和默认继承。这个也很容易理解：如果属性初始值的优先级高于用户代理样式表或默认继承，那么后两者将永远不可能生效。由于默认继承的优先级比属性初始值更高，所以实际上对于默认继承属性，初始值只能被用于没有指定值的根元素上，非根元素的值是继承的。
 
+属性初始值并不会因为HTML元素的变化而改变。实际上，在我们没有设置任何CSS样式的情况下，一般样式的来源就是这两种：属性初始值和用户代理样式表。属性初始值在Chrome浏览器调试栏的Style中并不会展示，但在Computed中勾上`Show all`，可以看到置灰的样式，其中大部分都是默认值。（有些是计算得出的）
+
+![](/2024/css-21.png)
+
+### 显式设置初始值
+如果我们希望提高属性初始值的优先级，可以使用initial实现。它的用法与inherit是一致的，优先级规则也一样。这里我们举个例子，看一下显式设置初始值的用法：
+
+```html
+<html>
+  <body>
+    <div>
+     <i class="ic"> hello, jzplp </i>
+    </div>
+  </body>
+  <style>
+    div {
+      font-style: normal;
+    }
+    .ic {
+      font-style: initial;
+    }
+  </style>
+</html>
+```
+`<i>`元素本身的用户代理样式表，会将文字设置为斜体；父元素`<div>`又将文字设置为正常，而`.ic`又将样式设置为了初始值作用在`<i>`元素上。由于`.ic`的优先级最高，因此生效。在浏览器调试栏中，其他的值都被划去了。
+
+![](/2024/css-22.png)
+
+从上面例子也可以看到，属性初始值和用户代理样式表确实是两种值：一个是正常，一个是斜体。在在浏览器调试栏的Computed中，也可以看到最终使用的值依然是normal。
+
+![](/2024/css-23.png)
 
 ## all属性
 
@@ -642,3 +678,11 @@ todo  写更多总结
   https://www.w3.org/TR/CSS21/sample.html
 - MDN CSS 层叠\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Cascade
+- MDN CSS font-size\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-size
+- MDN CSS font-style\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/font-style
+- MDN CSS 初始值\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/initial_value
+- 有趣的CSS优先级\
+  https://juejin.cn/post/7050723289194299399
