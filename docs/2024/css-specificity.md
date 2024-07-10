@@ -614,6 +614,33 @@ font-style是一个可以被默认继承的样式，因此`<i>`继承了属性�
 
 ## all属性
 
+all属性是一种显式控制所有属性的手段，可以将属性值设置为初始值，继承值或者其他类型值。它的用法类似于这样：
+```css
+div {
+  all: initial;
+}
+```
+通过主动声明，控制`<div>`所有属性的值为初始值。它的优先级也依照设置的“位置”决定，即优先级规则与显式继承和显式设置初始值一致。例如在这里就是`div`选择器的优先级。all属性的取值有四种：
+
+* initial
+* inherit
+* unset
+* revert
+
+其中的两种我们上面已经讨论过，它在all属性中的含义与上面描述的含义相同。不仅如此，这几个值其实都可以赋值给任意属性。下面我们分别描述一下这些取值的含义。
+
+注意：all不能控制unicode-bidi与direction属性，下面的章节中不再特意说明这一点。
+
+### initial值
+initial在上面的显式设置初始值一节已经描述过，任意属性的值为initial，它的实际值就是该属性的初始值。而`all: initial`表示把所有属性设置为初始值。
+
+### inherit值
+inherit在上面的显式继承一节已经描述过，任意属性的值为inherit，它的实际值就是该属性的继承值，即父属性的值。而`all: initial`表示把所有属性设置为继承值，不区分是否默认继承属性。
+
+### unset值
+
+### revert值
+
 ## !important声明
 
 ## 外部样式表
@@ -658,8 +685,6 @@ todo  写更多总结
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-classes
 - MDN CSS 伪元素\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-elements
-- MDN CSS all属性\
-  https://developer.mozilla.org/zh-CN/docs/Web/CSS/all
 - MDN CSS :is()伪类\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/:is
 - MDN CSS :not()伪类\
@@ -674,6 +699,8 @@ todo  写更多总结
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Inheritance
 - MDN CSS inherit\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/inherit
+- MDN CSS initial\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/initial
 - Default style sheet for HTML 4\
   https://www.w3.org/TR/CSS21/sample.html
 - MDN CSS 层叠\
@@ -686,3 +713,5 @@ todo  写更多总结
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/initial_value
 - 有趣的CSS优先级\
   https://juejin.cn/post/7050723289194299399
+- MDN CSS all属性\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/all
