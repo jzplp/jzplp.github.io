@@ -638,8 +638,17 @@ initial在上面的显式设置初始值一节已经描述过，任意属性的�
 inherit在上面的显式继承一节已经描述过，任意属性的值为inherit，它的实际值就是该属性的继承值，即父属性的值。而`all: initial`表示把所有属性设置为继承值，不区分是否默认继承属性。
 
 ### unset值
+使用unset作为属性值时，分为两种情况：
+- 对于默认继承属性，使用unset的行为类似于inherit值。即值为该属性的继承值。
+- 对于非默认继承属性，使用unset的行为类似于initial值。即值为该属性的初始值。
+
+那么既然有这两个值，为什么还要使用unset呢？unset实际上就是为了`all：unset`而准备的。对于单个属性，我们可以明确的知道是不是默认继承属性，不要用到unset。但假设希望将元素的所有属性都设置为“默认值”，即默认继承使用继承值，非默认继承使用初始值。这时候就不用每个属性都设置一遍，使用一句`all：unset`即可。
 
 ### revert值
+使用initial，inherit或者unset值的属性，直接作用于该元素上该属性的用户代理样式表都是不生效的。例如对于`<em style="font-style: unset">hello</em>`来说，无论font-style取上面三个中的哪个值，em本身的用户代理样式表中的斜体都不会生效。但是用户代理样式表也属于一种默认值，有没有让这种默认值生效的语法呢？revert就能办到。
+
+todo 补充完
+
 
 ## !important声明
 
@@ -715,3 +724,7 @@ todo  写更多总结
   https://juejin.cn/post/7050723289194299399
 - MDN CSS all属性\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/all
+- MDN CSS unset\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/unset
+- 【译】理解CSS关键字：“Initial”，“Inherit”和“Unset”\
+  https://juejin.cn/post/6948600225900691464
