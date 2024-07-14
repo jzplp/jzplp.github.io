@@ -573,7 +573,7 @@ font-style是一个可以被默认继承的样式，因此`<i>`继承了属性�
 
 ## 属性初始值
 ### 初始值规则
-除了继承和用户代理样式表之外，在CSS中还有一个“默认值”，叫做属性初始值。这个初始值和浏览器无关，也和HTML元素本身无关。每个CSS属性都有一个初始值（当然有些是空）。例如：为什么我们没有配置过color，但是字体颜色还是黑色；为什么我们没有设置过font-size，但是文字却有一个确定的大小。这就是属性初始值的作用。在CSS相关的查询网站上可以查到CSS的初始值，例如font-size和font-style。
+除了继承和用户代理样式表之外，在CSS中还有一个“默认值”，叫做属性初始值。这个初始值和浏览器类型无关，也和HTML元素本身无关。每个CSS属性都有一个初始值（当然有些是空）。例如：为什么我们没有配置过color，但是字体颜色还是黑色；为什么我们没有设置过font-size，但是文字却有一个确定的大小。这就是属性初始值的作用。在CSS相关的查询网站上可以查到CSS的初始值，例如font-size和font-style。
 
 ![](/2024/css-20.png)
 
@@ -590,17 +590,11 @@ font-style是一个可以被默认继承的样式，因此`<i>`继承了属性�
 ```html
 <html>
   <body>
-    <div>
-     <i class="ic"> hello, jzplp </i>
-    </div>
+    <div> <i class="ic"> hello, jzplp </i> </div>
   </body>
   <style>
-    div {
-      font-style: normal;
-    }
-    .ic {
-      font-style: initial;
-    }
+    div { font-style: normal; }
+    .ic { font-style: initial; }
   </style>
 </html>
 ```
@@ -616,9 +610,7 @@ font-style是一个可以被默认继承的样式，因此`<i>`继承了属性�
 
 all属性是一种显式控制所有属性的手段，可以将属性值设置为初始值，继承值或者其他类型值。它的用法类似于这样：
 ```css
-div {
-  all: initial;
-}
+div { all: initial; }
 ```
 通过主动声明，控制`<div>`所有属性的值为初始值。它的优先级也依照设置的“位置”决定，即优先级规则与显式继承和显式设置初始值一致。例如在这里就是`div`选择器的优先级。all属性的取值有四种：
 
@@ -642,12 +634,43 @@ inherit在上面的显式继承一节已经描述过，任意属性的值为inhe
 - 对于默认继承属性，使用unset的行为类似于inherit值。即值为该属性的继承值。
 - 对于非默认继承属性，使用unset的行为类似于initial值。即值为该属性的初始值。
 
-那么既然有这两个值，为什么还要使用unset呢？unset实际上就是为了`all：unset`而准备的。对于单个属性，我们可以明确的知道是不是默认继承属性，不要用到unset。但假设希望将元素的所有属性都设置为“默认值”，即默认继承使用继承值，非默认继承使用初始值。这时候就不用每个属性都设置一遍，使用一句`all：unset`即可。
+那么既然有这两个值，为什么还要使用unset呢？unset实际上就是为了`all：unset`而准备的。对于单个属性，我们可以明确的知道是不是默认继承属性，不要用到unset。但假设希望将元素的所有属性都设置为“默认值”，即默认继承使用继承值，非默认继承使用初始值。这时候就不用每个属性都设置一遍，使用一句`all：unset`即可。我们来看一个例子：
+
+```html
+<html>
+  <body>
+    <div> <i class="cla"> hello, jzplp </i> </div>
+  </body>
+  <style>
+    div { color: red; }
+    .cla {
+      color: blue;
+      all: unset;
+    }
+  </style>
+</html>
+```
+
+![](/2024/css-24.png)
+
+首先看color属性，它是默认继承属性，`<i>`默认继承了父元素的red，但是`.cla`却又设置了blue，覆盖了red，red上面显示划去的标识。但是`all：unset`使得blue不生效（注意这时候blue并没有划去）。而默认继承red生效了。
+
+再看下font-style属性，用户代理样式表中提供了斜体，但是`all：unset`优先级更高，虽然是默认继承属性但父级和更上层都无继承值，因此相当于使用默认值normal，覆盖了斜体。注意这里的`font-style: italic`也没有被划去。因此在Chrome中没被划去不代表样式真正生效，尤其使用all的时候。
 
 ### revert值
 使用initial，inherit或者unset值的属性，直接作用于该元素上该属性的用户代理样式表都是不生效的。例如对于`<em style="font-style: unset">hello</em>`来说，无论font-style取上面三个中的哪个值，em本身的用户代理样式表中的斜体都不会生效。但是用户代理样式表也属于一种默认值，有没有让这种默认值生效的语法呢？revert就能办到。
 
-todo 补充完
+revert本身可以作用在任意属性上，对单个CSS属性属性生效，也可以作用在all上面，例如`all: revert`，对所有属性生效。revert的作用根据revert所在的位置的不同的有关：
+1. 
+
+
+
+
+
+
+
+## 用户自定义样式
+
 
 
 ## !important声明
@@ -655,8 +678,6 @@ todo 补充完
 ## 外部样式表
 
 ## @import
-
-## 用户自定义样式
 
 ## 层叠层 @layer
 
