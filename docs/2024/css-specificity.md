@@ -660,13 +660,49 @@ inherit在上面的显式继承一节已经描述过，任意属性的值为inhe
 ### revert值
 使用initial，inherit或者unset值的属性，直接作用于该元素上该属性的用户代理样式表都是不生效的。例如对于`<em style="font-style: unset">hello</em>`来说，无论font-style取上面三个中的哪个值，em本身的用户代理样式表中的斜体都不会生效。但是用户代理样式表也属于一种默认值，有没有让这种默认值生效的语法呢？revert就能办到。
 
-revert本身可以作用在任意属性上，对单个CSS属性属性生效，也可以作用在all上面，例如`all: revert`，对所有属性生效。revert的作用根据revert所在的位置的不同的有关：
-1. 
+revert本身可以作用在任意属性上，对单个CSS属性属性生效，也可以作用在all上面，例如`all: revert`，对所有属性生效。revert的作用根据revert所在的位置的不同的有关。这里先明确几个概念：
 
+- 作者样式：网页提供的样式，即开发者提供的样式。（前面介绍过）
+- 用户代理样式表：浏览器提供的样式默认值。（前面介绍过）
+- 用户自定义样式：用户在浏览器中自己配置的样式。（后面章节介绍）
 
+然后是revert的作用说明：
 
+1. 如果在用户代理样式表中使用revert：属性值回滚到unset效果。即默认继承属性使用继承值，非默认继承属性使用属性初始值。
+2. 如果在用户自定义样式中使用revert：属性值如果在用户代理样式表中有定义，则回滚到用户代理样式表效果；否则回滚到unset效果（即与第一条相同）
+3. 如果在作者样式中使用revert：属性值如果在用户自定义样式中有定义，则回滚到用户代理样式表效果；否则回滚到第二条的效果。
 
+简单的说，revert的效果是把当前的样式回滚一层（只回滚一层）。即作者样式回滚到用户自定义样式；用户自定义样式回滚到用户代理样式表；用户代理样式表回滚到unset。
 
+这里看一个简单的例子：
+
+```html
+<html>
+  <body>
+    <div> <i class="cla"> hello, jzplp </i> </div>
+  </body>
+  <style>
+    div { color: red; }
+    .cla {
+      color: blue;
+      font-style: normal;
+      all: revert;
+    }
+  </style>
+</html>
+```
+
+![](/2024/css-25.png)
+
+首先看color属性：父元素设置了red，`<i>`继承了属性，但是被`.cla`中的blue覆盖了。然后是`all: revert`，回滚到用户自定义样式（没有），回滚到用户代理样式表（没有），回滚到unset，color是默认继承属性，因此继承生效。
+
+然后看font-style属性：用户代理样式表中设置了italic，被`.cla`中的normal覆盖了。然后是`all: revert`，回滚到用户自定义样式（没有），回滚到用户代理样式表（有），因此italic生效。注意这里的`color: red`和`font-style: italic`在Chrome调试栏中都是划去状态，但实际都生效了。这又说明了，划去不一定代表不生效。
+
+虽然revert中标明了用户代理样式表中设定可以回滚，但实际上应该不会有哪个浏览器会在用户代理样式表中设置该属性值。而且用户代理样式表在Chrome浏览器中无法修改，因此我们只能按照规范说明效果，不能实际测试。
+
+## 调试样式和插件样式
+
+以Chrome为例。
 
 
 ## 用户自定义样式
@@ -749,3 +785,7 @@ todo  写更多总结
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/unset
 - 【译】理解CSS关键字：“Initial”，“Inherit”和“Unset”\
   https://juejin.cn/post/6948600225900691464
+- MDN CSS revert\
+  https://developer.mozilla.org/en-US/docs/Web/CSS/revert
+- 图解 CSS：CSS 层叠和继承\
+  https://juejin.cn/post/7321558573518815258
