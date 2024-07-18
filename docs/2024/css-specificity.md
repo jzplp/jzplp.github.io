@@ -770,10 +770,75 @@ revert本身可以作用在任意属性上，对单个CSS属性属性生效，�
 ## 浏览器插件注入样式
 很多浏览器都提供了插件的功能，在插件里可以往页面注入样式。这些样式的优先级如何呢？这里以Chrome浏览器为例，研究一下浏览器插件注入样式。
 
-### 插件如何注入样式
+### 制作插件，注入样式
+首先创建一个文件夹，里面包含两个文件：`custom.css`与`manifest.json`。
+
+`custom.css`是我们要注入的样式，例如：
+```css
+/* custom.css */
+.cla {
+  color: blue;
+}
+.clb {
+  font-style: normal;
+}
+.clc {
+  font-weight: bolder;
+}
+```
+
+`manifest.json`是我们的插件配置文件。其中各项配置的含义可以参考网络上的配置文档。这里的`"file:///*/*"`是为了我们本地测试加的，我们打开电脑上的一个html文件，协议就是这个。
+
+```json
+{
+   "content_scripts": [{
+      "css": ["custom.css"],
+      "all_frames": true,
+      "matches": [ "http://*/*", "https://*/*", "file:///*/*" ]
+   }],
+   "description": "Custom css",
+   "name": "Custom CSS",
+   "version": "1.0",
+   "manifest_version": 3
+}
+```
+
+到这里我们插件就制作好了。在Chrome浏览器中输入`chrome://extensions/`，到管理插件的页面。点击“加载已解压的扩展程序”，选中我们刚才制作好的文件夹，然后可以看到我们的插件被引入了。
+
+![](/2024/css-33.png)
+
+然后打开一个可以命中我们插件里的css选择器的页面，在页面调试栏中可以看到名称叫做“inject stylesheet”(注入样式)的样式来源，内容和我们插件中写的样式是匹配的。
+
+![](/2024/css-34.png)
 
 ### 注入样式优先级
+插件注入的样式在Chrome中具有独立的样式来源说明，那么它的优先级如何呢？结论是：和作者样式（即开发者提供的样式）优先级一致。但是注入样式的位置是在页面的CSS之前。我们来看个例子：
 
+```html
+<html>
+  <body>
+    <div class="cla clb clc">hello, jzplp</div>
+  </body>
+  <style>
+    div { color: red; }
+    .clb { font-style: italic; }
+    div.clc { font-weight: normal; }
+  </style>
+</html>
+```
+
+![](/2024/css-35.png)
+
+这个例子分了三个属性，我们分别来看：
+* color属性：注入样式为blue，权重0-1-0。作者样式为red，权重0-0-1。注入样式权重更高，胜出。
+* font-style属性：注入样式为normal，权重0-1-0。作者样式为italic，权重0-1-0。但是作者样式位置在后面，作者样式胜出。
+* font-weight属性：注入样式为bolder，权重0-1-0。作者样式为normal，权重0-1-1。作者样式权重更高，胜出。
+
+通过例子可以看到，作者样式和注入样式的优先级确实是相同的，仅仅注入样式有位置劣势。遇到比较时，还是用权重和等上面介绍的方法来比较。
+
+为什么插件的注入样式优先级会和作者样式一致呢？假设调试样式是为了页面调试使用所以一致，那么插件的使用者又不是开发者，为什么还是一致。我个人觉得，插件样式既然存在，那么很可能是为了覆盖某些作者样式的作用。如果优先级太低，那么插件样式依然是一个鸡肋的功能，用处不大。
+
+在目前市场上已有的插件中，我们甚至可以看到有些插件把注入的样式设置为`!important`(后面会介绍)，致使注入样式的优先级非常高，影响用户正常使用。
 
 ## 用户自定义样式
 
@@ -859,3 +924,7 @@ todo  写更多总结
   https://developer.mozilla.org/en-US/docs/Web/CSS/revert
 - 图解 CSS：CSS 层叠和继承\
   https://juejin.cn/post/7321558573518815258
+- Chrome Version33+ 设置自定义CSS的方法\
+  https://blog.csdn.net/lyl_studio/article/details/21324605
+- 解决“该扩展程序未列在 Chrome 网上应用店中，并可能是在您不知情的情况下添加的”的方法\
+  https://blog.csdn.net/W_Fe5/article/details/137104126
