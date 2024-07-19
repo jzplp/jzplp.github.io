@@ -841,22 +841,49 @@ revert本身可以作用在任意属性上，对单个CSS属性属性生效，�
 在目前市场上已有的插件中，我们甚至可以看到有些插件把注入的样式设置为`!important`(后面会介绍)，致使注入样式的优先级非常高，影响用户正常使用。
 
 ## 用户自定义样式
+在revert值我们提到过用户自定义样式，他一般是在浏览器中由用户配置的一种样式表。按照CSS规范，它的优先级应该高于默认继承，高于用户代理样式表；优先级低于作者样式。
 
+但是，在Chrome浏览器中我没有找到设置用户自定义样式的地方。上网搜索了一下，网上有部分文章提到Chrome33+就不能自定义样式了，然后提供了浏览器插件的方案。不管是浏览器插件还是调试样式，都与CSS规范中用户自定义样式的优先级不同，不能看作是用户自定义样式。我搜索了一下其他浏览器，例如Firefox，也没有找到如何设置的方法。因此，对于用户自定义样式，在本文中仅按照规范介绍，就无法拿来实际举例实验了。
 
+## !important标识
+`!important`是在属性值后面的标识，形式是`color: red !important;`表示这个CSS样式是重要的。它的优先级非常高，优先级几乎高于所有不带`!important`标识的CSS属性。（后面部分会介绍优先级比`!important`更高的场景）
 
-## !important声明
+我们来看一个例子，具体分析下`!important`的优先级：
+```html
+<html>
+  <body>
+    <div class="cla" style="color: yellow; font-style: normal !important">hello, jzplp</div>
+  </body>
+  <style>
+    div {
+      color: red  !important;
+    }
+    .cla {
+      color: blue;
+      font-style: italic !important;
+    }
+  </style>
+</html>
+```
 
-## 外部样式表
+![](/2024/css-36.png)
 
-## @import
+- color属性: red的权重为0-0-1，比blue的权重0-1-0要低。但是因为`!important`，导致red优先级更高。再看yellow虽然是内联样式，但优先级也没有使用`!important`的red更高。
+- font-style属性：`.cla`选择器设置了italic，内联样式设置了normal，两个都带着`!impoortant`
+
+## 正在动画的样式
+
+## 正在过渡的样式
+
+## 层叠
 
 ## 层叠层 @layer
 
 ## 嵌套层叠层
 
-## 正在动画的样式
+## 外部样式表
 
-## 正在过渡的样式
+## @import
 
 ## 其他不会影响CSS优先级的内容
 todo 元素接近度
@@ -928,3 +955,5 @@ todo  写更多总结
   https://blog.csdn.net/lyl_studio/article/details/21324605
 - 解决“该扩展程序未列在 Chrome 网上应用店中，并可能是在您不知情的情况下添加的”的方法\
   https://blog.csdn.net/W_Fe5/article/details/137104126
+- MDN CSS !important\
+  https://developer.mozilla.org/en-US/docs/Web/CSS/important
