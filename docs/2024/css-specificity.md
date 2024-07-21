@@ -881,7 +881,45 @@ revert本身可以作用在任意属性上，对单个CSS属性属性生效，�
 
 通过上面说明可以看出，对于大部分CSS优先级规则，带`!important`标志的属性互相比较时与普通样式比较时规则一致。但是作者样式、用户自定义样式、用户代理样式表的`!important`标志互相比较时，优先级与不带标志时正好相反。不过用户自定义样式现在的浏览器基本无法配置，用户代理样式表也不会出现`!important`标志，因此这个优先级规则实际上是用不到的。
 
-## 正在动画的样式
+## CSS动画与优先级
+CSS动画（CSS animations）可以实现一种CSS样式在一段时间内转换另外一种样式的过程。CSS动画的内容比较多，这里我们仅描述一下与优先级相关的部分属性。
+
+### 简单CSS动画
+CSS动画的优先级判断很简单：比所有普通样式优先级高，比`!important`标志的优先级低。首先我们来举一个简单的动画例子，看一下CSS优先级的实际效果：
+
+```html
+<html>
+  <body>
+    <div class="cla" style="color: yellow">hello, jzplp</div>
+  </body>
+  <style>
+    @keyframes change {
+      0% {
+        color: red;
+        background-color: red;
+      }
+      100% {
+        color: blue;
+        background-color: blue;
+      }
+    }
+    .cla {
+      animation: change 5s 2s;
+    }
+    div {
+      background-color: green !important;
+    }
+  </style>
+</html>
+```
+
+
+
+
+### animation-play-state属性
+
+### animation-fill-mode属性
+
 
 ## 正在过渡的样式
 
@@ -967,3 +1005,7 @@ todo  写更多总结
   https://blog.csdn.net/W_Fe5/article/details/137104126
 - MDN CSS !important\
   https://developer.mozilla.org/en-US/docs/Web/CSS/important
+- MDN Using CSS animations\
+  https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations/Using_CSS_animations
+- 深入浅出 CSS 动画\
+  https://juejin.cn/post/7052506940777168927

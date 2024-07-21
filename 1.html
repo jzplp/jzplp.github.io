@@ -1,14 +1,23 @@
 <html>
   <body>
-    <div class="cla" style="color: yellow; font-style: normal !important">hello, jzplp</div>
+    <div class="cla" style="color: yellow">hello, jzplp</div>
   </body>
   <style>
-    div {
-      color: red  !important;
+    @keyframes change {
+      0% {
+        color: red;
+        background-color: red;
+      }
+      100% {
+        color: blue;
+        background-color: blue;
+      }
     }
     .cla {
-      color: blue;
-      font-style: italic !important;
+      animation: change 5s 2s;
+    }
+    div {
+      background-color: green !important;
     }
   </style>
 </html>
