@@ -6,18 +6,14 @@
     @keyframes change {
       0% {
         color: red;
-        background-color: red;
       }
       100% {
         color: blue;
-        background-color: blue;
       }
     }
     .cla {
       animation: change 5s 2s;
-    }
-    div {
-      background-color: green !important;
+      animation-fill-mode: both;
     }
   </style>
 </html>

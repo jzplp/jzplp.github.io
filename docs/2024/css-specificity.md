@@ -885,7 +885,7 @@ revert本身可以作用在任意属性上，对单个CSS属性属性生效，�
 CSS动画（CSS animations）可以实现一种CSS样式在一段时间内转换另外一种样式的过程。CSS动画的内容比较多，这里我们仅描述一下与优先级相关的部分属性。
 
 ### 简单CSS动画
-CSS动画的优先级判断很简单：比所有普通样式优先级高，比`!important`标志的优先级低。首先我们来举一个简单的动画例子，看一下CSS优先级的实际效果：
+CSS动画的优先级判断很简单：正在动画时的样式比所有普通样式优先级高，比`!important`标志的优先级低（动画也比正在过渡的样式优先级低）。首先我们来举一个简单的动画例子，看一下CSS优先级的实际效果：
 
 ```html
 <html>
@@ -913,13 +913,84 @@ CSS动画的优先级判断很简单：比所有普通样式优先级高，比`!
 </html>
 ```
 
+在上面的例子中，`@keyframes`定义了动画的规则，里面设定了动画的关键帧。这里设置了color和background-color从red变化到blue。animation属性应用动画规则，实际上他是一个组合属性：例子中的5s是animation-duration，指动画一个周期的时间；2s是animation-delay，指元素加载完成之后到动画开始前的延时时间。然后我们分析下效果：
 
+![](/2024/css-37.png)
 
+首先是color属性：内联样式设置了yellow，当动画执行前的2s，以及动画执行结束后，color都是yellow生效。虽然动画animation属性本身的优先级要低于内联样式，但在动画执行过程中，动画的优先级高于内联样式。因此我们可以看到文字的颜色变化。
+
+然后再看看background-color属性，同样设置了动画。但是在选择器`div`中设置了green，且带`!important`标识，优先级比动画更高。因此我们不会看到背景的颜色变化。
 
 ### animation-play-state属性
+animation-play-state属性可以暂停动画和恢复动画的执行。在暂停时依然处于“正在动画时”，遵守动画时的优先级规则。我们来看个例子：
+
+```html
+<html>
+  <body>
+    <div class="cla" style="color: yellow">hello, jzplp</div>
+  </body>
+  <style>
+    @keyframes change {
+      0% {
+        color: red;
+      }
+      100% {
+        color: blue;
+      }
+    }
+    .cla {
+      animation: change 5s;
+      animation-play-state: paused;
+    }
+    .cla:hover{
+      animation-play-state: running;
+    }
+  </style>
+</html>
+```
+
+![](/2024/css-38.png)
+
+这个例子中的动画依旧是color变化。动画默认是暂停的，只有我们鼠标悬停在元素上，动画才会进行。当动画暂停时（就算默认是暂停状态也算暂停），color也是动画的color，而不是内联样式yellow。
 
 ### animation-fill-mode属性
+在简单样式中我们提到过，在动画前的延时以及动画执行完成后，动画的样式不再生效；而animation-fill-mode属性可以让这两个时间内的动画样式依旧是生效状态。在动画前的延时时，使用的时0%时的样式。动画执行完成后，使用的是100%时的样式。animation-fill-mode属性有四个取值：
 
+* none: 默认值，动画前后都不生效
+* backwards: 动画前生效，动画后不生效
+* forwards: 动画前不生效，动画后生效
+* both: 动画前后都生效
+
+在取值为both时，比正在动画的样式优先级低的CSS样式，就再也没有生效的机会了。我们看一个例子：
+
+```html
+<html>
+  <body>
+    <div class="cla" style="color: yellow">hello, jzplp</div>
+  </body>
+  <style>
+    @keyframes change {
+      0% {
+        color: red;
+      }
+      100% {
+        color: blue;
+      }
+    }
+    .cla {
+      animation: change 5s 2s;
+      animation-fill-mode: both;
+    }
+  </style>
+</html>
+```
+
+这里先说明下时间线：0-2s 动画前的延时；2s-7s 动画中；7s后 动画后。我们使用不同的animation-fill-mode取值，可以观察到现象：
+
+* none: 0-2s yellow；2s-7s 由red到blue；7s后 yellow
+* backwards: 0-2s red；2s-7s 由red到blue；7s后 yellow
+* forwards: 0-2s yellow；2s-7s 由red到blue；7s后 blue
+* both: 0-2s red；2s-7s 由red到blue；7s后 blue
 
 ## 正在过渡的样式
 
