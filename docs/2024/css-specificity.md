@@ -992,7 +992,64 @@ animation-play-state属性可以暂停动画和恢复动画的执行。在暂停
 * forwards: 0-2s yellow；2s-7s 由red到blue；7s后 blue
 * both: 0-2s red；2s-7s 由red到blue；7s后 blue
 
-## 正在过渡的样式
+## CSS过渡与优先级
+### CSS过渡
+平时在CSS中改变某个属性的值，页面都是立即变化的。例如原本是红色`div { color: red }`，悬停时变为蓝色`div:hover { color: blue }`。当我们鼠标放到元素上时，颜色会立即变为蓝色。那么有没有一种方法，可以将样式变化在一段时间内逐渐进行，而不是突变呢？这就是CSS过渡(CSS transitions)。
+
+CSS过渡与CSS动画有些类似，都可以控制样式在一段时间内逐渐变化，但是CSS动画是在`@keyframes`里单独设定动画的规则，功能也更强大。而CSS过渡则是检测元素本身样式的变化，进行过渡。我们举一个例子：
+
+```html
+<html>
+  <body>
+    <div class="cla">hello, jzplp</div>
+  </body>
+  <style>
+    .cla {
+      color: red;
+      transition-property: color;
+      transition-duration: 5s;
+      transition-delay: 2s;
+    }
+    .cla:hover {
+      color: blue;
+    }
+  </style>
+</html>
+```
+
+- transition-property: 需要过渡的属性，可以是一个或多个，甚至是all
+- transition-duration: 过渡的时间长度
+- transition-delay: 过渡开始前的延时
+
+默认color为red；鼠标放到元素上时为blue。例子中增加了CSS过渡的属性，让颜色变化是逐渐进行的：鼠标放到元素上时，先延时两秒，然后可以看到5秒的由red变blue的过程。最后是blue。如果在过渡中或者结束后鼠标离开元素，还可以看到两秒延时后，颜色由逐渐变回red。
+
+![](/2024/css-39.png)
+
+### CSS过渡的优先级
+CSS过渡的样式，本身就来源于样式（优先级）变化导致的属性改变，CSS过渡本身也没有创造新的属性值。但是当CSS过渡正在进行中时，它的优先级却是最高的，比`!important`还要高。我们来看一个例子：
+
+```html
+<html>
+  <body>
+    <div class="cla" style="color: yellow">hello, jzplp</div>
+  </body>
+  <style>
+    .cla {
+      color: red !important;
+      transition-property: color;
+      transition-duration: 5s;
+      transition-delay: 2s;
+    }
+    .cla:hover {
+      color: blue !important;
+    }
+  </style>
+</html>
+```
+
+![](/2024/css-39.png)
+
+可以看到，red和blue都加了`!important`，它的过渡也是正常进行的。至于内联样式yellow，因为优先级相对太低，没有出场的机会了。
 
 ## 层叠
 
@@ -1080,3 +1137,9 @@ todo  写更多总结
   https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations/Using_CSS_animations
 - 深入浅出 CSS 动画\
   https://juejin.cn/post/7052506940777168927
+- MDN CSS transitions\
+  https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions
+- [译] 使用 CSS transitions（MDN）\
+  https://juejin.cn/post/6844903859324715021
+
+
