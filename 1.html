@@ -1,21 +1,19 @@
 <html>
   <body>
-    <div class="cla">hello, jzplp</div>
+    <div id="cla" class="cla">hello, jzplp</div>
+    <script>
+      setTimeout(() => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "./styles.css";
+        document.body.insertBefore(link, document.body.firstChild);
+      }, 1000);
+    </script>
+    <style>
+      div {
+        color: red;
+        font-style: italic;
+      }
+    </style>
   </body>
-  <style>
-    @keyframes change {
-      0% {
-        color: red !important;
-      }
-      100% {
-        color: blue;
-      }
-    }
-    .cla {
-      animation: change 5s 2s;
-      animation-fill-mode: both;
-      color: yellow !important;
-    }
-
-  </style>
 </html>

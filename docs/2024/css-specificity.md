@@ -1047,7 +1047,7 @@ CSS过渡的样式，本身就来源于样式（优先级）变化导致的属�
 </html>
 ```
 
-![](/2024/css-39.png)
+![](/2024/css-40.png)
 
 可以看到，red和blue都加了`!important`，它的过渡也是正常进行的。至于内联样式yellow，因为优先级相对太低，没有出场的机会了。
 
@@ -1073,6 +1073,66 @@ CSS过渡的样式，本身就来源于样式（优先级）变化导致的属�
 `!important`标识这种相反的优先级规则，在后面层叠层的介绍中，也可以看到。
 
 ## 外部样式表
+我们上面涉及到的样式全都是内联样式，或者是内部样式表`<style>`标签，那么外部样式表的优先级如何呢？
+
+### 外部样式优先级
+这里先给出结论：外部样式表的优先级与内部样式表一致。我们来看个例子：
+
+```html
+<html>
+  <body>
+    <div class="cla">hello, jzplp</div>
+    <style>
+      .cla {
+        color: red;
+        font-style: italic;
+      }
+    </style>
+    <link rel="stylesheet" href="./styles.css" />
+  </body>
+</html>
+```
+然后是外部样式表styles.css：
+```css
+.cla {
+  color: blue;
+}
+div {
+  font-style: normal;
+}
+```
+
+![](/2024/css-41.png)
+
+首先看color，内部样式表中是red；外部样式表blue的权重和一致，且位置靠后，因此blue生效。再看font-style，内部样式表权重和为0-1-0，外部样式表为0-0-1，外部样式表优先级低，italic生效。如果此时把内部样式表和外部样式表的元素位置交换，那么生效的则是red和italic。
+
+### 使用javascript插入样式表
+如果外部样式表是后插入的，并不是一开始就存在的，那么现象如何呢？我们看个例子：
+
+```html
+<html>
+  <body>
+    <div class="cla">hello, jzplp</div>
+    <script>
+      setTimeout(() => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "./styles.css";
+        document.body.insertBefore(link, document.body.firstChild);
+      }, 1000);
+    </script>
+    <style>
+      div {
+        color: red;
+        font-style: italic;
+      }
+    </style>
+  </body>
+</html>
+```
+在上面代码中，我们先插入了
+
+
 
 ## @import
 
