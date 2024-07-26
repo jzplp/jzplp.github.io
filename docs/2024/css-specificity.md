@@ -1106,7 +1106,7 @@ div {
 
 首先看color，内部样式表中是red；外部样式表blue的权重和一致，且位置靠后，因此blue生效。再看font-style，内部样式表权重和为0-1-0，外部样式表为0-0-1，外部样式表优先级低，italic生效。如果此时把内部样式表和外部样式表的元素位置交换，那么生效的则是red和italic。
 
-### 使用javascript插入样式表
+### 使用js延时插入样式表
 如果外部样式表是后插入的，并不是一开始就存在的，那么现象如何呢？我们看个例子：
 
 ```html
@@ -1130,9 +1130,60 @@ div {
   </body>
 </html>
 ```
-在上面代码中，我们先插入了
 
+例子中的`<script>`代码作用为 延时一秒后，在`<body>`的第一个元素前插入外部样式表`<link rel="stylesheet" href="./styles.css" />`。在刚打开页面时，外部样式表还没有插入，只有内部样式表`<style>`生效。此时页面是红色斜体。当一秒后，外部样式表插入。注意外部样式表的插入位置在内部样式表的前面。
 
+![](/2024/css-42.png)
+
+此时看color属性，外部样式表的权重和更高，因此文字变为blue。再看font-style属性，内部和外部样式表权重和一致，但是由于内部样式表位置更靠后，所以依然是italic生效。可以看出，CSS前后顺序的优先级原则不依赖于元素插入的时间，即使是更晚时间插入样式，但在DOM中依然更靠前，CSS的优先级规则不会变化。
+
+### 使用Node服务延时提供样式表
+外部样式表一般都是一个链接，是一个独立的HTTP请求，那么如果这个请求的响应时间较长，会有什么现象呢？会不会影响优先级？我们使用一个Node服务来控制请求的响应时间，实验一下。
+
+```js
+const http = require('http');
+const fs = require('fs');
+
+http.createServer((req, res) => {
+  let data = '';
+  console.log(`request url: ${req.url}`);
+  if(req.url === '/') {
+    data = fs.readFileSync('./index.html');
+    res.end(data);
+  } else if(req.url === '/styles.css') {
+    setTimeout(() => {
+      data = fs.readFileSync('./styles.css');
+      res.end(data);
+    }, 1000);
+  }
+}).listen(8000, () => {
+  console.log('server stast!');
+});
+```
+
+把上述代码放到js文件中，然后将index.html与styles.css放置在同一目录内。用命令行启动`node main.js`，一个最简单的Node服务就启动了。在浏览器中输入`localhost:8000`就可以看到我们的页面了。其中styles.css并不需要修改内容，但是可以看到服务端代码里写了中延迟了一秒才返回样式文件。index.html的内容如下：
+
+```html
+<html>
+  <head>
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      .cla {
+        color: red;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cla" class="cla">hello, jzplp</div>
+    <!-- 外部样式表放这里可以先渲染页面 -->
+  </body>
+</html>
+```
+
+我们启动服务，在浏览器访问地址，可以看到页面在一秒钟之后才渲染完成。为什么这么慢？这是因为外部样式表的获取是阻塞渲染的，也就是说必须等收到styles.css的数据，才能继续渲染其余的页面。由于我们的外部样式表是写到`<head>`中的，因此还没等`<body>`中的内容开始渲染，就阻塞了。这这时我们把外部样式表调整到`<body>`的最后，再重新启动服务，就可以先渲染再等待外部样式表了。
+
+我们在浏览器中可以看到文字先是红色斜体，这时候外部样式表还没有加载成功，仅仅是内部样式表起作用。一秒后文字变成蓝色，依然是斜体。这时候样式位置和属性都与“外部样式优先级”部分中的例子一致，现象也是一样的。这说明，外部样式表数据收到的时间并不会影响优先级，只是在收到数据前不会生效。
 
 ## @import
 
@@ -1216,7 +1267,11 @@ todo  写更多总结
   https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations/Using_CSS_animations
 - 深入浅出 CSS 动画\
   https://juejin.cn/post/7052506940777168927
+- MDN CSS @keyframes\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/@keyframes
 - MDN CSS transitions\
   https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions
 - [译] 使用 CSS transitions（MDN）\
   https://juejin.cn/post/6844903859324715021
+- MDN link 外部资源链接元素\
+  https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/link

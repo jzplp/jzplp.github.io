@@ -1,19 +1,14 @@
 <html>
-  <body>
-    <div id="cla" class="cla">hello, jzplp</div>
-    <script>
-      setTimeout(() => {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "./styles.css";
-        document.body.insertBefore(link, document.body.firstChild);
-      }, 1000);
-    </script>
+  <head>
     <style>
-      div {
+      .cla {
         color: red;
         font-style: italic;
       }
     </style>
+  </head>
+  <body>
+    <div id="cla" class="cla">hello, jzplp</div>
+    <link rel="stylesheet" href="./styles.css" />
   </body>
 </html>
