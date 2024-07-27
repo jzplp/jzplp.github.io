@@ -14,6 +14,8 @@ CSS的中文名称叫做“层叠样式表”。其中的层叠就是指的根�
 
 todo 使用思维导图呈现
 
+<div id="jsmind_container" style="width: 640px; height: 500px;"></div>
+
 - CSS属性顺序
 - 各种选择器和组合：ID选择器，类选择器，元素选择器等
 - CSS属性继承
@@ -96,7 +98,7 @@ p {
 ## 各类选择器和组合
 各类选择器和组合是我们平时接触最多的关于CSS优先级的内容。先来描述一下各种选择器的优先级。
 
-### 选择器的优先级
+### 选择器的权重
 选择器分为三个类别：
 
 1. 元素选择器(`p`)和伪元素选择器(`::before`)
@@ -1275,3 +1277,37 @@ todo  写更多总结
   https://juejin.cn/post/6844903859324715021
 - MDN link 外部资源链接元素\
   https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/link
+- jsMind 一个显示/编辑思维导图的纯javascript类库\
+  http://hizzgdev.github.io/jsmind/
+
+<script setup>
+import 'jsmind/style/jsmind.css';
+import jsMind from 'jsmind';
+import { onMounted } from 'vue';
+
+var mind = {
+  "meta": {
+    "name": "css specificity",
+    "author": "jzplp",
+    "version": "1"
+  },
+  "format": "node_tree",
+  "data": {
+    "id": "root",
+    "topic": "CSS优先级",
+    "children": [
+      {"id": "sub1", "topic": "属性顺序"},
+      {"id": "sub2", "topic": "选择器权重和"}
+    ]
+  }
+};
+var options = {
+  container: 'jsmind_container',
+  theme: 'primary',
+  editable: true,
+};
+onMounted(() => {
+  var jm = new jsMind(options);
+  jm.show(mind);
+})
+</script>

@@ -1,6 +1,13 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 devDependencies:
+  jsmind:
+    specifier: ^0.8.5
+    version: 0.8.5
   katex:
     specifier: ^0.16.7
     version: 0.16.7
@@ -766,6 +773,10 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /jsmind@0.8.5:
+    resolution: {integrity: sha512-fz7SZ4X9GFktM8Kr9qyqt9fw2fcSe3n94HmdDTsibTKrvgFFeXneO3z7xSk1zE2NK9Zzex2X3TCKxHczdpxmfg==}
+    dev: true
 
   /jsonc-parser@3.2.0:
     resolution: {integrity: sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==}

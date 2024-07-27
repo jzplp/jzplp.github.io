@@ -1,5 +1,5 @@
 {
-  "type":"module",
+  "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -9,7 +9,8 @@
   "devDependencies": {
     "katex": "^0.16.7",
     "vitepress": "1.0.0-rc.4",
-    "vue": "^3.3.2"
+    "vue": "^3.3.2",
+    "jsmind": "^0.8.5"
   },
   "pnpm": {
     "peerDependencyRules": {
