@@ -1282,7 +1282,6 @@ todo  写更多总结
 
 <script setup>
 import 'jsmind/style/jsmind.css';
-import jsMind from 'jsmind';
 import { onMounted } from 'vue';
 
 var mind = {
@@ -1307,7 +1306,10 @@ var options = {
   editable: true,
 };
 onMounted(() => {
-  var jm = new jsMind(options);
-  jm.show(mind);
+  import('jsmind').then((module) => {
+    const jsMind = module.default;
+    const jm = new jsMind(options);
+    jm.show(mind);
+  })
 })
 </script>
