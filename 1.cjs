@@ -14,5 +14,5 @@ http.createServer((req, res) => {
     }, 1000);
   }
 }).listen(8000, () => {
-  console.log('server stast!');
+  console.log('server start!');
 });

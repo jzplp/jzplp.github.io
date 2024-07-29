@@ -1159,7 +1159,7 @@ http.createServer((req, res) => {
     }, 1000);
   }
 }).listen(8000, () => {
-  console.log('server stast!');
+  console.log('server start!');
 });
 ```
 
@@ -1188,6 +1188,74 @@ http.createServer((req, res) => {
 我们在浏览器中可以看到文字先是红色斜体，这时候外部样式表还没有加载成功，仅仅是内部样式表起作用。一秒后文字变成蓝色，依然是斜体。这时候样式位置和属性都与“外部样式优先级”部分中的例子一致，现象也是一样的。这说明，外部样式表数据收到的时间并不会影响优先级，只是在收到数据前不会生效。
 
 ## @import
+### @import优先级
+与外部样式表类似，@import也是一种引用样式表的方法，但它是在CSS语句中引入，且必须在其他CSS语句的最上面（除某些特殊语句外）。我们来看一个例子。先是index.html：
+
+```html
+<html>
+  <head>
+    <style>
+      @import url('./styles.css');
+      .cla {
+        color: red;
+      }
+      div {
+        font-style: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cla">hello, jzplp</div>
+  </body>
+</html>
+```
+
+然后再是styles.css：
+
+```css
+.cla {
+  color: blue;
+  font-style: italic;
+}
+```
+
+可以看到，在`<style>`的最上面使用@import引入了`styles.css`。@import规则引入的样式，与其他样式的优先级规则是相同的。但由于必须在最上面引入，在前后顺序方面有些劣势。我们来看下优先级比较：
+
+![](/2024/css-43.png)
+
+首先看color，@import中提供了blue，权重和0-1-0。后面`<style>`中又直接设置了red，权重和一致，但是位靠后，因此red生效。然后看font-style，@import中权重和为0-0-1，`<style>`中直接设置了italic，权重和0-1-0，因此italic生效。
+
+### 使用Node服务延时提供@import
+@import是可以提供url的，那么像外部样式表一样，会受到网络影响。如果这个请求的响应时间较长，会有什么现象呢？我们使用一个Node服务来控制请求的响应时间，实验一下。Node服务的代码直接使用外部样式表中的代码，不需要改动。
+
+执行后，在浏览器中输入localhost:8000打开页面。在一秒之后，页面才展示。这是因为@import会阻塞页面渲染，而对应的`<style>`又在`<body>`上面，因此先收到数据再继续渲染页面。我们改一下html：
+
+```html
+<html>
+  <head>
+    <style>
+      .cla {
+        color: red;
+      }
+      div {
+        font-style: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cla">hello, jzplp</div>
+    <style>
+      @import url('./styles.css');
+    </style>
+  </body>
+</html>
+```
+
+这时候有两个`<style>`，第一个`<style>`提供了样式，但没有请求url，不会阻塞，第二个在`<body>`最后，因此不会阻塞页面元素的呈现。我们执行试一下：
+
+![](/2024/css-44.png)
+
+这时候可以看到一开始第一个`<style>`生效，是红色normal，一秒后收到@import数据，且优先级更高，因此变为蓝色斜体。
 
 ## 层叠层 @layer
 
@@ -1277,6 +1345,8 @@ todo  写更多总结
   https://juejin.cn/post/6844903859324715021
 - MDN link 外部资源链接元素\
   https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/link
+- MDN CSS @import\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/@import
 - jsMind 一个显示/编辑思维导图的纯javascript类库\
   http://hizzgdev.github.io/jsmind/
 
