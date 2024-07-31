@@ -1257,9 +1257,63 @@ http.createServer((req, res) => {
 
 这时候可以看到一开始第一个`<style>`生效，是红色normal，一秒后收到@import数据，且优先级更高，因此变为蓝色斜体。
 
-## 层叠层 @layer
+## 层叠层@layer
 
-## 嵌套层叠层
+在中大型项目或者引入组件库，前端框架或其他第三方的样式中，我们经常会遇到其他人写的样式，这些样式可能与我们自己写的样式是冲突的，我们不得不提高优先级，甚至使用important处理，覆盖这些第三方样式。
+
+我们上面描述过层叠的概念，一共分为8个层级。这些第三方样式与我们自己写的样式都在“作者样式”这个层级中，因此造成了优先级冲突的问题。而层叠层，就是为了解决这个问题而出现的。
+
+### 层叠层的用法
+层叠层允许我们自己定义层级。我们看几个例子，了解下用法：
+```css
+/* 创建层layout1 */
+@layer layout1;
+/* 可同时创建多个层 */
+@layer layout2, layout3;
+/* 创建层，并添加样式 */
+@layer layout4 {
+  div {
+    color: red;
+  }
+}
+/* 层名称相同时，实际是同一个层 */
+@layer layout2, layout3;
+/* 可以先创建，后添加添加样式 */
+@layer layout1 {
+  div {
+    color: red;
+  }
+}
+/* 可以对同一层多次添加样式 */
+@layer layout4 {
+  .cla {
+    font-style: normal;
+  }
+}
+/* 创建匿名层 */
+@layer {
+  div {
+    color: red;
+  }
+}
+/* 创建另一个匿名层 */
+@layer {
+  div {
+    color: red;
+  }
+}
+```
+
+使用@layer，可以创建层叠层，并且在层中提供样式。提供的样式可以正常的命中HTML元素，但是优先级有特殊规则（后面部分描述）。@layer后面可跟层的名称，如果多次出现同一个名称，实际属于同一个层。如果不提供名称，那么创建的就是匿名层。如果多次不提供名称，那么会创建多个不同的匿名层。因此，匿名层是无法多次添加样式的。
+
+### 层叠层与@import
+
+### 层叠层的优先级
+
+### 嵌套层叠层
+
+### 嵌套层叠层的优先级
+
 
 ## 其他不会影响CSS优先级的内容
 todo 元素接近度
@@ -1349,6 +1403,9 @@ todo  写更多总结
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/@import
 - jsMind 一个显示/编辑思维导图的纯javascript类库\
   http://hizzgdev.github.io/jsmind/
+- MDN CSS @layer\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/@layer
+
 
 <script setup>
 import 'jsmind/style/jsmind.css';
