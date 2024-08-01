@@ -1302,11 +1302,42 @@ http.createServer((req, res) => {
     color: red;
   }
 }
+/* 未分层样式 */
+div {
+  color: red;
+}
 ```
 
-使用@layer，可以创建层叠层，并且在层中提供样式。提供的样式可以正常的命中HTML元素，但是优先级有特殊规则（后面部分描述）。@layer后面可跟层的名称，如果多次出现同一个名称，实际属于同一个层。如果不提供名称，那么创建的就是匿名层。如果多次不提供名称，那么会创建多个不同的匿名层。因此，匿名层是无法多次添加样式的。
+使用@layer，可以创建层叠层，并且在层中提供样式。提供的样式可以正常的命中HTML元素，但是优先级有特殊规则（后面部分描述）。@layer后面可跟层的名称，如果多次出现同一个名称，实际属于同一个层。
+
+如果不提供名称，那么创建的就是匿名层。如果多次不提供名称，那么会创建多个不同的匿名层。因此，匿名层是无法多次添加样式的。如果样式没有被包含到层中，就属于未分层样式。
 
 ### 层叠层与@import
+使用@import可以引入其他文件的样式表，前面我们已经描述过。层叠层可以与@import配合使用，将引入的样式表直接放到一个层中。我们看几个例子，了解下用法：
+
+```css
+/* 创建层layout1，导入样式并放到层中 */
+@import url('./styles.css') layer(layout1);
+/* 先创建层，再导入样式 */
+@layer layout2, layout3;
+@import url('./styles.css') layer(layout2);
+/* 先创建层并添加样式，再导入样式 */
+@layer layout4 {
+  div {
+    color: red;
+  }
+};
+@import url('./styles.css') layer(layout4);
+/* 对同一层多次导入样式 */
+@import url('./styles1.css') layer(layout5);
+@import url('./styles2.css') layer(layout5);
+/* 创建匿名层，并导入样式 */
+@import url('./styles.css') layer();
+/* 导入到未分层样式 */
+@import url('./styles.css')
+```
+
+通过例子可以看到，@import导入的样式可以直接放到层中，也可以对层多次添加/导入样式，或者导入到匿名层中。
 
 ### 层叠层的优先级
 
