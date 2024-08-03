@@ -1321,13 +1321,13 @@ div {
 /* 先创建层，再导入样式 */
 @layer layout2, layout3;
 @import url('./styles.css') layer(layout2);
-/* 先创建层并添加样式，再导入样式 */
+/* 先创建层layout4并导入样式，再添加样式 */
+@import url('./styles.css') layer(layout4);
 @layer layout4 {
   div {
     color: red;
   }
 };
-@import url('./styles.css') layer(layout4);
 /* 对同一层多次导入样式 */
 @import url('./styles1.css') layer(layout5);
 @import url('./styles2.css') layer(layout5);
@@ -1431,11 +1431,202 @@ div {
 * font-size属性: layout1中设置了14px，内联样式设置了16px。内联样式优先级更高，16px生效。
 
 ## 嵌套层叠层
+我们在作者样式中设置的层叠层，其实很像作者样式中的“嵌套层”。而我们设置的层叠层，也能包含嵌套层。
 
 ### 嵌套层叠层的用法
+嵌套层叠层实际上就是在层叠层中在创建层叠层。我们来看一下用法：
+
+```css
+/* 层layout1  */
+@layer layout1 {
+  /* 层layout1的样式 */
+  div {
+    color: red;
+  }
+  /* 层layout1中的嵌套层layout11 */
+  @layer layout11 {
+    div {
+      color: blue;
+    }
+  }
+  /* 可以创建多个嵌套层 */
+  @layer layout12, layout13;
+  /* 可以对嵌套层多次添加样式 */
+  @layer layout11 {
+    div {
+      font-style: italic;
+    }
+  }
+  /* 匿名嵌套层 */
+  @layer {
+    div {
+      color: blue;
+    }
+  }
+}
+/* 层layout2  */
+@layer layout2 {
+  /* 层layout2中的嵌套层layout21 */
+  @layer layout21 {
+    div {
+      font-style: italic;
+    }
+  }
+}
+/* 直接创建嵌套层：layout3中的嵌套层layout31  */
+@layer layout3.layout31 {
+  div {
+    font-style: italic;
+  }
+}
+/* 层layout4  */
+@layer layout4 {
+  /* 层layout4中的嵌套层layout41 */
+  @layer layout41 {
+    /* 层layout4中的嵌套层layout41的嵌套层layout411 */
+    @layer layout411 {
+      /* 层layout4中的嵌套层layout41的嵌套层layout411的嵌套层layout4111 */
+      @layer layout4111 {
+        div {
+          font-style: italic;
+        }
+      }
+    }
+  }
+}
+```
+
+可以看到，我们在声明的层叠层中创建新层，即属于那个层叠层的嵌套层。嵌套层的创建方法与层叠层本身并没有什么区别。有一个不同点是，我们可以直接创建嵌套层，例如`@layer layout3.layout31`。即使layout3不存在，也会同时被创建。嵌套层叠层也可以包含更深的嵌套层。
+
+### 嵌套层叠层与@import
+之前我们描述过，可以将@import引入的样式直接放到层叠层中，作为分层样式。嵌套层叠层也可以做到。我们来看一下用法：
+
+```css
+/* 创建层layout1.layout11，导入样式并放到层中 */
+@import url('./styles.css') layer(layout1.layout11);
+/* 先创建层叠层，再导入样式 */
+@layer layout2.layout21;
+@import url('./styles.css') layer(layout2.layout21);
+/* 导入样式后再添加样式 */
+@layer layout2.layout21 {
+  div {
+    color: blue;
+  }
+}
+```
+
+可以看到，@import导入样式到嵌套层叠层，与引入到层叠层是基本一致的，直接指定嵌套层叠层的名称即可。如果@import导入的样式本身就包含层呢？这个层会直接作为嵌套层存在。这里列举下用法：
+
+首先是styles.css的文件内容：
+
+```css
+@layer layout11 {
+  div {
+    font-style: italic;
+  }
+}
+```
+
+然后我们引入styles.css的方式：
+
+```css
+/* 引入样式放到layout1中，实际存在嵌套层layout1.layout11 */
+@import url('./styles.css') layer(layout1);
+/* 直接引入样式，不放到层中  实际存在层layout11 */
+@import url('./styles.css');
+/* 引入样式放到layout2.layout21中，实际存在嵌套层layout2.layout21.layout11 */
+@import url('./styles.css') layer(layout2.layout21);
+```
+
+可以看到，如果@import后指定了层叠层，且引入的样式本身就包含层，这个层会作为指定的层叠层的嵌套层叠层存在。
 
 ### 嵌套层叠层的优先级
+嵌套的层叠层的优先级与层叠层规则一致。首先，嵌套层叠层属于它的父层级的一部分，符合它父层级的优先级规则。一个父层的多个嵌套层叠层，他们之间的规则优先级规则可以按照层叠层的优先级规则来看：即分层样式的优先级依照它们创建的顺序确定，创建位置越靠后优先级越高。父层直接所属的样式可以看作是嵌套层叠层的“未分层样式”，优先级比分层样式更高。我们来看一下例子：
 
+```html
+<html>
+  <head>
+    <style>
+      @layer layout1 {
+        @layer layout12, layout11;
+        @layer layout11 {
+          div {
+            color: red;
+            font-style: normal;
+          }
+        }
+        @layer layout12 {
+          div {
+            color: blue;
+            font-size: 14px;
+          }
+        }
+        div {
+          font-size: 16px;
+        }
+      }
+      @layer layout2.layout21 {
+        div {
+          font-style: italic;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div>hello, jzplp</div>
+  </body>
+</html>
+```
+
+![](/2024/css-47.png)
+
+* color属性: layout1.layout11中设置了red，layout1.layout12中设置了blue。注意创建顺序，layout12比layout11更早，因此layout11优先级更高，red生效。
+* font-style属性: layout1.layout11中设置了normal，layout2.layout21中设置了italic。由于父层就不同，因此按照父层的优先级确定。layout2创建顺序靠后，优先级更高，italic生效。
+* font-size属性: layout1.layout12中设置了14px，layout1中设置了16px。layout1属于layout1.layout12的未分层样式，优先级更高，因此16px生效。
+
+### 嵌套层叠层与!important
+嵌套层叠层与!important的关系也与层叠层一致，即!important标识的分层样式互相比较时，优先级与不带标识时正好相反。带!important标识的分层样式创建位置越靠前优先级越高。而未分层!important标识样式的优先级，低于带!important标识的分层样式。内联!important样式的优先级高于于带!important标识的分层样式。我们来看一下例子，实际上就是上一节的例子中每个属性都带了!important：
+
+```html
+<html>
+  <head>
+    <style>
+      @layer layout1 {
+        @layer layout12, layout11;
+        @layer layout11 {
+          div {
+            color: red !important;
+            font-style: normal !important;
+          }
+        }
+        @layer layout12 {
+          div {
+            color: blue !important;
+            font-size: 14px !important;
+          }
+        }
+        div {
+          font-size: 16px !important;
+        }
+      }
+      @layer layout2.layout21 {
+        div {
+          font-style: italic !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div>hello, jzplp</div>
+  </body>
+</html>
+```
+
+![](/2024/css-47.png)
+
+* color属性: layout1.layout11中设置了red，layout1.layout12中设置了blue。注意创建顺序，layout12比layout11更靠前，因此layout12优先级更高，blue生效。注意这里浏览器（Chrome127版本）的调试栏中是划去的是错的。
+* font-style属性: layout1.layout11中设置了normal，layout2.layout21中设置了italic。由于父层就不同，因此按照父层的优先级确定。layout1创建顺序靠前，优先级更高，normal生效。注意这里浏览器（Chrome127版本）的调试栏中是划去的是错的。
+* font-size属性: layout1.layout12中设置了14px，layout1中设置了16px。layout1属于layout1.layout12的未分层样式，优先级更低，因此14px生效。
 
 ## 其他不会影响CSS优先级的内容
 todo 元素接近度

@@ -2,23 +2,31 @@
   <head>
     <style>
       @layer layout1 {
+        @layer layout12, layout11;
+        @layer layout11 {
+          div {
+            color: red !important;
+            font-style: normal !important;
+          }
+        }
+        @layer layout12 {
+          div {
+            color: blue !important;
+            font-size: 14px !important;
+          }
+        }
         div {
-          color: red !important;
+          font-size: 16px !important;
+        }
+      }
+      @layer layout2.layout21 {
+        div {
           font-style: italic !important;
         }
-      }
-      @layer layout2 {
-        div {
-          color: blue !important;
-          font-size: 14px !important;
-        }
-      }
-      div {
-        font-style: normal !important;
       }
     </style>
   </head>
   <body>
-    <div style="font-size: 16px !important">hello, jzplp</div>
+    <div>hello, jzplp</div>
   </body>
 </html>
