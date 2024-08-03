@@ -1,29 +1,24 @@
 <html>
   <head>
     <style>
-      @layer layout1, layout2;
-      div {
-        font-style: normal;
-        font-size: 16px;
+      @layer layout1 {
+        div {
+          color: red !important;
+          font-style: italic !important;
+        }
       }
       @layer layout2 {
         div {
-          color: red;
-          background-color: yellow;
+          color: blue !important;
+          font-size: 14px !important;
         }
       }
-      @layer layout1 {
-        div {
-          color: blue;
-          font-style: italic;
-        }
-        #ida {
-          font-size: 14px;
-        }
+      div {
+        font-style: normal !important;
       }
     </style>
   </head>
   <body>
-    <div id="ida" style="background-color: green">hello, jzplp</div>
+    <div style="font-size: 16px !important">hello, jzplp</div>
   </body>
 </html>

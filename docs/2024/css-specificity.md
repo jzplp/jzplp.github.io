@@ -1343,7 +1343,7 @@ div {
 聊一下层叠层与普通样式（即非!important样式）的优先级关系。我们创建的层是在作者样式中的，但不仅作者样式可以包含层叠层，用户自定义样式，用户代理样式表都可以包含，用法和优先级规则都是一样的。但是用户自定义样式目前大部分浏览器无法创建，没有哪个浏览器会在用户代理样式表中创建层叠层，因此大部分层叠层的使用场景还是在作者样式中。这里先描述下层叠层的优先级规则：
 
 * 未分层样式优先级大于分层样式
-* 分层样式的优先级依照他们创建的顺序确定，创建位置越靠后优先级越高
+* 分层样式的优先级依照它们创建的顺序确定，创建位置越靠后优先级越高
 * 优先级比较：内联样式 > 未分层样式 > 分层样式
 * 分层样式的优先级符合之前描述的层叠顺序的规则，即属于作者样式的分层样式与为分层样式都符合作者样式的层叠优先级规则。优先级规则可以整理为：正在进行的过渡样式 > !important样式 > 正在进行的动画样式 > 作者样式(包含内联样式/未分层样式/分层样式等) > 用户自定义样式 > 用户代理样式表
 
@@ -1391,8 +1391,44 @@ div {
 * background-color属性：yellow在layout2中，green在内联样式。内联样式优先级更高，因此胜出。
 
 ### 层叠层与!important
+之前我们描述过!important，除了正在进行的过渡样式之外，!important样式大于所有的非!important样式。加上层叠层之后，规则也是一样的。对于同样!important样式之间的比较，内联样式/权重和等规则也是适用的。
 
+那么多个分层样式都存在带!important标识的同样属性，优先级规则是如何呢？规则非常类似于之前描述的层叠顺序，即!important标识的分层样式互相比较时，优先级与不带标识时正好相反。不带!important标识的分层样式，创建位置越靠后优先级越高；而带!important标识的分层样式相反，创建位置越靠前优先级越高。
 
+未分层!important标识样式的优先级，低于带!important标识的分层样式。内联!important样式的优先级高于于带!important标识的分层样式，也高于未分层!important标识样式。即 未分层!important标识样式 < 带!important标识的分层样式 < 内联!important样式。这里举个例子看下，其中所有属性都带!important标识：
+
+```html
+<html>
+  <head>
+    <style>
+      @layer layout1 {
+        div {
+          color: red !important;
+          font-style: italic !important;
+        }
+      }
+      @layer layout2 {
+        div {
+          color: blue !important;
+          font-size: 14px !important;
+        }
+      }
+      div {
+        font-style: normal !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="font-size: 16px !important">hello, jzplp</div>
+  </body>
+</html>
+```
+
+![](/2024/css-46.png)
+
+* color属性: layout1与layout2都分别设置了red和blue，layout1的red更靠前，因此优先级更高。注意这里浏览器（Chrome127版本）的调试栏中是错的，调试栏中是layout2的蓝色生效，红色被划去了。
+* font-style属性: layout1中设置了italic，未分层样式设置了normal。这里分层样式的优先级比未分层样式更高，因此italic生效。注意这里浏览器（Chrome127版本）的调试栏中也是错的，调试栏中normal生效，italic被划去了。
+* font-size属性: layout1中设置了14px，内联样式设置了16px。内联样式优先级更高，16px生效。
 
 ## 嵌套层叠层
 
