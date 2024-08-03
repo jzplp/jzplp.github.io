@@ -1622,15 +1622,64 @@ div {
 </html>
 ```
 
-![](/2024/css-47.png)
+![](/2024/css-48.png)
 
 * color属性: layout1.layout11中设置了red，layout1.layout12中设置了blue。注意创建顺序，layout12比layout11更靠前，因此layout12优先级更高，blue生效。注意这里浏览器（Chrome127版本）的调试栏中是划去的是错的。
 * font-style属性: layout1.layout11中设置了normal，layout2.layout21中设置了italic。由于父层就不同，因此按照父层的优先级确定。layout1创建顺序靠前，优先级更高，normal生效。注意这里浏览器（Chrome127版本）的调试栏中是划去的是错的。
 * font-size属性: layout1.layout12中设置了14px，layout1中设置了16px。layout1属于layout1.layout12的未分层样式，优先级更低，因此14px生效。
 
 ## 其他不会影响CSS优先级的内容
-todo 元素接近度
-todo class 顺序
+### 元素接近度
+假设有下面这样一个例子，有两个选择器`div span`和`body span`，这两个选择器的权重和相同。但是从DOM树上看，div比body更接近于命中的span元素，因此`div span`比`body span`是“更精确的”，因此`div span`的优先级是否会更高呢？
+
+```html
+<html>
+  <head>
+    <style>
+      div span {
+        color: red;
+      }
+      body span {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <span>hello, jzplp</span>
+    </div>
+  </body>
+</html>
+```
+
+![](/2024/css-49.png)
+
+答案是否定的，`div span`与`body span`的权重和一样，所属的层也是相同的，因此他们的优先级取决于出现的先后顺序，`body span`更靠后，因此优先级更高。CSS的优先级与元素接近度无关，只根据CSS明确列出的规则来确定。
+
+### class属性值顺序
+一个元素可以绑定多个class，以空格分隔。元素的class属性中值出现的先后顺序与优先级有关么？在下面这个例子中，`class="cla clb"`与`class="clb cla"`对优先级是否有影响？
+
+```html
+<html>
+  <head>
+    <style>
+      .cla {
+        color: red;
+      }
+      .clb {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cla clb">hello, jzplp</div>
+  </body>
+</html>
+```
+
+![](/2024/css-50.png)
+
+答案是没有影响，我们切换class值的顺序，结果都是.clb生效。因为class属性值顺序与优先级无关。这里.clb选择器出现的位置靠后，因此优先级更高。
 
 ## 总结
 通过上面这么多部分的描述，可以看到CSS优先级的判断，牵涉了太多CSS中的不同主题。可以说优先级的概念，贯穿了整个CSS领域。
