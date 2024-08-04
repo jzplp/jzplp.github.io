@@ -13,7 +13,7 @@ CSS的中文名称叫做“层叠样式表”。其中的层叠就是指的根�
 
 todo 使用思维导图呈现
 
-<div id="jsmind_container" style="width: 640px; height: 500px;"></div>
+<cssSpecMind />
 
 CSS优先级的判断，牵涉了太多CSS中的不同主题。可以说优先级的概念，贯穿了整个CSS领域。下面我们就来分别聊一下，这些主题是如何影响到CSS优先级的。
 
@@ -1770,35 +1770,6 @@ div {
 
 
 <script setup>
-import 'jsmind/style/jsmind.css';
-import { onMounted } from 'vue';
-
-var mind = {
-  "meta": {
-    "name": "css specificity",
-    "author": "jzplp",
-    "version": "1"
-  },
-  "format": "node_tree",
-  "data": {
-    "id": "root",
-    "topic": "CSS优先级",
-    "children": [
-      {"id": "sub1", "topic": "属性顺序"},
-      {"id": "sub2", "topic": "选择器权重和"}
-    ]
-  }
-};
-var options = {
-  container: 'jsmind_container',
-  theme: 'primary',
-  editable: true,
-};
-onMounted(() => {
-  import('jsmind').then((module) => {
-    const jsMind = module.default;
-    const jm = new jsMind(options);
-    jm.show(mind);
-  })
-})
+import cssSpecMind from '../../components/cssSpecMind.vue'
 </script>
+
