@@ -7,9 +7,6 @@ Promise是JavaScript中异步编程的解决方案，一开始在社区中提出
 - PromiseJz GitHub仓库
 - https://github.com/jzplp/PromiseJz
 
-## 目录
-[[toc]]
-
 ## JavaScript异步编程
 ### 回调函数简介
 在以前传统的JavaScript编程中，我们使用回调函数来解决异步编程的问题，即：一个操作（例如事件触发，定时器等）需要异步执行时，我们传入一个回调函数。当操作执行完毕后，程序会执行回调函数中的代码。目前JavaScript中提供的基础异步操作也基本是回调函数的形式：

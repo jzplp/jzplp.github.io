@@ -1,5 +1,5 @@
 <template>
-  <div id="jsmind_container" style="width: 640px; height: 1000px"></div>
+  <div id="jsmind_container" style="width: 1200px; height: 1488px"></div>
 </template>
 
 <script lang="ts" setup>

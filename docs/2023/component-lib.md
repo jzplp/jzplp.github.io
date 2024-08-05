@@ -1,8 +1,5 @@
 # 如何二次封装一个Vue3组件库？
 
-## 目录
-[[toc]]
-
 ## 为什么要二次封装组件库
 目前开源的Vue3组件库有很多，包括Element Plus、Ant Design Vue、Naive UI、Vuetify、Varlet等等。
 

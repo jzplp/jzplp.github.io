@@ -1,8 +1,5 @@
 # 浏览器中Cookie的全面介绍
 
-## 目录
-[[toc]]
-
 ## 简介
 在Web前端开发时，我们经常会遇到一些浏览器存储相关的工具，例如Cookie。Cookie的英文本意是曲奇，但是在Web中，它被用作浏览器中存储的数据。Cookie都是`name=value`的结构，name和value都为字符串。
 

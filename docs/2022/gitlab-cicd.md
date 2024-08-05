@@ -1,8 +1,5 @@
 # GitLab持续集成部署CI/CD初探：如何自动构建和发布个人前端博客
 
-## 目录
-[[toc]]
-
 ## 简介
 持续集成，持续部署简写为CI/CD，指的是代码频繁提交，且自动部署到生产环境。关于这些概念，阮一峰在博客中有讲（[持续集成是什么？](https://www.ruanyifeng.com/blog/2015/09/continuous-integration.html)），这里就不再赘述了。
 

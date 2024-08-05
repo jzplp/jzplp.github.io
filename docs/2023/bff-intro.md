@@ -1,8 +1,5 @@
 # 什么情形下应该使用BFF？带你了解BFF的优势，即服务于前端的后端
 
-## 目录
-[[toc]]
-
 ## BFF简介
 BFF是一种Web架构，全名为Backends For Frontends，即为服务于前端的后端。这个词来源于Sam Newman的一篇文章：[Pattern: Backends For Frontends](https://samnewman.io/patterns/architectural/bff/)。BFF一般指的是在前端与后端之间加增加一个中间层。为什么要在前端和后端之间增加一个BFF层呢？
 
