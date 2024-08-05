@@ -17,9 +17,10 @@ const mind = {
     "id": "root",
     "topic": "CSS优先级",
     "children": [
-      { "id": "1", "topic": "属性位置顺序", "direction": "left" },
+      { "id": "1", "topic": "属性前后顺序", "direction": "left" },
+      { "id": "10", "topic": "属性覆盖规则", "direction": "left" },
       {
-        "id": "2", "topic": "选择器权重和", "direction": "left", children:
+        "id": "2", "topic": "选择器与权重和", "direction": "left", children:
           [
             { "id": "2.0", "topic": "0-0-0的*选择器" },
             { "id": "2.1", "topic": "0-0-1的选择器" },
