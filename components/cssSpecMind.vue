@@ -1,5 +1,5 @@
 <template>
-  <div id="jsmind_container" style="width: 1200px; height: 1488px"></div>
+  <div id="jsmind_container" style="width: 1200px; height: 1546px"></div>
 </template>
 
 <script lang="ts" setup>
@@ -17,8 +17,8 @@ const mind = {
     "id": "root",
     "topic": "CSS优先级",
     "children": [
-      { "id": "1", "topic": "属性前后顺序", "direction": "left" },
-      { "id": "10", "topic": "属性覆盖规则", "direction": "left" },
+      { "id": "1", "topic": "属性前后顺序", },
+      { "id": "10", "topic": "属性覆盖规则", },
       {
         "id": "2", "topic": "选择器与权重和", "direction": "left", children:
           [
@@ -27,7 +27,8 @@ const mind = {
             { "id": "2.2", "topic": "0-1-0的选择器" },
             { "id": "2.3", "topic": "1-0-0的ID选择器" },
             { "id": "2.4", "topic": "组合选择器" },
-            { "id": "2.5", "topic": "CSS嵌套" },
+            { "id": "2.5", "topic": "并集选择器" },
+            { "id": "2.6", "topic": "CSS嵌套" },
           ]
       },
       {
