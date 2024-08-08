@@ -83,7 +83,13 @@ const mind = {
           { "id": "12.5", "topic": "animation-fill-mode属性" },
         ]
       },
-      { "id": "13", "topic": "CSS过渡" },
+      {
+        "id": "13", "topic": "CSS过渡", children: [
+          { "id": "13.1", "topic": "transition-property属性" },
+          { "id": "13.2", "topic": "transition-duration属性" },
+          { "id": "13.3", "topic": "transition-delay属性" }
+        ]
+      },
       { "id": "14", "topic": "层叠顺序" },
       {
         "id": "15", "topic": "层叠层@layer", children: [
