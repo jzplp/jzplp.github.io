@@ -10,7 +10,16 @@
 
 首先注册用户，申请成为开发者。开发者分个人开发者与企业开发者，其中个人开发者无需条件，但是发部分接口调用次数每天只有一万次。
 
+注册之后是申请应用，如果是在公共网络上运行服务，记得需要加域名白名单。创建好之后会给一个key，后面请求接口会使用这个key作为验证。如果只是用于本地测试，可以不加白名单，等上线前换成待白名单的key即可。
+
+![](/2024/tianditu-2.png)
+
+天地图提供了很多地图相关的API，包括各类地图瓦片API，网页API，服务端API和数据API等。
+
 ## 使用Leaflet展示地图
+
+
+
 
 ## 增加交互？
 
@@ -19,7 +28,9 @@
 ## 参考
 - 天地图\
   https://www.tianditu.gov.cn/
-- Leaflet地图库\
+- 天地图 服务调用配额说明\
+  https://console.tianditu.gov.cn/api/traffic
+- Leaflet 一个开源并且对移动端友好的交互式地图 JavaScript 库\
   https://leafletjs.com/
-- Leaflet中文文档\
+- Leaflet 中文文档\
   https://leafletjs.cn/
