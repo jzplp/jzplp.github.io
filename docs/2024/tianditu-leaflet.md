@@ -21,6 +21,8 @@
 
 
 
+<TiandituLeaflet />
+
 ## 增加交互？
 
 ## 总结
@@ -34,3 +36,8 @@
   https://leafletjs.com/
 - Leaflet 中文文档\
   https://leafletjs.cn/
+
+
+<script setup>
+import TiandituLeaflet from '../../components/tiandituLeaflet/index.vue'
+</script>
