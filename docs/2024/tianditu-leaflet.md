@@ -18,6 +18,33 @@
 
 ## 使用Leaflet展示地图
 
+这里使用vue3为例，描述下如何使用Leaflet展示地图。
+
+### 引入地图
+
+首先安装依赖，命令函执行：`npm install leaflet`。然后在vue文件中放置一个div容器，设置好宽高等CSS：
+
+```vue
+<template>
+  <div id="map" style="height: 600px; width: 600px"></div>
+</template>
+```
+
+然后在script中引入Leaflet，注意CSS样式也要一起引入。为了方便描述，我们将地图相关逻辑都放到了`./leaflet.js`中。注意创建地图时DOM容器需要存在，因此我们在vue的onMounted中创建。
+
+```vue
+<script lang="ts" setup>
+import { onMounted } from 'vue';
+import "leaflet/dist/leaflet.css";
+import { createMap } from './leaflet';
+
+onMounted(() => {
+  createMap();
+})
+</script>
+```
+
+我这里是在VitePress中引入的，
 
 
 
