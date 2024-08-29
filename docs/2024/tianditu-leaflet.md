@@ -16,13 +16,9 @@
 
 天地图提供了很多地图相关的API，包括各类地图瓦片API，网页API，服务端API和数据API等。
 
-## 使用Leaflet展示地图
+### 引入Leaflet库
 
-这里使用vue3为例，描述下如何使用Leaflet展示地图。
-
-### 引入地图
-
-首先安装依赖，命令函执行：`npm install leaflet`。然后在vue文件中放置一个div容器，设置好宽高等CSS：
+这里使用vue3为例。首先安装依赖，命令函执行：`npm install leaflet`。然后在vue文件中放置一个div容器，设置好宽高等CSS：
 
 ```vue
 <template>
@@ -44,13 +40,79 @@ onMounted(() => {
 </script>
 ```
 
-我这里是在VitePress中引入的，
+我这里是在VitePress中引入的。由于SSR功能，VitePress使用假定在导入时处于浏览器环境的代码，需要动态导入，因此改了一下引入方式。不改的话，本地dev模式可以启动，但是打包会报错。
 
+```vue
+<script lang="ts" setup>
+import { onMounted } from 'vue';
+import "leaflet/dist/leaflet.css";
+
+onMounted(() => {
+  import('./leaflet').then((module) => {
+    const createMap = module.default;
+    createMap();
+  });
+})
+</script>
+```
+
+## 展示天地图
+然后再来看下`./leaflet.js`中的逻辑。首先我们创建地图：
+
+```js
+import L from 'leaflet';
+
+export default function createMap() {
+  const map = L.map('map');
+}
+```
+
+然后引入瓦片图层。天地图提供了很多瓦片类型，可以看：[天地图 地图API文档](http://lbs.tianditu.gov.cn/server/MapService.html)。同时Leaflet中多个瓦片图层可以叠加，我们这里放一层矢量底图，再放一层矢量注记。
+
+```js
+const map = L.map('map');
+L.tileLayer(
+  "http://t0.tianditu.gov.cn/vec_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=您的密钥"
+).addTo(map);
+L.tileLayer(
+  "http://t0.tianditu.gov.cn/cva_w/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=您的密钥"
+).addTo(map);
+```
+
+注意这里选择球面墨卡托投影。文档最下面有请求示例，但是部分内容需要我们自己修改，比如密钥，图层类型和LAYER。LAYER和其它取值可以在地图元数据查询中查到，例如我引入的两个图层的地图元数据地址：
+
+```
+http://t0.tianditu.gov.cn/vec_w/wmts?request=GetCapabilities&service=wmts
+http://t0.tianditu.gov.cn/cva_w/wmts?request=GetCapabilities&service=wmts
+```
+
+![](/2024/tianditu-3.png)
+
+上图是元数据中部分内容的截图，可以看到不仅有调用需要的参数值，还标明了有多少图层/版本等很多描述信息。
+
+在提供瓦片图层后，地图目前还不能访问，需要我们提供部分配置：
+
+```js
+const map = L.map("map", {
+  center: [24.1, 109.2], // 中心点
+  zoom: 10, // 当前展示的层级
+  maxZoom: 18, // 最大层级
+  minZoom: 1, // 最小层级
+  attributionControl: false, // 不展示版权信息
+});
+```
+
+其中最大最小层级是地图元数据中提供的，zoom是当前展示的层级。中心点是`[纬度, 经度]`的一个点，可以随便设置。这时候地图就可以在我们的应用中展示啦~ 拖动可以平移地图，滑动滚轮可以缩放地图。
+
+![](/2024/tianditu-4.png)
+
+## 地图瓦片概念
+
+
+## 增加交互？
 
 
 <TiandituLeaflet />
-
-## 增加交互？
 
 ## 总结
 
@@ -63,7 +125,10 @@ onMounted(() => {
   https://leafletjs.com/
 - Leaflet 中文文档\
   https://leafletjs.cn/
-
+- VitePress SSR兼容性\
+  https://vitepress.dev/zh/guide/ssr-compat
+- 天地图 地图API\
+  http://lbs.tianditu.gov.cn/server/MapService.html
 
 <script setup>
 import TiandituLeaflet from '../../components/tiandituLeaflet/index.vue'
