@@ -6,8 +6,10 @@
 import { onMounted } from 'vue';
 import "leaflet/dist/leaflet.css";
 
+const props = defineProps(['type']);
+
 onMounted(() => {
-  import('./leaflet').then((module) => {
+  import('./leaflet1').then((module) => {
     const createMap = module.default;
     createMap();
   });

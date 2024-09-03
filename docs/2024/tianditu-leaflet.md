@@ -104,26 +104,25 @@ const map = L.map("map", {
 
 其中最大最小层级是地图元数据中提供的，zoom是当前展示的层级。中心点是`[纬度, 经度]`的一个点，可以随便设置。这时候地图就可以在我们的应用中展示啦~ 拖动可以平移地图，滑动滚轮可以缩放地图。
 
-![](/2024/tianditu-4.png)
+<TiandituLeaflet type="1" />
 
 ## 地图瓦片概念
 
 我们上面展示的展示的地图，是可以通过大小缩放查看的，既可以展示整个大陆轮廓，也可以展示建筑物和街道细节。这是通过地图瓦片来实现的。首先设置一个瓦片为256*256像素的图片。如下图所示，在第0层中，由一张图片表示整个地图；在第1层中，由四张图片表示整个地图；在第2层中，由16张图片整个地图。第n层级的图片数量为2^n。通过这种形式，可以实现地图缩放时查看不同细节程度的地图。
+todo 修改描述
 
-![](/2024/tianditu-5.png)
+
+![](/2024/tianditu-4.png)
 
 上面我们请求瓦片图层的接口，实际上是URL模板，其中`TILEMATRIX={z}&TILEROW={y}&TILECOL={x}`表示x,y,z三个变量。x和y表示瓦片坐标，即横向和纵向的瓦片标号，z表示瓦片层级。
 
 （todo  瓦片标号图搞一张）
 
-地球是一个球体，是无法直接转化为平面的地图形式的，是通过投影来实现的。不同的投影方式有不同的优缺点，而我们Leaflet是使用的墨卡托投影，具体采用EPSG3857坐标系。关于投影和坐标系的知识这里就不描述了，感兴趣可以自行学习一下。
+地球是一个球体，是无法直接转化为平面的地图形式的，是通过投影来实现的。不同的投影方式有不同的优缺点，而我们Leaflet是使用的墨卡托投影，具体采用EPSG3857坐标系。关于投影和坐标系的知识这里就不描述了，感兴趣可以自行学习一下。可以参考下这篇文章：[Web GIS 开发入门](https://mp.weixin.qq.com/s/Wg3V-yamQ7NzpGBdQI4h8Q)
 
-(todo  引用增加 投影和坐标系 知识链接)
 
 ## 增加交互？
 
-
-<TiandituLeaflet />
 
 ## 总结
 
@@ -140,6 +139,12 @@ const map = L.map("map", {
   https://vitepress.dev/zh/guide/ssr-compat
 - 天地图 地图API\
   http://lbs.tianditu.gov.cn/server/MapService.html
+- Web GIS 开发入门\
+  https://mp.weixin.qq.com/s/Wg3V-yamQ7NzpGBdQI4h8Q
+- 地图投影方式\
+  https://pro.arcgis.com/zh-cn/pro-app/latest/help/mapping/properties/list-of-supported-map-projections.htm
+- 聊聊GIS中的坐标系\
+  https://zhuanlan.zhihu.com/p/98839097
 
 <script setup>
 import TiandituLeaflet from '../../components/tiandituLeaflet/index.vue'
