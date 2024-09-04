@@ -9,8 +9,8 @@ import "leaflet/dist/leaflet.css";
 const props = defineProps(['type']);
 
 onMounted(() => {
-  import('./leaflet1').then((module) => {
-    const createMap = module.default;
+  import('./leaflet.js').then((module) => {
+    const createMap = module.createMap;
     createMap();
   });
 })
