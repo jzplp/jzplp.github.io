@@ -122,10 +122,33 @@ const map = L.map("map", {
 
 ### 使用Leaflet展示瓦片层级
 
+在这里展示一个小的Demo，里面标出了每个瓦片的标号（x,y）和层级（z）。我们缩放和拖动地图，可以看到瓦片也随之变化和移动。
+
 <TiandituLeaflet type="2" />
 
-todo 增加源码和解释
+它的实现是扩展了一个瓦片图层类，在createTile方法中创建div元素，放置文字内容和边框。最后创建一个我们扩展的瓦片图层对象，并附加到地图上即可。实际上这就是Leaflet教程的其中一个： [扩展 Leaflet: Layers](https://leafletjs.cn/examples/extending/extending-2-layers.html)。
 
+```js
+export function showMapTile(map) {
+  // 扩展瓦片图层
+  L.GridLayer.DebugCoords = L.GridLayer.extend({
+    createTile: function (coords) {
+      // 创建一个div元素
+      var tile = document.createElement("div");
+      // 里面放瓦片标号
+      tile.innerHTML = `x:${coords.x}, y:${coords.y}, z:${coords.z}`;
+      // 设置边框
+      tile.style.outline = "1px solid red";
+      return tile;
+    },
+  });
+  // 创建扩展的瓦片图层对象，并附加到地图上
+  (new L.GridLayer.DebugCoords()).addTo(map)
+}
+
+// 调用
+showMapTile(map);
+```
 
 ## 增加交互？
 
@@ -151,6 +174,9 @@ todo 增加源码和解释
   https://pro.arcgis.com/zh-cn/pro-app/latest/help/mapping/properties/list-of-supported-map-projections.htm
 - 聊聊GIS中的坐标系\
   https://zhuanlan.zhihu.com/p/98839097
+- Leaflet教程: 扩展Leaflet: Layers\
+  https://leafletjs.cn/examples/extending/extending-2-layers.html
+
 
 <script setup>
 import TiandituLeaflet from '../../components/tiandituLeaflet/index.vue'

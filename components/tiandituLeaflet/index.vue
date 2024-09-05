@@ -1,18 +1,18 @@
 <template>
-  <div :id="'map' + type" style="height: 600px; width: 600px; border: 1px solid grey"></div>
+  <div :id="'map' + props.type" style="height: 600px; width: 600px; border: 1px solid grey"></div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted } from 'vue';
 import "leaflet/dist/leaflet.css";
 
-const { type } = defineProps(['type']);
+const props = defineProps(['type']);
 
 onMounted(() => {
   import('./leaflet.js').then((module) => {
     const { createMap, showMapTile } = module;
-    const map = createMap(type);
-    if (type === '2') {
+    const map = createMap(props.type);
+    if (props.type === '2') {
       showMapTile(map);
     }
   });
