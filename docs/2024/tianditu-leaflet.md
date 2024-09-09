@@ -150,8 +150,51 @@ export function showMapTile(map) {
 showMapTile(map);
 ```
 
-## 增加交互？
+## 添加地图元素和交互
+Leaflet提供了一些地图相关的交互形式和方法，这里我们举几个简单的例子。
 
+### 添加标记、圆和多边形
+这里列举了添加部分元素的方法:
+
+- 标记: 设定点的位置
+- 圆: 设定圆心位置和半径（以米为单位）
+- 多边形: 设定多边形的每个角的位置
+
+```js
+// 添加地图元素
+export function showElement(map) {
+  // 添加标记
+  L.marker([24.1, 109.2]).addTo(map);
+  // 添加圆
+  L.circle([24.101, 109.201], {
+    // 边框颜色
+    color: "red",
+    // 填充颜色
+    fillColor: "#f03",
+    // 填充的不透明度
+    fillOpacity: 0.5,
+    // 圆的半径，以米为单位
+    radius: 50,
+  }).addTo(map);
+  // 添加多边形
+  L.polygon([
+    [24.0995, 109.1991],
+    [24.0994, 109.1994],
+    [24.0997, 109.1993],
+  ]).addTo(map);
+}
+```
+
+最后是实际展示我们创建的元素：
+
+<TiandituLeaflet type="3" />
+
+
+### 点击与popups交互
+
+### 使用GeoJSON
+
+### 操作图层
 
 ## 总结
 
