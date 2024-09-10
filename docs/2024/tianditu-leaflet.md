@@ -189,8 +189,55 @@ export function showElement(map) {
 
 <TiandituLeaflet type="3" />
 
+### 点击与Popups交互
+Leaflet提供了Popups，这是一种简单的弹出窗口，通过元素调用bindPopup函数即可实现。同时还提供了包括点击事件在内的很多事件，可以监听并触发操作。这里截图了点击事件可以收到的信息，还是非常多的，具体字段含义可以看API文档。
 
-### 点击与popups交互
+![](/2024/tianditu-5.png)
+
+
+这里我们在上一节添加地图元素的基础上，增加了部分交互。
+- 点击圆出现Popups弹窗
+- 地图任意位置点击事件
+- 点击多边形，在地图上添加标记
+
+```js
+export function interactive(map) {
+  // 添加圆
+  const circle = L.circle([24.101, 109.201], {
+    // 边框颜色
+    color: "red",
+    // 填充颜色
+    fillColor: "#f03",
+    // 填充的不透明度
+    fillOpacity: 0.5,
+    // 圆的半径，以米为单位
+    radius: 50,
+  }).addTo(map);
+  // Popups弹窗
+  circle.bindPopup("我是一个圆");
+
+  // 点击事件
+  map.on("click", (e) => {
+    console.log(e);
+  });
+
+  // 添加多边形
+  const polygon = L.polygon([
+    [24.1, 109.1990],
+    [24.1005, 109.2005],
+    [24.0992, 109.1993],
+  ]).addTo(map);
+  // 点击多边形时添加标记
+  polygon.on('click', (e) => {
+    // 在点击位置添加
+    L.marker(e.latlng).addTo(map);
+  });
+}
+```
+
+我们看一下实际效果：
+
+<TiandituLeaflet type="4" />
 
 ### 使用GeoJSON
 

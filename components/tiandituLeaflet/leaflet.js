@@ -53,3 +53,35 @@ export function showElement(map) {
     [24.0997, 109.1993],
   ]).addTo(map);
 }
+
+// 添加交互
+export function interactive(map) {
+  // 添加圆
+  const circle = L.circle([24.101, 109.201], {
+    // 边框颜色
+    color: "red",
+    // 填充颜色
+    fillColor: "#f03",
+    // 填充的不透明度
+    fillOpacity: 0.5,
+    // 圆的半径，以米为单位
+    radius: 50,
+  }).addTo(map);
+  circle.bindPopup("我是一个圆");
+
+  // 点击事件
+  map.on("click", (e) => {
+    console.log(e);
+  });
+
+  // 添加多边形
+  const polygon = L.polygon([
+    [24.1, 109.1990],
+    [24.1005, 109.2005],
+    [24.0992, 109.1993],
+  ]).addTo(map);
+  // 点击多边形时添加标记
+  polygon.on('click', (e) => {
+    L.marker(e.latlng).addTo(map);
+  });
+}
