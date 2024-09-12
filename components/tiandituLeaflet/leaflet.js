@@ -76,12 +76,65 @@ export function interactive(map) {
 
   // 添加多边形
   const polygon = L.polygon([
-    [24.1, 109.1990],
+    [24.1, 109.199],
     [24.1005, 109.2005],
     [24.0992, 109.1993],
   ]).addTo(map);
   // 点击多边形时添加标记
-  polygon.on('click', (e) => {
+  polygon.on("click", (e) => {
     L.marker(e.latlng).addTo(map);
   });
+}
+
+// 添加GeoJSON
+export function showGeoJson(map) {
+  const point = {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [109.201, 24.101],
+    },
+    properties: {
+      name: "Point",
+    },
+  };
+  const lineString = {
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [109.2, 24.1],
+        [109.2015, 24.1012],
+      ],
+    },
+    properties: {
+      name: "LineString",
+    },
+  };
+
+  const polygon = {
+    type: "Feature",
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [109.199, 24.1],
+          [109.2005, 24.1005],
+          [109.1993, 24.0992],
+        ],
+      ],
+    },
+    properties: {
+      name: "Polygon",
+    },
+  };
+
+  L.geoJSON(point).addTo(map);
+  L.geoJSON(lineString, {
+    style: {
+      color: "#ff7800",
+      weight: 5,
+    },
+  }).addTo(map);
+  L.geoJSON(polygon).addTo(map);
 }

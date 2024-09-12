@@ -241,6 +241,55 @@ export function interactive(map) {
 
 ### 使用GeoJSON
 
+> GeoJSON是一种用于常见的，用于编码各种地理数据结构的格式。它定义了几种类型的JSON对象，以及将它们组合起来表示有关地理特征、属性和空间范围的数据的方式。
+
+这里简单的介绍一下GeoJSON的几种类型，更详细的介绍请看文末的参考链接。
+
+```js
+const point = {
+  type: "Feature",
+  geometry: {
+    type: "Point",
+    coordinates: [109.201, 24.101],
+  },
+  properties: {
+    name: "Point",
+  },
+};
+const lineString = {
+  type: "Feature",
+  geometry: {
+    type: "LineString",
+    coordinates: [
+      [109.2, 24.1],
+      [109.2015, 24.1012],
+    ],
+  },
+  properties: {
+    name: "LineString",
+  },
+};
+
+const polygon = {
+  type: "Feature",
+  geometry: {
+    type: "Polygon",
+    coordinates: [
+      [
+        [109.199, 24.1],
+        [109.2005, 24.1005],
+        [109.1993, 24.0992],
+      ],
+    ],
+  },
+  properties: {
+    name: "Polygon",
+  },
+};
+```
+
+<TiandituLeaflet type="5" />
+
 ### 操作图层
 
 ## 总结
@@ -266,6 +315,13 @@ export function interactive(map) {
   https://zhuanlan.zhihu.com/p/98839097
 - Leaflet教程: 扩展Leaflet: Layers\
   https://leafletjs.cn/examples/extending/extending-2-layers.html
+- Leaflet教程: 在 Leaflet 中使用 GeoJSON\
+  https://leafletjs.cn/examples/geojson/
+- RFC 7946 The GeoJSON Format\
+  https://datatracker.ietf.org/doc/html/rfc7946
+- WebGIS 标准数据格式 GeoJSON 格式介绍及数据处理、可视化工具推荐\
+  https://juejin.cn/post/7138434147449569317
+
 
 
 <script setup>

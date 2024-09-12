@@ -10,16 +10,19 @@ const props = defineProps(['type']);
 
 onMounted(() => {
   import('./leaflet.js').then((module) => {
-    const { createMap, showMapTile, showElement, interactive } = module;
+    const { createMap, showMapTile, showElement, interactive, showGeoJson } = module;
     const map = createMap(props.type);
     if (props.type === '2') {
       showMapTile(map);
     }
-    if(props.type === '3') {
+    if (props.type === '3') {
       showElement(map);
     }
-    if(props.type === '4') {
+    if (props.type === '4') {
       interactive(map);
+    }
+    if (props.type === '5') {
+      showGeoJson(map);
     }
   });
 })
