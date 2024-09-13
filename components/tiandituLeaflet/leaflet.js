@@ -105,6 +105,7 @@ export function showGeoJson(map) {
       coordinates: [
         [109.2, 24.1],
         [109.2015, 24.1012],
+        [109.201, 24.1012],
       ],
     },
     properties: {

@@ -1,4 +1,4 @@
-# 使用天地图与Leaflet，轻松创建出免费地图应用(未完成)
+# 使用天地图与Leaflet，轻松创建免费地图应用
 
 天地图又叫做地理信息公共服务平台，是提供给公众免费使用的地理信息平台，提供了多种形式的地图开发资源，使用天地图，可以构建免费的地图应用。Leaflet是一个开源的Javascript地图库，我们使用它来进行地图的展示和交互。
 
@@ -245,11 +245,16 @@ export function interactive(map) {
 
 这里简单的介绍一下GeoJSON的几种类型，更详细的介绍请看文末的参考链接。
 
+首先，所有的数据类型都包含在`type: "Feature"`的结构内，如下面的代码示例，外面的结构都是重复的。properties中是一些元数据信息，我们可以自行定义key和value，供我们自己处理数据使用。geometry中就是我们的具体的结构表示了。下面代码中举了三种例子：Point, LineString, Polygon。其中的coordinates每种类型各不相同的，但其中的基本元素都是坐标值。
+
+
 ```js
 const point = {
   type: "Feature",
   geometry: {
+    // 点
     type: "Point",
+    // 点的坐标值
     coordinates: [109.201, 24.101],
   },
   properties: {
@@ -259,10 +264,13 @@ const point = {
 const lineString = {
   type: "Feature",
   geometry: {
+    // 线
     type: "LineString",
+    // 线的端点坐标值 可以是折线，有多个端点
     coordinates: [
       [109.2, 24.1],
       [109.2015, 24.1012],
+      [109.201, 24.1012],
     ],
   },
   properties: {
@@ -273,7 +281,9 @@ const lineString = {
 const polygon = {
   type: "Feature",
   geometry: {
+    // 多边形
     type: "Polygon",
+    // 多边形的顶点坐标，注意第一个点和最后一个点是一样的，即首尾相连
     coordinates: [
       [
         [109.199, 24.1],
@@ -288,11 +298,33 @@ const polygon = {
 };
 ```
 
+我们把这些GeoJSON数据，放到地图中展示：
+
+```js
+L.geoJSON(point).addTo(map);
+L.geoJSON(lineString, {
+  // 可以设置样式
+  style: {
+    color: "#ff7800",
+    weight: 5,
+  },
+}).addTo(map);
+L.geoJSON(polygon).addTo(map);
+```
+
+最后数据展示在地图上的效果如下：
+
 <TiandituLeaflet type="5" />
 
-### 操作图层
+GeoJSON中还有一些其它类型，比如FeatureCollection，MultiPoint，MultiLineString，MultiPolygon等，这里就不一一介绍了，感兴趣的同学可以查看最后的参考文档。
 
 ## 总结
+
+这里只是简单介绍了Leaflet的使用方式，但这个地图库还有很多很多用法，也有很多第三方插件扩展功能。
+
+通过上述的代码可以看到，我们引入地图，做一些简单的应用是并不复杂的。而且包括天地图、百度、高德等在内，很多互联网地图是直接提供网页API的，即我们使用`<script>`的方式直接引入预设好的代码，不需要自己引入地图引擎去适配地图接口进行展示。例如天地图的网页API：
+
+![](/2024/tianditu-6.png)
 
 ## 参考
 - 天地图\
@@ -321,8 +353,6 @@ const polygon = {
   https://datatracker.ietf.org/doc/html/rfc7946
 - WebGIS 标准数据格式 GeoJSON 格式介绍及数据处理、可视化工具推荐\
   https://juejin.cn/post/7138434147449569317
-
-
 
 <script setup>
 import TiandituLeaflet from '../../components/tiandituLeaflet/index.vue'
