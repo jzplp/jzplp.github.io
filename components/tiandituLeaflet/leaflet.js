@@ -3,7 +3,7 @@ import L from "leaflet";
 export function createMap(type) {
   const map = L.map(`map${type}`, {
     center: [24.1, 109.2], // 中心点
-    zoom: 18, // 当前展示的层级
+    zoom: 10, // 当前展示的层级
     maxZoom: 18, // 最大层级
     minZoom: 1, // 最小层级
     attributionControl: false, // 不展示版权信息
@@ -36,7 +36,7 @@ export function showElement(map) {
   // 添加标记
   L.marker([24.1, 109.2]).addTo(map);
   // 添加圆
-  L.circle([24.101, 109.201], {
+  L.circle([24.3, 109], {
     // 边框颜色
     color: "red",
     // 填充颜色
@@ -44,20 +44,20 @@ export function showElement(map) {
     // 填充的不透明度
     fillOpacity: 0.5,
     // 圆的半径，以米为单位
-    radius: 50,
+    radius: 10000,
   }).addTo(map);
   // 添加多边形
   L.polygon([
-    [24.0995, 109.1991],
-    [24.0994, 109.1994],
-    [24.0997, 109.1993],
+    [23.8, 109],
+    [23.9, 109.5],
+    [24.0, 109.2],
   ]).addTo(map);
 }
 
 // 添加交互
 export function interactive(map) {
   // 添加圆
-  const circle = L.circle([24.101, 109.201], {
+  const circle = L.circle([24.3, 109], {
     // 边框颜色
     color: "red",
     // 填充颜色
@@ -65,7 +65,7 @@ export function interactive(map) {
     // 填充的不透明度
     fillOpacity: 0.5,
     // 圆的半径，以米为单位
-    radius: 50,
+    radius: 10000,
   }).addTo(map);
   circle.bindPopup("我是一个圆");
 
@@ -76,9 +76,9 @@ export function interactive(map) {
 
   // 添加多边形
   const polygon = L.polygon([
-    [24.1, 109.199],
-    [24.1005, 109.2005],
-    [24.0992, 109.1993],
+    [23.8, 109],
+    [23.9, 109.5],
+    [24.0, 109.2],
   ]).addTo(map);
   // 点击多边形时添加标记
   polygon.on("click", (e) => {
@@ -92,7 +92,7 @@ export function showGeoJson(map) {
     type: "Feature",
     geometry: {
       type: "Point",
-      coordinates: [109.201, 24.101],
+      coordinates: [109.2, 24.1],
     },
     properties: {
       name: "Point",
@@ -103,9 +103,9 @@ export function showGeoJson(map) {
     geometry: {
       type: "LineString",
       coordinates: [
-        [109.2, 24.1],
-        [109.2015, 24.1012],
-        [109.201, 24.1012],
+        [109.0, 24.3],
+        [109.2, 24.2],
+        [109.5, 24.4],
       ],
     },
     properties: {
@@ -119,9 +119,10 @@ export function showGeoJson(map) {
       type: "Polygon",
       coordinates: [
         [
-          [109.199, 24.1],
-          [109.2005, 24.1005],
-          [109.1993, 24.0992],
+          [109, 23.8],
+          [109.5, 23.9],
+          [109.2, 24.0],
+          [109, 23.8],
         ],
       ],
     },

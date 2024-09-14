@@ -166,7 +166,7 @@ export function showElement(map) {
   // 添加标记
   L.marker([24.1, 109.2]).addTo(map);
   // 添加圆
-  L.circle([24.101, 109.201], {
+  L.circle([24.3, 109], {
     // 边框颜色
     color: "red",
     // 填充颜色
@@ -174,13 +174,13 @@ export function showElement(map) {
     // 填充的不透明度
     fillOpacity: 0.5,
     // 圆的半径，以米为单位
-    radius: 50,
+    radius: 10000,
   }).addTo(map);
   // 添加多边形
   L.polygon([
-    [24.0995, 109.1991],
-    [24.0994, 109.1994],
-    [24.0997, 109.1993],
+    [23.8, 109],
+    [23.9, 109.5],
+    [24.0, 109.2],
   ]).addTo(map);
 }
 ```
@@ -203,15 +203,11 @@ Leaflet提供了Popups，这是一种简单的弹出窗口，通过元素调用b
 ```js
 export function interactive(map) {
   // 添加圆
-  const circle = L.circle([24.101, 109.201], {
-    // 边框颜色
+  const circle = L.circle([24.3, 109], {
     color: "red",
-    // 填充颜色
     fillColor: "#f03",
-    // 填充的不透明度
     fillOpacity: 0.5,
-    // 圆的半径，以米为单位
-    radius: 50,
+    radius: 10000,
   }).addTo(map);
   // Popups弹窗
   circle.bindPopup("我是一个圆");
@@ -223,9 +219,9 @@ export function interactive(map) {
 
   // 添加多边形
   const polygon = L.polygon([
-    [24.1, 109.1990],
-    [24.1005, 109.2005],
-    [24.0992, 109.1993],
+    [23.8, 109],
+    [23.9, 109.5],
+    [24.0, 109.2],
   ]).addTo(map);
   // 点击多边形时添加标记
   polygon.on('click', (e) => {
@@ -255,7 +251,7 @@ const point = {
     // 点
     type: "Point",
     // 点的坐标值
-    coordinates: [109.201, 24.101],
+    coordinates: [109.2, 24.1],
   },
   properties: {
     name: "Point",
@@ -268,9 +264,9 @@ const lineString = {
     type: "LineString",
     // 线的端点坐标值 可以是折线，有多个端点
     coordinates: [
-      [109.2, 24.1],
-      [109.2015, 24.1012],
-      [109.201, 24.1012],
+      [109.0, 24.3],
+      [109.2, 24.2],
+      [109.5, 24.4],
     ],
   },
   properties: {
@@ -286,9 +282,10 @@ const polygon = {
     // 多边形的顶点坐标，注意第一个点和最后一个点是一样的，即首尾相连
     coordinates: [
       [
-        [109.199, 24.1],
-        [109.2005, 24.1005],
-        [109.1993, 24.0992],
+        [109, 23.8],
+        [109.5, 23.9],
+        [109.2, 24.0],
+        [109, 23.8],
       ],
     ],
   },
