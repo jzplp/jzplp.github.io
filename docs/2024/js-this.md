@@ -2,6 +2,8 @@
 
 在JavaScript代码的不同位置中，this所指向的数据是不一样的。比如大部分同学都知道，在对象的函数数据中，this指向对象本身；在构造函数中，this指向要生成的新对象。事实上，this指向的逻辑不止这几种，this也不只是与原型链有关。在这里我们总结一下，在不同的场景下，JavaScript中的this, 究竟指向什么。
 
+todo 测试每一种都要带严格模式试一下。
+
 ## globalThis
 在观察各类this之前，先来了解一下globalThis的概念。globalThis是从不同的JavaScript环境中获取全局对象方法。
 
@@ -99,12 +101,41 @@ console.log(2, this === window);
 2 true
 ```
 
-## JS模块内使用
-由于JavaScript发展历史的原因，JavaScript有很多模块化开发规范，比如：AMD，CMD，UMD，CommonJS等等。后来ECMAScript标准官方定义了ESModule模块化规范，现在大部分环境都支持这个规范。这里我们对目前主流使用的ESModule和CommonJS规范进行说明。
+## CommonJS模块中使用
+由于JavaScript发展历史的原因，JavaScript有很多模块化开发规范，比如：AMD，CMD，UMD，CommonJS等等。后来ECMAScript标准官方定义了ESModule模块化规范，现在大部分环境都支持这个规范。我们对目前主流使用的ESModule和CommonJS规范进行说明。首先看一下CommonJS，这种规范最常用在Node.Js环境。
 
-### CommonJS和Node.js
+### Node.js命令行执行单个文件
+假设我们有一个js文件，里面没有任何模块化规范相关的代码。我们使用命令行直接执行这个文件`node 1.js`，这时this的值指向什么呢？是否和命令行直接执行代码一致呢？这里举个例子看下：
 
+```js
+console.log(this)
+console.log(this === globalThis);
+console.log(this === global);
+/* 输出
+{}
+false
+false
+*/
+```
 
+注意我们不能在带package.json的项目里面执行，否则项目配置会干扰我们的判断。这时查看结果，我们看到并不是global，而是一个空对象。这个空对象是什么呢？我们继续试验下：
+
+```js
+console.log(this)
+console.log(module.exports)
+console.log(this === module.exports);
+/* 输出
+{}
+{}
+true
+*/
+```
+
+原来这时候的this是module.exports！这是CommonJS规范中的模块导出内容。也就是说，在我们没有指定规范，且代码内容也没有任何规范相关指示时，Node.js命令行执行的文件包裹在CommonJS模块中运行。在CommonJS模块的this，指向的就是module.exports。
+
+todo 再多个例子
+
+## ESModule
 
 ### ESModule和浏览器
 
@@ -123,6 +154,8 @@ todo 考虑嵌套函数
 ### ESModule和浏览器
 
 ### ESModule和Node.js
+
+## 严格模式区别总结
 
 ## 构造函数调用
 
@@ -143,5 +176,7 @@ todo 考虑和上面形式的结合
   https://juejin.cn/post/6844903956800356360
 - MDN this\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this
+- JS 中在严格模式下 this 的指向 超详细\
+  https://www.cnblogs.com/cyy22321-blog/p/16672057.html
 
 

@@ -1,4 +1,5 @@
-"use strict";
-console.log(2, this);
-console.log(2, this === globalThis);
-console.log(2, this === window);
+console.log(this);
+console.log(this === globalThis);
+console.log(this === global);
+
+console.log(module.exports);
