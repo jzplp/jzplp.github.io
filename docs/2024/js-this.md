@@ -17,6 +17,7 @@ console.log(globalThis === window)
 Window {window: Window, self: Window, document: document, ...省略 }
 true
 */
+// 严格模式下表现一致
 
 // Node.js环境
 console.log(globalThis)
@@ -25,6 +26,7 @@ console.log(globalThis === global)
 <ref *1> Object [global] { ...省略 }
 true
 */
+// 严格模式下表现一致
 ```
 
 可以看到，在浏览器中globalThis就是window对象，而在Node.js中，globalThis是global对象。我们直接在命令行中使用var定义的全局变量，实际上会被作为globalThis的属性（但let和const不会）。这里我们不过多介绍全局对象，感兴趣的同学可以自行了解更多。
@@ -45,9 +47,10 @@ Window {window: Window, self: Window, document: document, ...省略 }
 true
 true
 */
+// 严格模式下表现一致
 ```
 
-可以看到，在浏览器命令行中直接使用this，实际指向的是globalThis，也就是window对象。在严格模式下表现也一致。
+可以看到，在浏览器命令行中直接使用this，实际指向的是globalThis，也就是window对象。
 
 ### Node.js命令行
 Node.js命令行，即使用node命令，不带其他参数，进入交互式shell。
@@ -62,9 +65,10 @@ console.log(this === global)
 true
 true
 */
+// 严格模式下表现一致
 ```
 
-在浏览器命令行中直接使用this，实际指向的是globalThis，也就是global对象。在严格模式下表现也一致。
+在浏览器命令行中直接使用this，实际指向的是globalThis，也就是global对象。
 
 ## 浏览器HTML中使用
 在浏览器的HTML中的this，是否和命令行中不一样呢？我们来试验一下。
@@ -90,7 +94,7 @@ console.log(2, this === globalThis);
 console.log(2, this === window);
 ```
 
-这里尝试了两种情况，一种是内部脚本语句，第二种是外部脚本文件。两种情况下，this都指向window。在严格模式下表现也一致。输出结果：
+这里尝试了两种情况，一种是内部脚本语句，第二种是外部脚本文件。两种情况下，this都指向window。输出结果：
 
 ```
 1 Window {window: Window, self: Window, document: document, ...省略 }
@@ -99,6 +103,7 @@ console.log(2, this === window);
 2 Window {window: Window, self: Window, document: document, ...省略 }
 2 true
 2 true
+// 严格模式下表现一致
 ```
 
 ## CommonJS模块中使用
@@ -116,6 +121,7 @@ console.log(this === global);
 false
 false
 */
+// 严格模式下表现一致
 ```
 
 注意我们不能在带package.json的项目里面执行，否则项目配置会干扰我们的判断。这时查看结果，我们看到并不是global，而是一个空对象。这个空对象是什么呢？我们继续试验下：
@@ -123,17 +129,67 @@ false
 ```js
 console.log(this)
 console.log(module.exports)
-console.log(this === module.exports);
+console.log(this === module.exports)
 /* 输出
 {}
 {}
 true
 */
+// 严格模式下表现一致
 ```
 
-原来这时候的this是module.exports！这是CommonJS规范中的模块导出内容。也就是说，在我们没有指定规范，且代码内容也没有任何规范相关指示时，Node.js命令行执行的文件包裹在CommonJS模块中运行。在CommonJS模块的this，指向的就是module.exports。
+原来这时候的this是module.exports！这是CommonJS规范中的模块导出内容。也就是说，在我们没有指定规范，且代码内容也没有任何规范相关指示时，Node.js命令行执行的文件会包裹在CommonJS模块中运行。(后面部分会说明如何使文件在ESModule规范下运行)
 
-todo 再多个例子
+这时候this的指向与直接命令行执行代码不同，这时候的this，指向的就是module.exports。我们再看一个例子：
+
+```js
+console.log(1, this)
+console.log(1, module.exports)
+console.log(1, this === module.exports)
+
+this.a = 1;
+exports.b = 2;
+
+console.log(2, this)
+console.log(2, module.exports)
+console.log(2, exports)
+console.log(2, this === module.exports)
+
+module.exports.c = 3;
+
+console.log(3, this)
+console.log(3, module.exports)
+console.log(3, this === module.exports)
+
+module.exports = {d: 4};
+
+console.log(4, this)
+console.log(4, module.exports)
+console.log(4, exports)
+console.log(4, this === module.exports)
+
+/* 输出
+1 {}
+1 {}
+1 true
+2 { a: 1, b: 2 }
+2 { a: 1, b: 2 }
+2 { a: 1, b: 2 }
+2 true
+3 { a: 1, b: 2, c: 3 }
+3 { a: 1, b: 2, c: 3 }
+3 true
+4 { a: 1, b: 2, c: 3 }
+4 { d: 4 }
+4 { a: 1, b: 2, c: 3 }
+5 false
+*/
+// 严格模式下表现一致
+```
+
+这个例子比较长。最上面我们输出了this和module.exports，都是空对象。然后我们将this和exports都添加了不同的属性，发现this和CommonJS的导出对象都增加了，也证明了exports和module.exports实际是同一个对象。然后在module.exports添加了属性，this中也同时被添加了。
+
+然后看最后一步，我们将module.exports整个替换为其它对象，这时候this和module.exports就再不是一个对象了。而exports依旧是旧对象不变。这里this和exports被覆盖的逻辑是一样的，导出的内容会被新的module.exports覆盖。
 
 ## ESModule
 
@@ -157,6 +213,8 @@ todo 考虑嵌套函数
 
 ## 严格模式区别总结
 
+`"use strict";`
+
 ## 构造函数调用
 
 ## 对象的函数属性调用
@@ -178,5 +236,6 @@ todo 考虑和上面形式的结合
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this
 - JS 中在严格模式下 this 的指向 超详细\
   https://www.cnblogs.com/cyy22321-blog/p/16672057.html
-
+- 「万字进阶」深入浅出 Commonjs 和 Es Module\
+  https://juejin.cn/post/6994224541312483336
 
