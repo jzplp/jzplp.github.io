@@ -211,7 +211,7 @@ todo 考虑嵌套函数
 
 ### ESModule和Node.js
 
-## 严格模式区别总结
+## 严格模式总结
 
 `"use strict";`
 
@@ -238,4 +238,3 @@ todo 考虑和上面形式的结合
   https://www.cnblogs.com/cyy22321-blog/p/16672057.html
 - 「万字进阶」深入浅出 Commonjs 和 Es Module\
   https://juejin.cn/post/6994224541312483336
-
