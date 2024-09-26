@@ -109,7 +109,7 @@ console.log(2, this === window);
 ## CommonJS模块中使用
 由于JavaScript发展历史的原因，JavaScript有很多模块化开发规范，比如：AMD，CMD，UMD，CommonJS等等。后来ECMAScript标准官方定义了ESModule模块化规范，现在大部分环境都支持这个规范。我们对目前主流使用的ESModule和CommonJS规范进行说明。首先看一下CommonJS，这种规范最常用在Node.Js环境。
 
-### Node.js命令行执行单个文件
+### 单个文件
 假设我们有一个js文件，里面没有任何模块化规范相关的代码。我们使用命令行直接执行这个文件`node 1.js`，这时this的值指向什么呢？是否和命令行直接执行代码一致呢？这里举个例子看下：
 
 ```js
@@ -191,6 +191,83 @@ console.log(4, this === module.exports)
 
 然后看最后一步，我们将module.exports整个替换为其它对象，这时候this和module.exports就再不是一个对象了。而exports依旧是旧对象不变。这里this和exports被覆盖的逻辑是一样的，导出的内容会被新的module.exports覆盖。
 
+### CommonJS模块文件
+这里我们新建两个CommonJS模块文件，看看this的指向问题。首先是入口文件a.js内容:
+
+```js
+const b = require("./b");
+console.log(b);
+
+console.log("a1", this);
+console.log("a1", module.exports);
+console.log("a1", this === module.exports);
+
+exports.a = 1;
+
+console.log("a2", this);
+console.log("a2", module.exports);
+console.log("a2", this === module.exports);
+```
+
+然后是被引用的b.js内容:
+
+```js
+console.log("b1", this);
+console.log("b1", module.exports);
+console.log("b1", this === module.exports);
+
+this.b = 2;
+module.exports.c = 3;
+
+console.log("b2", this);
+console.log("b2", module.exports);
+console.log("b2", this === module.exports);
+```
+
+命令行执行`node a.js`，然后我们看一下输出结果：
+
+```
+b1 {}
+b1 {}
+b1 true
+b2 { b: 2, c: 3 }
+b2 { b: 2, c: 3 }
+b2 true
+{ b: 2, c: 3 }
+a1 {}
+a1 {}
+a1 true
+a2 { a: 1 }
+a2 { a: 1 }
+a2 true
+// 严格模式下表现一致
+```
+
+因为文件a中先引用了文件b，所以文件b先输出。首先可以看到，在文件b中，我们使用this和module.exports本身对导出对象添加了属性，可以看到这并不影响this的指向，this依旧指向导出对象，而且我们添加的属性在文件a中成功的输出了。而文件a中this指向的是该文件独立的导出对象，与文件b的导出对象无关。
+
+### this是不是模块内的"全局对象"
+前面了解到，我们直接在命令行中使用var定义的全局变量，实际上会被作为globalThis的属性。上面我们也清楚了，在CommonJS模块内的this，并不是全局对象，而是该模块的初始导出对象。那么这里的this，是否可以作为这个模块局部的“全局对象”呢？也就是说，在模块中使用var定义的变量，会不会也挂在this上呢？我们来尝试一下。
+
+```js
+console.log(this);
+var a = 1;
+this.b = 2;
+module.exports.c = 3;
+console.log(this);
+console.log(b);
+/* 输出
+{}
+{ b: 2, c: 3 }
+ReferenceError: b is not defined
+*/
+// 严格模式下表现一致
+```
+
+首先使用var定义了变量a，但是后面输出this时，里面并没有a。然后对this添加了属性b，并尝试直接输出变量b，可以看到变量b找不到，引发了异常。可以得出结论，CommonJS中的this，用法并不像globalThis一样，并不是一个模块内的"全局对象"。
+
+### 小总结
+可以看到，当我们在CommonJS模块中使用this时，this指向的是该模块初始的导出对象。此时我们给this添加属性，属性值也会被导出。但如果我们覆盖了导出对象，此时导出对象就和this无关了。另外，模块中的this并不能类似像全局globalThis一样，不能模块内变量作为自身的属性。这个也容易理解，如果真的有这种特性，那模块内的变量统统被导出，模块导出机制会变得非常混乱。
+
 ## ESModule
 
 ### ESModule和浏览器
@@ -230,8 +307,8 @@ todo 考虑和上面形式的结合
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/globalThis
 - Javascript 中 let 声明的全局变量不在 window 上\
   https://juejin.cn/post/7064043813534171149
-- 现代 JavaScript 教程 — "use strict" 现代模式\
-  https://juejin.cn/post/6844903956800356360
+- MDN 严格模式\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Strict_mode
 - MDN this\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this
 - JS 中在严格模式下 this 的指向 超详细\
