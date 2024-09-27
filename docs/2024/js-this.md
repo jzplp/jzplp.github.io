@@ -1,13 +1,13 @@
 # JavaScript中的this, 究竟指向什么？（未完成）
 
-在JavaScript代码的不同位置中，this所指向的数据是不一样的。比如大部分同学都知道，在对象的函数数据中，this指向对象本身；在构造函数中，this指向要生成的新对象。事实上，this指向的逻辑不止这几种，this也不只是与原型链有关。在这里我们总结一下，在不同的场景下，JavaScript中的this, 究竟指向什么。
+在JavaScript代码的不同位置中，this所指向的数据是不一样的。比如大部分同学都知道，在对象的函数属性方法中，this指向对象本身；在构造函数中，this指向要生成的新对象。事实上，this指向的逻辑不止这几种，this也不只是与原型链有关。在这里我们总结一下，在不同的场景下，JavaScript中的this, 究竟指向什么。
 
 todo 测试每一种都要带严格模式试一下。
 
 ## globalThis
 在观察各类this之前，先来了解一下globalThis的概念。globalThis是从不同的JavaScript环境中获取全局对象方法。
 
-由于在部分环境或者在场景下，使用this是无法直接获取到全局对象的，例如一些模块化的JS代码内，以及在部分环境的严格模式下(具体场景和区别后面会描述)。因此globalThis提供了一个标准的方式来获取不同环境下的全局this对象。这个对象在不同的JavaScript环境中是不一样的。
+由于在部分环境或者上下文中，使用this是无法直接获取到全局对象的，例如一些模块化的JS代码内，以及在部分上下文的严格模式下(具体场景和区别后面会描述)。因此globalThis提供了一个标准的方式来获取不同环境下的全局this对象。这个对象在不同的JavaScript环境中是不一样的。
 
 ```js
 // 浏览器环境
@@ -31,11 +31,11 @@ true
 
 可以看到，在浏览器中globalThis就是window对象，而在Node.js中，globalThis是global对象。我们直接在命令行中使用var定义的全局变量，实际上会被作为globalThis的属性（但let和const不会）。这里我们不过多介绍全局对象，感兴趣的同学可以自行了解更多。
 
-## 命令行使用
-我们先试一下，直接在命令行使用this，所指向的值是什么。
+## 命令行全局上下文
+我们先试一下，直接在命令行的全局上下文中使用this，所指向的值是什么。
 
 ### 浏览器命令行
-浏览器命令行，即是在浏览器调试工具的Console中使用。
+浏览器命令行，即是在浏览器调试工具的Console中使用this。
 
 ```js
 // 浏览器命令行
@@ -50,7 +50,7 @@ true
 // 严格模式下表现一致
 ```
 
-可以看到，在浏览器命令行中直接使用this，实际指向的是globalThis，也就是window对象。
+可以看到，在浏览器命令行的全局上下文中直接使用this，实际指向的是globalThis，也就是window对象。
 
 ### Node.js命令行
 Node.js命令行，即使用node命令，不带其他参数，进入交互式shell。
@@ -68,10 +68,10 @@ true
 // 严格模式下表现一致
 ```
 
-在浏览器命令行中直接使用this，实际指向的是globalThis，也就是global对象。
+在浏览器命令行的全局上下文中直接使用this，实际指向的是globalThis，也就是global对象。
 
-## 浏览器HTML中使用
-在浏览器的HTML中的this，是否和命令行中不一样呢？我们来试验一下。
+## 浏览器HTML中的全局上下文
+在浏览器的HTML的全局上下文中的this，是否和命令行中不一样呢？我们来实验一下。
 
 ```html
 <html>
@@ -106,11 +106,11 @@ console.log(2, this === window);
 // 严格模式下表现一致
 ```
 
-## CommonJS模块中使用
+## CommonJS中的模块上下文
 由于JavaScript发展历史的原因，JavaScript有很多模块化开发规范，比如：AMD，CMD，UMD，CommonJS等等。后来ECMAScript标准官方定义了ESModule模块化规范，现在大部分环境都支持这个规范。我们对目前主流使用的ESModule和CommonJS规范进行说明。首先看一下CommonJS，这种规范最常用在Node.Js环境。
 
 ### 单个文件
-假设我们有一个js文件，里面没有任何模块化规范相关的代码。我们使用命令行直接执行这个文件`node 1.js`，这时this的值指向什么呢？是否和命令行直接执行代码一致呢？这里举个例子看下：
+假设我们有一个js文件，里面没有任何模块化规范相关的代码。我们使用命令行直接执行这个文件`node 1.js`，这时模块上下文中this的值指向什么呢？是否和命令行直接执行代码一致呢？这里举个例子看下：
 
 ```js
 console.log(this)
@@ -124,7 +124,7 @@ false
 // 严格模式下表现一致
 ```
 
-注意我们不能在带package.json的项目里面执行，否则项目配置会干扰我们的判断。这时查看结果，我们看到并不是global，而是一个空对象。这个空对象是什么呢？我们继续试验下：
+注意我们不能在带package.json的项目里面执行，否则项目配置会干扰我们的判断。这时查看结果，看到并不是global，而是一个空对象。这个空对象是什么呢？我们继续实验下：
 
 ```js
 console.log(this)
@@ -192,7 +192,7 @@ console.log(4, this === module.exports)
 然后看最后一步，我们将module.exports整个替换为其它对象，这时候this和module.exports就再不是一个对象了。而exports依旧是旧对象不变。这里this和exports被覆盖的逻辑是一样的，导出的内容会被新的module.exports覆盖。
 
 ### CommonJS模块文件
-这里我们新建两个CommonJS模块文件，看看this的指向问题。首先是入口文件a.js内容:
+这里新建两个CommonJS模块文件，看看this的指向问题。首先是入口文件a.js内容:
 
 ```js
 const b = require("./b");
@@ -268,13 +268,13 @@ ReferenceError: b is not defined
 ### 小总结
 可以看到，当我们在CommonJS模块中使用this时，this指向的是该模块初始的导出对象。此时我们给this添加属性，属性值也会被导出。但如果我们覆盖了导出对象，此时导出对象就和this无关了。另外，模块中的this并不能类似像全局globalThis一样，不能模块内变量作为自身的属性。这个也容易理解，如果真的有这种特性，那模块内的变量统统被导出，模块导出机制会变得非常混乱。
 
-## ESModule
+## ESModule中的模块上下文
 
 ### ESModule和浏览器
 
 ### ESModule和Node.js
 
-## 普通函数调用
+## 普通函数上下文
 
 todo 考虑嵌套函数
 
@@ -292,11 +292,11 @@ todo 考虑嵌套函数
 
 `"use strict";`
 
-## 构造函数调用
+## 构造函数上下文
 
-## 对象的函数属性调用
+## 对象的函数属性上下文
 
-## 箭头函数调用
+## 箭头函数上下文
 todo 考虑和上面形式的结合
 
 ## call, bind, apply
