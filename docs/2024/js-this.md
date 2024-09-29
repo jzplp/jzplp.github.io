@@ -269,8 +269,39 @@ ReferenceError: b is not defined
 可以看到，当我们在CommonJS模块中使用this时，this指向的是该模块初始的导出对象。此时我们给this添加属性，属性值也会被导出。但如果我们覆盖了导出对象，此时导出对象就和this无关了。另外，模块中的this并不能类似像全局globalThis一样，不能模块内变量作为自身的属性。这个也容易理解，如果真的有这种特性，那模块内的变量统统被导出，模块导出机制会变得非常混乱。
 
 ## ESModule中的模块上下文
+ESModule模块化规范是ECMAScript标准官方定义的，目前大部分环境都支持这个规范。这里列举Node.Js和浏览器环境，看一下在模块上下文中，this究竟指向什么。
 
 ### ESModule和浏览器
+我们来看下在浏览器中的表现。首先是index.html:
+
+```html
+<html>
+  <body>
+    <script>
+      console.log(1, this);
+    </script>
+    <script type="module">
+      import a from "./a.js";
+      console.log(a);
+      console.log(2, this);
+      console.log(2, globalThis);
+    </script>
+  </body>
+</html>
+```
+
+然后是index.html中引用的a.js：
+
+```js
+console.log(3, this)
+const a = 3;
+export default a;
+```
+
+我们直接在浏览器中打开，却发现报错：
+
+![](/2024/this-1.png)
+
 
 ### ESModule和Node.js
 
