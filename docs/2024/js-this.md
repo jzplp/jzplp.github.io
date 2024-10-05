@@ -302,8 +302,79 @@ export default a;
 
 ![](/2024/this-1.png)
 
+这是因为直接用Chrome浏览器打开的本地文件，协议为`file://`。在这个协议下使用ESModule中的import会被认为是跨域。因此我们在本地启动一个Node服务来提供HTTP协议，用来支持import。
+
+```js
+// main.js
+const http = require('http');
+const fs = require('fs');
+
+http.createServer((req, res) => {
+  let data = '';
+  console.log(`request url: ${req.url}`);
+  if(req.url === '/') {
+    data = fs.readFileSync('./index.html');
+    res.end(data);
+  } else if(req.url === '/a.js') {
+    data = fs.readFileSync('./a.js');
+    // Chrome浏览器要求必须设置Content-type才能使用import
+    res.setHeader('Content-type', 'text/javascript');
+    res.end(data);
+  }
+}).listen(8000, () => {
+  console.log('server start!');
+});
+```
+
+然后在命令行执行`node main.js`启动服务，再到浏览器输入`localhost:8000`即可访问页面。查看浏览器Console输出：
+
+```
+1 Window {window: Window, self: Window, document: document, ...省略 }
+3 undefined
+3
+2 undefined
+2 Window {window: Window, self: Window, document: document, ...省略 }
+// 严格模式下表现一致
+```
+
+可以看到，在浏览器中非ESModule，this指向window，而在ESModule内，this却是undefined，而globalThis依然指向window不变。
 
 ### ESModule和Node.js
+
+虽然在Node.js下默认使用CommonJS规范，但Node.js也是支持ESModule的，但需要手动开启，方式主要有两种：
+1. 文件后缀名为.mjs。
+2. 所在项目的package.json文件中包含`type: "module"`。
+
+我们在Node.js中开启ESModule，看看this的指向问题。首先是入口文件a.mjs：
+
+```js
+import a from "./a.mjs";
+console.log(a);
+console.log(2, this);
+console.log(2, globalThis);
+```
+
+然后是被引入的文件b.mjs:
+
+```js
+console.log(3, this)
+const a = 3;
+export default a;
+```
+
+最后命令行执行`node a.mjs`，结果如下：
+
+```
+3 undefined
+3
+2 undefined
+2 <ref *1> Object [global] { ...省略 }
+// 严格模式下表现一致
+```
+
+我们构造的示例与浏览器中ESModule的示例基本一致，结果也是一致的，除了在Node.js中，globalThis依然指向global对象。
+
+因此，不管是Node.js还是浏览器环境，在ESModule的模块上下文中，this的指向都是undefined。
 
 ## 普通函数上下文
 
@@ -322,6 +393,12 @@ todo 考虑嵌套函数
 ## 严格模式总结
 
 `"use strict";`
+
+ESModule是自动使用严格模式的，我们是否设置`"use strict";`对this指向没有影响。
+
+
+
+
 
 ## 构造函数上下文
 
