@@ -377,10 +377,58 @@ export default a;
 因此，不管是Node.js还是浏览器环境，在ESModule的模块上下文中，this的指向都是undefined。
 
 ## 普通函数上下文
+在普通函数上下文，以及普通函数的嵌套函数中，this指向什么？在不同的环境和模块化规范下，this指向有什么区别呢？我们在不同的场景执行同一段代码，看看结果区别如何。
 
-todo 考虑嵌套函数
+```js
+function fun1() {
+  console.log(1, this);
+  function fun2() {
+    console.log(2, this);
+  }
+  fun2();
+  return fun2;
+}
+const fun2 = fun1();
+fun2();
+```
 
 ### 浏览器命令行
+首先看看在浏览器命令行执行的结果：
+
+```
+// 非严格模式
+1 Window {window: Window, self: Window, document: document, ...省略 }
+2 Window {window: Window, self: Window, document: document, ...省略 }
+2 Window {window: Window, self: Window, document: document, ...省略 }
+```
+
+可以看到，浏览器命令行的不管是单层函数，还是嵌套函数，都是指向window，也就是globalThis。但是在严格模式下表现并不一致：
+
+```
+// 严格模式
+1 undefined
+2 undefined
+2 undefined
+```
+
+在严格模式下，this值为undefined。这里先不解释，在专门的严格模式总结中描述。
+
+### 浏览器HTML中
+看一下在浏览器HTML中执行的结果：
+
+```
+// 非严格模式
+1 Window {window: Window, self: Window, document: document, ...省略 }
+2 Window {window: Window, self: Window, document: document, ...省略 }
+2 Window {window: Window, self: Window, document: document, ...省略 }
+
+// 严格模式
+1 undefined
+2 undefined
+2 undefined
+```
+
+浏览器HTML中与浏览器命令行的效果完全一致，而且是否严格模式的表现也不一致。
 
 ### Node.js命令行
 
