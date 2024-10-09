@@ -431,12 +431,72 @@ fun2();
 浏览器HTML中与浏览器命令行的效果完全一致，而且是否严格模式的表现也不一致。
 
 ### Node.js命令行
+看一下在Node.js命令行中执行的结果：
+
+```
+// 非严格模式
+1 <ref *1> Object [global] { ...省略 }
+2 <ref *1> Object [global] { ...省略 }
+2 <ref *1> Object [global] { ...省略 }
+
+// 严格模式
+1 undefined
+2 undefined
+2 undefined
+```
+
+结果与在浏览器中类似，非严格模式指向globalThis，严格模式为undefined。
 
 ### CommonJS和Node.js
+看一下在Node.js中，使用CommonJS规范中执行的结果：
+
+```
+// 非严格模式
+1 <ref *1> Object [global] { ...省略 }
+2 <ref *1> Object [global] { ...省略 }
+2 <ref *1> Object [global] { ...省略 }
+
+// 严格模式
+1 undefined
+2 undefined
+2 undefined
+```
+
+结果还是与前面类似，非严格模式指向globalThis，严格模式为undefined。
 
 ### ESModule和浏览器
+看一下在浏览器中，使用ESModule规范中执行的结果：
+
+```
+// 非严格模式
+1 undefined
+2 undefined
+2 undefined
+
+// 严格模式
+1 undefined
+2 undefined
+2 undefined
+```
+
+ESModule规范中，this的值全都是undefined。
 
 ### ESModule和Node.js
+看一下在Node.js中，使用ESModule规范中执行的结果：
+
+```
+// 非严格模式
+1 undefined
+2 undefined
+2 undefined
+
+// 严格模式
+1 undefined
+2 undefined
+2 undefined
+```
+
+ESModule规范中，this的值全都是undefined。
 
 ## 严格模式总结
 
