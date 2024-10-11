@@ -498,24 +498,32 @@ ESModule规范中，this的值全都是undefined。
 
 ESModule规范中，this的值全都是undefined。
 
+## 构造函数上下文
+
+考虑父类构造函数， 派生类构造函数
+
+## 对象调用与函数属性上下文
+
+## 类的静态方法上下文
+
+## super上下文
+
+## 箭头函数上下文
+todo 考虑和上面形式的结合
+
+## 回调函数
+
+## call, bind, apply
+
+
 ## 严格模式总结
 
 `"use strict";`
 
 ESModule是自动使用严格模式的，我们是否设置`"use strict";`对this指向没有影响。
 
+## 复杂组合场景讨论
 
-
-
-
-## 构造函数上下文
-
-## 对象的函数属性上下文
-
-## 箭头函数上下文
-todo 考虑和上面形式的结合
-
-## call, bind, apply
 
 
 ## 参考
