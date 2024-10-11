@@ -376,6 +376,19 @@ export default a;
 
 因此，不管是Node.js还是浏览器环境，在ESModule的模块上下文中，this的指向都是undefined。
 
+## 场景小总结
+
+通过上面对于全局上下文/模块上下文的实验结果，我们总结出了六种场景：
+
+* 浏览器命令行
+* 浏览器HTML中
+* Node.js命令行
+* CommonJS和Node.js
+* ESModule和浏览器
+* ESModule和Node.js
+
+后续的实验都会考虑这六种场景，以及对应的严格模式。
+
 ## 普通函数上下文
 在普通函数上下文，以及普通函数的嵌套函数中，this指向什么？在不同的环境和模块化规范下，this指向有什么区别呢？我们在不同的场景执行同一段代码，看看结果区别如何。
 
@@ -500,13 +513,67 @@ ESModule规范中，this的值全都是undefined。
 
 ## 构造函数上下文
 
-考虑父类构造函数， 派生类构造函数
+构造函数是JavaScript原型链和类的重要概念，是生成实例对象的方法，构造函数中的this，指向的就是我们要生成的实例对象的this。这里我们来执行一段代码，试验一下。
+
+```js
+let global1 = null;
+function C1() {
+  global1 = this;
+  console.log(1, this);
+  this.a = 1;
+  console.log(1, this);
+}
+const c1 = new C1();
+console.log(1, global1, c1, global1 === c1);
+
+let global2 = null;
+class C2 {
+  a = 2;
+  constructor() {
+    global2 = this;
+    console.log(2, this);
+    this.b = 2;
+    console.log(2, this);
+  }
+}
+const c2 = new C2();
+console.log(2, global2, c2, global2 === c2);
+
+let global3 = null;
+function C3() {
+  global3 = this;
+  this.a = 1;
+  console.log(3, this);
+  return {};
+}
+const c3 = new C3();
+console.log(3, global3, c3, global3 === c3);
+```
+
+代码中分别尝试了三种情形，分别是传统构造函数，Class类的构造函数，以及在构造函数中返回另一个对象。来看一下输出：
+
+```
+1 C1 {}
+1 C1 { a: 1 }
+1 C1 { a: 1 } C1 { a: 1 } true
+2 C2 { a: 2 }
+2 C2 { a: 2, b: 2 }
+2 C2 { a: 2, b: 2 } C2 { a: 2, b: 2 } true
+3 C3 { a: 1 }
+3 C3 { a: 1 } {} false
+```
+
+由于构造函数中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。可以看到，构造函数上下文中的this，确实是指向创建的实例对象，不管是传统构造函数还是Class类的构造函数。
+
+如果构造函数返回另一个对象，那么这个返回的对象并不属于这个构造函数的实例对象；构造函数中的this也不指向返回对象，而是指向真正的实例对象。
 
 ## 对象调用与函数属性上下文
 
 ## 类的静态方法上下文
 
 ## super上下文
+
+## 父类构造函数，派生类构造函数
 
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
@@ -521,6 +588,9 @@ todo 考虑和上面形式的结合
 `"use strict";`
 
 ESModule是自动使用严格模式的，我们是否设置`"use strict";`对this指向没有影响。
+
+## 部分特殊场景
+
 
 ## 复杂组合场景讨论
 
@@ -539,3 +609,6 @@ ESModule是自动使用严格模式的，我们是否设置`"use strict";`对thi
   https://www.cnblogs.com/cyy22321-blog/p/16672057.html
 - 「万字进阶」深入浅出 Commonjs 和 Es Module\
   https://juejin.cn/post/6994224541312483336
+- 《ECMAScript6入门教程》Class 的基本语法\
+  https://es6.ruanyifeng.com/#docs/class
+
