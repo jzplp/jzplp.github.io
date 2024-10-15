@@ -570,6 +570,7 @@ console.log(3, global3, c3, global3 === c3);
 如果构造函数返回另一个对象，那么这个返回的对象并不属于这个构造函数的实例对象；构造函数中的this也不指向返回对象，而是指向真正的实例对象。
 
 ## 对象或实例属性的函数上下文
+### 函数属性
 如果一个函数是某个对象或者实例的属性，那么这个函数的内部的this，指向的应该是这个对象/实例本身。这里我们来执行一段代码，试验一下。
 
 ```js
@@ -588,14 +589,62 @@ const b = new C1();
 b.fun();
 ```
 
-对于函数fun，我们尝试了两种场景，一种先创建对象，再作为对象属性赋值，另一种是在构造函数中作为属性赋值。我们来看一下输出：
+对于函数fun，我们尝试了两种情况，一种先创建对象，再作为对象属性赋值，另一种是在构造函数中作为属性赋值。我们来看一下输出：
 
 ```
 { fun: [Function: fun] }
 C1 { fun: [Function: fun] }
 ```
 
-可以看到分别输出了普通对象和C1的实例。结合上面关于普通函数上下文的实验，可以看到其实函数本身是“不拥有自己的this的”，函数内部的this，完全看调用这个函数所在的环境和调用方式。如果是以对象属性的形式调用，this就指向对象本身；如果是直接调用，则指向globalThis或者严格模式下为undefined。
+由于对象或实例属性函数中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。可以看到分别输出了普通对象和C1的实例。
+
+结合上面关于普通函数上下文的实验，可以看到其实函数本身是“不拥有自己的this的”，函数内部的this，完全看调用这个函数所在的环境和调用方式。如果是以对象属性的形式调用，this就指向对象本身；如果是直接调用，则指向globalThis或者严格模式下为undefined。
+
+### get和set
+一个对象的取值函数getter和存值函数setter也都是函数，在其中也能获取到this。在这里面this指向什么呢？
+
+```js
+const c1 = {
+  get g1() {
+    console.log("1 get", this);
+    return 1;
+  },
+  set g1(val) {
+    console.log("1 set", this);
+  },
+};
+c1.g1 = c1.g1;
+
+const c2 = {};
+Object.defineProperty(c2, "g2", {
+  enumerable: true, // 对象可以枚举
+  get() {
+    console.log("2 get", this);
+    return 1;
+  },
+  set(val) {
+    console.log("2 set", this);
+  },
+});
+c2.g2 = c2.g2;
+```
+
+这里又尝试了两种情况，一种是定义对象时直接提供getter和setter，一种是先定义对象，后面使用Object.defineProperty添加。我们看一下输出。
+
+```
+1 get { g1: [Getter/Setter] }
+1 set { g1: [Getter/Setter] }
+2 get { g2: [Getter/Setter] }
+2 set { g2: [Getter/Setter] }
+```
+
+可以看到，分别输出了getter和setter所属的对象。由于getter和getter函数中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
+
+## 原型函数属性上下文
+上面介绍了实例属性的函数中，this的指向问题。那我们再看一下如果这个函数属性是挂在原型上的，或者是原型上的set和get，this指向如何。
+
+
+
 
 ## 类的静态方法上下文
 
@@ -639,4 +688,4 @@ ESModule是自动使用严格模式的，我们是否设置`"use strict";`对thi
   https://juejin.cn/post/6994224541312483336
 - 《ECMAScript6入门教程》Class 的基本语法\
   https://es6.ruanyifeng.com/#docs/class
-
+- 
