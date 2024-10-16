@@ -643,6 +643,67 @@ c2.g2 = c2.g2;
 ## 原型函数属性上下文
 上面介绍了实例属性的函数中，this的指向问题。那我们再看一下如果这个函数属性是挂在原型上的，或者是原型上的set和get，this指向如何。
 
+### 原型函数属性
+首先来看看原型上的函数属性。
+
+```js
+class C1 {
+  a = 1;
+  fun() {
+    console.log(1, this);
+  }
+}
+const c1 = new C1();
+c1.fun();
+
+function C2() {
+  this.a = 2;
+}
+C2.prototype = {
+  fun() {
+    console.log(2, this);
+  },
+};
+const c2 = new C2();
+c2.fun();
+
+function C3() {
+  this.a = 3;
+}
+const c3 = new C3();
+const c3proto = {
+  fun() {
+    console.log(3, this);
+  },
+};
+c3.__proto__ = c3proto;
+c3.fun();
+c3proto.fun();
+```
+
+上面代码尝试了三种情况，分别是class关键字直接创建原型；在构造函数上提供原型；以及在实例上直接赋值原型。其中最后一种我们还尝试了在原型上直接调用函数，这相当于上一节对象的函数属性上下文。看一下输出结果：
+
+```
+// 浏览器输出
+1 C1 { a: 1 }
+2 C2 { a: 2 }
+3 C3 { a: 3 }
+3 { fun: [Function: fun] }
+
+// Node.js输出
+1 C1 { a: 1 }
+2 { a: 2 }
+3 { a: 3 }
+3 { fun: [Function: fun] }
+```
+
+可以看到，在浏览器和Node.js中的输出有区别，是情况2和3的输出不同。浏览器中明确指出了这是C2和C3的实例，但是Node.js并没有。那是不是就说明Node.js中this指向的不是实例呢？
+
+并不是的，查看代码发现所有的a都是实例属性，而不是原型属性。因此实际上无论浏览器或者Node.js，这三种场景this指向的都是实例对象，而不是原型对象。只不过Node.js对于console.log的输出处理不同。
+
+再看最后一句输出：原型对象调用fun函数，函数中的this指向的是原型对象；实例调用fun函数，函数中的this指向的是实例对象。因此函数中this的指向和函数本身无关，而是和函数的“调用形式”有关。
+
+### 原型的get和set
 
 
 
