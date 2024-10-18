@@ -695,17 +695,95 @@ c3proto.fun();
 2 { a: 2 }
 3 { a: 3 }
 3 { fun: [Function: fun] }
+
+// 严格模式下表现一致
 ```
 
 可以看到，在浏览器和Node.js中的输出有区别，是情况2和3的输出不同。浏览器中明确指出了这是C2和C3的实例，但是Node.js并没有。那是不是就说明Node.js中this指向的不是实例呢？
 
-并不是的，查看代码发现所有的a都是实例属性，而不是原型属性。因此实际上无论浏览器或者Node.js，这三种场景this指向的都是实例对象，而不是原型对象。只不过Node.js对于console.log的输出处理不同。
+并不是的，查看代码发现所有的a都是实例属性，而不是原型属性。因此实际上无论浏览器或者Node.js，这三种场景this指向的都是实例对象，而不是原型对象。只不过原型更改后，Node.js对于console.log的输出处理不同。
 
 再看最后一句输出：原型对象调用fun函数，函数中的this指向的是原型对象；实例调用fun函数，函数中的this指向的是实例对象。因此函数中this的指向和函数本身无关，而是和函数的“调用形式”有关。
 
 ### 原型的get和set
+首先来看看原型上的取值函数getter和存值函数setter。仿照上一节给出了代码：
 
+```js
+class C1 {
+  a = 1;
+  get g1() {
+    console.log("1 get", this);
+    return 1;
+  };
+  set g1(val) {
+    console.log("1 set", this);
+  };
+}
+const c1 = new C1();
+c1.g1 = c1.g1;
 
+function C2() {
+  this.a = 2;
+}
+C2.prototype = {
+  get g2() {
+    console.log("2 get", this);
+    return 1;
+  },
+  set g2(val) {
+    console.log("2 set", this);
+  },
+};
+const c2 = new C2();
+c2.g2 = c2.g2;
+
+function C3() {
+  this.a = 3;
+}
+const c3proto = {
+  get g3() {
+    console.log("3 get", this);
+    return 1;
+  },
+  set g3(val) {
+    console.log("3 set", this);
+  },
+};
+const c3 = new C3();
+c3.__proto__ = c3proto;
+c3.g3 = c3.g3;
+c3proto.g3 = c3proto.g3;
+```
+
+来看一下各个环境的输出结果：
+
+```
+// 浏览器输出
+1 get C1 { a: 1 }
+1 set C1 { a: 1 }
+2 get C2 { a: 2 }
+2 set C2 { a: 2 }
+3 get C3 { a: 3 }
+3 set C3 { a: 3 }
+3 get { g3: [Getter/Setter] }
+3 set { g3: [Getter/Setter] }
+
+// Node.js输出
+1 get C1 { a: 1 }
+1 set C1 { a: 1 }
+2 get { a: 2 }
+2 set { a: 2 }
+3 get { a: 3 }
+3 set { a: 3 }
+3 get { g3: [Getter/Setter] }
+3 set { g3: [Getter/Setter] }
+
+// 严格模式下表现一致
+```
+
+可以看到，浏览器和Node.js的输出是不同的，但不同点依然是Node.js对于console.log的输出处理不同，本质上指向的还是同一个对象。
+
+然后我们看下输出结果，发现原型上的getter和setter与在原型上的函数属性一致，其中的this都指向调用它的对象。如果是实例调用就指向实例，原型直接调用就指向原型。
 
 ## 类的静态方法上下文
 
@@ -749,4 +827,4 @@ ESModule是自动使用严格模式的，我们是否设置`"use strict";`对thi
   https://juejin.cn/post/6994224541312483336
 - 《ECMAScript6入门教程》Class 的基本语法\
   https://es6.ruanyifeng.com/#docs/class
-- 
+
