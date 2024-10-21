@@ -786,6 +786,35 @@ c3proto.g3 = c3proto.g3;
 然后我们看下输出结果，发现原型上的getter和setter与在原型上的函数属性一致，其中的this都指向调用它的对象。如果是实例调用就指向实例，原型直接调用就指向原型。
 
 ## 类的静态方法上下文
+与实例属性或者原型属性一样，类本身也有自己的静态属性。那么在类的静态方法中，this的指向如何呢？
+
+```js
+class C1 {
+  static a = 1;
+  static fun() {
+    console.log(this, this === C1);
+  }
+  static get g1() {
+    console.log('get', this, this === C1);
+    return 1;
+  }
+  static set g1(val) {
+    console.log('set', this, this === C1);
+  }
+}
+C1.fun();
+C1.g1 = C1.g1;
+```
+
+我们尝试了类的静态属性方法，以及类的静态getter，setter。来看下输出结果：
+
+```
+[class C1] { a: 1 } true
+get [class C1] { a: 1 } true
+set [class C1] { a: 1 } true
+```
+
+可以看到，指向的都是类本身。没有指向实例（甚至这个例子都没有创建实例），也没有指向原型。注意这里没有包含传统的构造函数形式的类静态方法的例子。因为那种场景与直接对一个函数赋值一个属性没有任何区别。如果没有对这个函数使用new，甚至都看不出它是一个构造函数。因此，类的静态方法实际上就是类这个对象的方法而已。由于类的静态方法的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
 
 ## super上下文
 
