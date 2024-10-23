@@ -852,7 +852,28 @@ todo 考虑和上面形式的结合
 
 ESModule是自动使用严格模式的，我们是否设置`"use strict";`对this指向没有影响。class中是自动使用严格模式的。
 
-todo 试验下 class中的函数放到外面执行。
+### 类内的函数放到外面执行
+todo 具体描述后面补充。class中是自动使用严格模式的。那也就是说，类内的函数放到外面执行，也具有严格模式的性质。
+
+```js
+class C1 {
+  fun() {
+    console.log(this);
+  }
+}
+
+const c1 = new C1();
+c1.fun();
+const {fun} = c1;
+fun();
+
+function fun1() {
+  console.log(1, this);
+}
+fun1();
+```
+
+todo 试验下 实例方法等其它情况。
 
 ## 部分特殊场景
 
