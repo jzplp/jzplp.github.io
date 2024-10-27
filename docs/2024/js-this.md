@@ -834,9 +834,47 @@ class C1 {
 
 可以看到，类的静态块中的this指向的就是类本身。由于类的静态块中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
 
-## super上下文
+## 继承-构造函数
+了解实例和原型的上下文之后，我们再来了解一下与继承有关的场景中this的指向问题。首先来看一下继承中的构造函数。
 
-## 父类构造函数，派生类构造函数
+```js
+class C1 {
+  constructor() {
+    console.log(1, this);
+  }
+  a = 1;
+  fun1(){}
+}
+
+class C2 extends C1 {
+  constructor() {
+    // console.log(this) 这里会报错
+    super();
+    console.log(2, this);
+  }
+  b = 2;
+  fun2() {}
+}
+
+const c1 = new C1();
+const c2 = new C2();
+
+/* 输出
+1 C1 { a: 1 }
+1 C2 { a: 1 }
+2 C2 { a: 1, b: 2 }
+*/
+```
+
+首先我们创建了一个父类C1的实例，此时this指向父类的实例。子类C2继承了C1，在创建实例的时候，调用super()，即执行父类的构造函数。在super()执行前，不可以使用this，会报错的。
+
+可以看到父类的构造函数输出this中类名是子类C2，而不是父类本身C1。这是由继承的机制决定的，我们创建的是子类C2的实例，而不是父类C1的。但是由于父类构造函数需要先执行，此时子类的实例属性还没挂载到实例上，因此没有`b: 2`。在子类的构造函数中，此时子类的实例属性就已经被挂载了。
+
+由于继承构造函数中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
+
+
+
+## super上下文
 
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
@@ -897,4 +935,6 @@ todo 试验下 实例方法等其它情况。
   https://juejin.cn/post/6994224541312483336
 - 《ECMAScript6入门教程》Class 的基本语法\
   https://es6.ruanyifeng.com/#docs/class
+- 《ECMAScript6入门教程》Class 的继承\
+  https://es6.ruanyifeng.com/#docs/class-extends
 
