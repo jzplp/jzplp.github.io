@@ -706,7 +706,7 @@ c3proto.fun();
 再看最后一句输出：原型对象调用fun函数，函数中的this指向的是原型对象；实例调用fun函数，函数中的this指向的是实例对象。因此函数中this的指向和函数本身无关，而是和函数的“调用形式”有关。
 
 ### 原型的get和set
-首先来看看原型上的取值函数getter和存值函数setter。仿照上一节给出了代码：
+再来看看原型上的取值函数getter和存值函数setter。仿照上一节给出了代码：
 
 ```js
 class C1 {
@@ -834,8 +834,8 @@ class C1 {
 
 可以看到，类的静态块中的this指向的就是类本身。由于类的静态块中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
 
-## 继承-构造函数
-了解实例和原型的上下文之后，我们再来了解一下与继承有关的场景中this的指向问题。首先来看一下继承中的构造函数。
+## 继承-构造函数上下文
+了解实例和原型的上下文之后，我们再来了解一下与继承有关的场景中this的指向问题。首先来看一下继承中的构造函数上下文。
 
 ```js
 class C1 {
@@ -843,7 +843,7 @@ class C1 {
     console.log(1, this);
   }
   a = 1;
-  fun1(){}
+  fun1() {}
 }
 
 class C2 extends C1 {
@@ -873,8 +873,138 @@ const c2 = new C2();
 由于继承构造函数中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
 
 
+## 继承-实例函数属性上下文
+再来看看继承中的函数属性上下文，首先来看下继承中的实例属性上下文。我们构造下例子：
 
-## super上下文
+```js
+function fun() {
+  console.log(this);
+}
+class C1 {
+  constructor() {
+    this.fun1 = fun;
+  }
+  a = 1;
+}
+class C2 extends C1 {
+  constructor() {
+    super();
+    this.fun2 = fun;
+  }
+  b = 2;
+}
+
+const c1 = new C1();
+c1.fun1();
+const c2 = new C2();
+c2.fun1();
+c2.fun2();
+
+/* 输出
+C1 { a: 1, fun1: [Function: fun] }
+C2 { a: 1, fun1: [Function: fun], b: 2, fun2: [Function: fun] }
+C2 { a: 1, fun1: [Function: fun], b: 2, fun2: [Function: fun] }
+*/
+```
+
+首先我们创建了类C1的实例，没有用到继承，输出也是类C1的实例。然后我们创建了类C2的实例，继承C1，调用C1中的实例属性，发现此时this是C2的实例，与类C2自己绑定的fun2函数输出一致。至于函数中的super.xx用法指向的是原型，并不是实例属性，因此这个场景无法使用。
+
+由于继承实例函数属性上下文中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
+
+## 继承-原型函数属性上下文
+看完了继承的实例函数属性，再看下继承的原型函数属性上下文。
+
+### 函数属性
+首先看一下普通的函数属性，我们构造下例子：
+
+```js
+class C1 {
+  a = 1;
+  fun1() {
+    console.log(1, this);
+  }
+}
+class C2 extends C1 {
+  b = 2;
+  fun2() {
+    console.log(2, this);
+  }
+  fun3() {
+    super.fun1();
+  }
+}
+
+const c1 = new C1();
+c1.fun1();
+const c2 = new C2();
+c2.fun1();
+c2.fun2();
+c2.fun3();
+
+/* 输出
+1 C1 { a: 1 }
+1 C2 { a: 1, b: 2 }
+2 C2 { a: 1, b: 2 }
+1 C2 { a: 1, b: 2 }
+*/
+```
+
+可以看到与实例属性一致，在类C2的实例上调用的方法，其中继承的this指向的都是类C2的实例。注意最后一个输出，我们是使用super.xxx调用父类的原型方法，结果也是一致的。
+
+由于继承原型函数属性上下文中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
+
+### get和set
+再来看看继承原型上的取值函数getter和存值函数setter。我们构造下例子：
+
+```js
+class C1 {
+  a = 1;
+  get g1() {
+    console.log("1 get", this);
+    return 1;
+  }
+  set g1(val) {
+    console.log("1 set", this);
+  }
+}
+class C2 extends C1 {
+  b = 2;
+  get g2() {
+    console.log("2 get", this);
+    return 1;
+  }
+  set g2(val) {
+    console.log("2 set", this);
+  }
+  fun() {
+    super.g1 = super.g1;
+  }
+}
+
+const c1 = new C1();
+c1.g1 = c1.g1;
+const c2 = new C2();
+c2.g1 = c2.g1;
+c2.g2 = c2.g2;
+c2.fun();
+
+/* 输出
+1 get C1 { a: 1 }
+1 set C1 { a: 1 }
+1 get C2 { a: 1, b: 2 }
+1 set C2 { a: 1, b: 2 }
+2 get C2 { a: 1, b: 2 }
+2 set C2 { a: 1, b: 2 }
+1 get C2 { a: 1, b: 2 }
+1 set C2 { a: 1, b: 2 }
+*/
+```
+
+与普通函数属性一致，我们在在类C2的实例上使用getter和setter，其中继承的this指向也是类C2的实例。包括我们使用super直接调用类C1原型上的方法。由于继承原型函数属性上下文中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
+
+## 继承-类的静态方法上下文
+
+## 继承-类的静态块上下文
 
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
