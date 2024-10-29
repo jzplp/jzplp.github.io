@@ -1003,8 +1003,74 @@ c2.fun();
 与普通函数属性一致，我们在在类C2的实例上使用getter和setter，其中继承的this指向也是类C2的实例。包括我们使用super直接调用类C1原型上的方法。由于继承原型函数属性上下文中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
 
 ## 继承-类的静态方法上下文
+看完了继承的实例属性和原型属性，再来看看它的静态方法上下文中，this的指向。
 
-## 继承-类的静态块上下文
+### 外部和静态方法中调用
+```js
+class C1 {
+  static a = 1;
+  static fun1() {
+    console.log(1, this);
+  }
+}
+
+class C2 extends C1 {
+  static b = 1;
+  static fun2() {
+    console.log(2, this);
+  }
+  static fun3() {
+    super.fun1();
+  }
+}
+
+C1.fun1();
+C2.fun1();
+C2.fun2();
+C2.fun3();
+
+/* 输出
+1 [class C1] { a: 1 }
+1 [class C2 extends C1] { b: 1 }
+2 [class C2 extends C1] { b: 1 }
+1 [class C2 extends C1] { b: 1 }
+*/
+```
+
+可以看到在子类中调用父类的静态方法，其中的this指向的是子类。这与在子类实例中调用父类(实例或原型)方法是一样的逻辑。最后我们尝试了以super的形式调用父类方法，this指向的也是子类。由于继承类的静态方法上下文中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
+
+### 静态块中调用
+在子类中调用父类方法还有一个场景，就是静态块。我们举例试一下：
+
+```js
+class C1 {
+  static a = 1;
+  static fun() {
+    console.log('1 fun', this);
+  }
+  static {
+    console.log(1, this);
+  }
+}
+
+class C2 extends C1 {
+  static b = 1;
+  static {
+    console.log(2, this);
+    this.fun();
+    super.fun();
+  }
+}
+
+/* 输出
+1 [class C1] { a: 1 }
+2 [class C2 extends C1] { b: 1 }
+1 fun [class C2 extends C1] { b: 1 }
+1 fun [class C2 extends C1] { b: 1 }
+*/
+```
+
+这里在静态块中尝试了使用this和super调用父类的静态方法，结果其中的this指向的都是子类。由于继承类的静态方法在静态块中调用上下文中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
 
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
