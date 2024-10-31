@@ -1072,13 +1072,59 @@ class C2 extends C1 {
 
 这里在静态块中尝试了使用this和super调用父类的静态方法，结果其中的this指向的都是子类。由于继承类的静态方法在静态块中调用上下文中的this是JavaScript语法规定的特性，因此不同的环境和是否严格模式表现都是一致的。
 
+## call方法
+上面我们介绍了很多函数场景下，this的指向问题，其中无论是普通对象，类还是原型，修改函数中this指向的方式实际上都是obj.fun()。那么有没有方法，不需要将函数附加到对象上即可绑定this？下面要介绍的三个方法，call，bind和aplly，可以做到。首先介绍call方法。
+
+使用 call()可以在调用函数时让this指向指定的值。我们看一下例子：
+
+```js
+function fun(val) {
+  console.log(val, this);
+}
+const obj = { a: 1 };
+fun.call(obj, 2);
+
+/* 输出
+2 { a: 1 }
+*/
+```
+
+可以看到，使用call方法的第一个入参为要指向的this，后面的入参为函数本身原有的入参。call方法可以做到不修改对象绑定this，同时执行函数。
+
+如果call方法的第一个入参为null和undefined：在非严格模式下，此时它的this指向和不使用call方法一致，即为globalThis，可以参考上面普通函数场景下的输出。如果为严格模式，那么还是指向call方法的第一个入参。
+
+```js
+function fun() {
+  console.log(this);
+}
+fun.call();
+fun.call(undefined);
+fun.call(null);
+
+/* 输出
+// 非严格模式 Node.js
+<ref *1> Object [global] { ...省略 }
+<ref *1> Object [global] { ...省略 }
+<ref *1> Object [global] { ...省略 }
+// 非严格模式 浏览器
+Window {window: Window, self: Window, document: document, ...省略 }
+Window {window: Window, self: Window, document: document, ...省略 }
+Window {window: Window, self: Window, document: document, ...省略 }
+// 严格模式
+undefined
+undefined
+null
+*/
+```
+
+## bind方法
+
+## apply方法
+
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
 
 ## 回调函数
-
-## call, bind, apply
-
 
 ## 严格模式总结
 
@@ -1133,4 +1179,10 @@ todo 试验下 实例方法等其它情况。
   https://es6.ruanyifeng.com/#docs/class
 - 《ECMAScript6入门教程》Class 的继承\
   https://es6.ruanyifeng.com/#docs/class-extends
+- MDN Function.prototype.call()\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/call
+- MDN Function.prototype.bind()\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
+- MDN Function.prototype.apply()\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/apply
 
