@@ -1117,9 +1117,53 @@ null
 */
 ```
 
-## bind方法
-
 ## apply方法
+apply方法与上面介绍的call方法非常类似，也是不需要将函数附加到对象上即可绑定this，执行函数。他俩的区别在于函数传参方式不同，apply是用数组的形式传参。我们看一下示例：
+
+```js
+function fun(a, b) {
+  console.log(a, b, this);
+}
+
+const obj = { a: 1 };
+fun.call(obj, 1, 2);
+fun.apply(obj, [1, 2]);
+
+/* 输出
+1 2 { a: 1 }
+1 2 { a: 1 }
+*/
+```
+
+可以看到，call方法会将除了第一个参数外的所有参数都传给原函数，而apply的第二个方法是一个数组，数组的内容就是第二个函数的参数列表。
+
+如果apply方法的第一个入参为null和undefined，它的表现与call方法一致：在非严格模式下，此时它的this指向和不使用call方法一致，即为globalThis，可以参考上面普通函数场景下的输出。如果为严格模式，那么还是指向call方法的第一个入参。
+
+```js
+function fun() {
+  console.log(this);
+}
+fun.apply();
+fun.apply(undefined);
+fun.apply(null);
+
+/* 输出
+// 非严格模式 Node.js
+<ref *1> Object [global] { ...省略 }
+<ref *1> Object [global] { ...省略 }
+<ref *1> Object [global] { ...省略 }
+// 非严格模式 浏览器
+Window {window: Window, self: Window, document: document, ...省略 }
+Window {window: Window, self: Window, document: document, ...省略 }
+Window {window: Window, self: Window, document: document, ...省略 }
+// 严格模式
+undefined
+undefined
+null
+*/
+```
+
+## bind方法
 
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
