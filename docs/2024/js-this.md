@@ -1164,6 +1164,89 @@ null
 ```
 
 ## bind方法
+call和apply方法虽然可以绑定this，但都是立即执行该函数。那么有没有方法可以绑定this，但是并不会立即执行该函数呢？这就是bind方法的效果。
+
+### bind方法说明
+我们来举个例子看一下：
+
+```js
+// 示例1
+function fun1() {
+  console.log(this);
+}
+const obj = { a: 1 };
+const funa = fun1.bind(obj);
+funa();
+// 示例2
+function fun2(a, b, c, d) {
+  console.log(this, a, b, c, d);
+}
+const funb = fun2.bind(obj, 1,2);
+funb(3,4);
+const func = funb.bind(null, 5);
+func(6);
+/* 输出
+{ a: 1 }
+{ a: 1 } 1 2 3 4
+{ a: 1 } 1 2 5 6
+*/
+```
+
+示例1可以看到，使用bind方法绑定了obj作为函数的this，但是并没有直接执行，而是返回了新函数，可以延迟执行。而且比call和apply方法更高级的是，bind方法可以暂存入参，且可以多次调用，多次暂存。看示例2，funb绑定了this，且传了两个参数；在执行新函数的时候前两个就不需要传了，相当于起到暂存参数的作用。而且可以重复调用bind方法，多次暂存参数，例如func就二次调用了bind方法。不过多次调用时，绑定this就无效了，以第一次为准。
+
+### bind方法特殊场景
+首先是常见的第一个入参为null和undefined，它的表现与call，apply方法一致：在非严格模式下，此时它的this指向和不使用call方法一致，即为globalThis，可以参考上面普通函数场景下的输出。如果为严格模式，那么还是指向bind方法的第一个入参。
+
+```js
+function fun() {
+  console.log(this);
+}
+fun.bind()();
+fun.bind(undefined)();
+fun.bind(null)();
+
+/* 输出
+// 非严格模式 Node.js
+<ref *1> Object [global] { ...省略 }
+<ref *1> Object [global] { ...省略 }
+<ref *1> Object [global] { ...省略 }
+// 非严格模式 浏览器
+Window {window: Window, self: Window, document: document, ...省略 }
+Window {window: Window, self: Window, document: document, ...省略 }
+Window {window: Window, self: Window, document: document, ...省略 }
+// 严格模式
+undefined
+undefined
+null
+*/
+```
+
+然后是bind方法创建的函数作为构造函数，此时我们绑定的this是无效的：
+
+```js
+function Fun1() {
+  console.log(this, new.target === Fun1);
+}
+const obj = { a: 1 };
+const fun1 = Fun1.bind(obj);
+console.log(new fun1());
+
+function Fun2(a, b, c, d) {
+  console.log(a, b, c, d);
+}
+const fun2 = Fun2.bind(obj, 1, 2);
+new fun2(3, 4);
+
+/* 输出
+Fun1 {} true
+Fun1 {}
+1 2 3 4
+*/
+```
+
+可以看到，Fun1在作为构造函数使用时，绑定的obj是无效的，this此时还是构造函数生成的实例。虽然此时绑定this无效，但是暂存参数的功能还是有效的。例如fun2就暂存了Fun2的两个参数，然后作为构造函数使用时，成功读入了暂存的参数。
+
+bind方法创建的函数虽然能作为构造函数，但不能作为父类被其他子类继承。bind方法可以绑定类，此时静态方法会失效，但继承的静态方法依旧生效。bind还有一些其它特性，不过并不是this的新情形，因此这里就不多介绍了。
 
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
