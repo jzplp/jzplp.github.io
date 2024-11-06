@@ -1248,10 +1248,55 @@ Fun1 {}
 
 bind方法创建的函数虽然能作为构造函数，但不能作为父类被其他子类继承。bind方法可以绑定类，此时静态方法会失效，但继承的静态方法依旧生效。bind还有一些其它特性，不过并不是this的新情形，因此这里就不多介绍了。
 
+## 回调函数上下文
+当一个函数作为回调函数传递时，this的值取决于如何调用回调。
+
+### 自定义回调场景
+如果是我们自己写的调用回调代码，那么this的值就由我们的调用方式决定。这里举例看下：
+
+```js
+let globThis = null;
+function funStore() {
+  globThis = this;
+}
+funStore();
+
+function fun() {
+  console.log(globThis === this);
+}
+fun();
+
+function call1(call) {
+  call();
+}
+call1(fun);
+
+const obj = {
+  call2: function (call) {
+    call();
+  }
+};
+obj.call2(fun);
+
+/* 输出
+true
+true
+true
+*/
+```
+
+首先我们执行了一个普通函数，记录了this，然后在两种回调中尝试this值与普通函数直接执行的区别。输出发现没有任何区别，this的指向实际是一样的，可以参考上面普通函数场景下的输出，且不同的环境和是否严格模式表现都普通函数场景下一致。
+
+### JavaScript提供的回调场景
+JavaScript本身提供了很多回调函数的调用场景，比如迭代数组方法。其中大部分回调的this指向都与普通函数执行时一致，而且也可以传入可选的this值。我们看一下例子：
+
+
+
+### 部分特殊场景
+
+
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
-
-## 回调函数
 
 ## 严格模式总结
 
