@@ -1290,10 +1290,56 @@ true
 ### JavaScript提供的回调场景
 JavaScript本身提供了很多回调函数的调用场景，比如迭代数组方法。其中大部分回调的this指向都与普通函数执行时一致，而且也可以传入可选的this值。我们看一下例子：
 
+```js
+let globThis = null;
+function funStore() {
+  globThis = this;
+}
+funStore();
 
+function fun() {
+  console.log(globThis === this);
+}
+fun();
 
-### 部分特殊场景
+[1].forEach(fun);
+[1].map(fun);
 
+function fun2() {
+  console.log(this);
+}
+const obj = {a:1};
+[1].forEach(fun2, obj);
+[1].map(fun2, obj);
+
+/* 输出
+true
+true
+true
+{ a: 1 }
+{ a: 1 }
+*/
+```
+
+这里我们举例了数组的两个原型方法：forEach和map。在执行回调函数时，this的值与普通函数直接执行没有区别。但是这些接受回调的方法允许我们多传一个参数作为this指向，传了之后，回调中的this值就是我们指定的了。
+
+### 部分特殊情形
+还有一些特殊的可以接收回调的函数，它的回调函数this指向是由意义的。我们举例看下：
+
+```js
+function fun() {
+  console.log(this);
+}
+JSON.parse("true", fun);
+JSON.stringify({ a: 1 }, fun);
+
+/* 输出
+{ '': true }
+{ '': { a: 1 } }
+*/
+```
+
+这里尝试了JSON.parse和JSON.stringify。可以看到，虽然我们没有传额外的参数，但是回调函数中的this却与普通函数直接执行是有区别的。这里的this指向的是当前解析的对象，具体可以查看相关文档了解。
 
 ## 箭头函数上下文
 todo 考虑和上面形式的结合
@@ -1357,4 +1403,7 @@ todo 试验下 实例方法等其它情况。
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
 - MDN Function.prototype.apply()\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/apply
-
+- MDN JSON.parse()\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+- MDN JSON.stringify()\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
