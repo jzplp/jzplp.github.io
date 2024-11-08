@@ -1248,6 +1248,45 @@ Fun1 {}
 
 bind方法创建的函数虽然能作为构造函数，但不能作为父类被其他子类继承。bind方法可以绑定类，此时静态方法会失效，但继承的静态方法依旧生效。bind还有一些其它特性，不过并不是this的新情形，因此这里就不多介绍了。
 
+## 原始值原型函数属性上下文
+在JavaScript中，原始值（原始数据类型）是一种既非对象也无方法或属性的数据。所有原始值都是不可变的，即它们的值不能被修改。但是当在原始值上访问属性时，JavaScript自动将值装入包装对象中，并访问该对象上的属性。这里我们尝试执行原始值的原型函数属性，看看其中this的指向。
+
+```js
+function fun() {
+  console.log(this);
+}
+Number.prototype.fun = fun;
+(1).fun();
+console.log(new Number(1), 1);
+
+String.prototype.fun = fun;
+('a').fun();
+console.log(new String('a'), 'a');
+
+Boolean.prototype.fun = fun;
+(false).fun();
+console.log(new Boolean(false), false);
+
+/* 输出
+// 非严格模式
+[Number: 1]
+[Number: 1] 1
+[String: 'a']
+[String: 'a'] a
+[Boolean: false]
+[Boolean: false] false
+// 严格模式
+1
+[Number: 1] 1
+a
+[String: 'a'] a
+false
+[Boolean: false] false
+*/
+```
+
+可以看到，我们先在原始值对应的原型上增加了一个函数属性，然后再在原始值上调用。结果在严格模式和非严格模式是不同的。严格模式下，this指向原始值；非严格模式下，this指向包装对象。
+
 ## 回调函数上下文
 当一个函数作为回调函数传递时，this的值取决于如何调用回调。
 
@@ -1407,3 +1446,5 @@ todo 试验下 实例方法等其它情况。
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
 - MDN JSON.stringify()\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+- MDN 原始值\
+  https://developer.mozilla.org/zh-CN/docs/Glossary/Primitive
