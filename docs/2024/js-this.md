@@ -1380,8 +1380,86 @@ JSON.stringify({ a: 1 }, fun);
 
 这里尝试了JSON.parse和JSON.stringify。可以看到，虽然我们没有传额外的参数，但是回调函数中的this却与普通函数直接执行是有区别的。这里的this指向的是当前解析的对象，具体可以查看相关文档了解。
 
-## 箭头函数上下文
-todo 考虑和上面形式的结合
+## 箭头函数
+箭头函数是一种简洁的函数表达式，且除了简介之外，与普通函数相比在用法上有一些差异，比如这里要说的this。普通函数中this的指向是看调用函数的对象，如果没有为上面介绍的普通函数上下文中的this指向。但箭头函数的this指向是看创建箭头函数时，作用域中this的指向。
+
+箭头函数的this指向，在不同的情形下与普通函数的效果由较大区别。
+
+### 不同的环境和模块化规范
+首先我们试一下，在不同的环境和模块化规范下，直接执行函数。
+
+```js
+function fun1() {
+  console.log(1, this);
+}
+const fun2 = () => {
+  console.log(2, this);
+}
+console.log(0, this);
+fun1();
+fun2();
+
+/* 输出
+// 浏览器命令行 非严格模式
+0 Window {window: Window, self: Window, document: document, ...省略 }
+1 Window {window: Window, self: Window, document: document, ...省略 }
+2 Window {window: Window, self: Window, document: document, ...省略 }
+
+// 浏览器命令行 严格模式
+0 Window {window: Window, self: Window, document: document, ...省略 }
+1 undefined
+2 Window {window: Window, self: Window, document: document, ...省略 }
+
+// 浏览器HTML中 非严格模式
+0 Window {window: Window, self: Window, document: document, ...省略 }
+1 Window {window: Window, self: Window, document: document, ...省略 }
+2 Window {window: Window, self: Window, document: document, ...省略 }
+
+// 浏览器HTML中 严格模式
+0 Window {window: Window, self: Window, document: document, ...省略 }
+1 undefined
+2 Window {window: Window, self: Window, document: document, ...省略 }
+
+// Node.js命令行 非严格模式
+0 <ref *1> Object [global] { ...省略 }
+1 <ref *1> Object [global] { ...省略 }
+2 <ref *1> Object [global] { ...省略 }
+
+// Node.js命令行 严格模式
+0 <ref *1> Object [global] { ...省略 }
+1 undefined
+2 <ref *1> Object [global] { ...省略 }
+
+// CommonJS和Node.js 非严格模式
+0 {}
+1 <ref *1> Object [global] { ...省略 }
+2 {}
+
+// CommonJS和Node.js 严格模式
+0 {}
+1 undefined
+2 {}
+
+// ESModule和浏览器
+0 undefined
+1 undefined
+2 undefined
+
+// ESModule和Node.js
+0 undefined
+1 undefined
+2 undefined
+*/
+```
+
+我们尝试了六种场景，以及对应的严格模式和非严格模式。可以看到不同的场景下，箭头函数的指向的this值是有去别的，而且很多场景下普通函数和箭头函数的this指向也不一样。
+
+但是可以看到，箭头函数中this的指向和箭头函数外，直接输出this的指向是一样的。因此证明了箭头函数中的this指向，即是作用域中this的指向。
+
+### 待定
+
+
+
 
 ## 严格模式总结
 
@@ -1448,3 +1526,5 @@ todo 试验下 实例方法等其它情况。
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
 - MDN 原始值\
   https://developer.mozilla.org/zh-CN/docs/Glossary/Primitive
+- MDN 箭头函数表达式\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Arrow_functions
