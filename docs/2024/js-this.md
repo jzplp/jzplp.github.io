@@ -1381,7 +1381,7 @@ JSON.stringify({ a: 1 }, fun);
 这里尝试了JSON.parse和JSON.stringify。可以看到，虽然我们没有传额外的参数，但是回调函数中的this却与普通函数直接执行是有区别的。这里的this指向的是当前解析的对象，具体可以查看相关文档了解。
 
 ## 箭头函数
-箭头函数是一种简洁的函数表达式，且除了简介之外，与普通函数相比在用法上有一些差异，比如这里要说的this。普通函数中this的指向是看调用函数的对象，如果没有为上面介绍的普通函数上下文中的this指向。但箭头函数的this指向是看创建箭头函数时，作用域中this的指向。
+箭头函数是一种简洁的函数表达式，且除了简介之外，与普通函数相比在用法上有一些差异，比如这里要说的this。普通函数中this的指向是看调用函数的对象，如果没有为上面介绍的普通函数上下文中的this指向。但箭头函数的this指向是创建箭头函数时，作用域中this的指向。
 
 箭头函数的this指向，在不同的情形下与普通函数的效果由较大区别。
 
@@ -1456,8 +1456,51 @@ fun2();
 
 但是可以看到，箭头函数中this的指向和箭头函数外，直接输出this的指向是一样的。因此证明了箭头函数中的this指向，即是作用域中this的指向。
 
-### 待定
+### 外部的箭头函数在对象和类中作为属性
+如果一个在对象和类外面的箭头函数，被作为对象属性，类的静态属性或者实例属性来执行，其中的this指向又是如何呢？我们来看一下例子：
 
+```js
+function fun1() {
+  console.log(1, this);
+}
+const outerThis = this;
+const fun2 = () => {
+  console.log(this === outerThis);
+};
+
+const obj = {
+  fun1: fun1,
+  fun2: fun2,
+};
+obj.fun1();
+obj.fun2();
+
+class C1 {
+  static sf1 = fun1;
+  static sf2 = fun2;
+  f1 = fun1;
+  f2 = fun2;
+}
+C1.sf1();
+C1.sf2();
+
+const c1 = new C1();
+c1.f1();
+c1.f2();
+
+/* 输出
+1 { fun1: [Function: fun1], fun2: [Function: fun2] }
+true
+1 [class C1] { sf1: [Function: fun1], sf2: [Function: fun2] }
+true
+1 C1 { f1: [Function: fun1], f2: [Function: fun2] }
+true
+*/
+```
+
+在这里我们同时对比了普通函数和箭头函数的情况。可以看到普通函数在对象属性，类的静态属性或者实例属性执行时，this指向的值就是“拥有这个属性的对象”，我们在上面的章节讨论过。但是箭头函数的this却始终与外面直接输出的this指向是一致的，不管箭头函数被哪个类或者对象拥有。这也说明了箭头函数的this指向是创建箭头函数时，作用域中this的指向。
+
+### 类或对象内部的箭头函数
 
 
 
