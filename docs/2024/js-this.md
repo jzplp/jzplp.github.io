@@ -1500,7 +1500,66 @@ true
 
 在这里我们同时对比了普通函数和箭头函数的情况。可以看到普通函数在对象属性，类的静态属性或者实例属性执行时，this指向的值就是“拥有这个属性的对象”，我们在上面的章节讨论过。但是箭头函数的this却始终与外面直接输出的this指向是一致的，不管箭头函数被哪个类或者对象拥有。这也说明了箭头函数的this指向是创建箭头函数时，作用域中this的指向。
 
+为什么这里要输出`this === outerThis`而不是直接输出this的值呢？因为不同的环境和模块化规范，以及是否严格模式之下，这里的this值的情况太多了，这里重复输出太罗嗦了，因此统一用这个表达式代替。
+
 ### 类或对象内部的箭头函数
+我们再来看一下，如果箭头函数定义在对象或者类的内部，此时箭头函数指向什么。
+
+```js
+const outerThis = this;
+const obj = {
+  fun1() {
+    console.log(this);
+  },
+  fun2: () => {
+    console.log(this === outerThis);
+  },
+};
+obj.fun1();
+obj.fun2();
+
+class C1 {
+  static staticThis = this;
+  static sf1 = function () {
+    console.log('sf1', this);
+  };
+  static sf2 = () => {
+    console.log('sf2', this);
+  };
+  cthis = this;
+  f1 = function () {
+    console.log('f1', this);
+  };
+  f2 = () => {
+    console.log('f2', this);
+  };
+}
+console.log('staticThis', C1.staticThis);
+C1.sf1();
+C1.sf2();
+
+const c1 = new C1();
+console.log('cthis', c1.cthis);
+c1.f1();
+c1.f2();
+
+/* 输出
+{ fun1: [Function: fun1], fun2: [Function: fun2] }
+true
+staticThis [class C1] { staticThis: [Circular *1], sf1: [Function: sf1], sf2: [Function: sf2] }
+sf1 [class C1] { staticThis: [Circular *1], sf1: [Function: sf1], sf2: [Function: sf2] }
+sf2 [class C1] { staticThis: [Circular *1], sf1: [Function: sf1], sf2: [Function: sf2] }
+cthis C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
+f1 C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
+f2 C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
+*/
+```
+
+首先我们看一下对象属性，虽然箭头函数是在对象内部定义的，但this的指向还是与外部的this指向一致，因此可以认为对象没有形成自己的作用域。
+
+再来看看类。类这里分为静态属性和实例属性。我们先看静态属性，首先直接输出了this，发现是类C1本身。因此作用域中的this指向就是类C1，这也是箭头函数的指向。然后是实例属性，虽然代码看起来实例属性和静态属性在同一个作用域下，但实际上实例属性是创建实例时被初始化的，初始化时的作用域与构造函数中一致，即是对象实例。因此这里箭头函数中this指向的也是实例。
+
+### 类继承
 
 
 
