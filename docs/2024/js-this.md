@@ -1560,6 +1560,53 @@ f2 C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
 再来看看类。类这里分为静态属性和实例属性。我们先看静态属性，首先直接输出了this，发现是类C1本身。因此作用域中的this指向就是类C1，这也是箭头函数的指向。然后是实例属性，虽然代码看起来实例属性和静态属性在同一个作用域下，但实际上实例属性是创建实例时被初始化的，初始化时的作用域与构造函数中一致，即是对象实例。因此这里箭头函数中this指向的也是实例。
 
 ### 类继承
+我们再来看一下继承情形下，箭头函数中this的指向。
+
+```js
+class C1 {
+  static staticThis = this;
+  static sf1 = function () {
+    console.log("sf1", this);
+  };
+  static sf2 = () => {
+    console.log("sf2", this);
+  };
+  cthis = this;
+  f1 = function () {
+    console.log("f1", this);
+  };
+  f2 = () => {
+    console.log("f2", this);
+  };
+}
+
+class C2 extends C1 {
+  a = 1;
+  static b = 2;
+}
+console.log("staticThis", C2.staticThis);
+C2.sf1();
+C2.sf2();
+
+const c2 = new C2();
+console.log("cthis", c2.cthis);
+c2.f1();
+c2.f2();
+
+/* 输出
+staticThis [class C1] { staticThis: [Circular *1], sf1: [Function: sf1], sf2: [Function: sf2] }
+sf1 [class C2 extends C1] { b: 2 }
+sf2 [class C1] { staticThis: [Circular *1], sf1: [Function: sf1], sf2: [Function: sf2] }
+cthis C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
+f1 C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
+f2 C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
+*/
+```
+
+可以看到，这一节的例子实际上就是上一节类实例的例子增加了继承。首先看下静态属性，在父类中静态属性中直接设置的this，子类中输出却是父类。可以认为父类中静态属性的作用域是父类，箭头函数中this的指向也是如此。但在普通函数的情形下，因为我们是子类调用的函数，因此普通函数中this的指向还是子类，符合普通函数this指向调用方的规则。
+
+再看实例属性的继承。可以看到输出中不管是直接赋值的this，普通函数和箭头函数，this指向的都是子类。因为在创建实例属性时，只有一个实例存在，这个实例就是子类的实例，因此这里的指向是一致的。
+
 
 
 
