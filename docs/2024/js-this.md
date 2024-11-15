@@ -1607,8 +1607,46 @@ f2 C1 { cthis: [Circular *1], f1: [Function: f1], f2: [Function: f2] }
 
 再看实例属性的继承。可以看到输出中不管是直接赋值的this，普通函数和箭头函数，this指向的都是子类。因为在创建实例属性时，只有一个实例存在，这个实例就是子类的实例，因此这里的指向是一致的。
 
+### 作用域中this变化的情形
+假设箭头函数所处的作用域中的this在不同情形是变化的，那么箭头函数中this的指向会不会跟着变化呢？我们看一个例子。
+
+```js
+function fun1() {
+  console.log(this);
+  const fun2 = () => {
+    console.log(this);
+  };
+  fun2();
+}
+// fun1();
+
+const obj = {
+  fun: fun1,
+};
+obj.fun();
+
+class C1 {
+  static fun1 = fun1;
+  fun = fun1;
+}
+C1.fun1();
+const c1 = new C1();
+c1.fun();
 
 
+/* 输出
+{ fun: [Function: fun1] }
+{ fun: [Function: fun1] }
+[class C1] { fun1: [Function: fun1] }
+[class C1] { fun1: [Function: fun1] }
+C1 { fun: [Function: fun1] }
+C1 { fun: [Function: fun1] }
+*/
+```
+
+可以看到，我们的箭头函数是定义在一个普通函数内部的，而这个普通函数我们使用了各种方式执行，因此函数内部的this指向各不相同。而且每次是新创建的箭头函数。箭头函数来说，作用域中的this一直在变化，因此内部this指向也一直在变化。
+
+第一个在最外层执行的场景我们注释了，因为输出随着不同的场景变化，前面已经介绍过可能的值，因此这里省略了。
 
 ## 严格模式总结
 
