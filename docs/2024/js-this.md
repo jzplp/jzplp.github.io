@@ -1648,6 +1648,71 @@ C1 { fun: [Function: fun1] }
 
 第一个在最外层执行的场景我们注释了，因为输出随着不同的场景变化，前面已经介绍过可能的值，因此这里省略了。
 
+## eval函数中的this
+eval函数会将传入的字符串当做JavaScript代码执行。如果传入的“代码”中包含this，那么这时的this指向如何呢？eval函数有两种模式，一种是直接调用，一种是间接调用。两者的指向并不一致。
+
+### 直接调用
+在直接调用时，eval内部的作用域上下文就是eval执行时所处的上下文。
+
+```js
+eval("console.log(1, this)");
+const obj = {
+  fun() {
+    eval("console.log(2, this)");
+  }
+}
+obj.fun();
+
+eval(`
+  class C1 { static a = this; b = this; }
+  const c = new C1();
+  console.log(3, C1.a);
+  console.log(4, c.b);
+`);
+
+
+/* 输出
+// 第一行会随着外部作用域this的指向而变化，这里列举几种，不全列举了
+1 {} // Node.js + Commonjs 非严格模式
+1 undefined // Node.js + ESModule
+1 <ref *1> Object [global] { ...省略 } // Node.js + 命令行 非严格模式
+2 { fun: [Function: fun] }
+3 <ref *1> [class C1] { a: [Circular *1] }
+4 <ref *1> C1 { b: [Circular *1] }
+*/
+```
+
+首先我们尝试了在最外层中调用eval输出this，发现确实会随着外部作用域this的指向而变化。然后尝试了在对象方法中执行eval，此时this指向为调用的对象。然后我们尝试了在eval内部创建作用域，输出内部的this，发现指向的规则与在外面一致。
+
+### 间接调用
+间接调用时，eval内部的作用域却是全局作用域，此时this的指向为globalThis。
+
+```js
+const e = eval;
+e("console.log(1, this)");
+
+const obj = {
+  fun() {
+    const ef = eval;
+    ef("console.log(2, this)");
+  },
+};
+obj.fun();
+
+/* 输出
+// Node.js
+1 <ref *1> Object [global] { ...省略 }
+2 <ref *1> Object [global] { ...省略 }
+// 浏览器
+1 Window {window: Window, self: Window, document: document, ...省略 }
+2 Window {window: Window, self: Window, document: document, ...省略 }
+*/
+```
+
+我们把eval赋值给一个变量，然后间接调用它，发现无论eval执行时所处的作用域是什么，this的指向都是globalThis，即使是严格模式也不会变化。
+
+## 事件处理器
+
 ## 严格模式总结
 
 `"use strict";`
@@ -1683,7 +1748,6 @@ todo 试验下 实例方法等其它情况。
 ## 复杂组合场景讨论
 
 
-
 ## 参考
 - MDN globalThis\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/globalThis
@@ -1715,3 +1779,6 @@ todo 试验下 实例方法等其它情况。
   https://developer.mozilla.org/zh-CN/docs/Glossary/Primitive
 - MDN 箭头函数表达式\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Arrow_functions
+- MDN eval()\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval
+
