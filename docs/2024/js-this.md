@@ -1712,6 +1712,37 @@ obj.fun();
 我们把eval赋值给一个变量，然后间接调用它，发现无论eval执行时所处的作用域是什么，this的指向都是globalThis，即使是严格模式也不会变化。
 
 ## 事件处理器
+JavaScript中的事件处理器可以绑定事件处理函数，这个处理函数是个回调函数，那么其中this的指向如何呢？
+
+```js
+<html>
+  <div onclick="console.log(1, this)" onwheel="console.log(2, this)">点击1</div>
+  <div id="click2">点击2</div>
+  <body>
+    <script>
+      const click2 = document.getElementById("click2");
+      click2.addEventListener("click", function () {
+        console.log(3, this);
+      });
+      click2.addEventListener("click", () => {
+        console.log(4, this);
+      });
+    </script>
+  </body>
+</html>
+
+
+/* 输出
+1 <div onclick="console.log(1, this)" onwheel="console.log(2, this)">点击1</div>
+2 <div onclick="console.log(1, this)" onwheel="console.log(2, this)">点击1</div>
+3 <div id="click2">点击2</div>
+// 不同环境输出不一致
+4 Window {window: Window, self: Window, document: document, ...省略 }  // 浏览器 非ESmodule
+4 undefined // 浏览器 + ESmodule
+*/
+```
+
+实际上，如果事件处理函数是一个普通函数，那么其中的this指向的是引发事件的对象。如果是一个箭头函数，那么this指向符合箭头函数的自己的规则，即外部作用域中this的指向。
 
 ## 严格模式总结
 
@@ -1743,6 +1774,8 @@ fun1();
 todo 试验下 实例方法等其它情况。
 
 ## 部分特殊场景
+
+
 
 
 ## 复杂组合场景讨论
