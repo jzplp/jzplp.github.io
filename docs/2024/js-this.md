@@ -1795,10 +1795,79 @@ JavaScript中的事件处理器可以绑定事件处理函数，这个处理函�
 实际上，如果事件处理函数是一个普通函数，那么其中的this指向的是引发事件的对象。如果是一个箭头函数，那么this指向符合箭头函数的自己的规则，即外部作用域中this的指向。
 
 ## 严格模式总结
+严格模式是JavaScript的一种模式，相对于非严格模式限制了部分语法和使用方式。在文件，函数最开始放置`"use strict";`语句，即可开启严格模式。严格模式与非严格模式对于this的处理是有区别的，我们上面描述不同场景下this的指向时，已经碰到过一些了。
 
-`"use strict";`
+### 严格模式与非严格模式this的区别(未完成)
+
+事实上在非严格模式下，传递给函数的this会被强制转换为一个对象。例如在普通函数上下文中，因为this没有指向（undefined）所以将this替换成了globalThis。或者原始值作为this时，会被替换为这个值的包装对象。我们看一下具体的例子(这些例子都是前面讲过的)：
+
+```js
+function fun() {
+  console.log(this);
+}
+
+fun.call();
+fun.call(undefined);
+fun.call(null);
+
+fun.apply();
+fun.apply(undefined);
+fun.apply(null);
+
+fun.bind()();
+fun.bind(undefined)();
+fun.bind(null)();
+
+Number.prototype.fun = fun;
+(1).fun();
+String.prototype.fun = fun;
+('a').fun();
+Boolean.prototype.fun = fun;
+(false).fun();
+```
+
+上面列举了普通函数，以及使用call, apply, bind执行函数，同时指定this是undefined或null的场景。在非严格模式下，this都指向globalThis。而严格模式下，输出则变成了this原始指向的值。另外还有原始值作为this访问属性方法的场景。在非严格模式下this指向值的包装对象；严格模式下this指向值本身。我们看下输出：
+
+```js
+// 非严格模式输出
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+globalThis // 具体值由环境确定
+[Number: 1]
+[String: 'a']
+[Boolean: false]
+
+// 严格模式输出
+undefined
+undefined
+undefined
+null
+undefined
+undefined
+null
+undefined
+undefined
+null
+1
+a
+false
+```
+
+### 受严格模式影响的场景
+
+
+### 严格模式的条件
 
 ESModule是自动使用严格模式的，我们是否设置`"use strict";`对this指向没有影响。class中是自动使用严格模式的。
+
+
 
 ### 类内的函数放到外面执行
 todo 具体描述后面补充。class中是自动使用严格模式的。那也就是说，类内的函数放到外面执行，也具有严格模式的性质。
