@@ -1870,44 +1870,61 @@ false
 
 ### 严格模式内代码在外部调用
 
-
-类内的函数放到外面执行
-todo 具体描述后面补充。class中是自动使用严格模式的。那也就是说，类内的函数放到外面执行，也具有严格模式的性质。
+严格模式除了整个文件生效之外，也可以只在class中生效，或者只在某个函数内生效。那么严格模式外执行严格模式之内的代码，是否也具有严格模式的性质么？ 我们来试一下。
 
 ```js
-class C1 {
-  fun() {
-    console.log(this);
-  }
+function fun() {
+  console.log(0, this);
 }
-
-const c1 = new C1();
-c1.fun();
-const {fun} = c1;
 fun();
 
-function fun1() {
-  console.log(1, this);
+class C1 {
+  fun1() {
+    console.log(1, this);
+  }
+  fun2() {
+    return function () {
+      console.log(2, this);
+    };
+  }
 }
+const c1 = new C1();
+const { fun1 } = c1;
 fun1();
+
+const fun2 = c1.fun2();
+fun2();
+
+let fun3;
+function funStrict() {
+  "use strict";
+  fun3 = function () {
+    console.log(3, this);
+  };
+}
+funStrict();
+fun3();
+
+/* 输出
+globalThis // 具体值由环境确定
+undefined
+undefined
+undefined
+*/
 ```
 
-todo 试验下 实例方法等其它情况。
+首先我们在外面输出了一个普通函数内部的this，结果是globalThis。然后我们将类和严格模式函数中的代码（实际为嵌套的函数）放到严格模式外执行，发现输出的this都是undefined，这说明严格模式依然是生效的。
 
 
-## 作用域与this
+## 部分特殊场景
 
-对象字面量不创建作用域
+对象字面量不创建作用域，因此更不会
 
 ```js
 const obj = {
   a: this,
 }
 ```
-
-## 部分特殊场景
-
-
 
 
 
