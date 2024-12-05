@@ -1906,19 +1906,20 @@ funStrict();
 fun3();
 
 /* 输出
-globalThis // 具体值由环境确定
-undefined
-undefined
-undefined
+0 globalThis // 具体值由环境确定
+1 undefined
+2 undefined
+3 undefined
 */
 ```
 
 首先我们在外面输出了一个普通函数内部的this，结果是globalThis。然后我们将类和严格模式函数中的代码（实际为嵌套的函数）放到严格模式外执行，发现输出的this都是undefined，这说明严格模式依然是生效的。
 
+## 特殊或组合场景讨论
+这里我们讨论下部分容易搞错的特殊场景，又或者上面介绍的一些场景的组合情形下，this指向的值。
 
-## 部分特殊场景
-
-对象字面量不创建作用域，因此更不会
+### 对象字面量不创建作用域
+对象字面量不创建作用域，因此更不会更改外部的this。
 
 ```js
 const obj = {
@@ -1926,9 +1927,48 @@ const obj = {
 }
 ```
 
+这里的this和对象字面量外部作用域中的this实际是一致的。
+
+### 箭头函数使用call/bind/apply方法
+上面描述过，箭头函数的this指向是创建箭头函数时，外部作用域中this的指向。虽然call/bind/apply方法可以改变函数内的this指向，但无法改变箭头函数内的this指向。我们看一下例子：
+
+```js
+const obj = {a:1};
+const fun1 = function () {
+  console.log(1, this);
+};
+const fun2 = () => {
+  console.log(2, this);
+}
+
+fun1();
+fun2();
+
+fun1.call(obj);
+fun2.call(obj);
+
+fun1.apply(obj);
+fun2.apply(obj);
+
+fun1.bind(obj)();
+fun2.bind(obj)();
+
+/* 输出 以 Node.js + CommonJs + 非严格模式为例 
+1 <ref *1> Object [global] { ...省略 }
+2 {}
+1 { a: 1 }
+2 {}
+1 { a: 1 }
+2 {}
+1 { a: 1 }
+2 {}
+*/
+```
+
+这里以 Node.js + CommonJs + 非严格模式 为例，此时外部作用域中的this指向为{}。可以看到普通函数的this指向受到了call/bind/apply方法的影响，但是箭头函数始终指向外部作用域中的this。因此箭头函数的this指向不会受到call/bind/apply方法的影响。
 
 
-## 复杂组合场景讨论
+
 
 
 ## 总结
