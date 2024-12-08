@@ -1967,7 +1967,60 @@ fun2.bind(obj)();
 
 这里以 Node.js + CommonJs + 非严格模式 为例，此时外部作用域中的this指向为{}。可以看到普通函数的this指向受到了call/bind/apply方法的影响，但是箭头函数始终指向外部作用域中的this。因此箭头函数的this指向不会受到call/bind/apply方法的影响。
 
+### new和bind方法
+bind方法可以为函数绑定this，且不会立即执行该函数。那么经过bind方法绑定的函数，再使用new命令，其中的this会指向什么？
 
+```js
+function fun() {
+  console.log(this);
+}
+
+const fun1 = fun.bind({ a: 1 });
+console.log(new fun1());
+
+/* 输出
+fun {}
+fun {}
+*/
+```
+
+在例子中我们对函数绑定了{a:1}，但使用new命令后，函数内this指向的并不是bind绑定的对象，而是new命令新创建的对象。
+
+### 嵌套普通函数中的this并不会继承
+嵌套普通函数中的this指向并不会继承外部作用域。我们看下例子：
+
+```js
+const obj = {
+  f1: function () {
+    console.log(1, this);
+    function f2() {
+      console.log(2, this);
+    }
+    f2();
+  },
+};
+obj.f1();
+
+class C1 {
+  static f3() {
+    console.log(3, this);
+    function f4() {
+      console.log(4, this);
+    }
+    f4();
+  }
+}
+C1.f3();
+
+/* 输出 以 Node.js + CommonJs + 非严格模式为例 
+1 { f1: [Function: f1] }
+2 <ref *1> Object [global] { ...省略 }
+3 [class C1]
+4 undefined
+*/
+```
+
+我们尝试了普通对象方法和类的静态方法两种作用域，再其中创建了普通函数并执行，发现指向的this和当前作用域都无关，其中普通对象方法this指向了globalThis，class因为自动使用严格模式，所以输出undefined。
 
 
 
@@ -2007,4 +2060,5 @@ fun2.bind(obj)();
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Functions/Arrow_functions
 - MDN eval()\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval
-
+- JavaScript的this原理 阮一峰\
+  https://www.ruanyifeng.com/blog/2018/06/javascript-this.html
