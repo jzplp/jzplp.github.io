@@ -1,11 +1,9 @@
-# JavaScript中的this, 究竟指向什么？（未完成）
+# JavaScript中的this, 究竟指向什么？
 
-在JavaScript代码的不同位置中，this所指向的数据是不一样的。比如大部分同学都知道，在对象的函数属性方法中，this指向对象本身；在构造函数中，this指向要生成的新对象。事实上，this指向的逻辑不止这几种，this也不只是与原型链有关。在这里我们总结一下，在不同的场景下，JavaScript中的this, 究竟指向什么。
-
-todo 测试每一种都要带严格模式试一下。
+在JavaScript代码的不同位置中，this所指向的数据是不一样的。比如大部分同学都知道，在对象的函数属性方法中，this指向对象本身；在构造函数中，this指向要生成的新对象。事实上，this指向的逻辑不止这几种，this也不只是与原型链有关。在这里我们研究一下，在不同的场景下，JavaScript中的this, 究竟指向什么。
 
 ## globalThis
-在观察各类this之前，先来了解一下globalThis的概念。globalThis是从不同的JavaScript环境中获取全局对象方法。
+在观察各类this之前，先来了解一下globalThis的概念。globalThis是从不同的JavaScript环境中获取全局对象的方式。
 
 由于在部分环境或者上下文中，使用this是无法直接获取到全局对象的，例如一些模块化的JS代码内，以及在部分上下文的严格模式下(具体场景和区别后面会描述)。因此globalThis提供了一个标准的方式来获取不同环境下的全局this对象。这个对象在不同的JavaScript环境中是不一样的。
 
@@ -2022,10 +2020,10 @@ C1.f3();
 
 我们尝试了普通对象方法和类的静态方法两种作用域，再其中创建了普通函数并执行，发现指向的this和当前作用域都无关，其中普通对象方法this指向了globalThis，class因为自动使用严格模式，所以输出undefined。
 
-
-
 ## 总结
+在整理和撰写这篇文章之前，我一直认为this是简单的几条规则就可以概括的内容，但写完之后我发现，this的规则比想象的要复杂一些。并不是说难，而是情况很多。包含类与对象，箭头函数，JS运行环境，模块化，构造函数，继承，回调，箭头函数，call/bind/apply，eval，严格模式等很多主题。可以说贯穿了半个JavaScript语法的领域。
 
+阮一峰写过一篇[JavaScript的this原理](https://www.ruanyifeng.com/blog/2018/06/javascript-this.html)里面介绍了为什么JavaScript语言有this的设计，实际上这和内存中存储的数据结构有关系。但是JavaScript中的this搞出了如此多的场景和情形，实际上并不好用，也不容易理解。（只是容易面试出题了）
 
 ## 参考
 - MDN globalThis\
