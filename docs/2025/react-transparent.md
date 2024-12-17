@@ -3,6 +3,46 @@
 
 这篇文章中会描述使用React透传组件各类能力的方式。这些透传方式经常在高阶组件中使用，但并不只有高阶组件会用到它们。React有类式组件和函数式组件两种，我们会分别介绍。
 
+## 问题描述
+首先我们列举下简单的场景，说明我们为什么需要透传组件能力。这里以函数式组件为例。
+
+```js
+// 问题示例，这段代码是不正确的
+import { useRef } from "react";
+
+function FunComp() {
+  return <input />;
+}
+
+function FunComp2() {
+  return <div><input /></div>;
+}
+
+function App() {
+  const refFun = useRef(null);
+  const handleClick = () => {
+    console.log("click");
+  };
+  const handleClickFocus = () => {
+    if (refFun.current) refFun.current?.focus();
+  };
+  return (
+    <div>
+      <FunComp
+        ref={refFun}
+        style={{ background: "red" }}
+        onClick={handleClick}
+      />
+      <div onClick={handleClickFocus}>点我聚焦</div>
+    </div>
+  );
+}
+export default App;
+```
+
+假设我们想创建一个自定义组件（FunComp），里面封装了另外一个组件（例如这里的input），希望使用这个自定义组件增强原组件的能力，或者预先设定一些样式等等，自定义组件可能直接返回该组件，也可能被处理过（例如FunComp2被div包裹）。
+
+虽然原组件被封装了，但是还希望原组件的能力直接被透传给自定义组件。例如我们在自定义组件上操作props, 事件，ref等，希望就像操作原组件一样。在Vue3中，很多能力可以直接使用[Attributes继承](https://cn.vuejs.org/guide/components/attrs)特性，但是React却没有，需要我们自己实现。
 
 
 
@@ -11,4 +51,7 @@
 ## 参考
 - 如何二次封装一个Vue3组件库？\
   https://jzplp.github.io/2023/component-lib.html
+- Vue3 透传Attributes\
+  https://cn.vuejs.org/guide/components/attrs
+
 
