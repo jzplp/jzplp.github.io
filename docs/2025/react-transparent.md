@@ -44,6 +44,29 @@ export default App;
 
 虽然原组件被封装了，但是还希望原组件的能力直接被透传给自定义组件。例如我们在自定义组件上操作props, 事件，ref等，希望就像操作原组件一样。在Vue3中，很多能力可以直接使用[Attributes继承](https://cn.vuejs.org/guide/components/attrs)特性，但是React却没有，需要我们自己实现。
 
+## 函数式组件-透传Props和事件
+在函数式组件中，prop实际上就是组件的入参，且所有prop是被包含在同一个参数中的，因此很容易透传给子组件。且事件本身实际上也是prop，可以一并透传。
+
+```js
+function FunComp(props) {
+  return <input {...props} />;
+}
+
+function App() {
+  const handleClick = () => {
+    console.log("click");
+  };
+  return (
+    <div>
+      <FunComp style={{ background: "red" }} onClick={handleClick} />
+    </div>
+  );
+}
+
+export default App;
+```
+
+使用`{...props}`可以实现透传Props和事件。
 
 
 
