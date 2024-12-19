@@ -66,7 +66,98 @@ function App() {
 export default App;
 ```
 
-使用`{...props}`可以实现透传Props和事件。
+使用`{...props}`可以实现透传Props和事件。上述例子中，子组件可以接收到样式属性和事件。
+
+## 透传子节点children
+React中有一个特殊的属性children，表示父组件中包含的子节点。这也是需要透传的。
+
+### 直接渲染children属性
+
+```js
+function FunComp(props) {
+  return <div>左 {props.children} 右</div>;
+}
+
+function App() {
+  return (
+    <div>
+      <FunComp>子节点</FunComp>
+      <FunComp />
+    </div>
+  );
+}
+export default App;
+```
+
+可以看到，直接渲染props.children，即可透传子节点。即使没有子节点，这种透传也是没问题的。如果子组件本身已经透传了props，透传的对象又是
+
+### 使用透传Props实现透传子节点
+既然children也是Props之一，那么直接使用透传Props的方法是否可以呢? 我们试一下。
+
+```js
+function FunComp(props) {
+  return <div>左 {props.children} 右</div>;
+}
+
+function FunComp1(props) {
+  return <div {...props} />;
+}
+
+function FunComp2(props) {
+  return <FunComp {...props} />;
+}
+
+function App() {
+  return (
+    <div>
+      <FunComp1>子节点</FunComp1>
+      <FunComp1 children="子节点" />
+      <FunComp2>子节点</FunComp2>
+      <FunComp2 children="子节点" />
+    </div>
+  );
+}
+export default App;
+
+/* 页面效果
+子节点
+子节点
+左 子节点 右
+左 子节点 右
+*/
+```
+
+FunComp1包含的子组件是一个非自定义组件div，FunComp2包含的时自定义组件FunComp，可以看到我们使用`{...props}`进行Props透传，children实际上都被成功渲染了，甚至对父组件直接设置children属性也可以。
+
+### 冲突场景
+既然Props透传即可实现，那我们为什么还要强调一遍直接渲染props.children呢，因为有时候子组件不只渲染children，还有其它内容。如果Props和直接设置的子节点冲突，那么还是直接设置的子节点优先级更高。
+
+
+```js
+function FunComp(props) {
+  return <div {...props}>左 {props.children} 右</div>;
+}
+
+function App() {
+  return (
+    <div>
+      <FunComp>子节点</FunComp>
+      <FunComp children="子节点" />
+    </div>
+  );
+}
+export default App;
+
+/* 页面效果
+左 子节点 右
+左 子节点 右
+*/
+```
+
+我们同时透传了Props，也直接设置了子节点（其中包含其它内容），最后直接设置的子元素生效了。
+
+## 函数式组件-透传ref
+
 
 
 
