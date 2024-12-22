@@ -37,7 +37,6 @@ function App() {
     </div>
   );
 }
-export default App;
 ```
 
 假设我们想创建一个自定义组件（FunComp），里面封装了另外一个组件（例如这里的input），希望使用这个自定义组件增强原组件的能力，或者预先设定一些样式等等，自定义组件可能直接返回该组件，也可能被处理过（例如FunComp2被div包裹）。
@@ -62,13 +61,11 @@ function App() {
     </div>
   );
 }
-
-export default App;
 ```
 
 使用`{...props}`可以实现透传Props和事件。上述例子中，子组件可以接收到样式属性和事件。
 
-## 透传子节点children
+## 函数式组件-透传子节点
 React中有一个特殊的属性children，表示父组件中包含的子节点。这也是需要透传的。
 
 ### 直接渲染children属性
@@ -86,7 +83,6 @@ function App() {
     </div>
   );
 }
-export default App;
 ```
 
 可以看到，直接渲染props.children，即可透传子节点。即使没有子节点，这种透传也是没问题的。如果子组件本身已经透传了props，透传的对象又是
@@ -117,7 +113,6 @@ function App() {
     </div>
   );
 }
-export default App;
 
 /* 页面效果
 子节点
@@ -132,7 +127,6 @@ FunComp1包含的子组件是一个非自定义组件div，FunComp2包含的时�
 ### 冲突场景
 既然Props透传即可实现，那我们为什么还要强调一遍直接渲染props.children呢，因为有时候子组件不只渲染children，还有其它内容。如果Props和直接设置的子节点冲突，那么还是直接设置的子节点优先级更高。
 
-
 ```js
 function FunComp(props) {
   return <div {...props}>左 {props.children} 右</div>;
@@ -146,7 +140,6 @@ function App() {
     </div>
   );
 }
-export default App;
 
 /* 页面效果
 左 子节点 右
@@ -157,8 +150,69 @@ export default App;
 我们同时透传了Props，也直接设置了子节点（其中包含其它内容），最后直接设置的子元素生效了。
 
 ## 函数式组件-透传ref
+使用ref可以操作访问DOM节点，获取DOM元素上的属性或者方法。ref也是可以透传的。
 
+### 透传全部属性
 
+```js
+import { forwardRef, useRef } from "react";
+
+const FunComp = forwardRef(function (props, ref) {
+  return <input ref={ref} />;
+});
+
+function App() {
+  const inputRef = useRef(null);
+  function handleClick() {
+    console.log(inputRef.current?.style);
+    inputRef.current?.focus();
+  }
+  return (
+    <div>
+      <FunComp ref={inputRef} />
+      <div onClick={handleClick}>点击聚焦</div>
+    </div>
+  );
+}
+```
+
+使用forwardRef，可以透传ref属性。我们尝试了聚焦输入框，以及console输出style属性，都是正常生效的。
+
+### 仅暴露部分属性
+有时候我们不想暴露全部属性，仅希望暴露我们希望用户使用的部分属性，使用useImperativeHandle可以做到。
+
+```js
+import { forwardRef, useRef, useImperativeHandle } from "react";
+
+const FunComp = forwardRef(function (props, ref) {
+  const inputRef = useRef(null);
+  useImperativeHandle(ref, () => {
+    return {
+      focus() {
+        inputRef.current?.focus();
+      },
+    };
+  });
+  return <input ref={inputRef} />;
+});
+
+function App() {
+  const inputRef = useRef(null);
+  function handleClick() {
+    // 无法输出
+    console.log(inputRef.current?.style);
+    inputRef.current?.focus();
+  }
+  return (
+    <div>
+      <FunComp ref={inputRef} />
+      <div onClick={handleClick}>点击聚焦</div>
+    </div>
+  );
+}
+```
+
+我们仅向外层的ref暴露了focus，因此外层组件focus可以正常调用，但是却拿不到style属性了。使用这种形式还可以对方法进行额外的包装，或者创建一些新的ref方法。
 
 
 
@@ -167,5 +221,5 @@ export default App;
   https://jzplp.github.io/2023/component-lib.html
 - Vue3 透传Attributes\
   https://cn.vuejs.org/guide/components/attrs
-
-
+- React 使用ref操作DOM\
+  https://zh-hans.react.dev/learn/manipulating-the-dom-with-refs
