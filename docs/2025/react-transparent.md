@@ -214,6 +214,102 @@ function App() {
 
 我们仅向外层的ref暴露了focus，因此外层组件focus可以正常调用，但是却拿不到style属性了。使用这种形式还可以对方法进行额外的包装，或者创建一些新的ref方法。
 
+## 类式组件-透传Props和事件
+类式组件是另一种创建React组件的方法，被React标记为过时的API，但是在老代码中还经常被使用到。我们先来看一下，在类式组件中，如何Props和事件。
+
+```js
+import { Component } from "react";
+class ClassComp extends Component {
+  render() {
+    return <div {...this.props}>你好</div>;
+  }
+}
+
+class App extends Component {
+  render() {
+    const handleClick = () => {
+      console.log("click");
+    };
+    return <ClassComp style={{ background: "red" }} onClick={handleClick} />;
+  }
+}
+```
+
+通过上述代码可以看到，在类式组件中透传Props和事件与函数式组件一致，使用`{...props}`可以实现透传Props和事件。
+
+## 类式组件-透传子节点
+来看看类式组件是如何透传子节点的。
+
+### 直接渲染children属性
+
+```js
+import { Component } from "react";
+class ClassComp extends Component {
+  render() {
+    return <div>左 {this.props.children} 右</div>;
+  }
+}
+
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <ClassComp>子节点</ClassComp>
+        <ClassComp />
+      </div>
+    );
+  }
+}
+```
+
+代码依然与类式组件基本一致，直接渲染`{this.props.children}`即可。
+
+### 使用透传Props实现透传子节点
+上一节讲到的透传Props，同样可以实现透传子节点。
+
+```js
+import { Component } from "react";
+class ClassComp extends Component {
+  render() {
+    return <div>左 {this.props.children} 右</div>;
+  }
+}
+class ClassComp1 extends Component {
+  render() {
+    return <div {...this.props} />;
+  }
+}
+class ClassComp2 extends Component {
+  render() {
+    return <ClassComp {...this.props} />;
+  }
+}
+
+class App extends Component {
+  render() {
+    return (
+      <div>
+    <div>
+      <ClassComp1>子节点</ClassComp1>
+      <ClassComp1 children="子节点" />
+      <ClassComp2>子节点</ClassComp2>
+      <ClassComp2 children="子节点" />
+    </div>
+      </div>
+    );
+  }
+}
+
+/* 页面效果
+子节点
+子节点
+左 子节点 右
+左 子节点 右
+*/
+```
+
+与函数式组件一致，Props透传时也会透传children，甚至对父组件直接设置children属性也可以透传。至于Props和直接设置的子节点冲突的场景也与函数式组件一致，这里就不举例了。
+
 
 
 ## 参考
@@ -223,3 +319,6 @@ function App() {
   https://cn.vuejs.org/guide/components/attrs
 - React 使用ref操作DOM\
   https://zh-hans.react.dev/learn/manipulating-the-dom-with-refs
+- React omponent\
+  https://zh-hans.react.dev/reference/react/Component
+
