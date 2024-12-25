@@ -1,4 +1,4 @@
-# 如何使用React，透传各类组件能力/属性？（未完成）
+# 如何使用React，透传各类组件能力/属性？
 在23年的时候，我主要使用的框架还是Vue，当时写了一篇“[如何二次封装一个Vue3组件库？](https://jzplp.github.io/2023/component-lib.html)”的文章，里面涉及了一些如何使用Vue透传组件能力的方法。在我24年接触React之后，我发现这种扩展组件能力的方式有一个专门的术语：高阶组件（HOC）。但在Vue开发中，这个词很少听到。
 
 这篇文章中会描述使用React透传组件各类能力的方式。这些透传方式经常在高阶组件中使用，但并不只有高阶组件会用到它们。React有类式组件和函数式组件两种，我们会分别介绍。
@@ -214,6 +214,8 @@ function App() {
 
 我们仅向外层的ref暴露了focus，因此外层组件focus可以正常调用，但是却拿不到style属性了。使用这种形式还可以对方法进行额外的包装，或者创建一些新的ref方法。
 
+在React19中，不再需要forwardRef了，ref直接作为一个prop属性访问。可以看最后的参考文档。
+
 ## 类式组件-透传Props和事件
 类式组件是另一种创建React组件的方法，被React标记为过时的API，但是在老代码中还经常被使用到。我们先来看一下，在类式组件中，如何Props和事件。
 
@@ -289,12 +291,10 @@ class App extends Component {
   render() {
     return (
       <div>
-    <div>
-      <ClassComp1>子节点</ClassComp1>
-      <ClassComp1 children="子节点" />
-      <ClassComp2>子节点</ClassComp2>
-      <ClassComp2 children="子节点" />
-    </div>
+        <ClassComp1>子节点</ClassComp1>
+        <ClassComp1 children="子节点" />
+        <ClassComp2>子节点</ClassComp2>
+        <ClassComp2 children="子节点" />
       </div>
     );
   }
@@ -310,7 +310,109 @@ class App extends Component {
 
 与函数式组件一致，Props透传时也会透传children，甚至对父组件直接设置children属性也可以透传。至于Props和直接设置的子节点冲突的场景也与函数式组件一致，这里就不举例了。
 
+## 类式组件-透传ref
+类式组件透传Ref的形式就与函数式组件不同了。具体类式组件有不同的实现方式，我们分别介绍下：
 
+### 暴露部分属性
+
+```js
+import { Component, createRef } from "react";
+
+class ClassComp extends Component {
+  inputRef = createRef();
+  focus() {
+    this.inputRef.current?.focus();
+  }
+  render() {
+    return <input ref={this.inputRef} />;
+  }
+}
+
+class App extends Component {
+  classRef = createRef();
+  handleClick() {
+    console.log(this.classRef.current);
+    this.classRef.current?.focus();
+  }
+  render() {
+    return (
+      <div>
+        <ClassComp ref={this.classRef} />
+        <div onClick={() => this.handleClick()}>点击聚焦</div>
+      </div>
+    );
+  }
+}
+```
+
+通过代码可以看到，在类式组件中，不需要通过forwardRef等方法就可以使用ref访问子组件，且能执行子组件类中的方法。所以我们只要把需要暴露的内容包装成一个方法，那么就可以让父组件获取到。
+
+![](/2024/trans-1.png)
+
+通过输出的图可以看到，不仅能拿到方法，还能拿到属性和其它很多东西。
+
+### 拿到子组件内部的ref
+既然可以拿到子组件类中和属性也能拿到。那么父组件可以直接拿到子组件内部的ref属性inputRef，父组件可以直接拿到它来执行内部的方法。
+
+```js
+import { Component, createRef } from "react";
+
+class ClassComp extends Component {
+  inputRef = createRef();
+  render() {
+    return <input ref={this.inputRef} />;
+  }
+}
+
+class App extends Component {
+  classRef = createRef();
+  handleClick() {
+    this.classRef.current?.inputRef?.current?.focus();
+  }
+  render() {
+    return (
+      <div>
+        <ClassComp ref={this.classRef} />
+        <div onClick={() => this.handleClick()}>点击聚焦</div>
+      </div>
+    );
+  }
+}
+```
+
+通过代码可以看到，子组件不需要透出方法了，父组件直接拿到子组件的inputRef，想执行什么就执行什么，做到了真正的“透传”。绑定ref还有另一种方式，这里也介绍一下：
+
+```js
+import { Component, createRef } from "react";
+
+class ClassComp extends Component {
+  render() {
+    return <input ref="inputRef" />;
+  }
+}
+
+class App extends Component {
+  classRef = createRef();
+  handleClick() {
+    this.classRef.current?.refs?.inputRef?.focus();
+  }
+  render() {
+    return (
+      <div>
+        <ClassComp ref={this.classRef} />
+        <div onClick={() => this.handleClick()}>点击聚焦</div>
+      </div>
+    );
+  }
+}
+```
+
+ref属性的值可以直接是一个字符串，通过this.refs可以拿到使用字符串形式绑定的ref。
+
+## 总结
+函数式组件与类式组件在Props和事件透传的方式基本一致，但是ref透传的区别较大。直接对比的话，好像类式组件的透传能力更强一些，但是它把组件内部所有内容全暴露在外，违反了封装的原则，子组件内部的改动很容易影响父组件，不是一个好的设计。
+
+在React19版本中，ref属性也变成了prop，仅通过透传Props，就能实现透传组件大部分能力了。
 
 ## 参考
 - 如何二次封装一个Vue3组件库？\
@@ -321,4 +423,7 @@ class App extends Component {
   https://zh-hans.react.dev/learn/manipulating-the-dom-with-refs
 - React omponent\
   https://zh-hans.react.dev/reference/react/Component
-
+- ref用法\
+  https://blog.csdn.net/qq_47305413/article/details/136059266
+- React v19 ref作为一个属性\
+  https://zh-hans.react.dev/blog/2024/12/05/react-19#ref-as-a-prop
