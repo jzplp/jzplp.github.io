@@ -12,7 +12,9 @@ export default defineConfig({
     sidebar: [
       {
         text: '2025',
-        items: []
+        items: [
+          { text: '谈一谈Web前端开发中的本地代理配置', link: '/2025/web-proxy' },
+        ]
       },
       {
         text: '2024',
