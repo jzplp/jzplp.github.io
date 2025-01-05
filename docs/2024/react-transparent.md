@@ -410,7 +410,7 @@ class App extends Component {
 ref属性的值可以直接是一个字符串，通过this.refs可以拿到使用字符串形式绑定的ref。
 
 ## 总结
-函数式组件与类式组件在Props和事件透传的方式基本一致，但是ref透传的区别较大。直接对比的话，好像类式组件的透传能力更强一些，但是它把组件内部所有内容全暴露在外，违反了封装的原则，子组件内部的改动很容易影响父组件，不是一个好的设计。
+函数式组件与类式组件在Props和事件透传的方式基本一致，但是ref透传的区别较大。直接对比的话，好像类式组件的透传能力更强一些，但是它把组件内部所有内容全暴露在外，违反了封装的原则，子组件内部的改动很容易影响父组件，不是一个好的设计。参考文档中还给出了使用TypeScript时，透传参数如何判断类型的文档。
 
 在React19版本中，ref属性也变成了prop，仅通过透传Props，就能实现透传组件大部分能力了。
 
@@ -427,3 +427,5 @@ ref属性的值可以直接是一个字符串，通过this.refs可以拿到使�
   https://blog.csdn.net/qq_47305413/article/details/136059266
 - React v19 ref作为一个属性\
   https://zh-hans.react.dev/blog/2024/12/05/react-19#ref-as-a-prop
+- Useful Patterns by Use Case. React TypeScript Cheatsheet\
+  https://react-typescript-cheatsheet.netlify.app/docs/advanced/patterns_by_usecase
