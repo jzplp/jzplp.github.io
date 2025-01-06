@@ -13,12 +13,28 @@
 - 使用代理前：浏览器访问后端数据接口 -> 跨域
 - 使用代理后：浏览器访问本地数据接口 -> 本地代理转发给后端 -> 从后端拿到数据 -> 返回给前端（同域）
 
-这里举一个跨域的例子：
+这里使用React和fetch举一个跨域的例子：
+
+```js
+import { useEffect } from "react";
+
+function App() {
+
+  useEffect(() => {
+    fetch('/api/test').then(res => console.log(1, res))
+    fetch('https://www.baidu.com/s').then(res => console.log(2, res))
+  }, [])
+
+  return <div>23123</div>;
+}
+```
+
+![](/2025/proxy-1.png)
 
 
+我们在代码中使用fetch请求了两个接口，结果如图。一个是同域的`/api/test`，能正常收到结果。一个是跨域的`https://www.baidu.com/s`，请求被浏览器拦住了，错误提示为 CORS policy。如果我们想本地请求跨域的接口，就需要代理来帮我们。
 
 当然，使用代理还有一些其它原因，例如需要调试移动端，需要Mock数据，方便切换后端服务等等。
-
 
 ## Vite中的代理配置
 
