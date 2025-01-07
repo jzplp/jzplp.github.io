@@ -32,12 +32,43 @@ function App() {
 ![](/2025/proxy-1.png)
 
 
-我们在代码中使用fetch请求了两个接口，结果如图。一个是同域的`/api/test`，能正常收到结果。一个是跨域的`https://www.baidu.com/s`，请求被浏览器拦住了，错误提示为 CORS policy。如果我们想本地请求跨域的接口，就需要代理来帮我们。
+我们在代码中使用fetch请求了两个接口，结果如图。一个是同域的`/api/test`，能正常收到结果。一个是跨域的`https://www.baidu.com/s`，请求被浏览器拦住了，错误提示为 CORS policy。如果我们想本地请求跨域的接口，就需要代理来帮我们。(还有一些其它方式可以规避跨域，因为与这个主题无关，且有诸多限制，因此这里并不描述)
 
 当然，使用代理还有一些其它原因，例如需要调试移动端，需要Mock数据，方便切换后端服务等等。
 
+## 模拟后端服务
+在描述具体的代理配置和实验之前，我们先在本地启动一个模拟的后端服务，方便我们实验代理请求。
+
+```js
+const http = require('http');
+
+http.createServer((req, res) => {
+  console.log(`request url: ${req.url}`);
+  if(req.url === '/api/test') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end('{"a":1}');
+  } else {
+    res.writeHead(404);
+    res.end('Not found');
+  }
+}).listen(8000, () => {
+  console.log('server start!');
+});
+```
+
+我们在本地的8000端口启动了一个“后端服务”，当请求命中接口时，返回json。这个后端服务与前端独立，是跨域的。
+
 ## Vite中的代理配置
 
+```js
+{
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8000'
+    }
+  }
+}
+```
 
 
 
