@@ -31,7 +31,6 @@ function App() {
 
 ![](/2025/proxy-1.png)
 
-
 我们在代码中使用fetch请求了两个接口，结果如图。一个是同域的`/api/test`，能正常收到结果。一个是跨域的`https://www.baidu.com/s`，请求被浏览器拦住了，错误提示为 CORS policy。如果我们想本地请求跨域的接口，就需要代理来帮我们。(还有一些其它方式可以规避跨域，因为与这个主题无关，且有诸多限制，因此这里并不描述)
 
 当然，使用代理还有一些其它原因，例如需要调试移动端，需要Mock数据，方便切换后端服务等等。
@@ -56,20 +55,51 @@ http.createServer((req, res) => {
 });
 ```
 
-我们在本地的8000端口启动了一个“后端服务”，当请求命中接口时，返回json。这个后端服务与前端独立，是跨域的。
+我们在本地的8000端口启动了一个“后端服务”，当请求命中接口时，返回json。这个后端服务与前端独立，是跨域的。在下面的例子中，我们假设：
+
+* 前端本地服务：http://localhost:5000
+* 后端服务： http://localhost:8000
 
 ## Vite中的代理配置
+这里参考Vite文档中的说明，简单描述一下Vite中的代理配置。
+
+### 简单代理
 
 ```js
-{
-  server: {
-    proxy: {
-      '/api': 'http://localhost:8000'
-    }
-  }
+server: {
+  proxy: { '/api': 'http://localhost:8000' }
+}
+// 或者
+server: {
+  proxy: { "/api": { target: "http://localhost:8000" } }
 }
 ```
 
+最简单的配置就如上面所示，将/api开头的请求都转发到配置的服务地址上。我们举几个例子：
+
+* http://localhost:5000/api 命中为 http://localhost:8000/api
+* http://localhost:5000/api/test 命中为 http://localhost:8000/api/test
+* http://localhost:5000/api1 命中为 http://localhost:8000/api1
+* http://localhost:5000/abc 未命中
+
+### changeOrigin
+变更请求中的host为target所指定的url。
+
+```js
+server: {
+  proxy: { '/api': 'http://localhost:8000', changeOrigin: true }
+}
+```
+通过打印我们模拟服务中req.headers，我们能看到加与不加的区别：
+
+* 加之前 host: 'localhost:5174'
+* 加之后 host: 'localhost:8000'
+
+![](/2025/proxy-2.png)
+
+为什么要改host？因为部分后端会要求host为指定地址时，接口验证才会通过。还有很多后端会要求其它的指定数据，例如headers和cookies等，我们后面再描述。
+
+### rewrite
 
 
 
