@@ -17,14 +17,11 @@
 
 ```js
 import { useEffect } from "react";
-
 function App() {
-
   useEffect(() => {
     fetch('/api/test').then(res => console.log(1, res))
     fetch('https://www.baidu.com/s').then(res => console.log(2, res))
   }, [])
-
   return <div>23123</div>;
 }
 ```
@@ -57,8 +54,8 @@ http.createServer((req, res) => {
 
 我们在本地的8000端口启动了一个“后端服务”，当请求命中接口时，返回json。这个后端服务与前端独立，是跨域的。在下面的例子中，我们假设：
 
-* 前端本地服务：http://localhost:5000
-* 后端服务： http://localhost:8000
+* 前端本地服务： `http://localhost:5000`
+* 后端服务： `http://localhost:8000`
 
 ## Vite中的代理配置
 这里参考Vite文档中的说明，简单描述一下Vite中的代理配置。
@@ -77,10 +74,10 @@ server: {
 
 最简单的配置就如上面所示，将/api开头的请求都转发到配置的服务地址上。我们举几个例子：
 
-* http://localhost:5000/api 命中为 http://localhost:8000/api
-* http://localhost:5000/api/test 命中为 http://localhost:8000/api/test
-* http://localhost:5000/api1 命中为 http://localhost:8000/api1
-* http://localhost:5000/abc 未命中
+* `http://localhost:5000/api` 命中为 `http://localhost:8000/api`
+* `http://localhost:5000/api/test` 命中为 `http://localhost:8000/api/test`
+* `http://localhost:5000/api1` 命中为 `http://localhost:8000/api1`
+* `http://localhost:5000/abc` 未命中
 
 ### changeOrigin
 变更请求中的host为target所指定的url。
