@@ -1,4 +1,4 @@
-# 谈一谈Web前端开发中的本地代理配置
+# 谈一谈Web前端开发中的本地代理配置（未完成）
 
 在Web前端开发中，我们在本地写代码经常遇到的一件事情就是代理配置。代理配置说简单也简单，配置一次基本就一劳永逸，但有时候配置不对，无论如何也连不上后端，就成了非常头疼的一件事。在这篇文章中，我们先从项目构建工具提供的代理配置开始，讨论一下本地代理的问题。
 
@@ -84,19 +84,56 @@ server: {
 
 ```js
 server: {
-  proxy: { '/api': 'http://localhost:8000', changeOrigin: true }
+  proxy: { "/api": { target: "http://localhost:8000", changeOrigin: true } }
 }
 ```
 通过打印我们模拟服务中req.headers，我们能看到加与不加的区别：
 
-* 加之前 host: 'localhost:5174'
-* 加之后 host: 'localhost:8000'
+* 配置之前 host: 'localhost:5174'
+* 配置之后 host: 'localhost:8000'
 
 ![](/2025/proxy-2.png)
 
 为什么要改host？因为部分后端会要求host为指定地址时，接口验证才会通过。还有很多后端会要求其它的指定数据，例如headers和cookies等，我们后面再描述。
 
 ### rewrite
+rewrite参数接收一个函数，可以在传给后端前，重写接口地址。
+
+```js
+server: {
+  proxy: {
+    "/api": {
+      target: "http://localhost:8000",
+      rewrite: (path) => path.replace(/\/proxy/, ""),
+    },
+  },
+},
+```
+
+使用上面的例子，可以将接口地址中的/proxy/去掉，而没有包含的则不改动。
+
+* `http://localhost:5000/api/proxy/test` 命中为`http://localhost:5000/api/test`
+* `http://localhost:5000/api/test` 命中为 `http://localhost:5000/api/test`
+* `http://localhost:5000/abc` 未命中
+
+### bypass
+bypass也接收一个函数，不同的是它可以接收request对象，和代理配置等，方便我们直接修改请求对象。例如我们可以在bypass中直接修改headers：
+
+```js
+server: {
+  proxy: {
+    "/api": {
+      target: "http://localhost:8000",
+      bypass: (req, res, options) => {
+        req.headers.host = options.target;
+      },
+    },
+  },
+},
+```
+
+* 配置之前 host: 'localhost:5174'
+* 配置之后 host: 'localhost:8000'
 
 
 
