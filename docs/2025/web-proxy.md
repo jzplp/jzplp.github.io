@@ -89,7 +89,7 @@ server: {
 ```
 通过打印我们模拟服务中req.headers，我们能看到加与不加的区别：
 
-* 配置之前 host: 'localhost:5174'
+* 配置之前 host: 'localhost:5000'
 * 配置之后 host: 'localhost:8000'
 
 ![](/2025/proxy-2.png)
@@ -135,6 +135,65 @@ server: {
 * 配置之前 host: 'localhost:5174'
 * 配置之后 host: 'localhost:8000'
 
+bypass还可以返回另一个url，代替原本的请求；返回false会为请求产生 404 错误；返回null或undefined则继续代理请求（如上例）。
+
+```js
+// 将/api/b请求代替为/index.html
+bypass: (req, res, options) => {
+  if(req.url == '/api/b') return '/index.html';
+},
+// 返回404
+bypass: (req, res, options) => {
+  if(req.url == '/api/b') return false;
+},
+```
+
+## Webpack中的代理配置
+这里我们换用Vue CLI创建了工程，看看Webpack中提供的代理配置。
+
+### 简单代理
+
+```js
+devServer: {
+  proxy: 'http://localhost:8000'
+}
+```
+服务器将任何未知请求 (没有匹配到静态文件的请求) 代理到指定的后端服务。
+
+### 配置选项
+
+```js
+proxy: {
+  "/proxy": {
+    target: "http://localhost:8000",
+    changeOrigin: true,
+    // pathRewrite: { '^/proxy': '' },
+    pathRewrite: (path) => path.replace(/^\/proxy/, ""),
+    bypass:  (req, res, options) => {
+      req.headers.host = options.target;
+    }
+  },
+},
+```
+
+这是在Webpack中的配置例子，可以看到和Vite的配置非常像，我们对比一下：
+
+| Vite配置 | Webpack配置 |
+| - | - |
+| target | target |
+| changeOrigin | changeOrigin |
+| rewrite | pathRewrite |
+| bypass | bypass |
+
+这些对应的配置在Webpack和Vite中不仅效果一样，连配置方式，字段名都是基本都一样的，因此这里不再赘述了，Webpack的使用方法对比Vite即可。
+
+
+## 待写
+
+
+## 总结
+使用代理之后，在浏览器中，前端访问还是原来的非跨域的接口，但实际请求后端的url可能早就被改的面目全非了。
+
 
 
 ## 参考
@@ -148,3 +207,5 @@ server: {
   https://github.com/http-party/node-http-proxy
 - MDN fetch\
   https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch
+- Vue CLI devServer.proxy\
+  https://cli.vuejs.org/zh/config/?#devserver-proxy
