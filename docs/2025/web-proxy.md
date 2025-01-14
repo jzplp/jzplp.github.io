@@ -112,8 +112,8 @@ server: {
 
 使用上面的例子，可以将接口地址中的/proxy/去掉，而没有包含的则不改动。
 
-* `http://localhost:5000/api/proxy/test` 命中为`http://localhost:5000/api/test`
-* `http://localhost:5000/api/test` 命中为 `http://localhost:5000/api/test`
+* `http://localhost:5000/api/proxy/test` 命中为`http://localhost:8000/api/test`
+* `http://localhost:5000/api/test` 命中为 `http://localhost:8000/api/test`
 * `http://localhost:5000/abc` 未命中
 
 ### bypass
@@ -187,13 +187,29 @@ proxy: {
 
 这些对应的配置在Webpack和Vite中不仅效果一样，连配置方式，字段名都是基本都一样的，因此这里不再赘述了，Webpack的使用方法对比Vite即可。
 
+## Vite和Webpack配置总结
+使用代理之后，在浏览器中，前端访问还是原来的非跨域的接口，但实际请求后端的url可能早就被改的面目全非了。例如上面的场景中，浏览器中看到的请求是`http://localhost:5000/api/proxy/test`，但实际对后端你发起的请求为`http://localhost:8000/api/test`。
 
-## 待写
+### 生产模式
+那么上述的代理配置，在生产模式，即我们构建后的成果物中会不会生效呢？答案是不会的。因为构建的成果物是纯静态资源（html,js等），没有服务器配置，因此是无法解决跨域问题的。在服务器中，一般由后端服务或者有统一的代理服务器解决跨域问题。
+
+正好vite有预览模式（preview），我们本地打包一下构建成果物，然后本地预览一下试试。注意需要先在vite中设置`preview.proxy`为false，否则预览模式也会自动采用开发模式的代理。
+
+结果虽然本地后端服务依旧是开启状态，在浏览器中看到的请求依然是`http://localhost:5000/api/proxy/test`没有变，但是接口不通了，后端服务收不到请求。
+
+### 共同的底层http-proxy
+通过上一节的具体配置，我们发现两个构建工具的配置形式非常像。这是因为它们使用了共同的底层依赖http-proxy。
+
+查看Vite的文档与Vite代理配置的源码，发现Vite实际就是将http-proxy进行了简单的封装。查看Webpack的文档，发现代理配置是由http-proxy-middleware这个包提供的，而它的底层依赖，实际上也是http-proxy。因此，这两个构建工具的代理配置才这么像。
+
+那为什么两个工具的配置还有不同的地方呢？这是因为构建工具在封装http-proxy时，多提供的额外功能。因此两者才会有一些小区别。
+
+## http-proxy
+
+
 
 
 ## 总结
-使用代理之后，在浏览器中，前端访问还是原来的非跨域的接口，但实际请求后端的url可能早就被改的面目全非了。
-
 
 
 ## 参考
@@ -203,9 +219,11 @@ proxy: {
   https://webpack.docschina.org/configuration/dev-server/#devserverproxy
 - Github http-proxy-middleware\
   https://github.com/chimurai/http-proxy-middleware
-- Github node-http-proxy\
+- Github http-proxy\
   https://github.com/http-party/node-http-proxy
 - MDN fetch\
   https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch
 - Vue CLI devServer.proxy\
   https://cli.vuejs.org/zh/config/?#devserver-proxy
+- Vite代理配置 源码\
+  https://github.com/vitejs/vite/blob/main/packages/vite/src/node/server/middlewares/proxy.ts
