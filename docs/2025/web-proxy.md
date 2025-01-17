@@ -205,14 +205,49 @@ proxy: {
 那为什么两个工具的配置还有不同的地方呢？这是因为构建工具在封装http-proxy时，多提供的额外功能。因此两者才会有一些小区别。
 
 ## http-proxy简述
-http-proxy是一个Node.js下的HTTP代理请求库，Vite和Webpack等构建工具就是用它作为底层代理请求的方法。
+http-proxy是一个Node.js下的HTTP代理请求库，Vite和Webpack等构建工具就是用它作为底层代理请求的方法。我们不通过构建工具，直接使用一下http-proxy。这里我们启动一个小Node.js服务器作为前端开发服务器（在角色上类似于前端构建工具启动的本地开发服务）。
 
-### 使用http-proxy
-首先我们不通过构建工具，直接使用一下http-proxy。这里我们启动一个小Node.js服务器作为前端开发服务器（在角色上类似于前端构建工具启动的本地开发服务）。
+```js
+const http = require('http');
+const httpProxy = require('http-proxy');
 
+const htmlData = `
+<html>
+  <script>
+    fetch('/proxy/api/test').then(res => console.log(1, res.json()))
+    fetch('/proxy/api/b').then(res => console.log(2, res.json()))
+    fetch('/api/b').then(res => console.log(2, res.json()))
+  </script>
+</html>
+`;
 
+const reg = /^\/proxy/;
+const rewrite = (path) => path.replace(reg, "");
+const proxy = httpProxy.createProxyServer({});
 
-### 源码简单分析
+proxy.on('proxyReq', (proxyReq, req, res, option) => {
+  proxyReq.path = rewrite(proxyReq.path);
+})
+
+http.createServer((req, res) => {
+  console.log(`request url: ${req.url}`);
+  if(req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(htmlData);
+  } else if(reg.test(req.url)) {
+    proxy.web(req, res, { target: 'http://localhost:8000' }, (e) => {});
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+  }
+}).listen(5000, () => {
+  console.log('server start!');
+});
+```
+
+可以看到，我们自己启动了一个服务，提供HTML，里面包含fetch请求。当fetch请求命中我们的API规则时，将req和res交给http-proxy的代理接管，由它来负责请求真正的后端，拿到接口返回后，再透传回来。代理提供了一些配置和事件，可以做到拦截请求，更改请求内容或者返回数据等等。上面展示的例子就类似于我们在前面使用Webpack和Vite的配置的代理规则。
+
+通过例子可以看到，http-proxy代理本身是没有“独立服务”的(除非我们手动启动独立服务)，依附于本地开发用的http服务。它的作用很简单，仅仅是帮我们请求后端接口而已。
 
 
 ## 总结
