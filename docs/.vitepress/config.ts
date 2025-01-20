@@ -13,7 +13,7 @@ export default defineConfig({
       {
         text: '2025',
         items: [
-          { text: '谈一谈Web前端开发中的本地代理配置', link: '/2025/web-proxy' },
+          { text: '谈一谈前端构建工具的本地代理配置（Webpack与Vite）', link: '/2025/web-proxy' },
         ]
       },
       {
