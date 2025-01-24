@@ -13,6 +13,7 @@ export default defineConfig({
       {
         text: '2025',
         items: [
+          { text: '标题没想好', link: '/2025/css-float' },
           { text: '谈一谈前端构建工具的本地代理配置（Webpack与Vite）', link: '/2025/web-proxy' },
         ]
       },
