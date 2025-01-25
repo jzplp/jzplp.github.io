@@ -14,7 +14,8 @@ export default defineConfig({
         text: '2025',
         items: [
           { text: '标题没想好', link: '/2025/css-float' },
-          { text: '谈一谈前端构建工具的本地代理配置（Webpack与Vite）', link: '/2025/web-proxy' },
+          /* { text: '(非技术)从一公里到半程马拉松：我的一年跑步经历', link: '/2025/run-half-marathon' }, */
+          { text: '谈一谈前端构建工具的本地代理配置(Webpack与Vite)', link: '/2025/web-proxy' },
         ]
       },
       {
