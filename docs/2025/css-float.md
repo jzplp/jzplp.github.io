@@ -1,9 +1,6 @@
-# 聊一下CSS的float与浮动流（未完成）
-在网络上关于CSS的知识中，有时候能听到“标准流”，“浮动流”，“定位流”等等词语。这几个“流”实际上指的是CSS中传统的布局方案。“标准流”就是浏览器默认的布局方式，“浮动流”是指的用
+# 聊一下CSS中的标准流，浮动流，文本流，文档流
+在网络上关于CSS的文章中，有时候能听到“标准流”，“浮动流”，“定位流”等等词语，还有像文档流，文本流等词，这些流指的都是什么？ 实际上指的是CSS中的一些布局方案和特性。今天我们就来聊一下CSS中的这些流。
 
-
-
-todo  了解文档流 文本流
 
 
 ## 参考
@@ -11,4 +8,9 @@ todo  了解文档流 文本流
   https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/CSS_layout/Introduction
 - MDN 浮动\
   https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/CSS_layout/Floats
-
+- HTML的文档流和文本流分别是什么？\
+  https://www.zhihu.com/question/21911352
+- 文档流、文本流、定位流、浮动流、脱离文档流\
+  https://blog.csdn.net/a18792627168/article/details/106298596
+- HTML中的文档流和文本流\
+  https://juejin.cn/post/6844904013360545800
