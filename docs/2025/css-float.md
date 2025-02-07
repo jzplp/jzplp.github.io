@@ -1,4 +1,4 @@
-# 聊一下CSS中的标准流，浮动流，文本流，文档流
+# 聊一下CSS中的标准流，浮动流，文本流，文档流（未完成）
 在网络上关于CSS的文章中，有时候能听到“标准流”，“浮动流”，“定位流”等等词语，还有像“文档流”，“文本流”等词，这些流指的都是什么？ 实际上指的是CSS中的一些布局方案和特性。今天我们就来聊一下CSS中的这些流。
 
 ## 简述
@@ -10,7 +10,9 @@
 看了简述，还是不清楚各种流的区别与关联，比如文档流和文本流看起来差不多，究竟有什么不同？CSS浮动和定位为什么要多加一个“流”字？下面我们一一解答下。
 
 ## 文档流
-文档流的英文名是“normal flow”，是HTML默认的布局形式。
+文档流又叫做普通流，标准流，常规流等等，的英文名是“normal flow”，是HTML默认的布局形式。在未指定使用其它布局时，我们使用的就是文档流的布局。在文档流中分为两种元素：块级元素和内联元素。
+
+
 
 
 ## 文本流
@@ -36,3 +38,16 @@
   https://www.zhihu.com/question/24529373
 - 文档流和文本流的区别\
   https://www.cnblogs.com/gvip-cyl/p/6258119.html
+- CSS2 normal-flow\
+  https://www.w3.org/TR/CSS2/visuren.html#normal-flow
+- MDN 常规流中的块和内联布局\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_flow_layout/Block_and_inline_layout_in_normal_flow
+- MDN 块级内容\
+  https://developer.mozilla.org/zh-CN/docs/Glossary/Block-level_content
+- MDN 行级内容\
+  https://developer.mozilla.org/zh-CN/docs/Glossary/Inline-level_content
+- MDN 区块格式化上下文\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_display/Block_formatting_context
+- MDN 行内格式化上下文\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/Inline_formatting_context
+
