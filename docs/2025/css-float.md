@@ -10,12 +10,90 @@
 看了简述，还是不清楚各种流的区别与关联，比如文档流和文本流看起来差不多，究竟有什么不同？CSS浮动和定位为什么要多加一个“流”字？下面我们一一解答下。
 
 ## 文档流
-文档流又叫做普通流，标准流，常规流等等，的英文名是“normal flow”，是HTML默认的布局形式。在未指定使用其它布局时，我们使用的就是文档流的布局。在文档流中分为两种元素：块级元素和内联元素。
+文档流又叫做普通流，标准流，常规流等等，的英文名是“normal flow”，是HTML默认的布局形式。在未指定使用其它布局时，我们使用的就是文档流的布局。在文档流中分为两种元素：块级元素和行内元素。
 
+**块级元素**：常见的块级元素有div和p标签等。块级元素会默认占满横向全部宽度，在文档流中从上到下垂直排列。块级元素的左边缘与父元素的左边缘是重合的。
 
+**行内元素**：常见的行内元素有span和a标签等。行内元素在文档流中的宽度为实际内容的宽度，在水平方向从左到右排列。
 
+```html
+<html>
+  <body>
+    <div class="border div-common"></div>
+    <div class="border div-common div-width"></div>
+    <div class="border div-common div-width"></div>
+    你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS!
+    我是JZ。你好CSS! 我是JZ。
+    <span class="border">
+      我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS!
+    </span>
+  </body>
+  <style>
+    .border {
+      border: 1px solid red;
+    }
+    .div-common {
+      height: 50px;
+    }
+    .div-width {
+      width: 100px;
+    }
+  </style>
+</html>
+```
+
+![](/2025/float-1.png)
+
+通过例子我们可以看到，每个块级元素独占一行，从上到下排列。在未设置宽度时，默认占满横向全部宽度；即使设置了宽度且剩余空间足够，也是独占一行。行内元素则从左到右排列，如果一行不够，则从下一行左边开始继续。
 
 ## 文本流
+文本流是指的文本字符从左到右，从上到下的输出顺序。只看说明，感觉文本流和文档流看起来像是一种东西，但事实上是不一样的，我们看一个例子。
+
+```html
+<html>
+  <body>
+    <div class="container">
+      <div class="div-common"></div>
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS!
+      我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+    </div>
+    <div class="container">
+      <div class="div-common div-float"></div>
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS!
+      我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+    </div>
+    <div class="container">
+      <div class="div-common div-pos"></div>
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS!
+      我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+    </div>
+  </body>
+  <style>
+    .container {
+      margin-bottom: 50px;
+    }
+    .div-common {
+      height: 50px;
+      width: 100px;
+      border: 1px solid red;
+    }
+    .div-float {
+      float: left;
+    }
+    .div-pos {
+      position: absolute;
+    }
+  </style>
+</html>
+```
+
+![](/2025/float-2.png)
+
+
+这里列举了三种情况（例子中包含浮动流和定位流，我们后面会单独介绍）：
+1. 第一种情况就是正常的文档流，块级元素单独占一行，字符文本也单独一行从左到右排列。
+2. 我们对块级元素设置了左浮动。下面的字符文本跑到同一行展示了，因此浮动脱离了文档流。但是字符文本没有覆盖到块级元素上面，因此没有脱离文本流。
+3. 我们对块级元素设置了绝对定位。可以看到下面的字符文本不止跑到同一行展示了，还覆盖到了块级元素上面，因此脱离了文档流，也脱离了文本流。
 
 ## 浮动流
 
