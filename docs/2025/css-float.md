@@ -95,6 +95,52 @@
 2. 我们对块级元素设置了左浮动。下面的字符文本跑到同一行展示了，因此浮动脱离了文档流。但是字符文本没有覆盖到块级元素上面，因此没有脱离文本流。
 3. 我们对块级元素设置了绝对定位。可以看到下面的字符文本不止跑到同一行展示了，还覆盖到了块级元素上面，因此脱离了文档流，也脱离了文本流。
 
+## CSS的float属性
+首先我们来描述一下CSS的float属性。
+
+```html
+<html>
+  <body>
+    <div class="div-common">
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好
+      <img class="img-common" src="1.jpg" />
+      <span>
+        CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+      </span>
+    </div>
+    <div class="div-common">
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好
+      <img class="img-common left" src="1.jpg" />
+      CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+    </div>
+    <div class="div-common">
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好
+      <img class="img-common right" src="1.jpg" />
+      CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+    </div>
+  </body>
+  <style>
+    .div-common {
+      margin-bottom: 40px;
+    }
+    .img-common {
+      width: 40px;
+      height: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+  </style>
+</html>
+```
+
+![](/2025/float-3.png)
+
+文本中间有一个图片元素，在不设置浮动时，
+
 ## 浮动流
 
 ## 定位流
