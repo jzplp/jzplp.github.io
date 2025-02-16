@@ -96,7 +96,13 @@
 3. 我们对块级元素设置了绝对定位。可以看到下面的字符文本不止跑到同一行展示了，还覆盖到了块级元素上面，因此脱离了文档流，也脱离了文本流。
 
 ## CSS的float属性
-首先我们来描述一下CSS的float属性。
+首先我们来描述一下CSS的float属性。float属性即是控制浮动流的主要属性，一共有三个值。向哪个方向浮动，即是将那个元素放到其容器的哪一侧。
+
+* left: 左浮动
+* right: 右浮动
+* none: 不浮动 
+
+### 基本特性
 
 ```html
 <html>
@@ -139,7 +145,52 @@
 
 ![](/2025/float-3.png)
 
-文本中间有一个图片元素，在不设置浮动时，
+文本中间有一个图片元素，在不设置浮动时，图片在文本的中间，在设置了左或者右浮动后，图片到了左侧或者右侧。还可以看到，原本图片是占一行，但设置了浮动后，实现了文字环绕图片展示。
+
+```html
+<html>
+  <body>
+    <div class="div-common">
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好
+      <img class="img-common left" src="1.jpg" />
+      <img class="img-common left" src="1.jpg" />
+      <img class="img-common left" src="1.jpg" />
+      CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+    </div>
+    <div class="div-common">
+      你好CSS! 我是JZ。你好CSS! 我是JZ。你好
+      <img class="img-common right" src="1.jpg" />
+      <img class="img-common right" src="1.jpg" />
+      <img class="img-common left" src="1.jpg" />
+      CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
+    </div>
+  </body>
+  <style>
+    .div-common {
+      margin-bottom: 40px;
+    }
+    .img-common {
+      width: 40px;
+      height: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+  </style>
+</html>
+```
+
+![](/2025/float-4.png)
+
+如例子，可以将多个元素设置浮动，浮动到同一侧的元素会并排放置，即碰到另一个浮动的元素就停止。
+
+### clear属性
+
+
+
 
 ## 浮动流
 
@@ -174,4 +225,6 @@
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_display/Block_formatting_context
 - MDN 行内格式化上下文\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Inline_formatting_context
+- MDN float\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/float
 
