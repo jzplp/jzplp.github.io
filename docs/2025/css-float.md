@@ -187,12 +187,70 @@
 
 如例子，可以将多个元素设置浮动，浮动到同一侧的元素会并排放置，即碰到另一个浮动的元素就停止。
 
-### clear属性
+### 块级元素浮动
+不止行内元素，块级元素实际上也是可以浮动的。我们举例看一下：
+
+```html
+<html>
+  <body>
+    <div class="div-common" style="height: 140px">
+      <div class="size-common">1</div>
+      <div class="size-common">2</div>
+      <div class="size-common">3</div>
+    </div>
+    <div class="div-common">
+      <div class="size-common left">1</div>
+      <div class="size-common left">2</div>
+      <div class="size-common right">3</div>
+    </div>
+    <div class="div-common">
+      CSS! 我是JZ。你好CSS! 我是JZ。
+      <div class="size-common left">1</div>
+      <div class="size-common left">2</div>
+      <div class="size-common right">3</div>
+      <div class="size-common right">4</div>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      height: 60px;
+      padding-top: 10px;
+      border: 1px dotted blue; 
+    }
+    .size-common {
+      width: 40px;
+      height: 40px;
+      border: 1px solid red; 
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+  </style>
+</html>
+```
+
+![](/2025/float-5.png)
+
+从例子中可以看到，当未设置浮动时，块级元素根据文档流的特点，从上到下排列。当设置浮动之后，亏啊及元素聚到了一行，左右浮动排列。如果同时存在未浮动的行内元素，则行内元素在中间展示。
+
+### display属性变化
+其实不仅如此，原本的行内元素在设置了浮动后，就变成了块级元素。即float属性会修改 display属性的计算值（图源MDN）：
+
+![](/2025/float-6.png)
 
 
 
 
 ## 浮动流
+上面仅仅描述了浮动的基本特性，事实上浮动的特性还有很多。我们从浮动流的角度，再看看浮动有什么其它特性。
+
+
+
+## clear属性清除浮动
+
 
 ## 定位流
 
@@ -227,4 +285,4 @@
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Inline_formatting_context
 - MDN float\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/float
-
+- 
