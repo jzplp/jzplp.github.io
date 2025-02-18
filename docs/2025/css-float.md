@@ -237,15 +237,49 @@
 从例子中可以看到，当未设置浮动时，块级元素根据文档流的特点，从上到下排列。当设置浮动之后，亏啊及元素聚到了一行，左右浮动排列。如果同时存在未浮动的行内元素，则行内元素在中间展示。
 
 ### display属性变化
-其实不仅如此，原本的行内元素在设置了浮动后，就变成了块级元素。即float属性会修改 display属性的计算值（图源MDN）：
+其实不仅如此，原本的行内元素在设置了浮动后，就变成了块级元素。即float属性会修改display属性的计算值（图源MDN）：
 
 ![](/2025/float-6.png)
 
+```html
+<html>
+  <body>
+    <div class="div-common">
+      CSS! 我是JZ。你好CSS! 我是JZ。
+      <div class="size-common left">1</div>
+      <img class="size-common left" src="1.jpg" />
+      <span class="left">左浮动</span>
+      <div class="size-common left">2</div>
+      <div class="size-common right">3</div>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      height: 60px;
+      padding-top: 10px;
+      border: 1px dotted blue; 
+    }
+    .size-common {
+      width: 40px;
+      height: 40px;
+      border: 1px solid red; 
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+  </style>
+</html>
+```
 
+![](/2025/float-7.png)
 
+可以看到span元素的display原本是inline，但设置了浮动之后，计算值就变为block了，img元素额现象也是一样的。
 
 ## 浮动流
-上面仅仅描述了浮动的基本特性，事实上浮动的特性还有很多。我们从浮动流的角度，再看看浮动有什么其它特性。
+上面仅仅描述了浮动的基本特点，事实上浮动的特点还有很多。我们从浮动流的角度，再看看浮动有什么其它特点。
 
 
 
@@ -285,4 +319,8 @@
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Inline_formatting_context
 - MDN float\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/float
-- 
+- 三个div都做浮动，给第二个div加上clear:both为什么右边的还是在本行浮动？（clear:right无效）\
+  https://www.zhihu.com/question/28166594
+- 经验分享：CSS浮动(float,clear)通俗讲解\
+  https://www.cnblogs.com/iyangyuan/archive/2013/03/27/2983813.html
+
