@@ -281,6 +281,94 @@
 ## 浮动流
 上面仅仅描述了浮动的基本特点，事实上浮动的特点还有很多。我们从浮动流的角度，再看看浮动有什么其它特点。
 
+### 浮动流与块级元素
+首先我们来看一下纯块级元素在浮动流中的表现。
+
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <div class="size-common one"></div>
+      <div class="size-common two"></div>
+      <div class="size-common three"></div>
+      <div class="size-common four"></div>
+    </div>
+    <div class="div-common">
+      <div class="size-common one left"></div>
+      <div class="size-common two left"></div>
+      <div class="size-common three right"></div>
+      <div class="size-common four right"></div>
+    </div>
+    <div class="div-common" style="margin-top: 80px">
+      <div class="size-common one"></div>
+      <div class="size-common two left"></div>
+      <div class="size-common three"></div>
+      <div class="size-common four"></div>
+    </div>
+    <div class="div-common">
+      <div class="size-common one"></div>
+      <div class="size-common two right"></div>
+      <div class="size-common three"></div>
+      <div class="size-common four"></div>
+    </div>
+    <div class="div-common">
+      <div class="size-common one"></div>
+      <div class="size-common two left"></div>
+      <div class="size-common three left"></div>
+      <div class="size-common four"></div>
+    </div>
+    <div class="div-common" style="margin-top: 20px">
+      <div class="size-common one"></div>
+      <div class="size-common two right"></div>
+      <div class="size-common three right"></div>
+      <div class="size-common four"></div>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      margin-bottom: 10px;
+      border: 1px dotted blue;
+    }
+    .size-common {
+      width: 40px;
+      height: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+    .one {
+      background: red;
+      height: 20px;
+      width: 30px;
+    }
+    .two {
+      background: yellow;
+      height: 50px;
+      width: 40px;
+    }
+    .three {
+      background: green;
+      height: 30px;
+      width: 50px;
+    }
+    .four {
+      background: blue;
+      height: 40px;
+      width: 60px;
+    }
+  </style>
+</html>
+```
+
+![](/2025/float-8.png)
+
+这里有按先后次序放置的四个元素，分别是第一个红，第二个黄，第三个绿，第四个蓝色。蓝色虚线指的是外部容器的框。我们看看它们在不同场景下的表现：
+* 第一行：未设置浮动，四个元素按照文档流从上到下展示。
+* 第二行，四个元素全部设置浮动，四个元素排成了一行。外部容器
+
 
 
 ## clear属性清除浮动
