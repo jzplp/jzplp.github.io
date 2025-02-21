@@ -278,60 +278,56 @@
 
 可以看到span元素的display原本是inline，但设置了浮动之后，计算值就变为block了，img元素额现象也是一样的。
 
-## 浮动流
-上面仅仅描述了浮动的基本特点，事实上浮动的特点还有很多。我们从浮动流的角度，再看看浮动有什么其它特点。
+## 浮动流与块级元素
+上面仅仅描述了浮动的基本特点，事实上浮动的特点还有很多。我们从浮动流与块级元素的角度，再看看浮动有什么其它特点。
 
-### 浮动流与块级元素
+### 浮动流与块级文档流
 首先我们来看一下纯块级元素在浮动流中的表现。
 
 ```html
 <html>
   <body>
     <div class="div-common">
-      <div class="size-common one"></div>
-      <div class="size-common two"></div>
-      <div class="size-common three"></div>
-      <div class="size-common four"></div>
+      <div class="one"></div>
+      <div class="two"></div>
+      <div class="three"></div>
+      <div class="four"></div>
     </div>
     <div class="div-common">
-      <div class="size-common one left"></div>
-      <div class="size-common two left"></div>
-      <div class="size-common three right"></div>
-      <div class="size-common four right"></div>
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="three right"></div>
+      <div class="four right"></div>
     </div>
     <div class="div-common" style="margin-top: 80px">
-      <div class="size-common one"></div>
-      <div class="size-common two left"></div>
-      <div class="size-common three"></div>
-      <div class="size-common four"></div>
+      <div class="one"></div>
+      <div class="two left"></div>
+      <div class="three"></div>
+      <div class="four"></div>
     </div>
     <div class="div-common">
-      <div class="size-common one"></div>
-      <div class="size-common two right"></div>
-      <div class="size-common three"></div>
-      <div class="size-common four"></div>
+      <div class="one"></div>
+      <div class="two right"></div>
+      <div class="three"></div>
+      <div class="four"></div>
     </div>
     <div class="div-common">
-      <div class="size-common one"></div>
-      <div class="size-common two left"></div>
-      <div class="size-common three left"></div>
-      <div class="size-common four"></div>
+      <div class="one"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="four"></div>
     </div>
     <div class="div-common" style="margin-top: 20px">
-      <div class="size-common one"></div>
-      <div class="size-common two right"></div>
-      <div class="size-common three right"></div>
-      <div class="size-common four"></div>
+      <div class="one"></div>
+      <div class="two right"></div>
+      <div class="three right"></div>
+      <div class="four"></div>
     </div>
   </body>
   <style>
     .div-common {
       margin-bottom: 10px;
       border: 1px dotted blue;
-    }
-    .size-common {
-      width: 40px;
-      height: 40px;
     }
     .left {
       float: left;
@@ -375,7 +371,140 @@
 
 通过这几个例子，可以看到浮动与文档流的关系。浮动元素前面如果有块级元素，那么浮动元素会在块级元素的下方。但是浮动元素本身脱离了文档流，因此不占空间，下方的非浮动块级元素可能会被浮动元素盖住。所有非浮动元素会形成一个文档流。
 
-### 块级元素与浮动超过一行
+### 块级元素与浮动超过一行（单侧）
+当浮动的块级元素超过一行时，会发生什么现象呢？我们来看一下单侧浮动的例子。
+
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <div class="one left"></div>
+      <div class="three left"></div>
+      <div class="four left"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="two left"></div>
+    </div>
+    <div class="div-common" style="margin-top: 110px">
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="four left" style="width: 100px"></div>
+    </div>
+    <div class="div-common" style="margin-top: 80px">
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="four left"></div>
+    </div>
+    <div class="div-common" style="margin-top: 100px">
+      <div class="one left" style="height: 100px"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="four left"></div>
+    </div>
+    <div class="div-common" style="margin-top: 120px">
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="three left" style="height: 50px"></div>
+      <div class="four left"></div>
+    </div>
+
+    <div class="div-common" style="margin-top: 120px">
+      <div class="one left" style="height: 100px"></div>
+      <div class="two left" ></div>
+      <div class="three left" style="height: 50px"></div>
+      <div class="four left"></div>
+    </div>
+    <div class="div-common" style="margin-top: 120px">
+      <div class="one left" style="height: 100px"></div>
+      <div class="two left" ></div>
+      <div class="three left"></div>
+      <div class="four left"></div>
+      <div class="two left" style="height: 10px"></div>
+    </div>
+    <div class="div-common" style="margin-top: 120px">
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="four left"></div>
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="four left"></div>
+    </div>
+    <div class="div-common" style="margin-top: 150px">
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="three left"></div>
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="one left"></div>
+      <div class="one left"></div>
+      <div class="two left"></div>
+      <div class="two left"></div>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      margin-bottom: 10px;
+      border: 1px dotted blue;
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+    .one {
+      background: red;
+      height: 20px;
+      width: 90px;
+    }
+    .two {
+      background: yellow;
+      height: 50px;
+      width: 120px;
+    }
+    .three {
+      background: green;
+      height: 40px;
+      width: 150px;
+    }
+    .four {
+      background: blue;
+      height: 40px;
+      width: 180px;
+    }
+  </style>
+</html>
+```
+
+![](/2025/float-9.png)
+
+这些例子中为了更容易换行，元素比较宽，且数量比较多，每一个元素都设置的左浮动。这些例子比较复杂。我们还是一行一行来分析：
+
+* 第一行：正常浮动，超过一行之后，从第二行左边继续开始浮动。且第二行的开始高度是前一行最低的位置。
+* 第二行：第三个绿元素的高度比第二个矮一点，第四个元素与第三个高度一样，且一行可以完整放置，因此横向排列。
+* 第三行：与第二行类似，但是第四个蓝元素更宽，导致横向一行肯定放不开。但是注意第四个蓝元素并没有去开一个新行，而是在前一个绿元素下方继续放置。
+* 第四行：与第三行类似，但是第一个红元素高度很高，能纵向同时容纳第二个黄元素与第三个绿元素。但因为横向有空间，因此第三个绿元素并没有纵向放置。第四个蓝元素虽然横向一行肯定放不开，而且前面的红元素右侧还有大片空闲区域，但是依旧放置在第三个绿源苏下方。
+* 第五行：与第三行类似，但是第二个黄元素与第三个绿元素高度相同。因此第三个绿元素下方没有空闲区域了，因此第四个绿元素只好从最左侧开始新的一行浮动了。
+* 第六行：第一个红元素非常高，第二三个元素高度相同，且第四个蓝元素太宽，无法放置在第一行。由于前一个第二三个元素高度相同，因此第四个蓝元素无法放置在第三个下方，因此它向前寻找，找到了第一个元素下方还有位置。
+* 第七行：与第六行类似，但第四个蓝元素可以放置在第三个元素下方，同时增加了第五个黄元素。第五个黄元素太宽，无法放置在第四个绿元素右侧。第五个黄元素同时高度非常低，三四五元素加起来都比红元素高度低，因此第五个黄元素向前寻找位置，最终在第一个红元素右侧放置。注意看虽然第五个黄元素上方还有空位可以容纳它自己，但是它不在前一个元素右侧的时候，它的位置纵向需要在前一个元素下方。
+* 第八行：第四个蓝元素在第三个绿元素下方放置，且依旧属于浮动的第一行。第五个红元素的横向位置和第四个蓝元素对齐，虽然上方还有位置可以完整放置红元素，但红元素还是没有过去。同样的第二行的第一个黄元素上方有位置，但纵向还是从上一行最低的位置下方开始。
+* 第九行：上面部分示例的综合场景。
+
+从上面的例子可以看到浮动在换行场景时的一些规律：
+1. 如果一行后方有位置，那么优先横向放置。
+2. 如果一行后方没有位置，且前一个元素下方有“空位”，就优先放置在前一个元素下方。如果下方没有空位，但是更前的元素下方有空位，这个元素会向前寻找。
+3. 后一个元素的位置如果在前一个元素右侧，那么纵向位置可以水平对齐。如果后一个元素的位置如果在前一个元素左侧，那么那么纵向位置必须在前一个元素最低位置的下方。
+4. 如果实在找不到位置，那就开启新的一行浮动。新一行浮动的纵向位置开始于前一行所有元素的最下方。
+
+
+### 块级元素与浮动超过一行（双侧）
+
+
+
 
 
 
