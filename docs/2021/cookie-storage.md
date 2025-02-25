@@ -17,7 +17,7 @@ console.log(sessionStorage.sessionA)
 console.log(localStorage.localA)
 ```
 
-​​![](/2021/cookie-1.png)
+​​![图片](/2021/cookie-1.png)
 
 打开一个新浏览器窗口，url相同，测试值是否被传过去了：
 
@@ -25,7 +25,7 @@ console.log(localStorage.localA)
 let windowName = 'qazwsxedc'
 window.open('http://127.0.0.1:7001', windowName)
 ```
-​​![](/2021/cookie-2.png)
+​​![图片](/2021/cookie-2.png)
 
 可以看到，全部的值都被传输到了新窗口。
 
@@ -53,7 +53,7 @@ localStorage.localA = '6'
 
 测试第二个窗口，已经产生变化了，除了sessionStorage都变为了新值。也就是说这些值是浏览器共享的（在同一域下）：
 
-​​![](/2021/cookie-3.png)
+​​![图片](/2021/cookie-3.png)
 
 第三步，此时重新打开第二个窗口，windowName不变，然后测试：
 
@@ -90,7 +90,7 @@ window.open('http://127.0.0.1:7001', windowName)
 
 此时测试第二个窗口，发现数值成功更新。
 
-​​![](/2021/cookie-4.png)
+​​![图片](/2021/cookie-4.png)
 
 因为窗口关闭会话结束了，因此sessionStorage可以更新。
 

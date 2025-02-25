@@ -25,7 +25,7 @@ var timer = setTimeout(name => console.log(`Hello setTimeout`), 3000);
 timer.unref();
 console.log('Waiting timer');
 ```
-​​​![](/2020/time-1.png)
+​​​![图片](/2020/time-1.png)
 
 可以看到，定时器并没有执行，unref取消了定时。
 
@@ -37,7 +37,7 @@ timer.ref();
 console.log('Waiting timer');
 ```
 
-​​​![](/2020/time-2.png)
+​​​![图片](/2020/time-2.png)
 
 在调用unref后，对同一个定时器再调用ref，定时器又被恢复了。
 
@@ -49,7 +49,7 @@ timer.unref();
 console.log('Waiting timer');
 ```
 第二个定时器timer2在定时中，第一个定时器timer1调用unref。
-​​​![](/2020/time-3.png)
+​​​![图片](/2020/time-3.png)
 这时候，unref居然不起作用了！timer的定时器依然输出了。
 
 因此，如果有其他定时器存在，unref就不起效果。
@@ -62,7 +62,7 @@ timer.unref();
 console.log('Waiting timer');
 ```
 和上一个例子相比，两个定时器的定时时间交换了，首先定时结束的是没被取消的定时器，然后再是被“尝试取消“的定时器。
-​​​![](/2020/time-4.png)
+​​​![图片](/2020/time-4.png)
 
 这次可以看到，时间短的，没被取消的定时器被执行了，时间长的，被尝试取消的定时器没有输出。
 
@@ -78,7 +78,7 @@ console.log('Waiting timer');
 process.stdin.on('readable', () => console.log(process.stdin.read().toString()));
 ```
 在设置定时器后调用unref，再监听stdin的输入事件，此时的事件循环不为空，但是只有一个timer定时器存在。
-​​​![](/2020/time-5.png)
+​​​![图片](/2020/time-5.png)
 
 可以看到，unref没有起作用，定时器依然被输出了。也就是说，unref是否有效果，要看程序运行时是否还有事件循环，而不仅仅是定时器本身。
 

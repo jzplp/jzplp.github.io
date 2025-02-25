@@ -11,7 +11,7 @@ AJAX的全称是Asynchronous JavaScript and XML，是一种利用Javascript在we
 下面是AJAX的实现，后端采用的Egg.js。
 
 这个示例可以实现不同类型的AJAX请求，包含同步，异步，GET/POST，XML
-​​​![](/2020/ajax-1.png)
+​​​![图片](/2020/ajax-1.png)
 
 点击不同类型的请求，除了看到文字更新之外，在谷歌浏览器的Network里面还可以看到每一次AJAX请求，点击可以看到具体细节。
 

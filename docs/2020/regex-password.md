@@ -13,7 +13,7 @@ aaaa，1111，abcccc111，qqqwww，qweeeeerty，等等。
 [《正则表达式30分钟入门教程》](https://deerchao.cn/tutorials/regex/regex.htm)
 
 正则表达式用来测试也非常简单，直接打开浏览器的console界面，用Javascript测试即可：
-​​![](/2020/regex-1.png)
+​​![图片](/2020/regex-1.png)
 
 用Javascript测试只需要掌握几个函数的用法，看这个教程就可以：
 
@@ -39,7 +39,7 @@ https://www.runoob.com/js/js-regexp.html
 ```
 现在就可以检测重复4次的数字或者字母了：
 
-​​![](/2020/regex-2.png)
+​​![图片](/2020/regex-2.png)
 
 上面的正则中。\1表示第一个分组。但是之后正则表达式会越来越长，还会有嵌套的分组，到时候找到分组的序号可能比较困难，因此我们改为了命名分组：
 
@@ -68,7 +68,7 @@ https://www.runoob.com/js/js-regexp.html
 ```
 
 测试一下效果：
-​​![](/2020/regex-3.png)
+​​![图片](/2020/regex-3.png)
 
 不管用了！不管有没有重复的字符，都显示true。
 
@@ -85,7 +85,7 @@ https://www.runoob.com/js/js-regexp.html
 （注意不同的分组名称不一样哦）
 
 可以了？
-​​![](/2020/regex-4.png)
+​​![图片](/2020/regex-4.png)
 
 从这个结果来看，看起来只能判断字符串开头是重复的情况。
 
@@ -95,13 +95,13 @@ https://www.runoob.com/js/js-regexp.html
 (?!.*(?<re1>[a-zA-Z0-9])\k<re1>{3})(?<!.*(?<re2>[a-zA-Z0-9])\k<re2>{3})
 ```
 测试结果如下：
-​​![](/2020/regex-5.png)
+​​![图片](/2020/regex-5.png)
 看来是正确的。
 
 这样就实现了，不管在任意的位置，前面和后面都不能出现连续重复至少4个的字母或者数字。
 
 ## 扩展，可继续包含其他条件
 在这个正则中我们还可以继续包含其他的判断条件，比如必须包含abc：
-​​![](/2020/regex-6.png)
+​​![图片](/2020/regex-6.png)
 还可以把这个”必须包含abc”的条件写成零宽断言的形式，同学们可以自己试一试。
 

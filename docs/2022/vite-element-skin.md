@@ -91,7 +91,7 @@ Web前端界面切换主题/皮肤，是一个常见的需求。如果希望在�
 
 * Element Plus：
 
-![](/2022/vite-element-skin-1.png)
+![图片](/2022/vite-element-skin-1.png)
 
 其中Element Plus官方也说明了这种换肤方式: [通过CSS变量设置](https://element-plus.gitee.io/zh-CN/guide/theming.html#通过CSS变量设置)
 

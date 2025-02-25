@@ -50,7 +50,7 @@ window.open("newopenprotocol://test");
 
 甚至在浏览器直接访问这个链接也行。
 
-![](/2022/web-exe-1.png)
+![图片](/2022/web-exe-1.png)
 
 经测试，火狐浏览器打开时会有浏览器的提示框。
 

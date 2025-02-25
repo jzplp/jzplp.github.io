@@ -101,7 +101,7 @@ GitLab Runner 是一个与 GitLab CI/CD 一起使用以在管道中运行作业�
 
 然后去我们的GitLab库，在Settings >> CI/CD >> Runners 中找到 Set up a specific Runner manually。
 
-![](/2022/gitlab-cicd-1.png)
+![图片](/2022/gitlab-cicd-1.png)
 
 然后注册和启动注册GitLab Runner。图中的2和3分别作为URL和token，在注册的命令行中输入。GitLab Runner执行命令需要管理员权限。
 
@@ -187,7 +187,7 @@ git push -f http://xxxx:$PASSWORD@xxxx.com/xxxx/xxxx-blog.git master:gl-pages
 
 但是这个.gitlab-ci.yml是其他人都能看到的，不能直接明文下入密码。因此我们会用到GitLab提供的变量功能。在Settings >> CI/CD >> Variables。我们增加密码变量，设置保护。然后在.gitlab-ci.yml中用$Key来替换变量。这样无论在.gitlab-ci.yml中还是在日志中，都会隐藏真实的密码。
 
-![](/2022/gitlab-cicd-2.png)
+![图片](/2022/gitlab-cicd-2.png)
 
 * 注意要设置只有master分支才执行，否则我们代码中的git push命令可能会引起无限循环。
 
@@ -201,11 +201,11 @@ E:\personalProject\xxxx-blog>git push
 ```
 提交后，在GitLab的 提交记录中可以看到后面有个图标。其中扇形表示正在进行中，对号表示成功。叉号表示失败，Pending一般表示GitLab Runner没有生效。
 
-![](/2022/gitlab-cicd-3.png)
+![图片](/2022/gitlab-cicd-3.png)
 
 我们点击图标，进入另一个页面，再点击deploy框，就能看到具体的日志。
 
-![](/2022/gitlab-cicd-4.png)
+![图片](/2022/gitlab-cicd-4.png)
 
 等执行成功后，我们再去看看我们的博客，就已经成功更新啦。
 

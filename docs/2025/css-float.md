@@ -29,20 +29,14 @@
     </span>
   </body>
   <style>
-    .border {
-      border: 1px solid red;
-    }
-    .div-common {
-      height: 50px;
-    }
-    .div-width {
-      width: 100px;
-    }
+    .border { border: 1px solid red; }
+    .div-common { height: 50px; }
+    .div-width { width: 100px; }
   </style>
 </html>
 ```
 
-![](/2025/float-1.png)
+![图片](/2025/float-1.png)
 
 通过例子我们可以看到，每个块级元素独占一行，从上到下排列。在未设置宽度时，默认占满横向全部宽度；即使设置了宽度且剩余空间足够，也是独占一行。行内元素则从左到右排列，如果一行不够，则从下一行左边开始继续。
 
@@ -77,17 +71,13 @@
       width: 100px;
       border: 1px solid red;
     }
-    .div-float {
-      float: left;
-    }
-    .div-pos {
-      position: absolute;
-    }
+    .div-float { float: left; }
+    .div-pos { position: absolute; }
   </style>
 </html>
 ```
 
-![](/2025/float-2.png)
+![图片](/2025/float-2.png)
 
 
 这里列举了三种情况（例子中包含浮动流和定位流，我们后面会单独介绍）：
@@ -133,17 +123,13 @@
       width: 40px;
       height: 40px;
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
+    .left { float: left; }
+    .right { float: right; }
   </style>
 </html>
 ```
 
-![](/2025/float-3.png)
+![图片](/2025/float-3.png)
 
 文本中间有一个图片元素，在不设置浮动时，图片在文本的中间，在设置了左或者右浮动后，图片到了左侧或者右侧。还可以看到，原本图片是占一行，但设置了浮动后，实现了文字环绕图片展示。
 
@@ -173,17 +159,13 @@
       width: 40px;
       height: 40px;
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
+    .left { float: left; }
+    .right { float: right; }
   </style>
 </html>
 ```
 
-![](/2025/float-4.png)
+![图片](/2025/float-4.png)
 
 如例子，可以将多个元素设置浮动，浮动到同一侧的元素会并排放置，即碰到另一个浮动的元素就停止。
 
@@ -222,24 +204,20 @@
       height: 40px;
       border: 1px solid red; 
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
+    .left { float: left; }
+    .right { float: right; }
   </style>
 </html>
 ```
 
-![](/2025/float-5.png)
+![图片](/2025/float-5.png)
 
 从例子中可以看到，当未设置浮动时，块级元素根据文档流的特点，从上到下排列。当设置浮动之后，亏啊及元素聚到了一行，左右浮动排列。如果同时存在未浮动的行内元素，则行内元素在中间展示。
 
 ### display属性变化
 其实不仅如此，原本的行内元素在设置了浮动后，就变成了块级元素。即float属性会修改display属性的计算值（图源MDN）：
 
-![](/2025/float-6.png)
+![图片](/2025/float-6.png)
 
 ```html
 <html>
@@ -264,17 +242,13 @@
       height: 40px;
       border: 1px solid red; 
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
+    .left { float: left; }
+    .right { float: right; }
   </style>
 </html>
 ```
 
-![](/2025/float-7.png)
+![图片](/2025/float-7.png)
 
 可以看到span元素的display原本是inline，但设置了浮动之后，计算值就变为block了，img元素额现象也是一样的。
 
@@ -329,12 +303,8 @@
       margin-bottom: 10px;
       border: 1px dotted blue;
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
+    .left { float: left; }
+    .right { float: right; }
     .one {
       background: red;
       height: 20px;
@@ -359,7 +329,7 @@
 </html>
 ```
 
-![](/2025/float-8.png)
+![图片](/2025/float-8.png)
 
 这里有按先后次序放置的四个元素，分别是第一个红，第二个黄，第三个绿，第四个蓝色。蓝色虚线指的是外部容器的框。我们看看它们在不同场景下的表现：
 * 第一行：未设置浮动，四个元素按照文档流从上到下展示。
@@ -450,12 +420,8 @@
       margin-bottom: 10px;
       border: 1px dotted blue;
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
+    .left { float: left; }
+    .right { float: right; }
     .one {
       background: red;
       height: 20px;
@@ -480,19 +446,19 @@
 </html>
 ```
 
-![](/2025/float-9.png)
+![图片](/2025/float-9.png)
 
-这些例子中为了更容易换行，元素比较宽，且数量比较多，每一个元素都设置的左浮动。这些例子比较复杂。我们还是一行一行来分析：
+这些例子中为了更容易换行，元素比较宽，且数量比较多，每一个元素都设置的左浮动。这些例子比较复杂。我们还是一个一个来分析：
 
-* 第一行：正常浮动，超过一行之后，从第二行左边继续开始浮动。且第二行的开始高度是前一行最低的位置。
-* 第二行：第三个绿元素的高度比第二个矮一点，第四个元素与第三个高度一样，且一行可以完整放置，因此横向排列。
-* 第三行：与第二行类似，但是第四个蓝元素更宽，导致横向一行肯定放不开。但是注意第四个蓝元素并没有去开一个新行，而是在前一个绿元素下方继续放置。
-* 第四行：与第三行类似，但是第一个红元素高度很高，能纵向同时容纳第二个黄元素与第三个绿元素。但因为横向有空间，因此第三个绿元素并没有纵向放置。第四个蓝元素虽然横向一行肯定放不开，而且前面的红元素右侧还有大片空闲区域，但是依旧放置在第三个绿源苏下方。
-* 第五行：与第三行类似，但是第二个黄元素与第三个绿元素高度相同。因此第三个绿元素下方没有空闲区域了，因此第四个绿元素只好从最左侧开始新的一行浮动了。
-* 第六行：第一个红元素非常高，第二三个元素高度相同，且第四个蓝元素太宽，无法放置在第一行。由于前一个第二三个元素高度相同，因此第四个蓝元素无法放置在第三个下方，因此它向前寻找，找到了第一个元素下方还有位置。
-* 第七行：与第六行类似，但第四个蓝元素可以放置在第三个元素下方，同时增加了第五个黄元素。第五个黄元素太宽，无法放置在第四个绿元素右侧。第五个黄元素同时高度非常低，三四五元素加起来都比红元素高度低，因此第五个黄元素向前寻找位置，最终在第一个红元素右侧放置。注意看虽然第五个黄元素上方还有空位可以容纳它自己，但是它不在前一个元素右侧的时候，它的位置纵向需要在前一个元素下方。
-* 第八行：第四个蓝元素在第三个绿元素下方放置，且依旧属于浮动的第一行。第五个红元素的横向位置和第四个蓝元素对齐，虽然上方还有位置可以完整放置红元素，但红元素还是没有过去。同样的第二行的第一个黄元素上方有位置，但纵向还是从上一行最低的位置下方开始。
-* 第九行：上面部分示例的综合场景。
+* 第一个例子：正常浮动，超过一行之后，从第二行左边继续开始浮动。且第二行的开始高度是前一行最低的位置。
+* 第二个例子：第三个绿元素的高度比第二个矮一点，第四个元素与第三个高度一样，且一行可以完整放置，因此横向排列。
+* 第三个例子：与第二个例子类似，但是第四个蓝元素更宽，导致横向一行肯定放不开。但是注意第四个蓝元素并没有去开一个新行，而是在前一个绿元素下方继续放置。
+* 第四个例子：与第三个例子类似，但是第一个红元素高度很高，能纵向同时容纳第二个黄元素与第三个绿元素。但因为横向有空间，因此第三个绿元素并没有纵向放置。第四个蓝元素虽然横向一行肯定放不开，而且前面的红元素右侧还有大片空闲区域，但是依旧放置在第三个绿源苏下方。
+* 第五个例子：与第三个例子类似，但是第二个黄元素与第三个绿元素高度相同。因此第三个绿元素下方没有空闲区域了，因此第四个绿元素只好从最左侧开始新的一行浮动了。
+* 第六个例子：第一个红元素非常高，第二三个元素高度相同，且第四个蓝元素太宽，无法放置在第一行。由于前一个第二三个元素高度相同，因此第四个蓝元素无法放置在第三个下方，因此它向前寻找，找到了第一个元素下方还有位置。
+* 第七个例子：与第六个例子类似，但第四个蓝元素可以放置在第三个元素下方，同时增加了第五个黄元素。第五个黄元素太宽，无法放置在第四个绿元素右侧。第五个黄元素同时高度非常低，三四五元素加起来都比红元素高度低，因此第五个黄元素向前寻找位置，最终在第一个红元素右侧放置。注意看虽然第五个黄元素上方还有空位可以容纳它自己，但是它不在前一个元素右侧的时候，它的位置纵向需要在前一个元素下方。
+* 第八个例子：第四个蓝元素在第三个绿元素下方放置，且依旧属于浮动的第一行。第五个红元素的横向位置和第四个蓝元素对齐，虽然上方还有位置可以完整放置红元素，但红元素还是没有过去。同样的第二行的第一个黄元素上方有位置，但纵向还是从上一行最低的位置下方开始。
+* 第九个例子：上面部分示例的综合场景。
 
 从上面的例子可以看到浮动在换行场景时的一些规律：
 1. 如果一行后方有位置，那么优先横向放置。
@@ -502,10 +468,104 @@
 
 
 ### 块级元素与浮动超过一行（双侧）
+可以看到，在单侧浮动的元素排列就已经比较复杂了，如果左侧和右侧同时出现浮动，且超过一行，又会出现怎样的现象呢？首先看个简单的例子。
+
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <div class="div1 left red"></div>
+      <div class="div1 left yellow"></div>
+      <div class="div1 right green"></div>
+      <div class="div1 right blue"></div>
+      <div class="div1 left gray"></div>
+      <div class="div1 right pink"></div>
+    </div>
+    <div class="div-common" style="margin-top: 110px">
+      <div class="div1 left red"></div>
+      <div class="div1 left yellow"></div>
+      <div class="div1 left gray"></div>
+      <div class="div1 right pink"></div>
+      <div class="div1 right green"></div>
+      <div class="div1 right blue"></div>
+    </div>
+    <div class="div-common" style="margin-top: 110px">
+      <div class="div1 left red"></div>
+      <div class="div1 left yellow"></div>
+      <div class="div1 left gray"></div>
+      <div class="div1 right pink"></div>
+      <div class="div1 left green"></div>
+      <div class="div5 right blue"></div>
+    </div>
+    <div class="div-common" style="margin-top: 110px">
+      <div class="div3 left red"></div>
+      <div class="div2 left yellow"></div>
+      <div class="div2 left gray"></div>
+      <div class="div1 right pink"></div>
+      <div class="div1 left green"></div>
+      <div class="div2 right blue"></div>
+    </div>
+    <div class="div-common" style="margin-top: 120px">
+      <div class="div3 left red"></div>
+      <div class="div2 left yellow"></div>
+      <div class="div2 left gray"></div>
+      <div class="div1 right pink"></div>
+      <div class="div1 left green"></div>
+      <div class="div2 right blue"></div>
+      <div class="div2 left pink"></div>
+      <div class="div2 left gray"></div>
+      <div class="div2 right yellow"></div>
+      <div class="div2 left green"></div>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      margin-bottom: 10px;
+      border: 1px dotted blue;
+    }
+    .div1 {
+      height: 40px;
+      width: 100px;
+    }
+    .div2 {
+      height: 40px;
+      width: 150px;
+    }
+    .div3 {
+      height: 100px;
+      width: 50px;
+    }
+    .div4 {
+      height: 200px;
+      width: 50px;
+    }
+    .div5 {
+      height: 40px;
+      width: 50px;
+    }
+    .left { float: left; }
+    .right { float: right; }
+    .red { background: red; }
+    .yellow { background: yellow; }
+    .green { background: green; }
+    .blue { background: blue; }
+    .gray { background: gray; }
+    .pink { background: pink; }
+    .brown { background: brown; }
+  </style>
+</html>
+```
+
+![图片](/2025/float-10.png)
+
+首先看第一与第二个例子：同样的6个元素，只不过顺序和左右浮动不同。这里可以看到换行的规律：按照元素在HTML中出现的顺序在页面中排列，如果第一行无法容纳下一个元素，那么就从第二行开始继续浮动。
+
+第三个例子在的第五个绿元素因为第一行位置不够，因此开启了第二行左浮动。第六个蓝元素是右浮动，虽然第一行有位置可以放置，但由于上一个元素已经开启了第二行（虽然是左浮动），因此也在第二行展示了。
+
+然后是第四个例子，第一个红元素高度非常高，因此其余的左右浮动元素都在它的右侧排列，在内部换行，但是都属于大的第一行。再看第五个例子，第一个红元素的右侧足够放置三行元素的排列。尤其看第三行，最上面的部分高度在红元素内，但是下面的高度已经超过红元素了。再看最后一个绿元素，当右侧位置不够时，终于开启了大的第二行浮动。
 
 
-
-
+todo  例子继续
 
 
 

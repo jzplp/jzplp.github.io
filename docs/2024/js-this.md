@@ -300,7 +300,7 @@ export default a;
 
 我们直接在浏览器中打开，却发现报错：
 
-![](/2024/this-1.png)
+![图片](/2024/this-1.png)
 
 这是因为直接用Chrome浏览器打开的本地文件，协议为`file://`。在这个协议下使用ESModule中的import会被认为是跨域。因此我们在本地启动一个Node服务来提供HTTP协议，用来支持import。
 

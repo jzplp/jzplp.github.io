@@ -37,7 +37,7 @@ var c = querystring.parse(b);
 console.log(c)
 ```
 执行结果
-​​​![](/2020/query-1.png)
+​​​![图片](/2020/query-1.png)
 
 我们首先用javascript创建了一个对象，然后用querystring.stringify把对象转换成字符串并输出，然后再用querystring.parse对字符串解析，解析后又生成了一个对象。
 

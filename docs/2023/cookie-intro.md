@@ -11,16 +11,16 @@
 
 下图分别为设置Cookie和携带Cookie的示例。
 
-![](/2023/cookie-1.png)
+![图片](/2023/cookie-1.png)
 设置Cookie
 
-![](/2023/cookie-2.png)
+![图片](/2023/cookie-2.png)
 携带Cookie
 
 ## 配置属性
 在上面`Set-Cookie`的图中，我们可以看到，设置Cookie时，除了最前面的name和value之外，还配置了其他属性。实际上Cookie还有更多属性，可以查看浏览器的Application-Storage，获取当前网站的Cookie。
 
-![](/2023/cookie-3.png)
+![图片](/2023/cookie-3.png)
 
 这里简单描述一下每个属性的含义：
 
@@ -161,7 +161,7 @@ Public Suffix List除了应用在Samesite中，还在其他地方有应用。例
 
 SameSite属性仅仅能控制网站是否发送第三方Cookie，但是不能针对不同的网站来源做出不同的Cookie反应。例如一个网站对于外部的网站需要记录不同的第三方Cookie。Partitioned属性允许在请求第三方cookie，即跨站传输Cookie后，浏览器设置一个分区Key（PartitionKey），标明当前访问的网站来源。后续浏览器再次请求第三方Cookie时，浏览器会判当前网站的域名与分区Key是否一致。如果一致才发送这个Cookie，如果不一致则不发送。
 
-![](/2023/cookie-4.png)
+![图片](/2023/cookie-4.png)
 
 假设C网站开启了分区Cookie设置，例如`Set-Cookie: value=1; Partitioned;`。有A网站和B网站分别都会调用C网站的接口。
 1. A网站第一次访问后，浏览器除了记录Cookie，还会记录下PartitionKey=A网站。
