@@ -450,7 +450,7 @@
 
 这些例子中为了更容易换行，元素比较宽，且数量比较多，每一个元素都设置的左浮动。这些例子比较复杂。我们还是一个一个来分析：
 
-* 第一个例子：正常浮动，超过一行之后，从第二行左边继续开始浮动。且第二行的水平位置是前一行最低的位置。
+* 第一个例子：正常浮动，超过一行之后，从第二行左边继续开始浮动。且第二行的垂直位置是前一行最低的位置。
 * 第二个例子：第三个绿元素的高度比第二个矮一点，第四个元素与第三个高度一样，且一行可以完整放置，因此横向排列。
 * 第三个例子：与第二个例子类似，但是第四个蓝元素更宽，导致水平一行肯定放不开。但是注意第四个蓝元素并没有去开一个新行，而是在前一个绿元素下方继续放置。
 * 第四个例子：与第三个例子类似，但是第一个红元素高度很高，能纵向同时容纳第二个黄元素与第三个绿元素。但因为水平有空间，因此第三个绿元素并没有纵向放置。第四个蓝元素虽然水平一行肯定放不开，而且前面的红元素右侧还有大片空闲区域，但是依旧放置在第三个绿元素下方。
@@ -659,16 +659,95 @@
 
 再看更复杂一点的例子。
 
-* 首先第一个例子，第一个元红元素比第二个高一点，导致第三个灰元素左浮动时靠在红元素的右侧。而第四个绿元素比第三个灰元素低一点，因此第五个绿元素左浮动时靠在灰元素的右侧，形成了类似于台阶的样式。第二个例子把最后的绿元素右浮动，可以看到和左浮动在同一水平位置。
+* 首先第一个例子，第一个红元素比第二个高一点，导致第三个灰元素左浮动时靠在红元素的右侧。而第四个绿元素比第三个灰元素低一点，因此第五个绿元素左浮动时靠在灰元素的右侧，形成了类似于台阶的样式。第二个例子把最后的绿元素右浮动，可以看到和左浮动在同一水平位置。
 * 第三个例子在第二个的基础上增加了右浮动的蓝元素。虽然是右浮动，但因为绿元素前面位置水平被灰元素挡住了，因此位置靠下了，这时候蓝元素左侧反而没有左浮动的元素了，这时候放置一个左浮动的棕元素，它反而靠在最前了。
 * 第四第五个例子的非常类似，区别在于最后的棕元素是左浮动还是右浮动。棕元素的前一个元素是左浮动的粉元素，但是棕元素的位置上方恰好空出了一块位置，可以容纳棕元素。但是棕元素不能比前一个元素的水平位置更高，因此上方空出了一块位置。这个不管对左浮动还是右浮动都有效。
 
 通过这几个例子可以看到，双侧浮动和单侧浮动的换行以及位置规律是一样的，单侧的规则双侧也是可以生效的。但由于双侧浮动情况更多，因此会有更多看起来奇怪的位置排列现象。
 
+### 不同父元素的浮动流
+上面我们尝试的都集中在一个父元素里面，如果在不同的父元素中浮动，会发生什么现象呢？
 
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <div class="div1 left red"></div>
+      <div class="div1 left yellow"></div>
+    </div>
+    <div class="div-common">
+      <div class="div1 right gray"></div>
+      <div class="div1 right pink"></div>
+    </div>
+    <div class="div-common" style="margin-top: 80px">
+      <div class="div2 left red"></div>
+      <div class="div1 right yellow"></div>
+      <div class="div1 right pink"></div>
+    </div>
+    <div class="div-common" style="margin-top: 10px">
+      <div class="div1 left blue"></div>
+      <div class="div2 left gray"></div>
+      <div class="div1 left green"></div>
+    </div>
+    <div class="div-devide" style="margin-top: 180px"></div>
+    <div>
+      <div class="div1 left red"></div>
+      <div class="div1 left yellow"></div>
+    </div>
+    <div>
+      <div class="div1 right gray"></div>
+      <div class="div1 right pink"></div>
+    </div>
+    <div class="div-devide" style="margin-top: 100px"></div>
+    <div>
+      <div class="div2 left red"></div>
+      <div class="div1 right yellow"></div>
+      <div class="div1 right pink"></div>
+    </div>
+    <div style="margin-top: 10px">
+      <div class="div1 left blue"></div>
+      <div class="div2 left gray"></div>
+      <div class="div1 left green"></div>
+    </div>
+  </body>
+  <style>
+    .div-common { border: 1px dotted blue; }
+    .div-devide {
+      border: 1px dotted brown;
+    }
+    .div1 {
+      height: 50px;
+      width: 100px;
+    }
+    .div2 {
+      height: 50px;
+      width: 150px;
+    }
+    .left { float: left; }
+    .right { float: right; }
+    .red { background: red; }
+    .yellow { background: yellow; }
+    .green { background: green; }
+    .blue { background: blue; }
+    .gray { background: gray; }
+    .pink { background: pink; }
+    .brown { background: brown; }
+  </style>
+</html>
+```
 
+ ![图片](/2025/float-12.png)
 
+这几个例子与前几个有一些区别：这些都是两个父级div组成了一个例子，父级div之间没有设置margin。前两个例子父级div右boder，后两个例子没有。
 
+* 第一个例子：两个父级div由于内部元素全部浮动，因此不占空间。所以内部元素在垂直位置上居然是重叠的。即第二个父级div的元素浮动不会因为第一个父级div元素中出现浮动而在第二行排列。但由于父级div存在border，因此垂直位置并不是完全一致的，而是有很小的高度差。
+* 第三个例子：在第一个例子的基础上去掉了父级div的border。这样我们发现不同父级的浮动元素在垂直方向上位置完全一致。
+* 第二个例子：在第一个例子的基础上，增加了第二个父级div的margin-top，这样两个父级的元素浮动在第一行就能有明显区分，而且多了几个元素。我们看第五个灰元素，它自身属于第二个父级，放置的时候属于第一个父级的右浮动元素挡住了它的位置。虽然所属的父元素不同，但是灰元素依然避开了粉元素，在下方放置了。最后一个绿元素因为第一行位置不够，在第二行重新开始浮动。
+* 第四个例子：在第二个例子的基础上，去掉了父级div的border。现象与第二个例子基本一致。
+
+从这几个例子可以看出，虽然浮动元素所属的父级不同，浮动流的规律也是适用的；即在同一个浮动流中浮动。
+
+### 浮动排列与flex对比
 
 
 ## clear属性清除浮动
