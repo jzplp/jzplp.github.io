@@ -747,7 +747,133 @@
 
 从这几个例子可以看出，虽然浮动元素所属的父级不同，浮动流的规律也是适用的；即在同一个浮动流中浮动。
 
-### 浮动排列与flex对比
+## 浮动流与行内元素
+上面我们讨论了很多块级元素在浮动流中的现象，现在我们再讨论一下浮动流与行内元素的特点。由于文本行肯定有文字，因此示例中的不同元素查看更清晰了。
+
+### 文本与单元素浮动
+首先来看一下文本在浮动中的简单表现。
+
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <span class="red">第1个</span><span class="yellow">第2个</span
+      ><span class="green">第3个</span><span class="blue">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="red">第1个</span><span class="left yellow">第2个左</span
+      ><span class="green">第3个</span><span class="blue left">第4个左</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="red">第1个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="left yellow">第2个个个个个左</span>
+    </div>
+    <div class="div-common">
+      <span class="red"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="left yellow">第2个个个个个左</span>
+    </div>
+    <div class="div-common">
+      <span class="red"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="left yellow">第2个个个个个左</span>
+    </div>
+    <div class="div-common">
+      <span class="red">第1个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个个个个个个个个个</span
+      ><span class="left green">第3个个个个个左</span>
+    </div>
+    <div class="div-common">
+      <span class="red">第1个个个个个个个个个个个</span
+      ><span class="yellow">第2个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="left green">第3个个个个个左</span>
+    </div>
+    <div class="div-common">
+      <span class="red">第1个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="left gray">第4个个个个个个个个个个个</span>
+    </div>
+    <div class="div-common">
+      <span class="red">第1个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray">第4个个个个个个个</span><span class="left pink">第5个个个个个个个个</span>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .red {
+      background: red;
+    }
+    .yellow {
+      background: yellow;
+    }
+    .green {
+      background: green;
+    }
+    .blue {
+      background: blue;
+    }
+    .gray {
+      background: gray;
+    }
+    .pink {
+      background: pink;
+    }
+    .brown {
+      background: brown;
+    }
+  </style>
+</html>
+```
+
+ ![图片](/2025/float-13.png)
+
+
+* 第一个例子：五个文本元素，没有设置浮动
+* 第二个例子：第二个和第四个元素设置了左浮动，这两个元素跑到最左边了。同样都是浮动元素时，按照它们的在原HTML中的位置排列。
+* 第三个例子：只有两个元素，第二个元素浮动。但第一个元素太长，使得第一行无法容纳下完整的第二个元素，因此跑到第二行最左边浮动。注意此时第一行虽然有位置，但是浮动元素并未利用。（非浮动时则会利用）
+* 第四个例子：只有两个元素，第二个元素浮动。但第一个元素太长，超过了一行。因此第二个元素跑到第二行最左边浮动。注意此时第一个元素看起来向被浮动元素“断成两截”的样子。
+* 第五个例子：第一个元素太长了，自己延伸到第三行了，因此把第二个元素挤到第三行浮动。
+* 第六个例子：前两个元素使得第一行位置不足了，因此跑到第二行最左边浮动。注意此时第一行虽然有位置，但是浮动元素并未利用。（非浮动时则会利用）
+* 第七个例子：前两个元素超过了一行，第三个元素跑到第二行最左边浮动。最后一个元素像是被浮动元素“断成两截”的样子。
+* 第八个例子：三个元素延伸到第三行了，因此把第四个元素挤到第三行浮动。
+* 第九个例子：四个元素延伸到第三行了，第五个元素挤到第三行浮动。但注意第四个元素自身比较短，是肯定在第三行展示的，因此这里不止截断了第三个长元素，第一个元素还在同一行的第五个后面。
+
+这里能总结出单个元素单侧浮动的一点规律：浮动元素会在当前行向一侧浮动。但如果浮动元素在浮动前的位置跨行，则在它最下方所在行浮动。即原来浮动元素可能在第二行和第三行，则浮动后会在第三行浮动。我们做一下更多的实验，看看总结的规律是否正确。
+
+这里试一下单个浮动元素很长的场景：
+
+
+
+
+
+
+### 文本与多元素浮动（单侧）
+
+### 文本与多元素浮动（双侧）
+
+### 其它行内元素
+
+
+## 浮动流中的块级元素与文本行
+
+
+
+
+
+
 
 
 ## clear属性清除浮动
@@ -756,6 +882,11 @@
 
 
 ## 定位流
+
+## 浮动排列与flex对比
+
+参考 块级元素与浮动超过一行（单侧）
+
 
 ## 更多
 
@@ -792,4 +923,5 @@
   https://www.zhihu.com/question/28166594
 - 经验分享：CSS浮动(float,clear)通俗讲解\
   https://www.cnblogs.com/iyangyuan/archive/2013/03/27/2983813.html
-
+- 【CSS浮动属性】别再纠结布局了！一文带你玩转CSS Float属性\
+  https://juejin.cn/post/7351321081562857522
