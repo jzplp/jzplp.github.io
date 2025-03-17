@@ -853,12 +853,135 @@
 
 这里能总结出单个元素单侧浮动的一点规律：浮动元素会在当前行向一侧浮动。但如果浮动元素在浮动前的位置跨行，则在它最下方所在行浮动。即原来浮动元素可能在第二行和第三行，则浮动后会在第三行浮动。我们做一下更多的实验，看看总结的规律是否正确。
 
-这里试一下单个浮动元素很长的场景：
+### 单个元素很长
+这里试一下单个元素很长的场景，包括单个很长的非浮动元素与浮动元素：
 
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <span class="red"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span>
+    </div>
+    <div class="div-common">
+      <span class="red"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow left">第2个</span>
+    </div>
+    <div class="div-common">
+      <span class="red"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span>
+    </div>
+    <div class="div-common">
+      <span class="red"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow left">第2个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个</span
+      ><span class="red"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="div-common" style="margin-bottom: 70px">
+      <span class="yellow">第1个</span
+      ><span class="red left"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个</span
+      ><span class="red"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第3个</span><span class="blue">第4个</span>
+    </div>
 
+    <div class="div-common">
+      <span class="yellow">第1个</span
+      ><span class="red"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green left">第3个</span><span class="blue">第4个</span>
+    </div>
 
+    <div class="div-common" style="margin-bottom: 90px">
+      <span class="yellow">第1个</span
+      ><span class="red left"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第3个</span><span class="blue">第4个</span>
+    </div>
 
+    <div class="div-common">
+      <span class="yellow">第1个</span
+      ><span class="red left"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第3个</span><span class="blue">第4个</span
+      ><span class="gray"
+        >第5个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
 
+    <div class="div-common">
+      <span class="red left"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green">第3个</span
+      ><span class="blue">第4个</span
+      ><span class="gray">第5个个个个个个个个个个个</span>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .red {
+      background: red;
+    }
+    .yellow {
+      background: yellow;
+    }
+    .green {
+      background: green;
+    }
+    .blue {
+      background: blue;
+    }
+    .gray {
+      background: gray;
+    }
+    .pink {
+      background: pink;
+    }
+    .brown {
+      background: brown;
+    }
+  </style>
+</html>
+```
+
+ ![图片](/2025/float-14.png)
+
+上面的每个例子共同特征是，都有一个超过一行的红元素。我们一个一个来分析下。
+
+* 第一个例子：未设置浮动，与第二个例子做对比用。
+* 第二个例子：第二个黄元素设置了浮动，浮动前它在红元素之后，浮动后截断了红元素，跑到第二行最左侧了。
+* 第三个例子：与第一个例子类似，未设置浮动。只不过红元素更长了，使得第二个黄元素在第二行换行。
+* 第四个例子：第三个例子中的黄元素设置了浮动，可以看到浮动前黄元素横跨第二行第三行，浮动后只在第三行展示。
+* 第五个例子：第一个黄元素与第二个长红元素横跨第一行第二行，均未设置浮动。
+* 第六个例子：第五个例子中的红元素设置了浮动，在设置浮动后红元素从第二行开始展示，一直持续到第三行，且红色背景的覆盖范围持续到第三行结束。
+* 第七个例子：一共四个元素，均未设置浮动。其中第二个红元素很长。
+* 第八个例子：第三个绿元素设置了浮动，它本来就在第二行，因此跑到了第二行最左侧，截断了红元素。
+* 第九个例子：一共四个元素，其中第二个红元素很长，且设置了浮动。可以看到第二个红元素在第二行第三行展示，和第六个例子一致。
+* 第十个例子：在第九个例子的基础上增加了第五个灰元素，较长且未设置浮动。第二个红元素右上方的空白被灰元素填充了，且剩下灰元素部分被浮动的红元素阶段，到了第四行展示。
+* 第十一个例子：第十个例子中的红元素跑到了第一位，其它元素都没有占用红元素在第二行剩下的空间，而是全部在第三行展示。
+
+上面的例子看似有点奇怪，其实比较容易理解。虽然我们的元素是span，但浮动后就变成了块级元素，其中的文本也在块级元素内展示。因此浮动前这些文本可能横跨两行，浮动后便统一在一行展示了。即使是避免不了换行的长元素，也是在块级与元素内部换行。也正因为是块级元素，因此存在换行的长元素的未被文本覆盖的有背景的位置，也属于块级内部，别的文本是不能占用这个位置来展示的。
+
+至于同一个spna元素中的文本是可以被浮动元素截断，导致换行甚至间隔几行来展示的。
 
 ### 文本与多元素浮动（单侧）
 
