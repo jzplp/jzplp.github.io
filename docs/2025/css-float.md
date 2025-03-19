@@ -1079,8 +1079,90 @@
 
 如果排到后面的浮动元素可以在当前行容纳下，那么这个元素会不会排到前面展示呢？根据上面块级元素的规律，我认为不会。我们再看几个例子实验下：
 
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="red left">第2个个个个个个个</span
+      ><span class="green left">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common" style="margin-bottom: 150px">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="red left"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green left">第3个</span
+      ><span class="blue left"
+        >第4个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray left">第5个个个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="red left"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green left">第3个</span
+      ><span class="blue left"
+        >第4个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray left">第5个个个</span
+      ><span class="pink"
+        >第6个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="red left"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green left">第3个</span
+      ><span class="blue left"
+        >第4个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray left">第5个个个</span
+      ><span class="pink"
+        >第6个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+  </body>
+  <style>
+    .div-common {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .red {
+      background: red;
+    }
+    .yellow {
+      background: yellow;
+    }
+    .green {
+      background: green;
+    }
+    .blue {
+      background: blue;
+    }
+    .gray {
+      background: gray;
+    }
+    .pink {
+      background: pink;
+    }
+    .brown {
+      background: brown;
+    }
+  </style>
+</html>
+```
 
+![图片](/2025/float-16.png)
 
+* 第一个例子：第一个黄元素比较长，导致第二个红元素虽然是左浮动，但第一行容纳不下，因此在第二行左浮动。第三个第四个元素虽然第一行的空间足够容纳下，但它们是左浮动，必须在第二个红元素下方或者右侧，因此只能在第二行红元素后面放置。
+* 第二个例子：第二到第五个元素全部左浮动。其中第二和第四个元素长度超过了一行。可以看到所有浮动的元素都单独一行，因为所有的元素都没办法和前面的元素组合成单独一行。而且虽然第一行有空位可以容纳第三个元素，而且第二个元素后面（第三行）也有空位，但是由于块级元素的性质以及浮动元素不能出现在前一个浮动元素的“前面”，因此第三个元素依然独立一行展示。第五个元素同理。
+* 第三个例子：增加了第六个非浮动元素，可以看到它在各个浮动元素造成的空白中补足（除了被块级元素占据的空白）。
+* 第四个例子：缩短了第六个元素的长度，使其只到第四行。
+
+可以看到第二个例子中父级元素的的边框只右第一行，第三个例子中父级元素的边框持续到了最后一行，第四个例子中父级元素的边框缩短到了第四行。这说明文本行内元素构成的浮动中，依然是非浮动元素的高度决定了它的高度。通过这些例子可以看到，块级元素浮动规律和文本行内元素构成的浮动是一致的。例如后一个左浮动元素必须在前一个左浮动元素的“下方或者右侧”(右浮动同理)。
 
 ### 多文本元素双侧浮动
 
