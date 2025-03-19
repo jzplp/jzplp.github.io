@@ -1,5 +1,5 @@
 # 聊一下CSS中的标准流，浮动流，文本流，文档流（未完成）
-在网络上关于CSS的文章中，有时候能听到“标准流”，“浮动流”，“定位流”等等词语，还有像“文档流”，“文本流”等词，这些流指的都是什么？ 实际上指的是CSS中的一些布局方案和特性。今天我们就来聊一下CSS中的这些流。
+在网络上关于CSS的文章中，有时候能听到“标准流”，“浮动流”，“定位流”等等词语，还有像“文档流”，“文本流”等词，这些流指的都是什么？ 实际上指的是CSS中的一些布局方案和特性。今天我们就来聊一下CSS中的这些流。这篇文章重点详细描述的是浮动流。
 
 ## 简述
 * 文档流，普通流，标准流，常规流等：这么多名词实际上指的是都是文档流，即元素在HTML中的位置顺序，决定了它在页面中的位置顺序，分为块级元素和行内元素两种。
@@ -750,7 +750,7 @@
 ## 浮动流与行内元素
 上面我们讨论了很多块级元素在浮动流中的现象，现在我们再讨论一下浮动流与行内元素的特点。由于文本行肯定有文字，因此示例中的不同元素查看更清晰了。
 
-### 文本与单元素浮动
+### 单文本元素浮动
 首先来看一下文本在浮动中的简单表现。
 
 ```html
@@ -839,7 +839,6 @@
 ```
 
  ![图片](/2025/float-13.png)
-
 
 * 第一个例子：五个文本元素，没有设置浮动
 * 第二个例子：第二个和第四个元素设置了左浮动，这两个元素跑到最左边了。同样都是浮动元素时，按照它们的在原HTML中的位置排列。
@@ -963,7 +962,7 @@
 </html>
 ```
 
- ![图片](/2025/float-14.png)
+![图片](/2025/float-14.png)
 
 上面的每个例子共同特征是，都有一个超过一行的红元素。我们一个一个来分析下。
 
@@ -981,11 +980,109 @@
 
 上面的例子看似有点奇怪，其实比较容易理解。虽然我们的元素是span，但浮动后就变成了块级元素，其中的文本也在块级元素内展示。因此浮动前这些文本可能横跨两行，浮动后便统一在一行展示了。即使是避免不了换行的长元素，也是在块级与元素内部换行。也正因为是块级元素，因此存在换行的长元素的未被文本覆盖的有背景的位置，也属于块级内部，别的文本是不能占用这个位置来展示的。
 
-至于同一个spna元素中的文本是可以被浮动元素截断，导致换行甚至间隔几行来展示的。
+至于同一个span元素中的文本是可以被浮动元素截断，导致换行甚至间隔几行来展示的。另外如果浮动的元素在最下方，父元素的宽高是不计算最下方的浮动元素的。但如果浮动元素在最上方，父元素的宽高却将它包含在内。
 
-### 文本与多元素浮动（单侧）
+### 多文本元素单侧浮动
+上面的例子基本都都是单个元素浮动的场景，这一部分我们来看下多个元素同时浮动的例子。
 
-### 文本与多元素浮动（双侧）
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <span class="yellow">第1个</span><span class="red">第2个</span
+      ><span class="green">第3个</span><span class="blue">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个</span><span class="red left">第2个</span
+      ><span class="green">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span><span class="red left">第2个</span
+      ><span class="green">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个个个个个个</span><span class="red left">第2个</span
+      ><span class="green">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个个个个个</span><span class="red left">第2个</span
+      ><span class="green">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个个</span><span class="red left">第2个</span
+      ><span class="green">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个</span><span class="red left">第2个</span
+      ><span class="green">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+    <div class="div-common">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个</span><span class="red left">第2个</span
+      ><span class="green">第3个</span><span class="blue left">第4个</span
+      ><span class="gray">第5个</span>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .red {
+      background: red;
+    }
+    .yellow {
+      background: yellow;
+    }
+    .green {
+      background: green;
+    }
+    .blue {
+      background: blue;
+    }
+    .gray {
+      background: gray;
+    }
+    .pink {
+      background: pink;
+    }
+    .brown {
+      background: brown;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-15.png)
+
+这是一组相互关联的例子，每个例子都是五个元素。从第二个例子开始，都是第二个和第四个元素浮动。从第三个例子开始，第一个元素变长，但是长度逐渐减小。
+
+* 第一个例子：五个元素没有浮动，做对照使用。
+* 第二个例子：第二和第四个元素左浮动，浮动顺序为在HTML中的元素顺序。
+* 第三个例子：第一个元素超长，导致元素其它元素全部在第二行。浮动的第二和第四个元素也在第二行展示。效果和上一节的例子一致。
+* 第四个例子：第一个元素缩短，长度不足占满一行，但是第一行又不够完整的展示第二个元素（浮动为了块级元素，不能像行内元素一样换行），因此第三个元素的一部分放到了第一行。
+* 第五个例子：继续缩短第一个元素，使得第一行可以容纳第二个元素，因此第二个元素在第一行左浮动。
+* 第六个例子：继续缩短第一个元素，使得第一行可以容纳第二和第三个元素，但第四个位置不够，此时第五个元素在第一行和第二行跨行展示。
+* 第七个例子：继续缩短第一个元素，使得第一行可以容纳第二，第三，第四个元素。此时第二和第四个元素都在第一行左浮动。
+* 第八个例子：继续缩短第一个元素，此时所有元素都在第一行展示，类似第二个例子。
+
+这个例子体现出的文本浮动规则在前面已经说过了，但是通过不断地缩短第一个元素，能看出一个有趣的现象：当前行无法容纳浮动元素时，浮动元素会在下一行展示。但是排在后面的非浮动元素却不受限制，可以跑到浮动的前一行展示。
+
+如果排到后面的浮动元素可以在当前行容纳下，那么这个元素会不会排到前面展示呢？根据上面块级元素的规律，我认为不会。我们再看几个例子实验下：
+
+
+
+
+### 多文本元素双侧浮动
 
 ### 其它行内元素
 
