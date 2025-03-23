@@ -1166,6 +1166,129 @@
 
 ### 多文本元素双侧浮动
 
+了解了单侧多元素浮动，再来看一下双侧多元素浮动的场景。与单侧一样，我们也构造一组相互关联的例子：
+
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <span class="red">第1个</span><span class="yellow">第2个</span
+      ><span class="green">第3个</span><span class="blue">第4个</span
+      ><span class="gray">第5个</span><span class="pink">第6个</span
+      ><span class="brown">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right">第1个</span><span class="yellow">第2个</span
+      ><span class="green right">第3个</span><span class="blue">第4个</span
+      ><span class="gray left">第5个</span><span class="pink">第6个</span
+      ><span class="brown left">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right"
+        >第1个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green right">第3个</span
+      ><span class="blue">第4个</span><span class="gray left">第5个</span
+      ><span class="pink">第6个</span><span class="brown left">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right"
+        >第1个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green right">第3个</span
+      ><span class="blue">第4个</span><span class="gray left">第5个</span
+      ><span class="pink">第6个</span><span class="brown left">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right"
+        >第1个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green right">第3个</span
+      ><span class="blue">第4个</span><span class="gray left">第5个</span
+      ><span class="pink">第6个</span><span class="brown left">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right"
+        >第1个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green right">第3个</span
+      ><span class="blue">第4个</span><span class="gray left">第5个</span
+      ><span class="pink">第6个</span><span class="brown left">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right"
+        >第1个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green right">第3个</span
+      ><span class="blue">第4个</span><span class="gray left">第5个</span
+      ><span class="pink">第6个</span><span class="brown left">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green right">第3个</span
+      ><span class="blue">第4个</span><span class="gray left">第5个</span
+      ><span class="pink">第6个</span><span class="brown left">第7个</span>
+    </div>
+    <div class="div-common">
+      <span class="red right"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow">第2个</span><span class="green right">第3个</span
+      ><span class="blue">第4个</span><span class="gray left">第5个</span
+      ><span class="pink">第6个</span><span class="brown left">第7个</span>
+    </div>
+  </body>
+  <style>
+    .div-common {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+    .red {
+      background: red;
+    }
+    .yellow {
+      background: yellow;
+    }
+    .green {
+      background: green;
+    }
+    .blue {
+      background: blue;
+    }
+    .gray {
+      background: gray;
+    }
+    .pink {
+      background: pink;
+    }
+    .brown {
+      background: brown;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-17.png)
+
+* 第一个例子：未设置浮动，做对比用。
+* 第二个例子：第一个和第三个元素设置了右浮动，第五个和第七个元素设置了左浮动。可以看到，在HTML中顺序靠前的元素在浮动中的顺序更靠前。
+* 第三个例子：第一个元素长度增加，使得第一行放不开所有元素。这里第七个元素被挤到了第二行。由于第七个元素是浮动元素，因此他没有跨行展示。
+* 第四个例子：第一个元素长度继续增加。使得第六个元素无法完整放在第一行，由于它不是浮动元素，因此跨行展示。
+* 第五个例子：第一个元素长度继续增加，第六个元素全部放置在第二行。
+* 第六个例子：第一个元素长度继续增加，使得第五个元素无法完全放置在第一行。注意由于第五个元素是左浮动，不能跨行展示，因此在完全第二行展示。但是这样造成第一行又剩下一点空间被第六个元素填充了。
+* 第七个例子：第一个元素长度继续增加，第五六七个元素都在第二行展示，第四个元素由于空间不够跨行展示。
+* 第八个例子：第一个元素长度继续增加，第二行完整展示第四个元素。
+* 第九个例子：第一个元素长度继续增加，超过一行。触发了块级元素独立成两行，其它元素都在第三行展示。
+
+当双侧浮动时，元素的展示二号换行规律也是一样的，浮动元素的出现位置按照HTML的位置顺序出现。对于浮动元素来说，位置更靠后的元素的所在行不可能在位置更靠前的元素所在行的前面。但非浮动元素由于可以补缺的原因，位置靠后的元素是可以出现在更前面的行的。
+
+todo 双侧浮动的非浮动元素向上填充例子
+
+
+
+
+
 ### 其它行内元素
 
 
