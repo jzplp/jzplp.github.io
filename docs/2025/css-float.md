@@ -1281,13 +1281,102 @@
 * 第八个例子：第一个元素长度继续增加，第二行完整展示第四个元素。
 * 第九个例子：第一个元素长度继续增加，超过一行。触发了块级元素独立成两行，其它元素都在第三行展示。
 
-当双侧浮动时，元素的展示二号换行规律也是一样的，浮动元素的出现位置按照HTML的位置顺序出现。对于浮动元素来说，位置更靠后的元素的所在行不可能在位置更靠前的元素所在行的前面。但非浮动元素由于可以补缺的原因，位置靠后的元素是可以出现在更前面的行的。
+当双侧浮动时，元素的展示二号换行规律也是一样的，浮动元素的出现位置按照HTML的位置顺序出现。对于浮动元素来说，位置更靠后的元素的所在行不可能在位置更靠前的元素所在行的前面。但非浮动元素由于可以补缺的原因，位置靠后的元素是可以出现在更前面的行的。我们再来看几个例子：
 
-todo 双侧浮动的非浮动元素向上填充例子
+```html
+<html>
+  <body>
+    <div class="div-common">
+      <span class="red left">第1个个个个个个个个个个个个</span
+      ><span class="yellow right">第2个个个个个个个个个个个个个</span
+      ><span class="green left">第3个个个个个个个个个个个个个个个</span
+      ><span class="blue right">第4个个个个个个个个</span
+      ><span class="gray left">第5个个个个个个个个个</span
+      ><span class="pink right">第6个个个个个个个个个个个</span
+      ><span class="brown">第7个个个个个个个个个个个个个个个个个个个</span>
+    </div>
+    <div class="div-common" style="margin-bottom: 100px">
+      <span class="brown">第0个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="red left">第1个个个个个个个个个个个个</span
+      ><span class="yellow right">第2个个个个个个个个个个个个个</span
+      ><span class="green left">第3个个个个个个个个个个个个个个个</span
+      ><span class="blue right">第4个个个个个个个个</span
+      ><span class="gray left">第5个个个个个个个个个</span
+      ><span class="pink right">第6个个个个个个个个个个个</span>
+    </div>
+    <div class="div-common">
+      <span class="red left"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow right"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green left">第3个个个个个个个个个个个个</span
+      ><span class="blue right"
+        >第4个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray left">第5个个个个个个个个个个个个</span
+      ><span class="pink right">第6个个个个个个个个个个</span
+      ><span class="brown"
+        >第7个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="div-common">
+      <span class="red left"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="yellow right"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green left">第3个个个个个个个个个个个个</span
+      ><span class="blue right"
+        >第4个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray left">第5个个个个个个个个个个个个</span
+      ><span class="pink right">第6个个个个个个个个个个</span
+      ><span class="brown"
+        >第7个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+  </body>
+  <style>
+    .div-common {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .left {
+      float: left;
+    }
+    .right {
+      float: right;
+    }
+    .red {
+      background: red;
+    }
+    .yellow {
+      background: yellow;
+    }
+    .green {
+      background: green;
+    }
+    .blue {
+      background: blue;
+    }
+    .gray {
+      background: gray;
+    }
+    .pink {
+      background: pink;
+    }
+    .brown {
+      background: brown;
+    }
+  </style>
+</html>
+```
 
+![图片](/2025/float-18.png)
 
+* 第一个例子：前六个元素分别左右浮动，致使前三行都有少量空白。第七个元素未浮动，因此从第一行开始填补每一行的空白区域。
+* 第二个例子：第0个元素未浮动，第一到六个分别左右浮动。可以看到第一行的未浮动元素没有向下填充下面行的空白，下面的浮动元素也没有向上侵占未浮动元素的空间。
+* 第三个例子：浮动元素长度增加了，第二个元素和第四个元素都超过了一行。但是第四个元素依然在空白处填补。
+* 第四个例子：第三个例子未改动。但是使用鼠标选中了第一到第六个元素中间的部分文本。可以看到第7个元素虽然在中间穿插填补，但并未被选中。实际上选中顺序还是按照HTML的顺序，不是按照页面上呈现的顺序。
 
-
+第一与第二个例子中六个浮动元素是一样的，区别在于未浮动元素的位置。第一个例子在最后，元素向上填补了空缺。第二个例子在最前，元素没有向下填补浮动元素造成的空缺。
 
 ### 其它行内元素
 
