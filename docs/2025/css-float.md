@@ -9,6 +9,66 @@
 
 看了简述，还是不清楚各种流的区别与关联，比如文档流和文本流看起来差不多，究竟有什么不同？CSS浮动和定位为什么要多加一个“流”字？下面我们一一解答下。
 
+## 预置CSS
+下面的文档中会出现大量的重复CSS代码，这里提前进行声明。后面的所有示例都预先加载了这部分CSS代码。
+
+```css
+.left { /* 左浮动 */
+  float: left;
+}
+.right { /* 右浮动 */
+  float: right;
+}
+.red { /* 红 */
+  background: red;
+}
+.yellow { /* 黄 */
+  background: yellow;
+}
+.green { /* 绿 */
+  background: green;
+}
+.blue { /* 蓝 */
+  background: blue;
+}
+.gray { /* 灰 */
+  background: gray;
+}
+.pink { /* 粉 */
+  background: pink;
+}
+.brown { /* 棕 */
+  background: brown;
+}
+.maroon { /* 褐色 */
+  background: maroon;
+}
+.purple { /* 紫色 */
+  background: purple;
+}
+.fuchsia { /* 紫红 */
+  background: fuchsia;
+}
+.lime { /* 黄绿 */
+  background: lime;
+}
+.olive { /* 橄榄绿 */
+  background: olive;
+}
+.navy { /* 藏青 */
+  background: navy;
+}
+.teal { /* 青 */
+  background: teal;
+}
+.aqua { /* 水绿 */
+  background: aqua;
+}
+.orange { /* 橙 */
+  background: orange;
+}
+```
+
 ## 文档流
 文档流又叫做普通流，标准流，常规流等等，的英文名是“normal flow”，是HTML默认的布局形式。在未指定使用其它布局时，我们使用的就是文档流的布局。在文档流中分为两种元素：块级元素和行内元素。
 
@@ -52,7 +112,7 @@
       我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
     </div>
     <div class="container">
-      <div class="div-common div-float"></div>
+      <div class="div-common left"></div>
       你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。你好CSS!
       我是JZ。你好CSS! 我是JZ。你好CSS! 我是JZ。
     </div>
@@ -63,15 +123,13 @@
     </div>
   </body>
   <style>
-    .container {
-      margin-bottom: 50px;
-    }
+    .container { margin-bottom: 50px; }
     .div-common {
       height: 50px;
       width: 100px;
       border: 1px solid red;
     }
-    .div-float { float: left; }
+    .left { float: left; }
     .div-pos { position: absolute; }
   </style>
 </html>
@@ -116,15 +174,11 @@
     </div>
   </body>
   <style>
-    .div-common {
-      margin-bottom: 40px;
-    }
+    .div-common { margin-bottom: 40px; }
     .img-common {
       width: 40px;
       height: 40px;
     }
-    .left { float: left; }
-    .right { float: right; }
   </style>
 </html>
 ```
@@ -159,8 +213,6 @@
       width: 40px;
       height: 40px;
     }
-    .left { float: left; }
-    .right { float: right; }
   </style>
 </html>
 ```
@@ -204,8 +256,6 @@
       height: 40px;
       border: 1px solid red; 
     }
-    .left { float: left; }
-    .right { float: right; }
   </style>
 </html>
 ```
@@ -242,8 +292,6 @@
       height: 40px;
       border: 1px solid red; 
     }
-    .left { float: left; }
-    .right { float: right; }
   </style>
 </html>
 ```
@@ -303,8 +351,6 @@
       margin-bottom: 10px;
       border: 1px dotted blue;
     }
-    .left { float: left; }
-    .right { float: right; }
     .one {
       background: red;
       height: 20px;
@@ -420,8 +466,6 @@
       margin-bottom: 10px;
       border: 1px dotted blue;
     }
-    .left { float: left; }
-    .right { float: right; }
     .one {
       background: red;
       height: 20px;
@@ -543,15 +587,6 @@
       height: 40px;
       width: 50px;
     }
-    .left { float: left; }
-    .right { float: right; }
-    .red { background: red; }
-    .yellow { background: yellow; }
-    .green { background: green; }
-    .blue { background: blue; }
-    .gray { background: gray; }
-    .pink { background: pink; }
-    .brown { background: brown; }
   </style>
 </html>
 ```
@@ -642,15 +677,6 @@
       height: 100px;
       width: 50px;
     }
-    .left { float: left; }
-    .right { float: right; }
-    .red { background: red; }
-    .yellow { background: yellow; }
-    .green { background: green; }
-    .blue { background: blue; }
-    .gray { background: gray; }
-    .pink { background: pink; }
-    .brown { background: brown; }
   </style>
 </html>
 ```
@@ -723,15 +749,6 @@
       height: 50px;
       width: 150px;
     }
-    .left { float: left; }
-    .right { float: right; }
-    .red { background: red; }
-    .yellow { background: yellow; }
-    .green { background: green; }
-    .blue { background: blue; }
-    .gray { background: gray; }
-    .pink { background: pink; }
-    .brown { background: brown; }
   </style>
 </html>
 ```
@@ -809,30 +826,6 @@
     .div-common {
       border: 1px dotted blue;
       margin-bottom: 40px;
-    }
-    .left {
-      float: left;
-    }
-    .red {
-      background: red;
-    }
-    .yellow {
-      background: yellow;
-    }
-    .green {
-      background: green;
-    }
-    .blue {
-      background: blue;
-    }
-    .gray {
-      background: gray;
-    }
-    .pink {
-      background: pink;
-    }
-    .brown {
-      background: brown;
     }
   </style>
 </html>
@@ -934,30 +927,6 @@
       border: 1px dotted blue;
       margin-bottom: 40px;
     }
-    .left {
-      float: left;
-    }
-    .red {
-      background: red;
-    }
-    .yellow {
-      background: yellow;
-    }
-    .green {
-      background: green;
-    }
-    .blue {
-      background: blue;
-    }
-    .gray {
-      background: gray;
-    }
-    .pink {
-      background: pink;
-    }
-    .brown {
-      background: brown;
-    }
   </style>
 </html>
 ```
@@ -1034,30 +1003,6 @@
       border: 1px dotted blue;
       margin-bottom: 40px;
     }
-    .left {
-      float: left;
-    }
-    .red {
-      background: red;
-    }
-    .yellow {
-      background: yellow;
-    }
-    .green {
-      background: green;
-    }
-    .blue {
-      background: blue;
-    }
-    .gray {
-      background: gray;
-    }
-    .pink {
-      background: pink;
-    }
-    .brown {
-      background: brown;
-    }
   </style>
 </html>
 ```
@@ -1126,30 +1071,6 @@
     .div-common {
       border: 1px dotted blue;
       margin-bottom: 40px;
-    }
-    .left {
-      float: left;
-    }
-    .red {
-      background: red;
-    }
-    .yellow {
-      background: yellow;
-    }
-    .green {
-      background: green;
-    }
-    .blue {
-      background: blue;
-    }
-    .gray {
-      background: gray;
-    }
-    .pink {
-      background: pink;
-    }
-    .brown {
-      background: brown;
     }
   </style>
 </html>
@@ -1238,33 +1159,6 @@
       border: 1px dotted blue;
       margin-bottom: 40px;
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
-    .red {
-      background: red;
-    }
-    .yellow {
-      background: yellow;
-    }
-    .green {
-      background: green;
-    }
-    .blue {
-      background: blue;
-    }
-    .gray {
-      background: gray;
-    }
-    .pink {
-      background: pink;
-    }
-    .brown {
-      background: brown;
-    }
   </style>
 </html>
 ```
@@ -1338,33 +1232,6 @@
       border: 1px dotted blue;
       margin-bottom: 40px;
     }
-    .left {
-      float: left;
-    }
-    .right {
-      float: right;
-    }
-    .red {
-      background: red;
-    }
-    .yellow {
-      background: yellow;
-    }
-    .green {
-      background: green;
-    }
-    .blue {
-      background: blue;
-    }
-    .gray {
-      background: gray;
-    }
-    .pink {
-      background: pink;
-    }
-    .brown {
-      background: brown;
-    }
   </style>
 </html>
 ```
@@ -1380,12 +1247,21 @@
 
 
 ## 浮动流中块级元素与同高度行内元素
+前面描述的行内元素都是同高度的场景，但行内元素和块级元素都存在高度不同的场景。我们首先从简单的块级元素与同高度行内元素开始看起。
+
+```html
+
+```
+
+
 
 ## 浮动流中不同高度行内元素
 
 ## 浮动流中的可替换行内元素
 
 可替换+不可替换行内元素
+
+## 块级元素内部存在行内元素
 
 ## 浮动流中元素类型混合场景
 
