@@ -262,7 +262,7 @@
 
 ![图片](/2025/float-5.png)
 
-从例子中可以看到，当未设置浮动时，块级元素根据文档流的特点，从上到下排列。当设置浮动之后，亏啊及元素聚到了一行，左右浮动排列。如果同时存在未浮动的行内元素，则行内元素在中间展示。
+从例子中可以看到，当未设置浮动时，块级元素根据文档流的特点，从上到下排列。当设置浮动之后，块级元素聚到了一行，左右浮动排列。如果同时存在未浮动的行内元素，则行内元素在中间展示。
 
 ### display属性变化
 其实不仅如此，原本的行内元素在设置了浮动后，就变成了块级元素。即float属性会修改display属性的计算值（图源MDN）：
@@ -1247,11 +1247,83 @@
 
 
 ## 浮动流中块级元素与同高度行内元素
-前面描述的行内元素都是同高度的场景，但行内元素和块级元素都存在高度不同的场景。我们首先从简单的块级元素与同高度行内元素开始看起。
+前面描述的行内元素都是同高度的场景，但行内元素和块级元素都存在高度不同的场景。我们首先从简单的块级元素与同高度行内元素的组合场景开始看起。
+
+### 仅块级元素浮动
 
 ```html
-
+<html>
+  <body>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block left"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block left"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block left"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block left"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block left"></div> <div class="maroon block left"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block left"></div><div class="maroon block left"></div>
+      <div class="purple block"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .block {
+      width: 100px;
+      height: 40px;
+    }
+  </style>
+</html>
 ```
+
+![图片](/2025/float-19.png)
+
+这是一个较简单的例子，没有换行，所有块级元素的高度一致而且是左浮动。我们来分析一下：
+
+* 第一个例子：块级元素和行内元素间隔放置，没有设置浮动，做对比用。可以看到块级元素独立一行，在块级元素之间的行内元素们也是独立一行。
+* 第二个例子：红块级元素设置浮动。虽然浮动元素脱离了文档流不占空间，但是没有脱离“文本流”，行内元素还是会为它空出位置，因此行内元素在它同一行的后面显示。至于棕色的块级元素，没有浮动，所以应该在上面行内元素的下一行展示。由于红浮动元素并不占空间，因此和红元素部分重叠展示。
+* 第三个例子：两个块级元素同时浮动，到了一行。行内元素因此也在后面展示了。注意第二和第三个行内元素中间有空，这是因为它们中间原有一个块级元素，虽然浮动走了，但是两个行内元素并不紧挨，因此中间会出现空格。
+* 第四个例子：棕块级元素浮动。上面的红元素继续独立一行，棕块级元素则出现在了浮动元素之前。
+* 第五个例子：在棕块级元素浮动的基础上，增加了浮动的褐块级元素。可以看到横向展示了。
+* 第六个例子：在浮动的褐块级元素的后面增加了一个非浮动的紫色块级元素，可以看到如第二个例子一样，紫色元素为上面的恒内元素空出一行，然后与棕色元素部分重叠展示。最后的行内元素则独立一行展示。
+
+通过行内元素和块级元素的对比，我们可知在前一个块级元素浮动后，后面的非浮动块级元素依然会独立一行展示。但是后面的行内元素却紧贴着浮动块级元素同行展示。这也是浮动脱离文档流但没有脱离“文本流”的标志。
+
+todo  更多场景
+
+### 仅行内元素浮动
+
+
+### 块级元素与行内元素同时浮动
 
 
 
