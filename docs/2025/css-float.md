@@ -1318,7 +1318,91 @@
 
 通过行内元素和块级元素的对比，我们可知在前一个块级元素浮动后，后面的非浮动块级元素依然会独立一行展示。但是后面的行内元素却紧贴着浮动块级元素同行展示。这也是浮动脱离文档流但没有脱离“文本流”的标志。
 
-todo  更多场景
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+      <div class="brown block"></div>
+      <span class="gray">第3个个个个个个个个个个个个个个个</span
+      ><span class="pink">第4个个个个个个个个个个个个个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block left"></div>
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+      <div class="brown block"></div>
+      <span class="gray">第3个个个个个个个个个个个个个个个</span
+      ><span class="pink">第4个个个个个个个个个个个个个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block left"></div>
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+      <div class="brown block left"></div>
+      <span class="gray">第3个个个个个个个个个个个个个个个</span
+      ><span class="pink">第4个个个个个个个个个个个个个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+      <div class="brown block left higher"></div>
+      <div class="purple block left"></div>
+      <span class="gray">第3个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="pink">第4个个个个个个个个个个个个个个个个个个个个个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+      <div class="brown block left"></div>
+      <div class="purple block left higher"></div>
+      <span class="gray">第3个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="pink">第4个个个个个个个个个个个个个个个个个个个个个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .block {
+      width: 100px;
+      height: 40px;
+    }
+    .higher {
+      height: 100px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-20.png)
+
+这里又有几个例子，主要示例了换行和块级元素高度不同的个场景。我们一个一个分析下：
+
+* 第一个例子：块级元素和行内元素间隔放置，没有设置浮动，做对比用。可以看到行内元素正常换行。
+* 第二个例子：红块级元素设置浮动。可以看到行内元素在红元素右侧展示，且因为红元素可以容纳两行，因此在右侧分行放置。行内元素的第三行因为空间不够，独立成行。
+* 第三个例子：两个块级元素都设置了浮动。与上面行内元素没有换行的场景不同，这次两个元素分成两行浮动了。这是因为浮动元素后面的块级元素太长，导致第一个浮动元素后面没有空间放置第二个浮动元素了，只能新起一行。
+* 第四个例子：红块级元素没有浮动。后面行内元素有三行，再后面的两个块级元素都设置了浮动。注意看行内元素的第三行，前面是两个左浮动的块级元素。因此，行内元素的最后一行后面如果有左浮动元素，该浮动元素会跑到这一行的最左边。这与我们讨论行内浮动元素时的规律一致。注意看两个浮动元素的高度不一致，先高后矮。后面的行内元素，先在紫色的块级元素后面一行一行展示，然后又在下面更高的棕色元素后一行一行展示。
+* 第五个例子：与上一个例子不一样的是，两个浮动元素先矮后高。右侧的浮动元素并没有到棕色元素下面的空白区域展示，而是一直在右侧浮动。这与我们前面看到的浮动块级元素的规律类似。
 
 ### 仅行内元素浮动
 
