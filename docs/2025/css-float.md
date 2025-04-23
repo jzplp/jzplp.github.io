@@ -1406,10 +1406,63 @@
 
 ### 仅行内元素浮动
 
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow left">第1个</span><span class="green">第2个</span>
+      <div class="brown block"></div>
+      <span class="gray">第3个</span><span class="pink left">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow left">第1个</span
+      ><span class="green"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray">第3个</span><span class="pink left">第4个</span>
+      <div class="brown block"></div>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span
+      ><span class="green left"
+        >第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="gray">第3个</span><span class="pink left">第4个</span>
+      <div class="brown block"></div>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .block {
+      width: 100px;
+      height: 40px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-21.png)
+
+* 第一个例子：块级元素和行内元素间隔放置，没有设置浮动，做对比用。
+* 第二个例子：第一个和第四个文本左浮动。可以看到文本元素浮动仅在文本元素所在的行内部进行，不会影响块级元素。
+* 第三个例子：所有文本放在一起，且第二个文本超长，第一个和第四个文本左浮动。可以看到由于第二个元素跨行，所以第四个元素跑到文本第二行的最左边。
+* 第四个例子：第二个和第四个文本浮动。第二个文本由于超长因此独立两行展示，第四个文本没有侵占第二个文本内的空间。注意我们没有看到棕色块级元素，因为它被浮动元素遮盖了（注意看蓝色边框是留出棕色块级元素位置的）。浮动元素由于脱离文档流不占用空间，因此和下面的非浮动元素遮挡。
+
+在这个场景下，规律与上面纯行内元素的浮动场景一致，因此这里不过多讨论了。另外注意“第四个例子”中，非浮动的文本元素会给浮动的块级元素留出空间（即文本流），但是浮动的文本元素却没有给非浮动的块级元素留出空间。关于这一点我们在下一小节看看具体的对比。
 
 ### 块级元素与行内元素同时浮动
 
-
+todo 注意上一节遗留的对比
 
 ## 浮动流中不同高度行内元素
 
