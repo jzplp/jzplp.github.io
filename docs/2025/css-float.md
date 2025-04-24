@@ -1502,9 +1502,73 @@
 
 ### 块级元素与行内元素同时浮动
 
-todo 注意上一节遗留的对比
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="brown block"></div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block left"></div>
+      <span class="yellow left">第1个</span><span class="green">第2个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow left">第1个</span><span class="green">第2个</span>
+      <div class="red block left"></div>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green left">第2个</span>
+      <div class="brown block left"></div>
+      <span class="gray">第3个</span><span class="pink left">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green left">第2个个个个个个个个个个个个个个个个个</span>
+      <div class="brown block left"></div>
+      <span class="gray">第3个</span><span class="pink left">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block"></div>
+      <span class="yellow">第1个</span><span class="green left">第2个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span>
+      <div class="brown block left"></div>
+      <span class="gray">第3个</span><span class="pink left">第4个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .block {
+      width: 100px;
+      height: 40px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-23.png)
+
+* 第一个例子：未设置浮动，做对比用。
+* 第二个例子：红块级元素与第一个文本元素设置了浮动，可以看到横向顺序排列。
+* 第三个例子：红块级元素放到了最后，可以看到依然横向排列，只不过位置发生了变化。
+* 第四个例子：棕块级元素，第二和第四个文本元素浮动。可以看到在第二排横向展示，非浮动元素排列在后面。注意第三个文本元素因为和第一个元素的HTML中实际有个块级元素，因此有个空隙。而第一个文本元素虽然和第四个元素的HTML中间也有块级元素，但左侧是浮动区域，因此不展示空隙了。
+* 第五个例子：第二个文本元素长度加长。其它元素被挤到右边，发生了换行。注意看此时虽然第四个文本元素浮动，一三文本元素未浮动，但是依然一三元素在上方，第四个元素在下方。
+* 第六个例子：我们继续加长第二个文本元素，使其超过一行。可以看到一三文本元素在第二行上方，第四个元素则跑到了最后。注意第二个文本元素在HTML中的位置是比第三个文本元素靠前，但是依然在后面展示。这与前面行内元素的展示逻辑是一样的。
+
+那么如果多个不同的块级元素中间出现的“空白区域”，浮动或者浮动文本元素会不会补齐呢？我们看一下例子：
+
+
 
 ## 浮动流中不同高度行内元素
+
+todo 不同高度的文本元素
+
+
 
 ## 浮动流中的可替换行内元素
 
