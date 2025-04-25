@@ -1562,7 +1562,146 @@
 
 那么如果多个不同的块级元素中间出现的“空白区域”，浮动或者浮动文本元素会不会补齐呢？我们看一下例子：
 
+```html
+<html>
+  <body>
+    <div class="wrapper" style="margin-bottom: 50px">
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="yellow">第1个</span><span class="green">第2个</span
+      ><span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第2个</span><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="yellow left"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第2个</span><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green left">第2个</span><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow left">第1个</span>
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="green">第2个个个个个个个个个个个个个个个个个个个个个个个个个</span><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 80px">
+      <span class="yellow left">第1个</span>
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="green left">第2个个个个个个个个</span><span class="gray left">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <span class="yellow left">第1个个个个个个个个个个</span>
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="green left">第2个个个个个个个个</span><span class="gray left">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow left">第1个个个个个个个个个个</span>
+      <div class="red block1 left"></div>
+      <div class="brown block2 left"></div>
+      <span class="green left">第2个个个个个个个个</span><span class="gray left">第3个</span
+      ><span class="pink">第4个个个个个个个个个个个个个个个个个个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .block1 {
+      width: 100px;
+      height: 20px;
+    }
+    .block2 {
+      width: 200px;
+      height: 50px;
+    }
+  </style>
+</html>
+```
 
+![图片](/2025/float-24.png)
+
+* 第一个例子：设置了两个浮动的块级元素，左边低，右边高，左边下方留下的空白。这个例子主要做对比用。
+* 第二个例子：第一个文本元素长度加长，使得其它文本元素跑到空白下面了。但是没有去补齐空白。
+* 第三个例子：第一个文本元素设置浮动，在下面单独一行。可以看到其它文本元素在第一个文本元素上面展示了。
+* 第四个例子：文本元素仅第二个设置了浮动，可以看到它位于当前行的最左位置，没有向上补齐。
+* 第五个例子：第一个文本元素改成了在块级元素之前，第二个文本元素加长。可以看到依然没有元素补齐空白。
+* 第六个例子：在第五个例子的条件下，第二第三个文本元素浮动。可以看到第四个文本元素在右侧上方展示。
+* 第七个例子：第一个文本元素加长，导致两个块级元素不能在同一行。
+* 第八个例子：第四个文本元素加长，可以看到依然没有补齐空白。
+
+因此，块级浮动元素造成的左侧空白是不能被补齐的，文本元素只能补齐右侧的空白，而且是在非浮动状态下。我们列举几个可以被补齐的例子：
+
+```html
+<html>
+  <body>
+    <div class="wrapper" style="margin-bottom: 70px">
+      <span class="yellow">第1个个个个个个个个个个个个个个个个个个个个</span>
+      <div class="red block2 left"></div>
+      <span class="green left">第2个</span><span class="gray left">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 50px">
+      <div class="red block2 left"></div>
+      <div class="pink block2 left"></div>
+      <div class="purple block2 left"></div>
+      <span class="yellow">第1个个</span>
+      <span class="green">第2个个个个个</span><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 50px">
+      <div class="red block2 left"></div>
+      <div class="pink block2 left"></div>
+      <div class="purple block2 left"></div>
+      <span class="yellow left">第1个个</span>
+      <span class="green">第2个个个个个</span><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .block1 {
+      width: 100px;
+      height: 20px;
+    }
+    .block2 {
+      width: 200px;
+      height: 50px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-25.png)
+
+* 第一个例子：第一个文本元素与块级元素在两行分别左浮动。第二第三个文本元素左浮动。可以看到第四个文本元素去第一行补齐第一个文本元素右侧的空白，但是左浮动的文本元素却没有。
+* 第二个例子：三个块级元素左浮动。右侧的空白由文本元素补齐了。
+* 第三个例子：第一个文本元素左浮动。可以看到其它文本元素去补齐右侧，但是浮动的文本元素没有。
 
 ## 浮动流中不同高度行内元素
 
