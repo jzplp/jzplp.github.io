@@ -1705,7 +1705,72 @@
 
 ## 浮动流中不同高度行内元素
 
-todo 不同高度的文本元素
+前面列举的元素中，行内元素中文本高度都是相同的，因此一行一行顺序排列。假设行内元素的文本高度不同，现象又会怎样呢？我们可以通过控制字号来实现文本高度的控制。
+
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <span class="yellow size14">第1个</span
+      ><span class="green size35">第2个</span
+      ><span class="gray size14">第3个</span
+      ><span class="pink size35">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个</span
+      ><span class="green size35">第2个</span
+      ><span class="gray size14">第3个</span
+      ><span class="pink size35 left">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14">第1个</span
+      ><span class="green size35">第2个</span
+      ><span class="gray size14">第3个</span
+      ><span class="pink size35">第4个</span
+      ><span class="brown size14">第5个个个个个个个个个个个个个个个个个个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个</span
+      ><span class="green size35">第2个</span
+      ><span class="gray size14"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="pink size35 left">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个</span
+      ><span class="green size35 left">第2个</span
+      ><span class="gray size14"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="pink size35 left">第4个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .size14 {
+      font-size: 14;
+    }
+    .size35 {
+      font-size: 35;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-26.png)
+
+* 第一个例子：两种不同高度的文本元素展示，未浮动做对比用。默认垂直对齐是baseline。
+* 第二个例子：第一个第四个元素左浮动。看到左浮动的1号元素的“垂直对齐方式”改变了。但实际上并未改变，观察vertical-align还是baseline。这是因为设置后变为了块级元素，是自己跟自己对齐，因此垂直对齐无意义了。
+* 第三个例子：最后增加了第五个元素，且长度超过一行，可以看到并没有填充左边的空白，而是把所有元素整体作为一行，它自己跨到第二行展示。
+* 第四个例子：第三个元素加长，使其换行，可以看到第四个元素到了最左边浮动。
+* 第五个例子：一二四元素都浮动，只有第三个元素非浮动。可以看到非浮动元素在浮动元素右侧换行，没有把左浮动都作为一行处理。
+
+这里再列举几个右侧换行的例子：
+
+todo
+
 
 
 
