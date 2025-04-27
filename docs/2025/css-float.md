@@ -1707,6 +1707,8 @@
 
 前面列举的元素中，行内元素中文本高度都是相同的，因此一行一行顺序排列。假设行内元素的文本高度不同，现象又会怎样呢？我们可以通过控制字号来实现文本高度的控制。
 
+### 场景举例
+
 ```html
 <html>
   <body>
@@ -1767,12 +1769,85 @@
 * 第四个例子：第三个元素加长，使其换行，可以看到第四个元素到了最左边浮动。
 * 第五个例子：一二四元素都浮动，只有第三个元素非浮动。可以看到非浮动元素在浮动元素右侧换行，没有把左浮动都作为一行处理。
 
+### 右侧换行规律
 这里再列举几个右侧换行的例子：
 
-todo
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <span class="yellow size14">第1个个个</span
+      ><span class="green size35">第2个个个个个个个</span
+      ><span class="gray size14"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14">第1个个个</span
+      ><span class="green size35 left">第2个个个个个个个</span
+      ><span class="gray size14"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个个个</span
+      ><span class="green size35">第2个个个个个个个</span
+      ><span class="gray size14"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个个个</span
+      ><span class="green size35 left">第2个个个个个个个</span
+      ><span class="gray size14"
+        >第3个个个个个个个个个个个个个个个个个个个个个个个个个个</span
+      >
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个个个</span
+      ><span class="green size35 left">第2个个个个个个个</span
+      ><span class="gray size14">第3个</span
+      ><span class="pink size14">第4个个个个个个个个个个个个个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个个个</span
+      ><span class="green size35 left">第2个</span
+      ><span class="gray size35">第3个</span
+      ><span class="pink size14">第4个个个个个个个个个个个个个个个个个个个个个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow size14 left">第1个个个</span
+      ><span class="green size35 left">第2个</span
+      ><span class="gray size35 left">第3个</span
+      ><span class="pink size14">第4个个个个个个个个个个个个个个个个个个个个个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .size14 {
+      font-size: 14;
+    }
+    .size35 {
+      font-size: 35;
+    }
+  </style>
+</html>
+```
 
+![图片](/2025/float-27.png)
 
+* 第一个例子：一三是矮元素，二是高元素，均未设置浮动，做对比用。
+* 第二个例子：二元素浮动，一元素被挤到右边。三元素在右侧换行了。
+* 第三个例子：一元素浮动，二元素未浮动。这时候三元素没有在右边换行，而是整体换行了。
+* 第四个例子：一二元素均浮动，三元素在右侧换行。
+* 第五个例子：增加了第四个元素，且三元素变短，四元素在右侧换行了。
+* 第六个例子：三元素变高，这时候四元素没有在右侧换行，而是整体换行了。
+* 第七个例子：三元素变为左浮动，四元素又在右侧换行了。
 
+从这些例子中，可以看出行内元素在右侧换行的规律：右侧换行的多个元素是一个整体，这个整体的左边的元素超过右边这个整体的行高，且是浮动元素。即假设这个换行元素左侧是非浮动元素，也可以换行，只要把右侧的非浮动行内元素作为整体来换行即可。但如果些非浮动元素第一行的行高（取每个元素最高值）达到或者超过左侧浮动元素的行高，则不在右侧换行，而是和浮动元素作为一个整体换行。
 
 ## 浮动流中的可替换行内元素
 
