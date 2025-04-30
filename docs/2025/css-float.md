@@ -1856,6 +1856,38 @@
 
 可替换元素和行内元素类似，在默认情况下它们都像行内元素一样，在同一行横向展示。但是也与块级元素类似，可以指定元素的宽高。其它特性在这里就不描述了。我们举例看一下这两种元素的展示效果：
 
+```html
+<html>
+  <body>
+    <div>
+      个个个个<img class="common" src="./1.jpg" />个个个个<button class="common">按钮</button>个个个个<button class="common vertical-top">按钮</button>个个个个<input class="common" />个个个个<div class="common yellow inline-block"></div>个个个个
+      <div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .inline-block {
+      display: inline-block;
+    }
+    .vertical-top {
+      vertical-align: top;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-28.png)
+
+上面的例子展示了在文本中的可替换元素与行内块元素的表现。可以看到它们都是行内元素，但可以设置宽度与高度。同时它们在行中的纵向位置表现不一样：
+* 第一个图片元素和最后一个手动设置inline-block的黄元素，默认和文字的底端对齐。
+* 第二个按钮和第四个input元素，因为其中有文字，所以和文字居中对齐。
+* 第三个按钮，我们手动设置了`vertical-align: top`，于是和行内元素的最高处对齐。
+
+### 浮动表现
+看完了默认表现，我们再看一下它们在浮动流中的表现。
+
 
 
 
@@ -1863,11 +1895,6 @@
 可替换+不可替换行内元素
 
 ## 块级元素内部存在行内元素
-
-## 浮动流中元素类型混合场景
-
-块级元素+不同高行内元素+可替换元素
-
 
 ## clear属性清除浮动
 
