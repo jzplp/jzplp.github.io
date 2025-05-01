@@ -1861,7 +1861,7 @@
   <body>
     <div>
       个个个个<img class="common" src="./1.jpg" />个个个个<button class="common">按钮</button>个个个个<button class="common vertical-top">按钮</button>个个个个<input class="common" />个个个个<div class="common yellow inline-block"></div>个个个个
-      <div>
+      </div>
   </body>
   <style>
     .common {
@@ -1888,13 +1888,99 @@
 ### 浮动表现
 看完了默认表现，我们再看一下它们在浮动流中的表现。
 
+```html
+<html>
+  <body>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <span class="yellow">第1个</span><span class="green">第2个</span
+      ><img class="common left" src="./1.jpg" /><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <span class="yellow">第1个个个个个个个个个</span
+      ><span class="green">第2个个个个个个个个个个</span
+      ><img class="common left" src="./1.jpg" /><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span
+      ><span class="green">第2个</span
+      ><img class="common" src="./1.jpg" /><span class="gray left">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <span class="yellow">第1个</span><span class="green">第2个</span
+      ><input class="common left" /><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <span class="yellow">第1个个个个个个个个个</span
+      ><span class="green">第2个个个个个个个个个个</span
+      ><input class="common left" /><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span
+      ><span class="green">第2个</span
+      ><input class="common" /><span class="gray left">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <span class="yellow">第1个</span><span class="green">第2个</span
+      ><div class="common yellow inline-block left"></div><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper" style="margin-bottom: 100px">
+      <span class="yellow">第1个个个个个个个个个</span
+      ><span class="green">第2个个个个个个个个个个</span
+      ><div class="common yellow inline-block left"></div><span class="gray">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span
+      ><span class="green">第2个</span
+      ><div class="common yellow inline-block"></div><span class="gray left">第3个</span
+      ><span class="pink">第4个</span>
+    </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .inline-block {
+      display: inline-block;
+    }
+    .vertical-top {
+      vertical-align: top;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
 
+![图片](/2025/float-29.png)
 
+例子比较长，但是没什么难点，可替换元素与行内块元素就像一个大块头的行内元素表现类似，具体表现和前面的其它类似都类似。
 
-
-可替换+不可替换行内元素
+* 第一个例子：img元素浮动。
+* 第二个例子：img元素浮动的基础上，文本长度增加，右侧出现换行。
+* 第三个例子：img元素不浮动，单独一个文本元素浮动，虽然看起来纵向位置差较多，但实际上是在一行的。
+* 第四个例子：与第一个例子一样，但浮动元素变成了input，表现一致。
+* 第五个例子：与第二个例子一样，但浮动元素变成了input，表现一致。
+* 第六个例子：与第三个例子一样，但元素变成了input，除了垂直对齐外表现一致。
+* 第七个例子：与第一个例子一样，但浮动元素变成了行内块的div，表现一致。
+* 第八个例子：与第二个例子一样，但浮动元素变成了行内块的div，表现一致。
+* 第九个例子：与第三个例子一样，但元素变成了行内块的div，表现一致。
 
 ## 块级元素内部存在行内元素
+
+### 块级元素
+
+### 行内块元素
 
 ## clear属性清除浮动
 
