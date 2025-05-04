@@ -1964,7 +1964,7 @@
 
 ![图片](/2025/float-29.png)
 
-例子比较长，但是没什么难点，可替换元素与行内块元素就像一个大块头的行内元素表现类似，具体表现和前面的其它类似都类似。
+例子比较长，但是没什么难点，可替换元素与行内块元素就像一个大块头的行内元素，具体表现和前面的部分场景是类似的。
 
 * 第一个例子：img元素浮动。
 * 第二个例子：img元素浮动的基础上，文本长度增加，右侧出现换行。
@@ -1976,11 +1976,115 @@
 * 第八个例子：与第二个例子一样，但浮动元素变成了行内块的div，表现一致。
 * 第九个例子：与第三个例子一样，但元素变成了行内块的div，表现一致。
 
-## 块级元素内部存在行内元素
+## 元素内部包含行内元素
+块级元素内部可以包含行内元素，一些行内块元素内部也可以包含行内元素，那么包含行内元素时，浮动的表现又如何呢？
 
-### 块级元素
+### 块级元素包含行内元素
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange">块级元素1</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange left">块级元素1</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第2个</span>
+      <div class="orange left">块级元素1</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange left">
+        块级元素1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个
+      </div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
+![图片](/2025/float-30.png)
 
-### 行内块元素
+我们在一个div内部放置了行内元素，没有给这个div设置宽高。
+
+* 第一个例子：div元素未浮动，独占一整行，且高度由文本内容撑开。
+* 第二个例子：div元素设置浮动，元素实际宽高都由文本内容撑开。
+* 第三个例子：行内元素超长，浮动的div被挤到第二行。
+* 第四个例子：浮动的div超长，元素在第二行展示且独占两整行。
+
+上面列举的例子看起来很常规，和前面正常块级元素的表现基本一致。下面我们试一下，当块级元素设置宽高，但不足以容纳其中内容时的表现。
+
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <div class="orange common">块级元素1个个个个个个个个个</div>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange common">块级元素1个个个个个个个个个</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange left common">块级元素1个个个个个个个个个</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第2个</span>
+      <div class="orange left common">块级元素1个个个个个个个个个</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange left common">块级元素1个个个个个个个个个</div>
+      <span class="gray">第3个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="pink">第4个个个个个个个个个个个个个个个个个个个个个个个个个个</span>
+    </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 40px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 80px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-31.png)
+
+* 第一个例子：单独列举了div元素的宽高不能容纳内容的例子。橘黄色背景的为div实际占用空间，文本内容超出展示了。
+* 第二个例子：将div元素放到行内元素中，可以看到后面的行内元素覆盖了超出的块级元素文本。
+* 第三个例子：div元素设置浮动，超出的文本元素依旧。
+* 第四个例子：前面的行内元素超长，浮动的div被挤到第二行。
+* 第五个例子：后面的行内元素超长，可以看到依旧覆盖了div中超出的文本元素。
+
+### 行内块元素包含行内元素
+
+```html
+
+
+```
+
 
 ## clear属性清除浮动
 
@@ -1989,9 +2093,6 @@
 
 ## 定位流
 
-## 浮动排列与flex对比
-
-参考 块级元素与浮动超过一行（单侧）
 
 
 ## 更多
