@@ -2081,10 +2081,102 @@
 ### 行内块元素包含行内元素
 
 ```html
-
-
+<html>
+  <body>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange inline-block">块级元素1</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange left inline-block">块级元素1</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow"
+        >第1个个个个个个个个个个个个个个个个个个个个个个个</span
+      ><span class="green">第2个</span>
+      <div class="orange left inline-block">块级元素1</div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+    <div class="wrapper">
+      <span class="yellow">第1个</span><span class="green">第2个</span>
+      <div class="orange left inline-block">
+        块级元素1个个个个个个个个个个个个个个个个个个个个个个个个个个个个个个
+      </div>
+      <span class="gray">第3个</span><span class="pink">第4个</span>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+    .inline-block {
+      display: inline-block;
+    }
+  </style>
+</html>
 ```
 
+![图片](/2025/float-32.png)
+
+可以看到，除了第一个未浮动的例子行内块元素和文本元素一行之外，其它例子和块级元素一摸一样，因此这里不再赘述了。下面再来看一下设置宽高，但不足以容纳其中内容时的表现。
+
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="orange common">块级元素1个个个个个个个个个</div>
+      </div>
+      <div class="wrapper">
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="orange common">块级元素1个个个个个个个个个</div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+      </div>
+      <div class="wrapper">
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="orange left common">块级元素1个个个个个个个个个</div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+      </div>
+      <div class="wrapper">
+        <span class="yellow"
+          >第1个个个个个个个个个个个个个个个个个个个个个个个</span
+        ><span class="green">第2个</span>
+        <div class="orange left common">块级元素1个个个个个个个个个</div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+      </div>
+      <div class="wrapper">
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="orange left common">块级元素1个个个个个个个个个</div>
+        <span class="gray">第3个个个个个个个个个个个个个个个个个个个个个</span
+        ><span class="pink">第4个个个个个个个个个个个个个个个个个个个个个个个个个个</span>
+      </div>
+      <div class="wrapper">
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="orange common vertical-top">块级元素1个个个个个个个个个</div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 40px;
+      display: inline-block;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 80px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-33.png)
+
+这里只有第二个例子与上面块级元素不一样。虽然行内块元素中的文本超过了宽高，但第二个例子（也只有这个例子）为其留出了位置。如果我们设置div元素`vertical-align: top`，（看第六个例子），则超过的区域又没有被父级包裹。猜测应该是垂直对齐通过作用于行内元素，影响了父元素的包裹区域大小。
 
 ## clear属性清除浮动
 
