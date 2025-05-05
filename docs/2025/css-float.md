@@ -67,6 +67,15 @@
 .orange { /* 橙 */
   background: orange;
 }
+.clear-left {
+  clear: left;
+}
+.clear-right {
+  clear: right;
+}
+.clear-both {
+  clear: both;
+}
 ```
 
 ## 文档流
@@ -2179,6 +2188,88 @@
 这里只有第二个例子与上面块级元素不一样。虽然行内块元素中的文本超过了宽高，但第二个例子（也只有这个例子）为其留出了位置。如果我们设置div元素`vertical-align: top`，（看第六个例子），则超过的区域又没有被父级包裹。猜测应该是垂直对齐通过作用于行内元素，影响了父元素的包裹区域大小。
 
 ## clear属性清除浮动
+在CSS中还有个clear属性，用于清除浮动，取值有：none、left、right、both，对应不清除，清除左边，清除右边，左右都清除。虽然看起来叫做“clear”、“清除浮动”，但实际上不能起到“清除”的作用，只能说是“避开”，而且应用于行内元素无效（todo 待验证）。
+
+### clear用于块级元素
+看一下clear属性在块级元素上的表现，也通过这些例子了解clear属性的作用。首先看一下clear作用于浮动元素上的例子。
+
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="orange common right"></div>
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="teal common left"></div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+        <div class="purple common left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="orange common right"></div>
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="teal common left"></div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+        <div class="purple common left clear-left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="orange common right"></div>
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="teal common left clear-left"></div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+        <div class="purple common left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="orange common right"></div>
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="teal common left clear-right"></div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+        <div class="purple common left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="orange common right"></div>
+        <span class="yellow">第1个</span><span class="green">第2个</span>
+        <div class="teal common left"></div>
+        <span class="gray">第3个</span><span class="pink">第4个</span>
+        <div class="purple common left clear-right"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 40px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 80px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-34.png)
+
+* 第一个例子：三个块级元素，两个左浮动，一个右浮动，未设置clear，做对比用。
+* 第二个例子：紫元素clear:left，因为前面有一个左浮动元素，因此避开到第二行展示。
+* 第三个例子：青元素clear:left，但是前面并没有左浮动元素了，因此无变化。注意clear并不会清除自己身上的浮动，也并不会清除其它元素上的浮动。
+* 第四个例子：青元素clear:right。它的前面有一个右浮动元素，因此避开到第二行展示。后面的左浮动元素跟着也到了第二行展示。
+* 第五个例子：紫元素clear:right。它的前面有一个右浮动元素，因此避开到第二行展示。
+
+从上面几个例子可以看到，clear并不会清除自身的浮动属性，也更不会影响和清除其它浮动元素的属性。它仅仅是通过改变自身的位置，避开前面元素的浮动行，另起一行展示而已。
+
+
+
+
+
+
+
+todo clear管不了后面的元素 是否管的了后面的同向浮动 例子
+
+todo clear应用于非浮动元素 例子
+
+### clear用于行内元素
+
+
+
 
 ## 浮动的父元素塌陷和解决方案
 
@@ -2226,3 +2317,5 @@
   https://juejin.cn/post/7351321081562857522
 - MDN 可替换元素\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_images/Replaced_element_properties
+- MDN clear\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/clear
