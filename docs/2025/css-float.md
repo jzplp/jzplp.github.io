@@ -2311,9 +2311,81 @@
 
 通过上面的例子，我们可以看到，clear只能判断HTML中位置处于前面的元素是否有左右浮动。我们再看一下clear应用于非浮动元素的例子。
 
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow common left"></div>
+        <div class="green common left"></div>
+        <div class="blue commonHeight"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow common left"></div>
+        <div class="green common left"></div>
+        <div class="blue commonHeight clear-left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow common left"></div>
+        <div class="green commonHeight left"></div>
+        <div class="blue commonHeight"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow common left"></div>
+        <div class="green commonHeight left"></div>
+        <div class="blue commonHeight clear-left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow commonHeight left"></div>
+        <div class="green common left"></div>
+        <div class="blue commonHeight clear-left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow commonHeight right"></div>
+        <div class="green common left"></div>
+        <div class="blue commonHeight clear-left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow commonHeight right"></div>
+        <div class="green common left"></div>
+        <div class="blue commonHeight clear-right"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 40px;
+    }
+    .commonHeight {
+      width: 100px;
+      height: 60px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
 
+![图片](/2025/float-36.png)
 
-todo clear应用于非浮动元素 例子
+* 第一个例子：前三个元素左浮动，第四个更高的蓝元素不浮动，因为前面浮动元素不占位置，因此重叠展示。
+* 第二个例子：第四个更高的蓝元素设置了clear:left，可以看到蓝元素靠下展示，没有和浮动元素重叠。
+* 第三个例子：未设置clear，第三个浮动元素高度提高，做对比用。
+* 第四个例子：第四个蓝元素设置了clear:left，由于第三个浮动是高元素，因此蓝元素也避开了这部分高度。
+* 第五个例子：换到了第二个浮动元素是高元素，四个蓝元素位置不变。
+* 第六个例子：第二个浮动元素变为了右浮动。因为第四个蓝元素是clear:left，因此没有空出右浮动元素高的这部分区域。
+* 第七个例子：第四个蓝元素设置为clear:right，可以看到有空出右浮动元素高的这部分区域。
+
+通过上面的例子可以看到，clear属性也能作用于非浮动元素，而且效果类似，都使得被设置的元素避开前面的浮动元素。
 
 ### clear用于行内元素
 
