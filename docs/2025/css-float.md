@@ -2256,13 +2256,62 @@
 
 从上面几个例子可以看到，clear并不会清除自身的浮动属性，也更不会影响和清除其它浮动元素的属性。它仅仅是通过改变自身的位置，避开前面元素的浮动行，另起一行展示而已。
 
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="red common left clear-right"></div>
+        <div class="yellow common left"></div>
+        <div class="green common left"></div>
+        <div class="blue common right"></div>
+      </div>
+      <div class="wrapper" style="margin-bottom: 120px">
+        <div class="blue common right"></div>
+        <div class="red common left clear-right"></div>
+        <div class="yellow common left"></div>
+        <div class="green common left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow common left clear-right"></div>
+        <div class="green common left"></div>
+      </div>
+      <div class="wrapper" style="margin-bottom: 120px">
+        <div class="red common left"></div>
+        <div class="yellow common left clear-left"></div>
+        <div class="green common left"></div>
+      </div>
+      <div class="wrapper">
+        <div class="red common left"></div>
+        <div class="yellow common left clear-both"></div>
+        <div class="green common left"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 40px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 80px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-35.png)
+
+* 第一个例子：三个元素左浮动，一个元素右浮动。第一个左浮动元素设置clear:right，但是并无效果。因为右浮动元素在HTML中的位置在后面，因此无法影响到。
+* 第二个例子：右浮动元素在HTML中的位置提到前面，这时候左浮动元素设置clear:right，就有效果了。
+* 第三个例子：只有三个左浮动元素，中间元素设置了clear:right，效果和未设置一样。因为中间元素的HTML位置中的前面并没有右浮动元素。
+* 第四个例子：三个左浮动元素，中间元素设置了clear:left，第二个元素和它后面的浮动元素被移动到第二行展示。
+* 第五个例子：中间元素设置了clear:both，相当于第三个和第四个例子的结合。
+
+通过上面的例子，我们可以看到，clear只能判断HTML中位置处于前面的元素是否有左右浮动。我们再看一下clear应用于非浮动元素的例子。
 
 
-
-
-
-
-todo clear管不了后面的元素 是否管的了后面的同向浮动 例子
 
 todo clear应用于非浮动元素 例子
 
