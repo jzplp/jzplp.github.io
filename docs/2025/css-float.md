@@ -2438,10 +2438,69 @@
 
 从上面的例子可以看到，对于行内元素来说，对浮动元素设置clear有效，对非浮动元素设置无效。但这背后的原因是行内元素浮动后，display属性变化，会变为块级元素，因此设置有效。综合来看，clear属性对于行内元素的设置是无效的。
 
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <span class="red">第1个</span><button class="common left">按钮1</button><span class="yellow">第2个</span
+          ><button class="common right">按钮2</button><span class="green">第3个</span><button class="common left"
+          >按钮3</button><span class="blue">第4个</span
+          >
+      </div>
+      <div class="wrapper" style="margin-bottom: 100px">
+        <span class="red">第1个</span><button class="common left">按钮1</button><span class="yellow">第2个</span
+          ><button class="common right clear-left">按钮2</button><span class="green">第3个</span><button class="common left"
+          >按钮3</button><span class="blue">第4个</span
+          >
+      </div>
+      <div class="wrapper">
+        <span class="red">第1个</span><button class="common left">按钮1</button><span class="yellow">第2个</span
+          ><button class="common right">按钮2</button><span class="green">第3个</span><button class="common"
+          >按钮3</button><span class="blue">第4个</span
+          >
+      </div>
+      <div class="wrapper">
+        <span class="red">第1个</span><button class="common left">按钮1</button><span class="yellow">第2个</span
+          ><button class="common right">按钮2</button><span class="green">第3个</span><button class="common clear-left"
+          >按钮3</button><span class="blue">第4个</span
+          >
+      </div>
+      <div class="wrapper">
+        <span class="red">第1个</span><button class="common left">按钮1</button><span class="yellow">第2个</span
+          ><button class="common right">按钮2</button><span class="green">第3个</span><button class="common"
+          >按钮3</button><span class="blue clear-left">第4个</span
+          >
+      </div>
+      <div class="wrapper">
+        <div class="common left pink"></div>
+        <span class="red">第1个</span><button class="common left">按钮1</button><span class="yellow">第2个</span
+          ><button class="common clear-left">按钮2</button><span class="green clear-left">第3个</span>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 80px;
+      height: 40px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
 
-todo 行内块元素
-todo 行内元素+浮动的块级元素
+![图片](/2025/float-38.png)
 
+这些例子展示了行内元素，行内块元素，块级元素组合使用clear时的场景，可以发现行内元素与行内块元素对于clear的规律是一致的：
+
+* 第一个例子：三个按钮，两个左浮动，一个右浮动，作对比用。
+* 第二个例子：按钮2设置clear:left，按钮2和3避开到第二行展示。
+* 第三个例子：按钮1和2设置浮动，按钮3未设置浮动，做对比用。
+* 第四个例子：按钮3未浮动，设置clear:left，没有效果。
+* 第五个例子：文本4未浮动，设置clear:left，没有效果。
+* 第六个例子：最前面增加了一个左浮动块级元素，按钮2和文本3均未浮动，设置clear:left，没有效果。
 
 ## 浮动的父元素塌陷与解决方案
 
