@@ -2188,7 +2188,7 @@
 这里只有第二个例子与上面块级元素不一样。虽然行内块元素中的文本超过了宽高，但第二个例子（也只有这个例子）为其留出了位置。如果我们设置div元素`vertical-align: top`，（看第六个例子），则超过的区域又没有被父级包裹。猜测应该是垂直对齐通过作用于行内元素，影响了父元素的包裹区域大小。
 
 ## clear属性清除浮动
-在CSS中还有个clear属性，用于清除浮动，取值有：none、left、right、both，对应不清除，清除左边，清除右边，左右都清除。虽然看起来叫做“clear”、“清除浮动”，但实际上不能起到“清除”的作用，只能说是“避开”，而且应用于行内元素无效（todo 待验证）。
+在CSS中还有个clear属性，用于清除浮动，取值有：none、left、right、both，对应不清除，清除左边，清除右边，左右都清除。虽然看起来叫做“clear”、“清除浮动”，但实际上不能起到“清除”的作用，只能说是“避开”，而且应用于行内元素无效。
 
 ### clear用于块级元素
 看一下clear属性在块级元素上的表现，也通过这些例子了解clear属性的作用。首先看一下clear作用于浮动元素上的例子。
@@ -2389,10 +2389,61 @@
 
 ### clear用于行内元素
 
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <span class="red">第1个</span><span class="yellow right">第2个</span
+          ><span class="green">第3个</span><span class="blue left">第4个</span
+          ><span class="gray">第5个</span><span class="pink left">第6个</span
+          ><span class="brown left">第7个</span>
+      </div>
+      <div class="wrapper">
+        <span class="red">第1个</span><span class="yellow right">第2个</span
+          ><span class="green">第3个</span><span class="blue left">第4个</span
+          ><span class="gray">第5个</span><span class="pink left clear-left">第6个</span
+          ><span class="brown left">第7个</span>
+      </div>
+      <div class="wrapper">
+        <span class="red">第1个</span><span class="yellow right">第2个</span
+          ><span class="green">第3个</span><span class="blue left">第4个</span
+          ><span class="gray">第5个</span><span class="pink left clear-right">第6个</span
+          ><span class="brown left">第7个</span>
+      </div>
+      <div class="wrapper">
+        <span class="red">第1个</span><span class="yellow right">第2个</span
+          ><span class="green">第3个</span><span class="blue left">第4个</span
+          ><span class="gray clear-both">第5个</span><span class="pink left">第6个</span
+          ><span class="brown left">第7个</span>
+      </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-37.png)
+
+上面的例子展示了行内元素clear的场景，我们具体分析一下：
+
+* 第一个例子：第四个第六个第七个元素左浮动，第二个元素右浮动，做对比用。
+* 第二个例子：第六个元素设置了clear:left，因此避开到第二行展示。后面的左浮动第七个元素跟随到了第二行。
+* 第三个例子：第六个元素设置了clear:right，因此避开到第二行展示。后面的左浮动第七个元素跟随到了第二行。
+* 第四个例子：第五个非浮动元素设置了clear:both，现象与不设置一样无变化。
+
+从上面的例子可以看到，对于行内元素来说，对浮动元素设置clear有效，对非浮动元素设置无效。但这背后的原因是行内元素浮动后，display属性变化，会变为块级元素，因此设置有效。综合来看，clear属性对于行内元素的设置是无效的。
 
 
+todo 行内块元素
+todo 行内元素+浮动的块级元素
 
-## 浮动的父元素塌陷和解决方案
+
+## 浮动的父元素塌陷与解决方案
 
 
 ## 定位流
