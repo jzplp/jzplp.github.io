@@ -2574,9 +2574,81 @@
 
 在上面的例子中，我们给父级div设置了固定高度，下面的内容就可以露出来了。但这种方法太死板，不能根据浮动内容的高度自适应。
 
-### 方法：
+### 方法：clear和空块级元素
+前面我们聊过，使用css中的clear属性，可以让块级元素避开浮动元素，在后面新起一行展示。利用这个特性，可以做到自适应浮动内容的高度。
 
-### 方法：
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <img src="./1.jpg" class="common left">
+        <span>第一段文字。第一段文字。第一段文字。第一段文字。第一段文字。</span>
+        <div class="clear-both"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common2 red"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .common2 {
+      width: 120px;
+      height: 20px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-41.png)
+
+在父元素的最后，添加一个空的块级元素，设置clear，即可让父元素的区域包含这个空块级元素以及上面的浮动元素。由于空块级元素并不在视觉上占空间，因此页面展示中看不出它的存在。
+
+### 方法：clear和after伪类
+有些人会觉得在html中增加空元素不太美观，这时候还可以使用after伪类来代替空块级元素。
+
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper after">
+        <img src="./1.jpg" class="common left">
+        <span>第一段文字。第一段文字。第一段文字。第一段文字。第一段文字。</span>
+      </div>
+      <div class="wrapper">
+        <div class="common2 red"></div>
+      </div>
+  </body>
+  <style>
+    .after::after {
+      content: "";
+      display: block;
+      clear: both;
+    }
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .common2 {
+      width: 120px;
+      height: 20px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-41.png)
+
+使用after伪类在父元素的最后添加一个空元素，设置为块级且clear，这时候就能起到和html中设置空块级元素一样的效果了。
 
 ### 方法：
 
