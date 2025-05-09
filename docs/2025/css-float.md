@@ -2539,7 +2539,40 @@
 
 在上面的例子中，第一段有一个浮动的大图片，它的高度超过了第一段的父元素的高度，侵占了第二段的部分空间，把第二段中红色div的大部分区域都挡住了。这就是浮动的父元素塌陷问题。
 
-### 方法：
+### 方法：父元素设置固定高度
+最简单的方法就是给父元素设置一个固定的高度，或者固定的底部padding，margin等高度，即可以包裹进浮动元素。
+
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper" style="height: 120px">
+        <img src="./1.jpg" class="common left">
+        <span>第一段文字。第一段文字。第一段文字。第一段文字。第一段文字。</span>
+      </div>
+      <div class="wrapper">
+        <div class="common2 red"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .common2 {
+      width: 120px;
+      height: 20px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-40.png)
+
+在上面的例子中，我们给父级div设置了固定高度，下面的内容就可以露出来了。但这种方法太死板，不能根据浮动内容的高度自适应。
 
 ### 方法：
 
