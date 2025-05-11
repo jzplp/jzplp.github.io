@@ -2504,7 +2504,7 @@
 
 ## 浮动的父元素塌陷与解决方案
 ### 问题描述
-由于浮动元素不占空间，父元素可能无法把其中的浮动元素完全包裹在内。这时候浮动元素会覆盖后面其它元素的展示，这种特点会对我们造成困扰。
+由于浮动元素不占空间，父元素可能无法把其中的浮动元素完全包裹在内。这时候浮动元素会覆盖后面其它元素的展示，这种特点会对我们造成困扰。而这些解决父元素塌陷问题的方法， 被叫做clearfix。
 
 ```html
 <html>
@@ -2538,6 +2538,8 @@
 ![图片](/2025/float-39.png)
 
 在上面的例子中，第一段有一个浮动的大图片，它的高度超过了第一段的父元素的高度，侵占了第二段的部分空间，把第二段中红色div的大部分区域都挡住了。这就是浮动的父元素塌陷问题。
+
+下面会介绍很多种父元素塌陷问题的解决方案，部分解决方案不仅能应用到父元素，也能应用到后面的的元素。例如后面的元素设置固定上padding/margin/清除浮动等等。
 
 ### 方法：父元素设置固定高度
 最简单的方法就是给父元素设置一个固定的高度，或者固定的底部padding，margin等高度，即可以包裹进浮动元素。
@@ -2650,14 +2652,25 @@
 
 使用after伪类在父元素的最后添加一个空元素，设置为块级且clear，这时候就能起到和html中设置空块级元素一样的效果了。
 
-### 方法：
+### 方法：使用BFC(overflow)
+区块格式化上下文（Block Formatting Context，BFC）是一个以特定方式渲染的区域，在这里我们并不详细介绍BFC的特点，但是BFC可以包含内部浮动与排除外部浮动，解决浮动的父元素塌陷问题。
+
+![图片](/2025/float-42.png)
+
+很多种方式可以创建一个BFC，这里我们以比较常用的overflow为例。
+
+```html
+
+
+```
+
+### 方法：使用BFC(flow-root)
 
 
 ## 定位流
 
 
-
-## 更多
+## 总结
 
 ## 参考
 - MDN 介绍CSS布局\
@@ -2698,3 +2711,5 @@
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_images/Replaced_element_properties
 - MDN clear\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/clear
+- MDN 区块格式化上下文 BFC\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_display/Block_formatting_context
