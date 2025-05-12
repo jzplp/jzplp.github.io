@@ -2539,7 +2539,7 @@
 
 在上面的例子中，第一段有一个浮动的大图片，它的高度超过了第一段的父元素的高度，侵占了第二段的部分空间，把第二段中红色div的大部分区域都挡住了。这就是浮动的父元素塌陷问题。
 
-下面会介绍很多种父元素塌陷问题的解决方案，部分解决方案不仅能应用到父元素，也能应用到后面的的元素。例如后面的元素设置固定上padding/margin/清除浮动等等。
+下面会介绍很多种父元素塌陷问题的解决方案，这些解决方案不仅能应用到父元素，也能应用到后面的的元素上。
 
 ### 方法：父元素设置固定高度
 最简单的方法就是给父元素设置一个固定的高度，或者固定的底部padding，margin等高度，即可以包裹进浮动元素。
@@ -2660,12 +2660,75 @@
 很多种方式可以创建一个BFC，这里我们以比较常用的overflow为例。
 
 ```html
-
-
+<html>
+  <body>
+    <body>
+      <div class="wrapper overflow">
+        <img src="./1.jpg" class="common left">
+        <span>第一段文字。第一段文字。第一段文字。第一段文字。第一段文字。</span>
+      </div>
+      <div class="wrapper">
+        <div class="common2 red"></div>
+      </div>
+  </body>
+  <style>
+    .overflow {
+      overflow: auto;
+    }
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .common2 {
+      width: 120px;
+      height: 20px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+    }
+  </style>
+</html>
 ```
 
-### 方法：使用BFC(flow-root)
+![图片](/2025/float-41.png)
 
+可以看到，设置overflow这个看起来没什么关系属性之后，形成了一个BFC区块，区块中包含了所有浮动元素。
+
+### 方法：使用BFC(flow-root)
+使用overflow虽然好用，但是强制指定了overflow属性。有没有无副作用创建BFC的方式呢？那就是flow-root。设置display:flow-root可以创建一个BFC区块。通过下面的例子可以看到，效果和verflow一样。
+
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper flowroot">
+        <img src="./1.jpg" class="common left">
+        <span>第一段文字。第一段文字。第一段文字。第一段文字。第一段文字。</span>
+      </div>
+      <div class="wrapper">
+        <div class="common2 red"></div>
+      </div>
+  </body>
+  <style>
+    .flowroot {
+      display: flow-root;
+    }
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .common2 {
+      width: 120px;
+      height: 20px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-41.png)
 
 ## 定位流
 
