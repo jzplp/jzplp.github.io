@@ -2739,14 +2739,51 @@
 * 固定定位 fixed
 * 粘性定位 sticky
 
-下面分别简单介绍一下这几种定位方式。
+除了静态定位外，与定位属性结合的还有top, bottom, left, right属性，分别设置距离上方，下方，左方，右方的偏移。下面分别简单介绍一下这几种定位方式。
 
 ### 静态定位 static
 静态定位即正常的布局模式，遵守正常的文档流规则，也是position属性的默认值。由于无变化，这里就不提供例子了。
 
 ### 相对定位 relative
-相对定位模式下，元素先按照正常的定位
+相对定位模式下，元素先按照正常的文档流规则定位。然后再根据偏移属性移动元素。移动后，原位置的空白依然被保留。
 
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="common red"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red"></div>
+        <div class="common yellow relative"></div>
+        <div class="common green"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+      display: inline-block;
+    }
+    .relative {
+      position: relative;
+      top: 10px;
+      left: 20px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-43.png)
+
+有两个例子，第一个例子没有设置定位，做对比用。第二个例子设置了相对定位，可以看到向右和向下偏移了部分位置，但偏移前的空白依然是保留的。
 
 ### 绝对定位 absolute
 
