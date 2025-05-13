@@ -2731,9 +2731,34 @@
 ![图片](/2025/float-41.png)
 
 ## 定位流
+所谓定位流实际上就是CSS中的position属性。position定位属性在CSS中被经常使用，但定位流这个概念并不常见，一般只有在与浮动做对比的时候才提到。而且定位是针对于单个元素的，且方式有很多种，因此用一种“定位流”来描述我感觉并不精确。常用的定位方式有如下几种：
+
+* 静态定位 static
+* 相对定位 relative
+* 绝对定位 absolute
+* 固定定位 fixed
+* 粘性定位 sticky
+
+下面分别简单介绍一下这几种定位方式。
+
+### 静态定位 static
+静态定位即正常的布局模式，遵守正常的文档流规则，也是position属性的默认值。由于无变化，这里就不提供例子了。
+
+### 相对定位 relative
+相对定位模式下，元素先按照正常的定位
+
+
+### 绝对定位 absolute
+
+### 固定定位 fixed
+
+### 粘性定位 sticky
+
 
 
 ## 总结
+
+
 
 ## 参考
 - MDN 介绍CSS布局\
@@ -2776,3 +2801,5 @@
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/clear
 - MDN 区块格式化上下文 BFC\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_display/Block_formatting_context
+- MDN position\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/position
