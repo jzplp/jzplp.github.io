@@ -2786,11 +2786,93 @@
 有两个例子，第一个例子没有设置定位，做对比用。第二个例子设置了相对定位，可以看到向右和向下偏移了部分位置，但偏移前的空白依然是保留的。
 
 ### 绝对定位 absolute
+绝对定位是基于已定位的父级元素（非static）来进行定位的。定位元素会被移出文档流，偏移量是根据已定位的父级元素位置来偏移。
+
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="common red"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper" style="position:relative">
+        <div class="common red"></div>
+        <div class="common yellow absolute"></div>
+        <div class="common green"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+      display: inline-block;
+    }
+    .absolute {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-44.png)
+
+
+第一个例子依然没有设置定位，做对比用。第二个例子看到黄色元素原来的空位没有了，偏移定位也是基于父级元素位置。
 
 ### 固定定位 fixed
+固定定位的元素也会被移出文档流，但定位偏移是根据屏幕视口的位置来偏移。
+
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="common red"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red"></div>
+        <div class="common yellow fixed"></div>
+        <div class="common green"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+      display: inline-block;
+    }
+    .fixed {
+      position: fixed;
+      top: 100px;
+      left: 200px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      margin-bottom: 40px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-45.png)
+
+与absolute一样，没有留出空位置，但是偏移基于的位置变化了。
 
 ### 粘性定位 sticky
 
+
+
+### 不同定位模式与文本流
 
 
 ## 总结
