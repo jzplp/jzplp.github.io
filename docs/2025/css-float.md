@@ -2871,13 +2871,98 @@
 ![图片](/2025/float-46.png)
 
 ### 粘性定位 sticky
-粘性定位是相对定位和固定定位的结合。在达到偏移的位置前为相对定位，达到后则为固定定位。
+网上大部分关于粘性定位的说明是：相对定位和固定定位的结合。在达到偏移的位置前为相对定位，达到后则为固定定位。但是据我测试，达到偏移的位置前与相对定位不完全一样，到前偏移的位置后与固定定位也并不完全一样。我们具体来看下：
 
 ```html
-
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="common red"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red relative"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red fixed"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red sticky"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red sticky"></div>
+      </div>
+      <div class="wrapper">
+        <div class="gray" style="width: 100px; height: 10px"></div>
+        <div class="common red sticky"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper" style="position: relative; top: 15px">
+        <div class="common red sticky"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+      <div class="wrapper">
+         <div class="common gray"></div>
+        <div class="common red sticky"></div>
+        <div class="common yellow"></div>
+        <div class="common green"></div>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      width: 130px;
+      float: left;
+    }
+    .relative {
+      position: relative;
+      top: 30px;
+    }
+    .fixed {
+      position: fixed;
+      top: 30px;
+    }
+    .sticky {
+      position: sticky;
+      top: 30px;
+    }
+  </style>
+</html>
 ```
 
-但它和固定定位不完全一样，粘性定位滚动到父元素的边界就会脱离固定的效果。 todo
+![图片](/2025/float-47.png)
+
+![图片](/2025/float-48.png)
+
+![图片](/2025/float-49.png)
+
+粘性定位相对来说比较复杂，因此又提供了8个例子，而且这里只是简单描述，其它特点这里略过。首先注意到第一个图，最上面有一条横线，那是浏览器窗口的顶部。默认body会有8px的margin，因此所有的元素都是不到顶部的。这里不同例子中，偏移量都是top:30px。
+
+第一张图是默认最顶部无滚动条的场景，第二张图是滚动了一部分，第三张图是滚动更多。下面我们对每个例子进行分析。
+
+* 第一个例子：红黄绿三个元素纵向排列，没有设置定位，做对比用。
+* 第二个例子：红元素设置了相对定位。可以看到红元素位置下移，其他元素未动。红元素偏移是相对于原有的自身位置，在这里是父元素的顶部（蓝线）。
+* 第三个例子：红元素设置了固定定位。可以看到红元素位置下移，其他元素上移，没有给红元素留出空间。另外固定定位的偏移相对于视口，因此偏移后会比第二个例子的位置更高一些。
+* 第四个例子：
+* 第五个例子：
+* 第六个例子：
+* 第七个例子：
+* 第八个例子：
+
 
 
 ### 不同定位模式与文本流
@@ -2930,3 +3015,5 @@
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_display/Block_formatting_context
 - MDN position\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/position
+- position定位-sticky详细讲解\
+  https://blog.csdn.net/qq_38382380/article/details/146250484
