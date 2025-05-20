@@ -2965,14 +2965,96 @@
 
 从上面这些例子，可以看到粘性定位与相对定位和固定定位都不完全一致，不能直接等同。这里描述一下特点：
 1. 粘性定位受限于父组件的位置，不管达到偏移前后，是相对还是固定模式，都不能超过父组件容器。如果超过则没有“粘性”的效果了。
-2. 达到偏移前，元素类似于“静态定位”，即偏移位置是不生效的。
+2. 达到偏移前，元素类似于“静态定位”，或者说是偏移位置不生效的“相对定位”。
 3. 滚动达到偏移时，类似固定定位，元素固定在屏幕视口的偏移位置。
 4. 初始位置在偏移后时，类似固定定位，元素初始在屏幕视口偏移的位置。当滚动时，元素也固定在屏幕视口的偏移位置。
 
 注意例子里面的达到偏移前，代表的是第八个例子；初始位置在偏移后，代表的是第四个例子。关于粘性定位这里只是简单描述，粘性定位还有其它一些特点，这里就略过了。
 
 ### 不同定位模式与文本流
+这里我们看一下，不同定位模式对文本流的影响。为啥不测定位模式对文档流的影响？上面介绍各种定位模式时，实际上就是在文档流中演示的，因此不用单独介绍了。
 
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="common red "></div>
+        <span class="green">我是行内元素。我是行内元素。我是行内元素。我是行内元素。我是行内元素。</span>
+        <div class="common yellow"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red relative"></div>
+        <span class="green">我是行内元素。我是行内元素。我是行内元素。我是行内元素。我是行内元素。</span>
+        <div class="common yellow"></div>
+      </div>
+      <div class="wrapper" style="position: relative">
+        <div class="common red absolute"></div>
+        <span class="green">我是行内元素。我是行内元素。我是行内元素。我是行内元素。我是行内元素。</span>
+        <div class="common yellow"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red fixed"></div>
+        <span class="green">我是行内元素。我是行内元素。我是行内元素。我是行内元素。我是行内元素。</span>
+        <div class="common yellow"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common red sticky"></div>
+        <span class="green">我是行内元素。我是行内元素。我是行内元素。我是行内元素。我是行内元素。</span>
+        <div class="common yellow"></div>
+      </div>
+      <div class="wrapper">
+        <div class="common yellow"></div>
+        <div class="common red sticky"></div>
+        <span class="green">我是行内元素。我是行内元素。我是行内元素。我是行内元素。我是行内元素。</span>
+      </div>
+  </body>
+  <style>
+    .common {
+      width: 100px;
+      height: 100px;
+    }
+    .wrapper {
+      border: 1px dotted blue;
+      width: 150px;
+      float: left;
+    }
+    .static {
+      position: static;
+      top: 30px;
+    }
+    .relative {
+      position: relative;
+      top: 30px;
+    }
+    .absolute {
+      position: absolute;
+      top: 30px;
+    }
+    .fixed {
+      position: fixed;
+      top: 30px;
+    }
+    .sticky {
+      position: sticky;
+      top: 30px;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/float-50.png)
+
+![图片](/2025/float-51.png)
+
+上面列举了每个定位模式，并且下面放置了文本元素，我们一个一个分析哪些模式会脱离文本流，即文本不会为定位的红元素留出空间。
+
+* 第一个例子：静态定位，相当于未设置定位，当然未脱离文本流。
+* 第二个例子：相对定位，文本流为偏移前的元素位置留出空间，这和文档流一致。
+* 第三个例子：绝对定位，已脱离文本流。
+* 第四个例子：固定定位，已脱离文本流。
+* 第五个例子：粘性定位，且初始位置在偏移后。类似于相对定位，文本流为偏移前的元素位置留出空间。向下滚动时文本流依然为偏移前的元素位置留出空间，和文档流一致。
+* 第六个例子：粘性定位，且初始位置在偏移前。类似于未设置定位，未脱离文本流。
 
 ## 总结
 
