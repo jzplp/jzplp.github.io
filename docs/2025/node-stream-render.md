@@ -8,10 +8,46 @@
 我们前端页面的流式渲染和接口数据使用的流式传输在原理上与流式视频类似。只不过流式渲染是将HTML页面分块发送，流式传输是将接口数据分块发送。
 
 ## 使用Node.js实现流式传输
+Node.js支持流式作为数据传输方式，因此我们试一下使用HTTP协议传输流式数据。
 
-todo 流式HTTP接口，write和pipe以及其它方式。可以试纯Node.js和用简单http库。考虑是否举例文件流式。
+### 流式传输数据
+```js
+const http = require("http");
+
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+    if (req.url === "/") {
+      res.setHeader('Content-Type', 'text/plain');
+      let index = 0;
+      const clear = setInterval(() => {
+        if (++index === 10) {
+          res.end(`data index: ${index}\n`);
+          clearInterval(clear);
+        } else res.write(`data index: ${index}\n`);
+      }, 1000);
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
+```
+
+在Node.js中，使用`res.write`方法，即可在body上发送一个数据块。可以多次发送，接口传输不会停止，直到使用`res.end`方法结束发送。`res.write`方法会在header中自动增加`Transfer-Encoding: chunked`表示分块传输。使用这个方式，即可实现Node.js的流式传输。
+
+### 流式传输文件
+在Node.js中，流式不仅限于HTTP，文件系统也是支持流式的。但这里我们仅举例利用HTTP流式传输文件：
+
+```js
+
+```
+
+// pipe
 
 ## 浏览器HTML支持流式渲染
+
+// 浏览器直接请求text/plain不行流式
+
 
 
 ## fetch接收流式传输数据
@@ -45,3 +81,7 @@ React关于流式的支持和原理
   https://juejin.cn/post/7424908830902075444
 - MDN EventSource\
   https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
+- MDN 渲染页面：浏览器的工作原理\
+  https://developer.mozilla.org/zh-CN/docs/Web/Performance/Guides/How_browsers_work
+- Node.js文档\
+  https://nodejs.org/docs/latest/api/
