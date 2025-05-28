@@ -7,6 +7,8 @@
 
 我们前端页面的流式渲染和接口数据使用的流式传输在原理上与流式视频类似。只不过流式渲染是将HTML页面分块发送，流式传输是将接口数据分块发送。
 
+todo 画流程图列举流式和非流式渲染与传输
+
 ## 使用Node.js实现流式传输
 Node.js支持流式作为数据传输方式，因此我们试一下使用HTTP协议传输流式数据。
 
@@ -36,17 +38,29 @@ http
 在Node.js中，使用`res.write`方法，即可在body上发送一个数据块。可以多次发送，接口传输不会停止，直到使用`res.end`方法结束发送。`res.write`方法会在header中自动增加`Transfer-Encoding: chunked`表示分块传输。使用这个方式，即可实现Node.js的流式传输。
 
 ### 流式传输文件
-在Node.js中，流式不仅限于HTTP，文件系统也是支持流式的。但这里我们仅举例利用HTTP流式传输文件：
+在Node.js中，流式不仅限于HTTP，文件等其它系统也是支持流式的。这里我们举例利用HTTP流式传输文件：
 
 ```js
+const http = require("http");
+const fs = require("fs");
 
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+    if (req.url === "/") {
+      fs.createReadStream('./1.txt').pipe(res);
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
 ```
 
-// pipe
+使用fs.createReadStream创建一个可读流，然后使用管道将数据发送到HTTP输出流中。这时候HTTP的header中也会自动增加`Transfer-Encoding: chunked`。这样就实现了文件的流式输出。关于文件的流式输出还有其它方法，这里就不列举了。
 
 ## 浏览器HTML支持流式渲染
 
-// 浏览器直接请求text/plain不行流式
+todo 浏览器直接请求text/plain不能看到流式
 
 
 
@@ -61,6 +75,8 @@ todo 分不同的协议描述 HTTP1.1，HTTP2，HTTP3
 
 看看怎么指定不同HTTP版本来实验。
 
+
+Transfer-Encoding: chunked 的含义具体描述
 
 ## 总结
 
@@ -83,5 +99,7 @@ React关于流式的支持和原理
   https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
 - MDN 渲染页面：浏览器的工作原理\
   https://developer.mozilla.org/zh-CN/docs/Web/Performance/Guides/How_browsers_work
-- Node.js文档\
-  https://nodejs.org/docs/latest/api/
+- Node.js文档 Stream\
+  https://nodejs.org/docs/latest/api/stream.html
+- Node.js文档 HTTP\
+  https://nodejs.org/docs/latest/api/http.html
