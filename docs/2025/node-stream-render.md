@@ -11,7 +11,7 @@
 
 ![图片](/2025/stream-2.png)
 
-通过流程图可以清晰的看到，流式的优势在于可以一部分数据准备好就发给前端进行展示，不必把所有数据都准备好再发送，前端的页面或数据展示可以和后端处理并行进行。这样对于有需求的场景，用户体验和速度都能提升。
+通过流程图可以清晰的看到，流式的优势在于可以服务端准备好一部分数据好就给前端进行展示，不必把所有数据都准备好再发送，前端的页面或数据展示可以和服务端处理并行进行。这样对于有需求的场景，用户体验和速度都能提升。
 
 ## 使用Node.js实现流式传输
 Node.js支持流式作为数据传输方式，因此我们试一下使用HTTP协议传输流式数据。对于Node.js来说，前端的HTML页面也是数据的一种。
@@ -63,8 +63,39 @@ http
 使用fs.createReadStream创建一个可读流，然后使用管道将数据发送到HTTP输出流中。这时候HTTP的header中也会自动增加`Transfer-Encoding: chunked`。这样就实现了文件的流式输出。关于文件的流式输出还有其它方法，这里就不列举了。
 
 ## 浏览器HTML支持流式渲染
+把上面使用Node.js流式传输数据的例子的url直接放到浏览器地址栏访问，浏览器页面和调试工具的Network都是所有数据块传输完成后一起展示的，没有表现出流式特性。这并不是因为浏览器不支持流式，而是我们访问的方式不对。当我们把分块的数据内容换成HTML，再把url放到浏览器地址栏访问，就可以触发HTML流式渲染的特性了。看下服务端代码：
 
-todo 浏览器直接请求text/plain不能看到流式
+```js
+const http = require("http");
+
+const dataHeader = '<html><body><div>header</div>';
+const dataFooter = '<div>footer</div></body></html>'
+
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+    if (req.url === "/") {
+      res.setHeader('Content-Type', 'text/html');
+      res.write(dataHeader);
+      let index = 0;
+      const clear = setInterval(() => {
+        if (++index === 10) {
+          res.end(dataFooter);
+          clearInterval(clear);
+        } else res.write(`<div>data index: ${index}</div>`);
+      }, 1000);
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
+```
+
+![图片](/2025/stream-3.png)
+
+最后生成的HTML和浏览器展示的效果如上图，可以看到是一个接口传输完成所有的块，拼合成一整个HTML文件。调试工具的Network上看到这个接口的总时间为10秒，和我们服务端的延时对的上。只看静态图是看不出流式特性的，这里用一个gif动图展示流式的效果：
+
+
 
 
 
