@@ -99,9 +99,68 @@ http
 
 通过gif动图，可以明显的看到，HTML数据随着时间一点一点增加，浏览器窗口中的页面展示也是一点一点更新。这明显的体现了流式渲染的特性：即数据是分块发送的，并不是一次发送全部HTML数据；浏览器也不是收到完整的HTML数据后才开始渲染和展示页面，而是只要拿到部分HTML数据（哪怕是不完整的，例如标签没有闭合），就开始渲染展示流程。这也能在浏览器的工作原理中得到证明。
 
-## fetch接收流式传输数据
+## fetch与ReadableStream接收流式传输数据
+除了HTML之外，使用JavaScript在浏览器中也是可以获取流式数据的。这里我们以fetch为例，展示下如何接收流式数据。
 
+```js
+const http = require("http");
 
+const htmlData = `
+<html><body>
+  <div>hello, jzplp</div>
+  <script>
+    const decoder = new TextDecoder();
+    fetch('/api/stream').then(async (res) => {
+      console.log('res.body', res.body);
+      const reader = res.body.getReader();
+      while(1) {
+        const data = await reader.read();
+        if (data.done) return;
+        console.log('array', data.value);
+        console.log('decode', decoder.decode(data.value));
+      }
+    });
+  </script>
+</body></html>
+`;
+
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+  
+    if (req.url === "/") {
+      res.setHeader("Content-Type", "text/html");
+      res.end(htmlData);
+    }
+  
+    if (req.url === "/api/stream") {
+      res.setHeader('Content-Type', 'text/plain');
+      let index = 0;
+      const clear = setInterval(() => {
+        if (++index === 10) {
+          res.end(`data index: ${index}\n`);
+          clearInterval(clear);
+        } else res.write(`data index: ${index}\n`);
+      }, 1000);
+    }
+
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
+```
+
+这次服务端代码分为了两部分，匹配`url === "/"`的部分返回固定的字符串作为页面的HTML；匹配`url === "/api/stream"`的部分定时返回流式数据。虽然是流式数据也仅仅是字符串（与最开始流式传输的举例一致）但这次浏览器可以正常接收流式数据了。我们看下gif动图：
+
+![图片](/2025/stream-5.gif)
+
+同时我们在浏览器Console中也打印了我们收到数据的不同形式，这个数据也是随着时间流式处理的，这里就不展示动图了，只展示收到的完整数据。
+
+![图片](/2025/stream-6.png)
+
+重点是上面那段HTML代码，使用fetch请求流式接口，处理并输出。通过查看文档，发现从fetch中拿到的Response.body实际上是一个可读流ReadableStream，因此fetch自然可以接收流式数据。我们打印了res.body，在浏览器Console图中的第一条，可以看到确实是一个ReadableStream。
+
+对可读流使用reader方法创建一个reader(ReadableStreamDefaultReader)，再使用read方法，返回一个Promise，当流式传输有了新数据时，即可拿到结果（或者拿到流关闭的标志）。这时候我们输出数据，发现拿到的流式数据是Uint8Array格式的。我们创建一个TextDecoder（文本解码器），然后解析成utf-8格式的文本，就能拿到想要的数据了。当多次返回数据块时，需要多次调用read方法继续拿Promise，每个Promise可以拿到一个数据块。
 
 ## SSE(EventSource)支持流式传输
 
@@ -130,6 +189,8 @@ React关于流式的支持和原理
 
 并非全都是优势（占用端口）
 
+还有其它读流式数据的方法，看看要不要介绍 我觉得可以要 比如axios(与背后)
+
 ## 参考
 - 万字长文：深度解析React渲染技术演进之路\
   https://juejin.cn/post/7424908830902075444
@@ -141,3 +202,17 @@ React关于流式的支持和原理
   https://nodejs.org/docs/latest/api/stream.html
 - Node.js文档 HTTP\
   https://nodejs.org/docs/latest/api/http.html
+- Response.body MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/API/Response/body
+- ReadableStream MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/API/ReadableStream
+- ReadableStream.getReader() MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/API/ReadableStream/getReader
+- ReadableStreamDefaultReader.read() MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/API/ReadableStreamDefaultReader/read
+- TextDecoder MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/API/TextDecoder
+- TypedArray MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
+- ArrayBuffer MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer
