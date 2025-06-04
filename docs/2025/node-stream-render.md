@@ -162,12 +162,25 @@ http
 
 对可读流使用reader方法创建一个reader(ReadableStreamDefaultReader)，再使用read方法，返回一个Promise，当流式传输有了新数据时，即可拿到结果（或者拿到流关闭的标志）。这时候我们输出数据，发现拿到的流式数据是Uint8Array格式的。我们创建一个TextDecoder（文本解码器），然后解析成utf-8格式的文本，就能拿到想要的数据了。当多次返回数据块时，需要多次调用read方法继续拿Promise，每个Promise可以拿到一个数据块。
 
-## SSE(EventSource)支持流式传输
+## SSE(EventSource)流式传输
+JavaScript提供了一种SSE(Server-sent events)技术，可以利用HTTP协议和服务端进行单向的流式传输。SSE使用的JavaScript API为EventSource。
+
+### 协议简述
+
+单向流式传输的含义为服务端只能向客户端发送数据，客户端无法向服务端发送数据。
+
+### 代码实现
+
+
+### 关闭SSE
+
 
 
 
 ## 流式背后的HTTP协议支持
 todo 分不同的协议描述 HTTP1.1，HTTP2，HTTP3
+
+HTTP1.1 有链接数量限制
 
 看看怎么指定不同HTTP版本来实验。
 
@@ -194,9 +207,7 @@ React关于流式的支持和原理
 ## 参考
 - 万字长文：深度解析React渲染技术演进之路\
   https://juejin.cn/post/7424908830902075444
-- MDN EventSource\
-  https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
-- MDN 渲染页面：浏览器的工作原理\
+- 渲染页面：浏览器的工作原理 MDN\
   https://developer.mozilla.org/zh-CN/docs/Web/Performance/Guides/How_browsers_work
 - Node.js文档 Stream\
   https://nodejs.org/docs/latest/api/stream.html
@@ -216,3 +227,7 @@ React关于流式的支持和原理
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
 - ArrayBuffer MDN\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer
+- EventSource MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
+- 使用服务器发送事件 MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/API/Server-sent_events/Using_server-sent_events
