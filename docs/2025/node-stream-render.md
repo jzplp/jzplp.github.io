@@ -165,17 +165,100 @@ http
 ## SSE(EventSource)流式传输
 JavaScript提供了一种SSE(Server-sent events)技术，可以利用HTTP协议和服务端进行单向的流式传输。SSE使用的JavaScript API为EventSource。
 
-### 协议简述
+### 流程和协议简述
+单向流式传输指的是服务端只能向客户端发送数据，客户端无法向服务端发送数据。具体的协议和流程如下：
 
-单向流式传输的含义为服务端只能向客户端发送数据，客户端无法向服务端发送数据。
+1. 前端创建EventSource对象，请求后端接口。
+2. 后端将header中Content-Type设置为text/event-stream，表示使用SSE流式传输。
+3. 后端按照规定的数据格式发送事件或者数据块，前端接收数据并处理。
+4. 前端调用close方法关闭连接。
+
+SSE有规定的消息格式，格式中有如下字段：
+
+* event 标识事件类型
+* data 传输的数据内容
+* id 事件ID
+* retry 断开后浏览器尝试重新连接的时间，以毫秒为单位的整数
+
+其中event和data是最常用的字段。当传输纯数据时，可以忽略event字段，此时event为默认值message。每条消息后面需要跟两个换行符。这里举例部分消息格式（其中:表示注释行）
+
+```bash
+: 事件格式
+
+event: event1
+
+event: event2
+data: { "data1": 1, "data2": 2 }
+
+: 消息格式
+
+data: { "data1": 1, "data2": 2 }
+
+event: message
+data: dataString123
+
+: 关闭连接
+
+event: close
+```
 
 ### 代码实现
 
+```js
+const http = require("http");
+
+const htmlData = `
+<html><body>
+  <div>hello, jzplp</div>
+  <script>
+    const es = new EventSource('/api/sse');
+    es.onmessage = function(event) {
+      console.log(event.data);
+    }
+    es.addEventListener('abc', function(event) {
+      console.log('abc', event);
+})
+  </script>
+</body></html>
+`;
+
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+
+    if (req.url === "/") {
+      res.setHeader("Content-Type", "text/html");
+      res.end(htmlData);
+    }
+
+    if (req.url === "/api/sse") {
+      res.setHeader("Content-Type", "text/event-stream");
+      let index = 0;
+      setInterval(() => {
+        index++;
+        if (index % 4 === 0)
+          res.write(`event: abc\ndata: abc index: ${index}\n\n`);
+        else res.write(`data: data index: ${index}\n\n`);
+      }, 1000);
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
+```
+
+这里实现了一个简单的SSE示例，有数据传输和自定义事件。可以看到前端对于EventSource的使用方式：创建EventSource对象时传入url，即开始发送请求；接收事件和数据就是绑定事件监听器。
+
+浏览器对于SSE是做过适配的，在network中可以直接看到EventStream，这里依然使用gif动图展示随时间接收到的数据流。我们还在浏览器Console打印了收到的数据，也截图给大家。
+
+![图片](/2025/stream-7.gif)
+
+![图片](/2025/stream-8.png)
 
 ### 关闭SSE
+注意看上面的代码中并没有关闭SSE，关闭的方式在这里单独讨论。
 
-
-
+todo
 
 ## 流式背后的HTTP协议支持
 todo 分不同的协议描述 HTTP1.1，HTTP2，HTTP3
