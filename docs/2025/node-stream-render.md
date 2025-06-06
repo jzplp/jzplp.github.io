@@ -422,7 +422,20 @@ http
 
 可以看到，服务端关闭的时候发送事件，同时指示前端关闭，是比较好的关闭连接方式。
 
-## 流式背后的HTTP协议支持
+## 流式与HTTP1.1协议
+流式传输与渲染背后，少不了HTTP协议的支持。下面我们来简单看一下不同版本的HTTP协议是如何支撑流式实现的。上面的所有例子默认都是运行在HTTP1.1协议中的，因此我们先从HTTP1.1协议开始。
+
+### Transfer-Encoding: chunked简介
+
+### 使用TCP协议模拟流式
+
+## 流式与HTTP2协议
+
+todo 最后举例参考中的HTTP1.1过nginx变成http2流式
+
+## SSE与HTTP协议
+
+
 todo 分不同的协议描述 HTTP1.1，HTTP2，HTTP3
 
 HTTP1.1 有链接数量限制
@@ -476,3 +489,9 @@ React关于流式的支持和原理
   https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource
 - 使用服务器发送事件 MDN\
   https://developer.mozilla.org/zh-CN/docs/Web/API/Server-sent_events/Using_server-sent_events
+- Transfer-Encoding MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Headers/Transfer-Encoding
+- HTTP协议中的Transfer-Encoding\
+  https://juejin.cn/post/6997215152533667876
+- 当Transfer-Encoding: chunked遇上HTTP2\
+  https://juejin.cn/post/7188046760215445559
