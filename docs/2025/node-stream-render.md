@@ -168,10 +168,10 @@ JavaScript提供了一种SSE(Server-sent events)技术，可以利用HTTP协议�
 ### 流程和协议简述
 单向流式传输指的是服务端只能向客户端发送数据，客户端无法向服务端发送数据。具体的协议和流程如下：
 
-1. 前端创建EventSource对象，请求后端接口。
-2. 后端将header中Content-Type设置为text/event-stream，表示使用SSE流式传输。
-3. 后端按照规定的数据格式发送事件或者数据块，前端接收数据并处理。
-4. 前端调用close方法关闭连接。
+1. 客户端创建EventSource对象，请求服务端接口。
+2. 服务端将header中Content-Type设置为text/event-stream，表示使用SSE流式传输。
+3. 服务端按照规定的数据格式发送事件或者数据块，客户端接收数据并处理。
+4. 客户端调用close方法关闭连接。
 
 SSE有规定的消息格式，格式中有如下字段：
 
@@ -196,10 +196,6 @@ data: { "data1": 1, "data2": 2 }
 
 event: message
 data: dataString123
-
-: 关闭连接
-
-event: close
 ```
 
 ### 代码实现
@@ -217,7 +213,7 @@ const htmlData = `
     }
     es.addEventListener('abc', function(event) {
       console.log('abc', event);
-})
+    })
   </script>
 </body></html>
 `;
@@ -258,7 +254,173 @@ http
 ### 关闭SSE
 注意看上面的代码中并没有关闭SSE，关闭的方式在这里单独讨论。
 
-todo
+#### 服务端关闭
+首先我们试一下服务端关闭连接的场景。
+
+```js
+const http = require("http");
+
+const htmlData = `
+<html><body>
+  <div>hello, jzplp</div>
+  <script>
+    const es = new EventSource('/api/sse');
+    es.onmessage = function(event) {
+      console.log(event.data);
+    }
+  </script>
+</body></html>
+`;
+
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+
+    if (req.url === "/") {
+      res.setHeader("Content-Type", "text/html");
+      res.end(htmlData);
+    }
+
+    if (req.url === "/api/sse") {
+      res.setHeader("Content-Type", "text/event-stream");
+      let index = 0;
+      const clear = setInterval(() => {
+        index++;
+        if (index === 10) {
+          res.end();
+          clearInterval(clear);
+        } else res.write(`data: data index: ${index}\n\n`);
+      }, 1000);
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
+```
+
+在服务端代码中当index为10时，我们关闭了HTTP数据传输。这时可以看到浏览器的EventStream确实结束了传输，index停在了9。但是随后浏览器又新开了一个接口重新请求，这时index又从1开始持续循环。通过查看文档发现，当连接关闭时客户端会重启连接。
+
+![图片](/2025/stream-9.png)
+
+注意close并不是一个有关闭功能的事件，而是一个纯自定义事件，并不会起到关闭效果。我们尝试了：
+
+```js
+// 尝试1
+res.write(`event: close\n\n`);
+
+// 尝试2
+res.end(`event: close\n\n`);
+
+// 尝试3
+res.write(`event: close\ndata: close data\n\n`);
+
+// 尝试4
+res.end(`event: close\ndata: close data\n\n`);
+```
+
+* 尝试1：没有关闭连接。EventStream中未出现该事件（因为没有data）。
+* 尝试2：关闭连接又重启，这是因为res.end导致。
+* 尝试3：没有关闭连接，EventStream中出现该自定义事件和数据。
+* 尝试4：关闭连接又重启，且EventStream中出现该自定义事件和数据。
+
+![图片](/2025/stream-10.png)
+
+通过上述几个尝试，可以看出服务端实际上是没有关闭SSE的能力的，即使关闭了，前端也会重新开启。（当然服务端有拒绝服务的能力）
+
+#### 前端关闭
+前端是有关闭连接的能力的，使用EventSource实例的close方法即可关闭。
+
+```js
+const http = require("http");
+
+const htmlData = `
+<html><body>
+  <div>hello, jzplp</div>
+  <script>
+    const es = new EventSource('/api/sse');
+    es.onmessage = function(event) {
+      console.log(event.data);
+      if(event.data === '10') es.close();
+    }
+  </script>
+</body></html>
+`;
+
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+
+    if (req.url === "/") {
+      res.setHeader("Content-Type", "text/html");
+      res.end(htmlData);
+    }
+
+    if (req.url === "/api/sse") {
+      res.setHeader("Content-Type", "text/event-stream");
+      let index = 0;
+      setInterval(() => {
+        index++;
+        res.write(`data: ${index}\n\n`);
+      }, 1000);
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
+```
+
+![图片](/2025/stream-11.png)
+
+可以看到，在发送了10次数据后，前端控制关闭了。但这里看代服务端没有关闭连接以及setInterval。我们试一下后端关闭时，发送自定义事件，前端收到事件关闭连接。
+
+```js
+const http = require("http");
+
+const htmlData = `
+<html><body>
+  <div>hello, jzplp</div>
+  <script>
+    const es = new EventSource('/api/sse');
+    es.onmessage = function(event) {
+      console.log(event.data);
+    }
+    es.addEventListener('close', function(event) {
+      console.log('close!', event);
+      es.close();
+    })
+  </script>
+</body></html>
+`;
+
+http
+  .createServer((req, res) => {
+    console.log(`request url: ${req.url}`);
+
+    if (req.url === "/") {
+      res.setHeader("Content-Type", "text/html");
+      res.end(htmlData);
+    }
+
+    if (req.url === "/api/sse") {
+      res.setHeader("Content-Type", "text/event-stream");
+      let index = 0;
+      const clear = setInterval(() => {
+        index++;
+        if (index === 10) {
+          res.end(`event: close\ndata: close data\n\n`);
+          clearInterval(clear);
+        } else res.write(`data: ${index}\n\n`);
+      }, 1000);
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start");
+  });
+```
+
+![图片](/2025/stream-12.png)
+
+可以看到，服务端关闭的时候发送事件，同时指示前端关闭，是比较好的关闭连接方式。
 
 ## 流式背后的HTTP协议支持
 todo 分不同的协议描述 HTTP1.1，HTTP2，HTTP3
