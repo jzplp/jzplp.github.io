@@ -34,7 +34,7 @@ jzplp.github.io
 目录使用mddir生成。
 
 ## 工程开发
-```shell
+```bash
 # 安装依赖
 pnpm install
 # 开发模式启动

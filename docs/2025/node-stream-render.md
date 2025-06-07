@@ -99,7 +99,7 @@ http
 
 通过gif动图，可以明显的看到，HTML数据随着时间一点一点增加，浏览器窗口中的页面展示也是一点一点更新。这明显的体现了流式渲染的特性：即数据是分块发送的，并不是一次发送全部HTML数据；浏览器也不是收到完整的HTML数据后才开始渲染和展示页面，而是只要拿到部分HTML数据（哪怕是不完整的，例如标签没有闭合），就开始渲染展示流程。这也能在浏览器的工作原理中得到证明。
 
-## fetch与ReadableStream接收流式传输数据
+## fetch与可读流接收流式数据
 除了HTML之外，使用JavaScript在浏览器中也是可以获取流式数据的。这里我们以fetch为例，展示下如何接收流式数据。
 
 ```js
@@ -425,9 +425,52 @@ http
 ## 流式与HTTP1.1协议
 流式传输与渲染背后，少不了HTTP协议的支持。下面我们来简单看一下不同版本的HTTP协议是如何支撑流式实现的。上面的所有例子默认都是运行在HTTP1.1协议中的，因此我们先从HTTP1.1协议开始。
 
-### Transfer-Encoding: chunked简介
+### 分块传输简介
+在流式传输中，最重要的一项就是Header中的Transfer-Encoding: chunked，这里简单介绍一下这个标头的作用。Transfer-Encoding标头表示数据传递采用的编码形式，可选的值有：chunked, compress, deflate, gzip等。除了chunked之外，其他的值都代表压缩算法，和流式无关。只有chunk表示数据需要分块发送。
+
+首先HTTP1.1是默认保持长连接的，即Connection: keep-alive。在设置chunked之后，Content-Length这个表示数据长度的标头就不会被发送。因为数据是分块的，长度未知。那么如何知道数据块的长度和是否结束传输呢？
+
+在传输的每一个分块的开头，需要输出当前分块的数据长度，以十六进制的形式表示，最后输出“\r\n”。然后是传输的数据，最后也输出“\r\n”。当传输完全结束时，需要传输一个终止块，数据长度为0，但也有数据行。终止块的样子：“0\r\n\r\n”。通过这种形式，服务端和客户端就可以实现在一个HTTP接口中分块传输数据。
 
 ### 使用TCP协议模拟流式
+为了加深理解和实践，我们使用Node.js与TCP协议，模拟一下HTTP在服务端分块传输数据。
+
+```js
+const net = require("net");
+
+const header = "<html><body>\n";
+const footer = "</body></html>";
+
+net
+  .createServer((c) => {
+    console.log("client connected");
+    c.on("data", () => {
+      c.write("HTTP/1.1 200 OK\r\n");
+      c.write("Content-Type: text/html\r\n");
+      c.write("Transfer-Encoding: chunked\r\n");
+      c.write("\r\n");
+      c.write(`d\r\n${header}\r\n`);
+
+      let index = 0;
+      setInterval(() => {
+        if (++index === 10) {
+          c.write(`e\r\n${footer}\r\n`);
+          c.write("0\r\n\r\n");
+        } else {
+          const str = `<div>index:${index}</div>\n`;
+          c.write(`13\r\n${str}\r\n`);
+        }
+      }, 1000);
+    });
+  })
+  .listen(8000, () => {
+    console.log("server bound");
+  });
+```
+
+net是使用Node.js中TCP协议的API。这段代码使用TCP协议实现了一个简单的HTTP分块传输功能，传输了一个HTML文档。运行这段代码，在浏览器中访问localhost:8000，可以看到成功的被浏览器解析为HTTP的分块传输协议，并实现了流式渲染，验证了上面所说的分块传输协议。
+
+![图片](/2025/stream-13.gif)
 
 ## 流式与HTTP2协议
 
@@ -495,3 +538,5 @@ React关于流式的支持和原理
   https://juejin.cn/post/6997215152533667876
 - 当Transfer-Encoding: chunked遇上HTTP2\
   https://juejin.cn/post/7188046760215445559
+- Connection MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Headers/Connection
