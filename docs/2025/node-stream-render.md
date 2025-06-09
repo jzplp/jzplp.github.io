@@ -481,21 +481,62 @@ HTTP报文的Header和Body部分都使用帧来传送，其中Header部分为单
 
 因此，通过二进制分帧和多路复用，HTTP2天然就支持流式传输，而且效果比HTTP1.1更好，也并不需要额外设置Header。在参考文档中，还有原本用HTTP1.1协议的流式数据，通过Nginx转换后变为HTTP2传输到浏览器，虽然没有了Transfer-Encoding: chunked头部，但是依然具有流式特性。HTTP2还有其它很多改进，由于和流式没有直接关系，这里就不描述了。
 
-### 代码实践HTTP2流式
+### HTTP2流式代码
+正好Node.js也提供了HTTP2的相关API，这里我们尝试一下HTTP2的流式功能。因为HTTP2必须使用https，因此要生成证书。首先在电脑上安装‌OpenSSL，然后在Node.js代码的目录下执行命令：
 
+```bash
+# 生成私钥
+openssl genrsa -out server.key 1024
+# 生成证书请求文件 (仅为了实验HTTP2的场景下，中间输入全部回车即可)
+openssl req -new -key server.key -out server.csr
+# 生成证书
+openssl x509 -req -in server.csr -out server.crt -signkey server.key -days 3650
+```
 
+然后是Node.js服务端代码：
+
+```js
+const http2 = require("http2");
+const fs = require("fs");
+
+const dataHeader = "<html><body><div>header</div>";
+const dataFooter = "<div>footer</div></body></html>";
+
+const server = http2.createSecureServer({
+  key: fs.readFileSync("server.key"),
+  cert: fs.readFileSync("server.crt"),
+});
+
+server.on("stream", (stream) => {
+  stream.respond({
+    "content-type": "text/html",
+    ":status": 200,
+  });
+  stream.write(dataHeader);
+  let index = 0;
+  const clear = setInterval(() => {
+    if (++index === 10) {
+      stream.end(dataFooter);
+      clearInterval(clear);
+    } else stream.write(`<div>data index: ${index}</div>`);
+  }, 1000);
+});
+
+server.listen(8000, () => {
+  console.log("server start");
+});
+```
+
+在访问时需要使用HTTPS，即`https://localhost:8000/`。由于我们是自签名证书，因此浏览器会提示不安全，忽略即可。访问后的结果如下，可以看到协议部分确实是HTTP2。
+
+![图片](/2025/stream-14.png)
+
+![图片](/2025/stream-15.gif)
+
+通过gif图可以看到，HTML数据的接收和渲染确实是流式进行的。而且在服务端代码中，我们并没有设置流式相关的头部，观察浏览器的Network也没有，因为HTTP2是天然就支持流式的。由于协议比较复杂，这里就不使用TCP协议模拟HTTP2了。
 
 ## SSE与HTTP协议
 
-
-todo 分不同的协议描述 HTTP1.1，HTTP2，HTTP3
-
-HTTP1.1 有链接数量限制
-
-看看怎么指定不同HTTP版本来实验。
-
-
-Transfer-Encoding: chunked 的含义具体描述
 
 ## 总结
 
@@ -503,6 +544,7 @@ Transfer-Encoding: chunked 的含义具体描述
 
 流式渲染可以用在SSR上，流式传输可以在GPT回答或者其它
 
+HTTP1.1 有链接数量限制
 
 流式渲染相关的技术有很多，这里不讲的：
 
@@ -549,3 +591,9 @@ React关于流式的支持和原理
   https://juejin.cn/post/7188046760215445559
 - Connection MDN\
   https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Headers/Connection
+- http/2 二进制分帧层 (Binary Framing Layer)讲解\
+  https://blog.csdn.net/qq_62311779/article/details/139873173
+- Node.js文档 HTTP/2\
+  https://nodejs.org/docs/latest/api/http2.html
+- Nodejs 第六十一章（http2）\
+  https://juejin.cn/post/7352763226529447999
