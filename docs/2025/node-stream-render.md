@@ -479,7 +479,9 @@ HTTP2在技术上相比于1.1版本有了较大的进步，使用了二进制分
 
 HTTP报文的Header和Body部分都使用帧来传送，其中Header部分为单独的一个帧，Body部分可以分为多个帧独立传送。而且HTTP2实现了多路复用，同一个地址的不同请求使用同一个TCP连接，避免了HTTP1.1限制最大连接数的问题（后面总结描述）。
 
-因此，通过二进制分帧和多路复用，HTTP2天然就支持流式传输，而且效果比HTTP1.1更好，也并不需要额外设置Header。在参考文档中，还有原本用HTTP1.1协议的流式数据，通过Nginx转换后变为HTTP2传输到浏览器，虽然没有了Transfer-Encoding: chunked头部，但是依然具有流式特性。HTTP2还有其它很多改进，由于和流式没有直接关系，这里就不描述了。
+因此，通过二进制分帧和多路复用，HTTP2天然就支持流式传输，而且效果比HTTP1.1更好，也并不需要额外设置Header。在HTTP2中也不能设置Transfer-Encoding: chunked头部。
+
+在参考文档中，还有原本用HTTP1.1协议的流式数据，通过Nginx转换后变为HTTP2传输到浏览器。虽然没有了Transfer-Encoding: chunked头部，但是依然具有流式特性。HTTP2还有其它很多改进，由于和流式没有直接关系，这里就不描述了。
 
 ### HTTP2流式代码
 正好Node.js也提供了HTTP2的相关API，这里我们尝试一下HTTP2的流式功能。因为HTTP2必须使用https，因此要生成证书。首先在电脑上安装‌OpenSSL，然后在Node.js代码的目录下执行命令：
@@ -536,7 +538,57 @@ server.listen(8000, () => {
 通过gif图可以看到，HTML数据的接收和渲染确实是流式进行的。而且在服务端代码中，我们并没有设置流式相关的头部，观察浏览器的Network也没有，因为HTTP2是天然就支持流式的。由于协议比较复杂，这里就不使用TCP协议模拟HTTP2了。
 
 ## SSE与HTTP协议
+通过前面关于SSE的实验中，观察浏览器Network中的Header，发现了Transfer-Encoding: chunked。因此在HTTP1.1中，SSE中流式的实现也是通过分块传输来实现的。SSE更像是在HTTP1.1分块传输的上层，封装了一个小协议。既然HTTP1.1可以实现，那么HTTP2这种天然支持流式的协议也是可以使用SSE的。这里使用HTTP2实践一下：
 
+```js
+const http2 = require("http2");
+const fs = require("fs");
+
+const htmlData = `
+<html><body>
+  <div>hello, jzplp</div>
+  <script>
+    const es = new EventSource('/api/sse');
+    es.onmessage = function(event) {
+      console.log(event.data);
+      if(event.data === '10') es.close();
+    }
+  </script>
+</body></html>
+`;
+
+const server = http2.createSecureServer(
+  {
+    key: fs.readFileSync("server.key"),
+    cert: fs.readFileSync("server.crt"),
+  },
+  (req, res) => {
+    console.log(`request url: ${req.url}`);
+
+    if (req.url === "/") {
+      res.setHeader("Content-Type", "text/html");
+      res.end(htmlData);
+    }
+
+    if (req.url === "/api/sse") {
+      res.setHeader("Content-Type", "text/event-stream");
+      let index = 0;
+      setInterval(() => {
+        index++;
+        res.write(`data: ${index}\n\n`);
+      }, 1000);
+    }
+  }
+);
+
+server.listen(8000, () => {
+  console.log("server start");
+});
+```
+
+这里我们使用了Node.js的HTTP2的兼容性API，因此代码看起来和上面HTTP1.1的部分基本一致。在浏览器上可以看到，在HTTP2协议下，SSE也是生效的，而且header中没有了Transfer-Encoding: chunked。
+
+![图片](/2025/stream-16.png)
 
 ## 总结
 
