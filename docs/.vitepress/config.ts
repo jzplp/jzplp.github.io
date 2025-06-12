@@ -13,6 +13,7 @@ export default defineConfig({
       {
         text: '2025',
         items: [
+          { text: 'CSS中的BFC，到底有什么作用？', link: '/2025/css-bfc' },
           { text: '让数据"流动"起来！Node.js实现流式渲染/流式传输与背后的HTTP原理', link: '/2025/node-stream-render' },
           { text: '聊一下CSS中的标准流，浮动流，文本流，文档流', link: '/2025/css-float' },
           { text: '(非技术)从一公里到半程马拉松：我的一年跑步经历', link: '/2025/run-half-marathon' },
