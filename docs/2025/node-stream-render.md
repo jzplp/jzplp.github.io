@@ -426,7 +426,7 @@ http
 流式传输与渲染背后，少不了HTTP协议的支持。下面我们来简单看一下不同版本的HTTP协议是如何支撑流式实现的。上面的所有例子默认都是运行在HTTP1.1协议中的，因此先从HTTP1.1协议开始。
 
 ### 分块传输简介
-在流式传输中，最重要的一项就是Header中的Transfer-Encoding: chunked，这里简单介绍一下这个标头的作用。Transfer-Encoding标头表示数据传递采用的编码形式，可选的值有：chunked, compress, deflate, gzip等。除了chunked之外，其他的值都代表压缩算法，和流式无关。只有chunk表示数据需要分块发送。
+在流式传输中，最重要的一项就是Header中的Transfer-Encoding: chunked，这里简单介绍一下这个标头的作用。Transfer-Encoding标头表示数据传递采用的编码形式，可选的值有：chunked, compress, deflate, gzip等。除了chunked之外，其他的值都代表压缩算法，和流式无关。只有chunked表示数据需要分块发送。
 
 首先HTTP1.1是默认保持长连接的，即Connection: keep-alive。在设置chunked之后，Content-Length这个表示数据长度的标头就不会被发送。因为数据是分块的，长度未知。那么如何知道数据块的长度和是否结束传输呢？
 
