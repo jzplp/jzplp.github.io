@@ -9,25 +9,64 @@ BFC的全程为Block Formatting Context，含义是块级格式化上下文。�
 
 ![图片](/2025/bfc-1.png)
 
-可以看到，符合BFC出现的条件有很多。注意看，文档的根元素`<html>`是一个BFC区域。其它大部分都是明确的修改CSS属性以达到某些样式效果，变为BFC区域只不过是它们的副作用。只有一个无其它作用，专门设置为BFC区域的条件：`display: flow-root`。
+可以看到，符合BFC出现的条件有很多。注意看，文档的根元素`<html>`是一个BFC区域。其它大部分都是明确的修改CSS属性以达到某些样式效果，变为BFC区域只不过是它们的副作用。只有一个无其它作用，专门设置为BFC区域的条件：`display: flow-root`。本文的例子中主要使用这个条件来设置BFC区域。
 
-成为BFC区域后，这个区域内的元素不会受到外部元素的影响，内部元素也不会影响外部元素的布局。具体特点列举如下：
+成为BFC区域后，这个区域内的元素不会受到外部元素的影响，内部元素也不会影响外部元素的布局。特点列举如下：
 
 * BFC区域会包含内部的浮动元素
 * BFC区域会避开外部的浮动元素
 * BFC区域与外部没有margin折叠效果 todo
 
-todo BFC区域的其它 特性
-
 其中与浮动有关的特点在之前我写“[聊一下CSS中的标准流，浮动流，文本流，文档流](https://jzplp.github.io/2025/css-float.html)”文章的时候讲过，但当时我们的关注点在于浮动，这次我们还是重新描述一下，但重点放在BFC本身。
 
-## 包含内部的浮动元素
+## 包含内部浮动元素
+浮动指的是设置了CSS中float属性为left或者right的元素。设置了浮动之后，元素本身便脱离了文档流，父元素计算空间时也不会包含内部的浮动元素。这样会造成浮动的父元素塌陷问题。但设置了BFC之后，父元素就会包含内部的浮动元素。
 
-参考之前浮动先写
+```html
+<html>
+  <body>
+    <body>
+      <div class="wrapper">
+        <div class="parent">
+          <div class="child"></div>
+        </div>
+      </div>
+      <div class="wrapper">
+        <div class="parent bfc">
+          <div class="child"></div>
+        </div>
+      </div>
+  </body>
+  <style>
+    .wrapper {
+      height: 150px;
+      width: 100%;
+      float: left;
+    }
+    .parent {
+      border: 1px solid blue;
+    }
+    .child {
+      float: left;
+      width: 100px;
+      height: 100px;
+      background: yellow;
+    }
+    .bfc {
+      display: flow-root;
+    }
+  </style>
+</html>
+```
 
-## 避开外部的浮动元素
+![图片](/2025/bfc-2.png)
 
-等等。。。
+* 第一个例子是非BFC，可以看到父元素已经塌陷到只有一条线了，内部浮动的黄元素位置在父元素之外。
+* 第一个例子在父元素设置了BFC，父元素包裹住了内部浮动的黄元素，不会造成父元素塌陷问题。
+
+BFC包含内部的浮动元素的特点仅适用于符合BFC条件的那个元素，在BFC元素内部的元素则没有这个特点。即BFC元素本身可以包含内部的浮动元素，但是BFC内部包含的元素是无法包含它的浮动子元素的。这里不用举例，因为根HTML元素就是一个BFC区域，假设内部的所有子元素都有这个特点，那么BFC父元素塌陷的问题将永远不会存在。
+
+## 避开外部浮动元素
 
 ## 与外部没有margin折叠效果
 
