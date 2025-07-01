@@ -344,17 +344,147 @@ BFC 区域除了可以将内部的浮动元素包裹进来之外，还可以避�
 - 第一个例子：上面的元素增加了父元素(设置为蓝色)，出现了父子元素 margin 折叠，然后再跟下面的兄弟元素折叠。
 - 第二个例子：上面的父元素设置了 BFC，避开了父子元素 margin 折叠，因此避开了子元素与下面元素的 margin 折叠。
 - 第三个例子：下面的元素增加了父元素(设置为蓝色)，出现了父子元素 margin 折叠，然后再跟上面的兄弟元素折叠。
-- 第三个例子：下面的父元素设置了 BFC，避开了父子元素 margin 折叠，因此避开了子元素与上面元素的 margin 折叠。
+- 第四个例子：下面的父元素设置了 BFC，避开了父子元素 margin 折叠，因此避开了子元素与上面元素的 margin 折叠。
 
-通过这几个例子可以看出，BFC 不能阻止兄弟元素的 margin 折叠行为，如果希望禁止，需要利用父子元素 bikaimargin 折叠的方法实现。
+这里再尝试另一种组合场景：
+
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <div class="first"></div>
+      <div></div>
+      <div class="second"></div>
+    </div>
+    <div class="wrapper">
+      <div class="first"></div>
+      <div class="bfc"></div>
+      <div class="second"></div>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px solid red;
+      margin-bottom: 20px;
+      height: 140px;
+      width: 100%;
+    }
+    .first {
+      width: 100px;
+      height: 50px;
+      background: yellow;
+      margin: 10px;
+    }
+    .second {
+      width: 150px;
+      height: 50px;
+      background: green;
+      margin: 10px;
+    }
+    .bfc {
+      display: flow-root;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/bfc-7.png)
+
+这里在两个元素之间增加了一个空元素。在设置 BFC 之前，上下两个元素的 margin 是折叠的，中间空元素也被一起折叠了。在对空元素设置 BFC 之后，上下两个元素的 margin 不再折叠了。这个组合场景的原因分析如下：
+
+空元素首先自身可以折叠，再与上下两个元素的 margin 折叠，最终成为了一个 magrin。设置了 BFC 之后，空元素本身不能折叠了，因此虽然空元素可以和上与下两个元素折叠，但是两个元素本身的 margin“没有接触的机会”，因此无法折叠。
+
+通过这几个例子可以看出，BFC 不能阻止兄弟元素的 margin 折叠行为，如果希望禁止，则需要使用其它方式，例如利用空元素和父子元素实现。
 
 ## BFC 真的不受任何影响么
 
-todo 定位是受影响的 试试相对定位
+网上很多文章说 BFC 区域不受外部的影响，但 BFC 真的不受任何影响么？肯定是受影响的。例如上面提到的避开 margin 折叠场景，部分 margin 折叠就是无法避开的。除此之外，这里再举一个 BFC 受定位影响的例子：
+
+```html
+<html>
+  <body>
+    <div class="wrapper">
+      <div class="first"></div>
+      <div class="second"></div>
+    </div>
+    <div class="wrapper">
+      <div class="first realtive"></div>
+      <div class="second"></div>
+    </div>
+    <div class="wrapper">
+      <div class="first realtive"></div>
+      <div class="second bfc"></div>
+    </div>
+    <div class="wrapper">
+      <div class="first absolute"></div>
+      <div class="second"></div>
+    </div>
+    <div class="wrapper">
+      <div class="first absolute"></div>
+      <div class="second bfc"></div>
+    </div>
+    <div class="wrapper">
+      <div class="first fixed" style="top: 490px"></div>
+      <div class="second"></div>
+    </div>
+    <div class="wrapper">
+      <div class="first fixed" style="top: 580px"></div>
+      <div class="second bfc"></div>
+    </div>
+  </body>
+  <style>
+    .wrapper {
+      border: 1px solid red;
+      margin-bottom: 20px;
+      height: 70px;
+      width: 100%;
+      position: relative;
+    }
+    .first {
+      width: 100px;
+      height: 30px;
+      background: yellow;
+    }
+    .second {
+      width: 150px;
+      height: 40px;
+      background: green;
+    }
+    .bfc {
+      display: flow-root;
+    }
+    .realtive {
+      position: relative;
+      top: 20px;
+    }
+    .absolute {
+      position: absolute;
+      top: 20px;
+    }
+    .fixed {
+      position: fixed;
+    }
+  </style>
+</html>
+```
+
+![图片](/2025/bfc-9.png)
+
+- 第一个例子：上下两个元素，未设置 BFC 与定位，做对比用。
+- 第二个例子：上面元素设置了相对定位，覆盖了下面的元素。
+- 第三个例子：下面的元素设置了 BFC，但没有避开相对定位元素的覆盖。
+- 第四个例子：上面元素设置了绝对定位，覆盖了下面的元素。
+- 第五个例子：下面的元素设置了 BFC，但没有避开绝对定位元素的覆盖。
+- 第六个例子：上面元素设置了固定定位，覆盖了下面的元素。
+- 第七个例子：下面的元素设置了 BFC，但没有避开固定定位元素的覆盖。
+
+从这个例子可以看到，设置 BFC 对于避开定位是无效的，不管哪种定位模式，哪怕是相对定位也是无效的。
 
 ## 总结
 
 BFC 的包含内部浮动元素与避开外部浮动元素两个特点，使得它可以实现浮动父元素塌陷的问题。
+
+提一下 IFC
 
 ## 参考
 
@@ -368,3 +498,7 @@ BFC 的包含内部浮动元素与避开外部浮动元素两个特点，使得�
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_box_model/Mastering_margin_collapsing
 - 速通 BFC 知识点，BFC 规则全覆盖，看完全明白！！！\
   https://juejin.cn/post/7454005481503096847
+- 行内格式化上下文 MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_inline_layout/Inline_formatting_context
+- position MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/position
