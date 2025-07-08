@@ -13,6 +13,7 @@ export default defineConfig({
       {
         text: '2025',
         items: [
+          { text: '前端开发中的AST抽象语法树简介', link: '/2025/js-ast' },
           { text: '清除浮动/避开margin折叠：前端CSS中BFC的特点与限制', link: '/2025/css-bfc' },
           { text: '让数据"流动"起来！Node.js实现流式渲染/流式传输与背后的HTTP原理', link: '/2025/node-stream-render' },
           { text: '聊一下CSS中的标准流，浮动流，文本流，文档流', link: '/2025/css-float' },
