@@ -24,6 +24,7 @@ export default defineConfig({
       {
         text: '2024',
         items: [
+          { text: '2024年度总结：生活新起点', link: '/2024/2024-summary' },
           { text: '如何使用React，透传各类组件能力/属性？', link: '/2024/react-transparent' },
           { text: 'JavaScript中的this, 究竟指向什么？', link: '/2024/js-this' },
           { text: '使用天地图与Leaflet，轻松创建免费地图应用', link: '/2024/tianditu-leaflet' },
