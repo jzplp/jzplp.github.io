@@ -1,4 +1,4 @@
-# 前端开发中的AST抽象语法树简介（未完成 标题待确定）
+# 前端开发中的AST抽象语法树简介（未完成 标题待确定 可能突出下babel?）
 
 ## AST简介
 在平时的开发中，经常会遇到对我们写的JavaScript代码进行检查或改动的工具，例如ESLint会检查代码中的语法错误；Prettier会修改代码的格式；打包工具会将不同文件中的代码打包在一起等等。这些工具都对JavaScript代码本身进行了解析和修改。这些工具是如何实现对代码本身的解析呢？这就要用到一种叫做AST抽象语法树的技术。
@@ -9,11 +9,15 @@
 
 todo 写完下面的之后在这里放个流程图
 
+todo 提及babel。后面都采用babel做例子
+
 ## 词法分析
 
 ## 语法分析
 
-## AST的应用（这里试一下例子？）
+## JavaScript中的AST工具列表
+
+## AST的应用（这里可以试一下babel插件？）
 
 ## 具体语法树CST
 
@@ -28,3 +32,7 @@ todo 写完下面的之后在这里放个流程图
   https://mp.weixin.qq.com/s/KaIaCjRGC55UB6px15M1kw
 - CST vs AST 以及 biome 和 Oxc 各自的选择理由\
   https://juejin.cn/post/7504168956594683943
+- Babel文档\
+  https://babeljs.io/
+- 前端工程化基石 -- AST（抽象语法树）以及AST的广泛应用\
+  https://juejin.cn/post/7155151377013047304
