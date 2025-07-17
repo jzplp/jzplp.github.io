@@ -171,7 +171,69 @@ console.log(JSON.stringify(ast));
 
 因此，一段代码就被分析成了这样一颗AST树。这里我们再看一个例子：
 
+```js
+// 准备解析的代码
+const fun = function (a) {
+  const b = 2;
+  return a + b;
+}
 
+/* 生成的AST
+{
+  type: "Program",
+  body: [
+    {
+      type: "VariableDeclaration",
+      declarations: [
+        {
+          type: "VariableDeclarator",
+          id: { type: "Identifier", name: "fun" },
+          init: {
+            type: "FunctionExpression",
+            id: null,
+            params: [{ type: "Identifier", name: "a" }],
+            body: {
+              type: "BlockStatement",
+              body: [
+                {
+                  type: "VariableDeclaration",
+                  declarations: [
+                    {
+                      type: "VariableDeclarator",
+                      id: { type: "Identifier", name: "b" },
+                      init: { type: "Literal", value: 2, raw: "2" },
+                    },
+                  ],
+                  kind: "const",
+                },
+                {
+                  type: "ReturnStatement",
+                  argument: {
+                    type: "BinaryExpression",
+                    operator: "+",
+                    left: { type: "Identifier", name: "a" },
+                    right: { type: "Identifier", name: "b" },
+                  },
+                },
+              ],
+            },
+            generator: false,
+            expression: false,
+            async: false,
+          },
+        },
+      ],
+      kind: "const",
+    },
+  ],
+  sourceType: "script",
+}
+*/
+```
+
+这个例子增加了FunctionExpression，表示函数；BlockStatement表示块级语句；ReturnStatement表示return语句等。与前面词法分析将函数拆分成多个token不一样，这次函数是一个整体，且内部包含了params，BlockStatement和ReturnStatement等，确实是做到了对语法本身的分析。
+
+与tokenize方法一样，语法分析的parse方法也有很多选项，例如支持JSX语法，解析注释，列出在代码中的位置等等，这里就不描述了。除了通过代码之外，还有[AST explorer](https://astexplorer.net/)网站可以将代码在线转换为AST，并且可以在线标黄AST结点对应的代码。
 
 ## Estree
 
