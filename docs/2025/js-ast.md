@@ -235,15 +235,44 @@ const fun = function (a) {
 
 与tokenize方法一样，语法分析的parse方法也有很多选项，例如支持JSX语法，解析注释，列出在代码中的位置等等，这里就不描述了。除了通过代码之外，还有[AST explorer](https://astexplorer.net/)网站可以将代码在线转换为AST，并且可以在线标黄AST结点对应的代码。
 
-## Estree
+## 抽象语法树规范ESTree
+前面生成的AST树的结构中，我们看到了很多AST结点，这些节点有type表示结点类型，以及其他属性。Javascript有这么多语法规则，而且在不停的更新，如何知道这些语法规则的类型和属性定义呢？
 
+ESTree就提供了Javascript语法到AST结点的属性定义的规则。ESTree并不是AST转换工具，它是一份文档，提供了ECMAScript标准中的语法到AST结点定义的规则。生成AST的工具，需要遵守这个规则，这样不同工具生成的抽象语法树就是通用的，我们也只需要写一套代码来解析即可。[ESTree维护在GitHub](https://github.com/estree/estree)，通过查看ESTree的目录结构和规则示例，可以看到不仅包含了每年的最新语法，甚至还包含了一些还在stage中的语法。
 
+```
+# 目录结构(部分)
+├── experimental/
+├── extensions/
+├── stage3/
+├── deprecated.md
+├── es2015.md
+├── es2016.md
+├── es2017.md
+├── es2018.md
+├── es2019.md
+├── es2020.md
+├── es2021.md
+├── es2022.md
+├── es2025.md
+├── es2026.md
+├── es5.md
+└── ...
+
+# 规则实例
+interface Function <: Node {
+    id: Identifier | null;
+    params: [ Pattern ];
+    body: FunctionBody;
+}
+A function declaration or expression.
+```
+
+ESTree最早是由Mozilla工程师在开发Javascript引擎SpiderMonkey时定义的，后来被大家接收并形成了事实的标准，现在由Babel，ESlint和Acorn维护。ESTree并不是一个强制规则，因此也有部分AST转换工具没有使用这个标准。下面的工具介绍中会提到这一点。
 
 ## JavaScript中的AST工具列表
 
-### 工具列表
-
-### babel场景用具介绍
+## babel介绍
 
 ## AST的应用（这里可以试一下babel插件？）
 
@@ -268,7 +297,9 @@ const fun = function (a) {
   https://esprima.org/
 - 快来享受AST转换的乐趣\
   https://zhuanlan.zhihu.com/p/617125984
-- Estree Github\
+- ESTree Github\
   https://github.com/estree/estree
 - AST explorer JavaScript代码在线转换为AST语法树
   https://astexplorer.net/
+- 【转译器原理 parser 篇】实现 js 新语法并编译到 css\
+  https://juejin.cn/post/6959502530745204772
