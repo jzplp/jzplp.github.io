@@ -1,4 +1,4 @@
-# 前端开发中的AST抽象语法树简介（未完成 标题待确定 可能突出下babel?）
+# 前端开发中的AST抽象语法树简介（未完成 标题待确定）
 
 ## AST简介
 在平时的开发中，经常会遇到对我们写的JavaScript代码进行检查或改动的工具，例如ESLint会检查代码中的语法错误；Prettier会修改代码的格式；打包工具会将不同文件中的代码打包在一起等等。这些工具都对JavaScript代码本身进行了解析和修改。这些工具是如何实现对代码本身的解析呢？这就要用到一种叫做AST抽象语法树的技术。
@@ -270,7 +270,55 @@ A function declaration or expression.
 
 ESTree最早是由Mozilla工程师在开发Javascript引擎SpiderMonkey时定义的，后来被大家接收并形成了事实的标准，现在由Babel，ESlint和Acorn维护。ESTree并不是一个强制规则，因此也有部分AST转换工具没有使用这个标准。下面的工具介绍中会提到这一点。
 
-## JavaScript中的AST工具列表
+## AST工具列表
+首先列举一下目前社区中流行的AST生成工具，以及它们是否支持ESTree和输出Tokens。
+
+| 工具名称 | 支持ESTree | 支持输出Tokens | 简介 |
+| - | - | - | - |
+| Esprima | 是 | 是 | 很早的AST工具，支持最新语法的进度较慢 |
+| Acorn | 是 | 是 | 流行的AST工具，支持插件 |
+| Espree | 是 | 是 | ESLint(JS语法检查工具)的AST工具，最初基于Esprima开发，后来基于Acorn |
+| @babel/parser | 是 | 否 | Babel(JS编译器)的AST工具，fork于Acorn |
+| UglifyJS | 否 | 否 | UglifyJS(JS压缩工具)中提供的AST工具，独立格式不支持ESTree |
+
+todo 更多工具介绍
+
+其中Esprima是非常早的AST工具，也很好用，但由于ES6开始，ECMAScript标准中语法的数量增多速度变快，导致Esprima无法即使更新，因此出现了更多AST生成工具。其中Acorn是流行的工具之一，具有插件机制，现在很多JavaScript工具都采用了Acorn或者在它的基础上继续开发。Babel相关的内容后面会单独介绍。下面我们简单列举下这些工具的代码使用方式示例：
+
+```js
+/*
+  code    被解析的代码
+  tokens  词法分析结果
+  ast     生成的抽象语法树
+*/
+const code = "const a = 2 + 1;";
+
+// --- Esprima ---
+const esprima = require("esprima");
+const tokens = esprima.tokenize(code);
+const ast = esprima.parse(code);
+
+// --- Acorn ---
+const acorn = require("acorn");
+// it是个js遍历器
+const it = acorn.tokenizer(code);
+const tokens = [...it]；
+const ast = acorn.parse(code, { ecmaVersion: "latest" });
+
+// --- Espree ---
+const espree = require("espree");
+const tokens = espree.tokenize(code);
+const ast = espree.parse(code, { ecmaVersion: "latest" });
+
+// --- UglifyJS ---
+const UglifyJS = require("uglify-js");
+const ast = UglifyJS.minify(code, {
+    parse: {}, compress: false, mangle: false,
+    output: { ast: true, code: false }
+});
+```
+
+通过代码示例可以看到，虽然API细节个别有区别，但使用方式是基本一致的。
 
 ## babel介绍
 
@@ -282,7 +330,7 @@ ESTree最早是由Mozilla工程师在开发Javascript引擎SpiderMonkey时定义
 
 这属于编译原理的内容
 
-## 参考
+## 参考 todo 看哪些无需引用
 - 深入理解AST-带你揭秘前端工程的幕后魔法\
   https://juejin.cn/post/7405239837939548160
 - AST 抽象语法树知识点\
@@ -303,3 +351,11 @@ ESTree最早是由Mozilla工程师在开发Javascript引擎SpiderMonkey时定义
   https://astexplorer.net/
 - 【转译器原理 parser 篇】实现 js 新语法并编译到 css\
   https://juejin.cn/post/6959502530745204772
+- JS AST 原理揭秘\
+  https://zhaomenghuan.js.org/blog/js-ast-principle-reveals.html
+- Acorn Github\
+  https://github.com/acornjs/acorn
+- Espree Github\
+  https://github.com/eslint/js/tree/main/packages/espree
+- UglifyJS Github\
+  https://github.com/mishoo/UglifyJS
