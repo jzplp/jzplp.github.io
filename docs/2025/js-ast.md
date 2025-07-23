@@ -283,7 +283,7 @@ ESTree最早是由Mozilla工程师在开发Javascript引擎SpiderMonkey时定义
 
 todo 更多工具介绍
 
-其中Esprima是非常早的AST工具，也很好用，但由于ES6开始，ECMAScript标准中语法的数量增多速度变快，导致Esprima无法即使更新，因此出现了更多AST生成工具。其中Acorn是流行的工具之一，具有插件机制，现在很多JavaScript工具都采用了Acorn或者在它的基础上继续开发。Babel相关的内容后面会单独介绍。下面我们简单列举下这些工具的代码使用方式示例：
+其中Esprima是非常早的AST工具，也很好用，但由于ES6开始，ECMAScript标准中语法的数量增多速度变快，导致Esprima无法即使更新，因此出现了更多AST生成工具。其中Acorn是流行的工具之一，具有插件机制，现在很多JavaScript工具都采用了Acorn或者在它的基础上继续开发。下面我们简单列举下这些工具的代码使用方式示例：
 
 ```js
 /*
@@ -310,6 +310,10 @@ const espree = require("espree");
 const tokens = espree.tokenize(code);
 const ast = espree.parse(code, { ecmaVersion: "latest" });
 
+// --- @babel/parser ---
+const babelParser = require("@babel/parser");
+const ast = babelParser.parse(code);
+
 // --- UglifyJS ---
 const UglifyJS = require("uglify-js");
 const ast = UglifyJS.minify(code, {
@@ -318,9 +322,7 @@ const ast = UglifyJS.minify(code, {
 });
 ```
 
-通过代码示例可以看到，虽然API细节个别有区别，但使用方式是基本一致的。
-
-## babel介绍
+通过代码示例可以看到，虽然API细节个别有区别，但使用方式是基本一致的。还有一些社区工具虽然有解析AST的能力，但却没有抛出API，比如Terser；还有一些工具是直接集成了上面的工具作为解析AST的方法，例如recast。这些工具我们就不在表格中列出了。
 
 ## AST的应用（这里可以试一下babel插件？）
 
@@ -329,6 +331,8 @@ const ast = UglifyJS.minify(code, {
 ## 总结？
 
 这属于编译原理的内容
+
+babel相关内容在后面单独文章介绍
 
 ## 参考 todo 看哪些无需引用
 - 深入理解AST-带你揭秘前端工程的幕后魔法\
@@ -359,3 +363,7 @@ const ast = UglifyJS.minify(code, {
   https://github.com/eslint/js/tree/main/packages/espree
 - UglifyJS Github\
   https://github.com/mishoo/UglifyJS
+- UglifyJS — why not switching to SpiderMonkey AST\
+  https://lisperator.net/blog/uglifyjs-why-not-switching-to-spidermonkey-ast/
+- Terser Github\
+  https://github.com/terser/terser
