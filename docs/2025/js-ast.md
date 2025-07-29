@@ -368,8 +368,69 @@ const fun = function (letter) {
 上面代码的作用是，将输入代码中的let变量声明修改为const。这仅仅是个最简单的Demo，没有考虑变量修改的场景。有些人可能对于AST的作用有疑惑，认为对原代码为用字符串替换或者正则的方式也能实现。但当程序复杂时，例如变量名和字符串常量中都可能包含let，这时使用常规的正则方式难度是比较高的。
 
 ## 具体语法树CST
+前面我们介绍的都是抽象语法树AST，它是忽略注释，分号等无意义内容之后的组成的一颗树。那么有没有一种语法树可以保留这些内容呢？有的，它就是具体语法树CST(Concrete Syntax Tree)。具体语法树是代码的完整表示，在代码高亮，代码格式化等方面非常有用。这里我们使用Tree-sitter工具，尝试对代码生成具体语法树。
 
-## 总结？
+```js
+const Parser = require('tree-sitter');
+const JavaScript = require('tree-sitter-javascript');
+
+const parser = new Parser();
+parser.setLanguage(JavaScript);
+const code = 'let x = 2;';
+const tree = parser.parse(code);
+
+console.log(tree.rootNode.toString());
+console.log(tree.rootNode.children[0].children);
+
+/*  输出
+(program (lexical_declaration (variable_declarator name: (identifier) value: (number))))
+[
+  SyntaxNode {
+    type: let,
+    startPosition: {row: 0, column: 0},
+    endPosition: {row: 0, column: 3},
+    childCount: 0,
+  },
+  VariableDeclaratorNode {
+    type: variable_declarator,
+    startPosition: {row: 0, column: 4},
+    endPosition: {row: 0, column: 9},
+    childCount: 3,
+  },
+  SyntaxNode {
+    type: ;,
+    startPosition: {row: 0, column: 9},
+    endPosition: {row: 0, column: 10},
+    childCount: 0,
+  }
+]
+*/
+```
+
+Tree-sitter本身是用C语言编写的，但提供了JavaScript语言的npm包供使用。同时它也支持解析多种语言，不同的语言引入不同的解析器即可。Tree-sitter并不使用STree作为解析格式，而是使用S表达式，如我们输出的第一行`tree.rootNode.toString()`。S表达式(S-Expression)类似于前缀表达式，在Lisp语言中使用较多。这里举一个简单的例子：
+
+* 原表达式: 1 * (2 + 3)
+* S表达式: (* 1 (+ 2 3))
+
+从例子中可以简单理解为，在中间的操作符需要提到最前面。然后我们再来看输出的第一行，其中每个节点的含义如下：
+
+* program 程序根节点
+* lexical_declaration 声明语句
+* variable_declarator 声明器
+* name(identifier) 变量名
+* value:(number) 数字值
+
+然后将它们组合起来：
+
+* (program (lexical_declaration (variable_declarator name: (identifier) value: (number))))
+* (程序根节点 (声明语句 (声明器 变量名 数字值)))
+
+详细含义和解析方法可以查看Tree-sitter文档。不过细心看虽然用了S表达式的形式，但这依然是一颗AST而不是CST，因为树中并没有分号。todo 没结束
+
+
+
+
+## 总结
 
 这属于编译原理的内容
 
@@ -414,3 +475,9 @@ babel相关内容在后面单独文章介绍
   https://github.com/estools/estraverse
 - Escodegen Github\
   https://github.com/estools/escodegen
+- Tree-sitter 文档\
+  https://tree-sitter.github.io/tree-sitter/
+- Node Tree-sitter 文档\
+  https://tree-sitter.github.io/node-tree-sitter/
+- 利用 Tree-sitter 进行语法树分析\
+  https://juejin.cn/post/7407278157449052186
