@@ -376,14 +376,18 @@ const JavaScript = require('tree-sitter-javascript');
 
 const parser = new Parser();
 parser.setLanguage(JavaScript);
-const code = 'let x = 2;';
-const tree = parser.parse(code);
+const sourceCode = 'let x = 2;';
+const tree = parser.parse(sourceCode);
 
 console.log(tree.rootNode.toString());
+console.log(tree.rootNode.children[0].toString());
 console.log(tree.rootNode.children[0].children);
+console.log(tree.rootNode.children[0].children[1].toString());
+console.log(tree.rootNode.children[0].children[1]);
 
 /*  输出
 (program (lexical_declaration (variable_declarator name: (identifier) value: (number))))
+(lexical_declaration (variable_declarator name: (identifier) value: (number)))
 [
   SyntaxNode {
     type: let,
@@ -404,6 +408,13 @@ console.log(tree.rootNode.children[0].children);
     childCount: 0,
   }
 ]
+(variable_declarator name: (identifier) value: (number))
+VariableDeclaratorNode {
+  type: variable_declarator,
+  startPosition: {row: 0, column: 4},
+  endPosition: {row: 0, column: 9},
+  childCount: 3,
+}
 */
 ```
 
@@ -425,10 +436,16 @@ Tree-sitter本身是用C语言编写的，但提供了JavaScript语言的npm包�
 * (program (lexical_declaration (variable_declarator name: (identifier) value: (number))))
 * (程序根节点 (声明语句 (声明器 变量名 数字值)))
 
-详细含义和解析方法可以查看Tree-sitter文档。不过细心看虽然用了S表达式的形式，但这依然是一颗AST而不是CST，因为树中并没有分号。todo 没结束
+详细含义和解析方法可以查看Tree-sitter文档。不过细心看虽然用了S表达式的形式，但这依然是一颗AST而不是CST，因为树中并没有分号等无意义符号。我们仔细看输出的子节点中，发现了分号的存在，这一类无意义结点被称作匿名节点，在S表达式中并不会展示，但是遍历子节点时，是可以遍历到的。另外Tree-sitter也能解析存在错误的语法：
 
+```js
+const sourceCode = 'let x = 2qwe;';
+/*
+(program (lexical_declaration (variable_declarator name: (identifier) (ERROR (number)) value: (identifier))))
+*/
+```
 
-
+在代码有错误的情况下，依然生成了S表达式，且表达式中可以看到ERROR结点。这种能力对语法错误提示等功能有帮助。
 
 ## 总结
 
@@ -438,9 +455,7 @@ babel相关内容在后面单独文章介绍
 
 更复杂的使用后面介绍
 
-## 参考 todo 看哪些无需引用
-- 深入理解AST-带你揭秘前端工程的幕后魔法\
-  https://juejin.cn/post/7405239837939548160
+## 参考
 - AST 抽象语法树知识点\
   https://mp.weixin.qq.com/s/KaIaCjRGC55UB6px15M1kw
 - CST vs AST 以及 biome 和 Oxc 各自的选择理由\
