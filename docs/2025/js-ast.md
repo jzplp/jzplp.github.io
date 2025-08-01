@@ -1,4 +1,4 @@
-# JavaScript语法树简介：AST/CST/词法分析/语法分析/ESTree/生成工具
+# JavaScript语法树简介：AST/CST/词法/语法分析/ESTree/生成工具
 
 ## AST简介
 在平时的开发中，经常会遇到对JavaScript代码进行检查或改动的工具，例如ESLint会检查代码中的语法错误；Prettier会修改代码的格式；打包工具会将不同文件中的代码打包在一起等等。这些工具都对JavaScript代码本身进行了解析和修改。这些工具是如何实现对代码本身的解析呢？这就要用到一种叫做AST抽象语法树的技术。
