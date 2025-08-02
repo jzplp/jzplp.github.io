@@ -471,7 +471,7 @@ const sourceCode = 'let x = 2qwe;';
   https://zhuanlan.zhihu.com/p/617125984
 - ESTree Github\
   https://github.com/estree/estree
-- AST explorer JavaScript代码在线转换为AST语法树
+- AST explorer JavaScript代码在线转换为AST语法树\
   https://astexplorer.net/
 - 【转译器原理 parser 篇】实现 js 新语法并编译到 css\
   https://juejin.cn/post/6959502530745204772

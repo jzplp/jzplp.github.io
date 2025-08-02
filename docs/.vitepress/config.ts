@@ -10,6 +10,7 @@ const sidebarLists = [
   {
     text: "2025",
     items: [
+      { text: "babel介绍", link: "/2025/babel-intro" },
       { text: "JavaScript语法树简介：AST/CST/词法/语法分析/ESTree/生成工具", link: "/2025/js-ast" },
       {
         text: "清除浮动/避开margin折叠：前端CSS中BFC的特点与限制",
