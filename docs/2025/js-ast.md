@@ -320,7 +320,7 @@ const ast = UglifyJS.minify(code, {
 });
 ```
 
-通过代码示例可以看到，虽然API细节个别有区别，但使用方式是基本一致的。还有一些社区工具虽然有解析AST的能力，但却没有抛出API，比如Terser；还有一些工具是直接集成了上面的工具作为解析AST的方法，例如recast。这些工具我们就不在表格中列出了。
+通过代码示例可以看到，虽然API细节个别有区别，但使用方式是基本一致的。还有一些社区工具虽然有解析AST的能力，但却没有抛出API，比如Terser或者SWC；还有一些工具是直接集成了上面的工具作为解析AST的方法，例如recast。这些工具我们就不在表格中列出了。
 
 ## AST的应用Demo
 AST在Javascript的工具中应用非常广泛：代码编译构建，混淆压缩，语法高亮，错误检查，格式修改，ES版本兼容等等，应用实在是太多了。可以说在前端工程化领域中绝大部分工具都需要AST的能力。但其中大部分工具都不仅只是生成语法树，它们还会对AST进行修改，最后再生成代码。我们再用一个流程图来表示：
@@ -497,3 +497,5 @@ const sourceCode = 'let x = 2qwe;';
   https://tree-sitter.github.io/node-tree-sitter/
 - 利用 Tree-sitter 进行语法树分析\
   https://juejin.cn/post/7407278157449052186
+- SWC 文档\
+  https://swc.rs/
