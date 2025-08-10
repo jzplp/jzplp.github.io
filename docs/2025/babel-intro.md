@@ -29,10 +29,48 @@ Babel是一个JavaScript编译器，主要作用是将新版本的ECMAScript代�
 这里简单列举一下Babel部分基础功能的使用方式。
 
 ### 转义语法API
+首先尝试用JavaScript的API方式调用转换语法：
 
-### 转义语法命令行调用
+```js
+const babel = require("@babel/core");
+
+const code = `const a =1;`;
+
+const obj1 = babel.transformSync(code);
+console.log('例子1', obj1.code);
+
+const obj2 = babel.transformSync(code, {
+  presets: [
+    [
+      "@babel/preset-env",
+      {
+        targets: { ie: "11" },
+      },
+    ],
+  ],
+});
+console.log('例子2', obj2.code);
+```
+
+这里使用了@babel/core用来转换代码，它提供了多种API，包括同步异步，从文本/文件/AST中转换代码等。第一个例子是没有使用任何配置的，第二个例子还使用了@babel/preset-env，这是一个预设，同时可以接受参数表示要求适配的浏览器版本。我们看下输出结果：
+
+```js
+// 例子1
+const a = 1;
+// 例子2
+"use strict";
+
+var a = 1;
+```
+
+第一个例子因为没有配置，所以输出代码仅仅是格式上发生了变化。第二个例子因为有配置需要兼容IE11浏览器（不支持ES6），因此const被转义成了var。
 
 ### 配置文件
+
+上面的例子转移到配置文件中
+
+
+### 转义语法命令行调用
 
 ### Polyfill
 
