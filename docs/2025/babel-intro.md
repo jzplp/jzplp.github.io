@@ -66,11 +66,45 @@ var a = 1;
 第一个例子因为没有配置，所以输出代码仅仅是格式上发生了变化。第二个例子因为有配置需要兼容IE11浏览器（不支持ES6），因此const被转义成了var。
 
 ### 配置文件
+Babel支持独立的配置文件，且有多种形式，例如`babel.config.*, .babelrc.*`等等，我们以babel.config.json为例，放在项目的根目录下，然后将上一节中API中的配置转移到配置文件中：
 
-上面的例子转移到配置文件中
+```js
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "ie": "11"
+        }
+      }
+    ]
+  ]
+}
+```
+
+然后我们再使用API调用，并且去掉API中的配置，重新调用，发现Babel读取了配置文件中的配置，效果和前面API传入配置一致。
+
+```js
+const babel = require("@babel/core");
+
+const code = `const a =1;`;
+const obj1 = babel.transformSync(code);
+console.log('例子1', obj1.code);
+
+// 输出
+"use strict";
+
+var a = 1;
+```
+
+Babel配置文件支持很多配置，部分配置在后面会逐渐介绍。全量配置描述可以看Babel文档。
+
+### 命令行调用
+除了API调用之外，Babel可以通过命令行调用。
 
 
-### 转义语法命令行调用
+
 
 ### Polyfill
 
