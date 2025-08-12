@@ -101,10 +101,41 @@ var a = 1;
 Babel配置文件支持很多配置，部分配置在后面会逐渐介绍。全量配置描述可以看Babel文档。
 
 ### 命令行调用
-除了API调用之外，Babel可以通过命令行调用。
+除了API调用之外，Babel可以通过命令行调用。我们首先安装@babel/cli，然后在根目录创建src文件夹，包含两个文件：
 
+```js
+// index.js
+const index =1;
 
+// a.js
+const fun = () => {
+  console.log(123);
+}
+```
 
+我们依然使用上一节中Babel配置文件。然后命令行执行：
+
+```sh
+npx babel src --out-dir lib
+# 输出
+# Successfully compiled 2 files with Babel (5974ms).
+```
+
+此时新增了lib文件夹，里面包含我们创建的两个文件，但是都经过了转换。查看结果，配置文件也能通过命令行调用生效。
+
+```js
+// index.js
+"use strict";
+
+var index = 1;
+
+// a.js
+"use strict";
+
+var fun = function fun() {
+  console.log(123);
+};
+```
 
 ### Polyfill
 
