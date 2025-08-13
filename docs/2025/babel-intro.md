@@ -137,13 +137,123 @@ var fun = function fun() {
 };
 ```
 
-### Polyfill
-
 ### 生成AST
 
 ### 生成SourceMap
 
 ### 使用工具包
+
+## Polyfill功能
+前面对于代码的转换仅仅是语法层面的转换，例如const或者箭头函数。但ECMAScript的新版本除了增加新的语法外，还会增加新的API，比如对象，类，内置方法等等，例如Promise, Object.is()等等。这些并不是语法层面的改动，但也随着浏览器环境版本的变动而变动。
+
+### 未使用场景
+
+对于这些API的兼容的方法，就叫做“Polyfill”。有一个core-js包提供了各种API在旧版本的兼容实现，引入这个包中所需要的模块，即可正常使用这些新版本才有的API。这里举个使用Babel进行转换的例子（使用前面的配置文件进行转换）：
+
+```js
+// 转换前代码
+const a = 1;
+new Promise(() => {});
+
+// 转换后代码
+"use strict";
+
+var a = 1;
+new Promise(function () {});
+```
+
+可以看到，const和箭头函数都被转换成旧版本的形式了，但因为Promise并不是语法，因此它没有被转换。但Promise在IE11是不能用的，因此我们依然需要Polyfill，才能在低版本执行代码。
+
+### Polyfill配置
+Babel的@babel/preset-env预设中也提供了Polyfill功能，可以帮我们将缺失的API引入。首先需要修改配置文件：
+
+```js
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "ie": "11"
+        },
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
+    ]
+  ]
+}
+```
+
+增加useBuiltIns:usage表示需要按需引入Polyfill功能，同时Babel的Polyfill引入的实际上还是core-js包中的模块，因此需要指定core-js版本。此时将上面的代码重新转换，结果如下：
+
+```js
+// 转换后代码
+"use strict";
+
+require("core-js/modules/es.object.to-string.js");
+require("core-js/modules/es.promise.js");
+var a = 1;
+new Promise(function () {});
+```
+
+可以看到，除了语法被转换成旧版本，还增加了两个require，是core-js中的模块。引入了这些模块后，在旧版本浏览器中就存在Promise对象，我们的代码也可以正常执行了。
+
+### 根据代码按需引入
+Babel在引入Polyfill的时候，不会一股脑的将所有新API全部引入，这样会造成无用的API过多，影响执行效率。Babel会检查我们的代码，只引入使用到的API。例如我们在前面的例子中增加一行，然后重新转换：
+
+```js
+// 转换前代码
+const a = 1;
+new Promise(() => {});
+Object.is(a, a)
+
+
+// 转换后代码
+"use strict";
+
+require("core-js/modules/es.object.is.js");
+require("core-js/modules/es.object.to-string.js");
+require("core-js/modules/es.promise.js");
+var a = 1;
+new Promise(function () {});
+Object.is(a, a);
+```
+
+可以看到，我们的代码中多了`Object.is`，这是ES6新增的方法。在转换后的代码中除了看到新增的代码外，还多了一句require，里面包含这个ES6新增方法的实现。通过对比可以得出，Babel是会根据代码内容按需引入的。
+
+### 根据浏览器版本按需引入
+Babel在引入Polyfill的时候不仅考虑代码内容，还会考虑目标浏览器的版本。如果目标浏览器已经支持这个API，便不再引入了。前面的例子中我们是以IE11作为浏览器版本的，现在我们改一下配置文件：
+
+```js
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "60"
+        },
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
+    ]
+  ]
+}
+```
+
+现在支持的浏览器版本为Chrome60，我们重新转换代码：
+
+```js
+// 转换后代码
+"use strict";
+
+require("core-js/modules/es.promise.js");
+const a = 1;
+new Promise(() => {});
+Object.is(a, a);
+```
+
+通过结果可以看到，在更换浏览器版本后，需要引入的API也变化了，这说明Babel是会根据浏览器版本按需引入的。
 
 ## 转义React与JSX
 
@@ -158,7 +268,9 @@ var fun = function fun() {
 ## 总结
 
 ## 参考
-- Babel文档\
+- Babel 文档\
   https://babeljs.io/
-- Babel中文文档\
+- Babel 中文文档\
   https://www.babeljs.cn/
+- core-js Github\
+  https://github.com/zloirock/core-js
