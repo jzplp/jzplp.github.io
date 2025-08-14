@@ -138,8 +138,122 @@ var fun = function fun() {
 ```
 
 ### 生成AST
+在之前的文章中，我们介绍过AST抽象语法树，是将代码转换成抽象的树状结构的技术。在转换和生成代码中，AST是必须要用到的。Babel也支持输出AST。
+
+```js
+const babel = require("@babel/core");
+
+const code = `const a =1;`;
+const obj1 = babel.transformSync(code, { ast: true });
+console.log(JSON.stringify(obj1.ast));
+```
+
+然后我们看输出结果，是符合ESTree标准的抽象语法树：
+
+```json
+{
+  "type": "File",
+  "start": 0,
+  "end": 11,
+  "loc": {
+    "start": { "line": 1, "column": 0, "index": 0 },
+    "end": { "line": 1, "column": 11, "index": 11 }
+  },
+  "errors": [],
+  "program": {
+    "type": "Program",
+    "start": 0,
+    "end": 11,
+    "loc": {
+      "start": { "line": 1, "column": 0, "index": 0 },
+      "end": { "line": 1, "column": 11, "index": 11 }
+    },
+    "sourceType": "module",
+    "interpreter": null,
+    "body": [
+      {
+        "type": "VariableDeclaration",
+        "start": 0,
+        "end": 11,
+        "loc": {
+          "start": { "line": 1, "column": 0, "index": 0 },
+          "end": { "line": 1, "column": 11, "index": 11 }
+        },
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "start": 6,
+            "end": 10,
+            "loc": {
+              "start": { "line": 1, "column": 6, "index": 6 },
+              "end": { "line": 1, "column": 10, "index": 10 }
+            },
+            "id": {
+              "type": "Identifier",
+              "start": 6,
+              "end": 7,
+              "loc": {
+                "start": { "line": 1, "column": 6, "index": 6 },
+                "end": { "line": 1, "column": 7, "index": 7 },
+                "identifierName": "a"
+              },
+              "name": "a"
+            },
+            "init": {
+              "type": "NumericLiteral",
+              "start": 9,
+              "end": 10,
+              "loc": {
+                "start": { "line": 1, "column": 9, "index": 9 },
+                "end": { "line": 1, "column": 10, "index": 10 }
+              },
+              "extra": { "rawValue": 1, "raw": "1" },
+              "value": 1
+            }
+          }
+        ],
+        "kind": "const"
+      }
+    ],
+    "directives": [],
+    "extra": { "topLevelAwait": false }
+  },
+  "comments": []
+}
+```
 
 ### 生成SourceMap
+SourceMap是一种保存代码转换前后对应位置信息的技术，Babel同样简单配置即可生成。这次我们使用前面的命令行形式。首先修改配置文件：
+
+```js
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "60"
+        },
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
+    ]
+  ],
+  "sourceMaps": true
+}
+```
+
+然后执行命令行，结果生成代码的最下方有一行注释，指向了index.js.map。同时也生成了独立的index.js.map文件，这就是生成的SourceMap数据，这里就不展示了。（下方代码中包含那一句会让VitePress真的去寻找SourceMap文件，而且会因为找不到而报错，因此注释中我增加了防止报错的文本）
+
+```js
+"use strict";
+
+require("core-js/modules/es.promise.js");
+const a = 1;
+new Promise(() => {});
+Object.is(a, a);
+//# sourceMappingURL/*防止报错*/=index.js.map
+```
 
 ### 使用工具包
 
@@ -274,3 +388,5 @@ Object.is(a, a);
   https://www.babeljs.cn/
 - core-js Github\
   https://github.com/zloirock/core-js
+- JavaScript语法树简介：AST/CST/词法/语法分析/ESTree/生成工具\
+  https://jzplp.github.io/2025/js-ast.html
