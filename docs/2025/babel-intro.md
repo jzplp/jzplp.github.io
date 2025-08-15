@@ -255,8 +255,6 @@ Object.is(a, a);
 //# sourceMappingURL/*防止报错*/=index.js.map
 ```
 
-### 使用工具包
-
 ## Polyfill功能
 前面对于代码的转换仅仅是语法层面的转换，例如const或者箭头函数。但ECMAScript的新版本除了增加新的语法外，还会增加新的API，比如对象，类，内置方法等等，例如Promise, Object.is()等等。这些并不是语法层面的改动，但也随着浏览器环境版本的变动而变动。
 
@@ -368,6 +366,21 @@ Object.is(a, a);
 ```
 
 通过结果可以看到，在更换浏览器版本后，需要引入的API也变化了，这说明Babel是会根据浏览器版本按需引入的。
+
+## 使用工具包
+Babel除了可以转换语法之外，还提供了很多相关的开源库，其中包括一些工具包。这里我们简单介绍一些常用的Babel工具。
+
+### @babel/parser生成AST
+
+### @babel/generator从AST生成代码
+
+### @babel/traverse遍历和修改AST
+
+### @babel/code-frame代码报错信息展示
+
+### @babel/template todo
+
+### @babel/types todo
 
 ## 转义React与JSX
 
