@@ -396,13 +396,6 @@ console.log(res.code);
 const a = 1;
 ```
 
-### @babel/traverse遍历和修改AST
-上面介绍了生成AST和从AST生成代码的工具，那肯定少不了遍历修改AST的工具。@babel/traverse就可以做这件事。
-
-```js
-
-```
-
 ### @babel/code-frame代码报错信息展示
 当我们代码编译或者其它处理发生报错时，有时命令行会输出具体的错误代码位置。@babel/code-frame就是突出显示代码位置的工具。
 
@@ -425,7 +418,68 @@ console.log(res);
 */
 ```
 
-### @babel/types todo
+### @babel/types生成和判断AST结点
+@babel/types这个包里面放的并不是Babel相关的类型文件，而是判断和生成各种各样AST类型的函数。
+
+```js
+const babelTypes = require("@babel/types");
+
+const be = babelTypes.binaryExpression('+',
+  babelTypes.numericLiteral(1),
+  babelTypes.numericLiteral(2)
+);
+console.log(be);
+
+const r1 = babelTypes.isBinaryExpression(be);
+const r2 = babelTypes.isArrayExpression(be);
+console.log(r1, r2);
+
+/* 输出结果
+{
+  type: 'BinaryExpression',
+  operator: '+',
+  left: { type: 'NumericLiteral', value: 1 },
+  right: { type: 'NumericLiteral', value: 2 }
+}
+true false
+*/
+```
+
+在上面的代码中，我们利用@babel/types先创建了一个加号二元表达式的AST结点，其中左右都是数字字面量。然后使用函数判断其是否为二元表达式或数组表达式的AST结点。
+
+### @babel/traverse遍历和修改AST
+上面介绍了生成AST和从AST生成代码的工具，那肯定少不了遍历修改AST的工具。@babel/traverse就可以做这件事。
+
+```js
+// 生成AST
+const babelParser = require("@babel/parser");
+const ast = babelParser.parse("const a = 1 + 2");
+
+// 遍历和修改AST
+const babelTypes = require("@babel/types");
+const babelTraverse = require("@babel/traverse").default;
+babelTraverse(ast, {
+  enter(path) {
+    if (babelTypes.isBinaryExpression(path.node) && path.node.operator === "+")
+      path.node.operator = "-";
+  },
+});
+babelTraverse(ast, {
+  BinaryExpression(path) {
+    if (path.node.operator === "+") path.node.operator = "-";
+  },
+});
+
+// 从AST生成代码
+const babelGenerator = require("@babel/generator");
+const res = babelGenerator.generate(ast);
+console.log(res.code);
+
+// 生成结果
+const a = 1 - 2;
+```
+
+这段代码用到了上面提到的好多工具。首先把代码生成AST，然后使用@babel/traverse遍历和修改AST，最后生成新代码，可以看到已经被修改了（+号改成了-号）。其中遍历修改用了两种方式，最后的效果一致：第一种方式enter遍历所有结点，使用@babel/types中的函数判断结点类型，然后修改。第二种方式@babel/traverse直接提供了对应结点类型的访问入口，无需对所有结点做筛选。
 
 ### @babel/template todo
 
