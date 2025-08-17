@@ -368,19 +368,66 @@ Object.is(a, a);
 通过结果可以看到，在更换浏览器版本后，需要引入的API也变化了，这说明Babel是会根据浏览器版本按需引入的。
 
 ## 使用工具包
-Babel除了可以转换语法之外，还提供了很多相关的开源库，其中包括一些工具包。这里我们简单介绍一些常用的Babel工具。
+Babel除了可以转换语法之外，还提供了很多相关的开源库，其中包括一些工具包。这里我们简单介绍少部分常用的Babel工具。
 
 ### @babel/parser生成AST
+@babel/parser是Babel使用的JavaScript解析器，以前叫做Babylon。它可以提供JavaScript到AST抽象语法树的转换。
+
+```js
+const babelParser = require('@babel/parser');
+const ast = babelParser.parse('const a = 1');
+console.log(ast);
+```
 
 ### @babel/generator从AST生成代码
+@babel/generator提供了从AST数据生成代码的功能。
+
+```js
+// 生成AST
+const babelParser = require('@babel/parser');
+const ast = babelParser.parse('const a = 1');
+
+// 从AST生成代码
+const babelGenerator = require("@babel/generator");
+const res = babelGenerator.generate(ast);
+console.log(res.code);
+
+// 生成结果
+const a = 1;
+```
 
 ### @babel/traverse遍历和修改AST
+上面介绍了生成AST和从AST生成代码的工具，那肯定少不了遍历修改AST的工具。@babel/traverse就可以做这件事。
+
+```js
+
+```
 
 ### @babel/code-frame代码报错信息展示
+当我们代码编译或者其它处理发生报错时，有时命令行会输出具体的错误代码位置。@babel/code-frame就是突出显示代码位置的工具。
 
-### @babel/template todo
+```js
+const babelCodeFrame = require("@babel/code-frame");
+const lines = `const a =1;
+console.log('hello~')
+let sum = 1 + 2;`;
+const res = babelCodeFrame.codeFrameColumns(lines, {
+  start: { line: 2, column: 8 },
+  end: { line: 2, column: 12 },
+});
+console.log(res);
+
+/* 输出结果
+  1 | const a =1;
+> 2 | console.log('hello~')
+    |        ^^^^
+  3 | let sum = 1 + 2;
+*/
+```
 
 ### @babel/types todo
+
+### @babel/template todo
 
 ## 转义React与JSX
 
