@@ -481,7 +481,46 @@ const a = 1 - 2;
 
 这段代码用到了上面提到的好多工具。首先把代码生成AST，然后使用@babel/traverse遍历和修改AST，最后生成新代码，可以看到已经被修改了（+号改成了-号）。其中遍历修改用了两种方式，最后的效果一致：第一种方式enter遍历所有结点，使用@babel/types中的函数判断结点类型，然后修改。第二种方式@babel/traverse直接提供了对应结点类型的访问入口，无需对所有结点做筛选。
 
-### @babel/template todo
+### @babel/template从模板生成AST
+我们提供给@babel/template一个代码模板，给这个模板提供结点数据，就可以生成相应的AST抽象语法树。
+
+```js
+const babelTemplate = require("@babel/template").default;
+const babelTypes = require("@babel/types");
+
+const codeTemplate = "const %%name%% = %%value%%;";
+const template = babelTemplate(codeTemplate);
+const ast = template({
+  name: babelTypes.identifier("a"),
+  value: babelTypes.stringLiteral("hello, jzplp"),
+});
+console.log(JSON.stringify(ast));
+
+// 从AST生成代码
+const babelGenerator = require("@babel/generator");
+const res = babelGenerator.generate(ast);
+console.log(res.code);
+```
+
+首先我们创建了一个模板，有name和value两个占位符。一个是变量标识符，一个是值。然后我们给模板数据，数据本身是对应的AST结点。生成的AST，以及用AST生成的代码中都可以看到占位符被替换了。
+
+```js
+// 生成的AST
+{
+  "type": "VariableDeclaration",
+  "kind": "const",
+  "declarations": [
+    {
+      "type": "VariableDeclarator",
+      "id": { "type": "Identifier", "name": "a" },
+      "init": { "type": "StringLiteral", "value": "hello, jzplp" }
+    }
+  ]
+}
+
+// 生成的代码
+const a = "hello, jzplp";
+```
 
 ## 转义React与JSX
 
