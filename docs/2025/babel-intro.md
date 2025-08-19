@@ -522,9 +522,83 @@ console.log(res.code);
 const a = "hello, jzplp";
 ```
 
-## 转义React与JSX
-
 ## 转义TypeScript
+### 转义ts文件
+通过预设，Babel可以转换TypeScript语法的代码为JavaScript语法的代码（但是不能检查和输出类型声明）。首先修改配置文件babel.config.json：
+
+```js
+{
+  "presets": ["@babel/preset-typescript"]
+}
+```
+
+然后在src文件夹中新增index.ts文件，这就是我们要转义的文件：
+
+```ts
+const jz: number = 1;
+const list: Array<number> = [jz];
+interface Stru {
+  jz: number;
+  list: Array<number>;
+}
+const stru: Stru = { jz, list };
+const p = new Promise(() => {});
+```
+
+然后执行命令行，和之前相比增加了支持ts文件的参数：`babel src --out-dir lib --extensions ".ts"`。在lib文件夹中可以看到生成结果index.js，去掉了TypeScript类型相关语法。
+
+```js
+// 生成结果
+const jz = 1;
+const list = [jz];
+const stru = {
+  jz,
+  list
+};
+const p = new Promise(() => {});
+```
+
+### 多预设同时生效
+在上一节转义TS文件生成的结果代码中，可以看到只转义了TypeScript，并没有转义新版本的ECMAScript语法和Polyfill。是否需要我们编译两次，第一次转义TS，第二次转义ES新语法？通过多个预设的顺序排列，Babel支持在一次转义中同时做多件事。修改配置文件：
+
+```js
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "ie": "11"
+        },
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
+    ],
+    "@babel/preset-typescript"
+  ]
+}
+```
+
+Babel支持同时传入多个预设，这些预设有前后顺序，数组中后面的预设更早执行，因此先使用@babel/preset-typescript转义TypeScript，再使用@babel/preset-env转义新版本的ECMAScript语法。我们看下转义结果：
+
+```js
+"use strict";
+
+require("core-js/modules/es.object.to-string.js");
+require("core-js/modules/es.promise.js");
+var jz = 1;
+var list = [jz];
+var stru = {
+  jz: jz,
+  list: list
+};
+var p = new Promise(function () {});
+```
+
+另外插件数组是从前往后执行，插件在预设之前运行。不过这个例子举的不太好，因此发现这两个插件顺序更换的结果一致。看看后面转义JSX是否可以更换顺序吧。
+
+## 转义JSX
+
 
 ## 如何开发Babel插件
 
