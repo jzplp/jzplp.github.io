@@ -582,6 +582,7 @@ const p = new Promise(() => {});
 Babel支持同时传入多个预设，这些预设有前后顺序，数组中后面的预设更早执行，因此先使用@babel/preset-typescript转义TypeScript，再使用@babel/preset-env转义新版本的ECMAScript语法。我们看下转义结果：
 
 ```js
+// 生成结果
 "use strict";
 
 require("core-js/modules/es.object.to-string.js");
@@ -595,10 +596,166 @@ var stru = {
 var p = new Promise(function () {});
 ```
 
-另外插件数组是从前往后执行，插件在预设之前运行。不过这个例子举的不太好，因此发现这两个插件顺序更换的结果一致。看看后面转义JSX是否可以更换顺序吧。
+另外插件数组是从前往后执行，插件在预设之前运行。不过我发现这两个插件在配置文件的顺序更换之后，结果也一致。
 
 ## 转义JSX
+### 转义JSX语法
+通过@babel/preset-react预设，Babel可以解析JSX。首先修改配置文件babel.config.json：
 
+```js
+{
+  "presets": ["@babel/preset-react"]
+}
+```
+
+然后在src文件夹中新增index.jsx文件，这就是我们要转义的文件：
+
+```js
+function Comp() {
+  const a = 1;
+  const str = "jzplp";
+
+  return (
+    <div>
+      <span>{str}</span>
+      <span>{a}</span>
+    </div>
+  );
+}
+```
+
+执行命令行`babel src --out-dir lib`(和一开始的命令行一致)。可以看到输出结果，JSX语法被转义成了createElement方法。
+
+```js
+// 生成结果
+function Comp() {
+  const a = 1;
+  const str = "jzplp";
+  return /*#__PURE__*/ React.createElement(
+    "div",
+    null,
+    /*#__PURE__*/ React.createElement("span", null, str),
+    /*#__PURE__*/ React.createElement("span", null, a)
+  );
+}
+```
+
+### 转义TSX语法
+同时使用JSX语法和TypeScript语法的代码，被叫做TSX。再加上转义ECMAScript新语法，因此转义需要三个预设同时生效。首先展示一下我们需要转义的代码：
+
+```ts
+const jz: number = 1;
+const list: Array<number> = [jz];
+interface Stru {
+  jz: number;
+  list: Array<number>;
+}
+const stru: Stru = { jz, list };
+const p = new Promise(() => {});
+
+function Comp() {
+  const a = 1;
+  const str = "jzplp";
+
+  return (
+    <div>
+      <span>{str}</span>
+      <span>{a}</span>
+    </div>
+  );
+}
+```
+
+首先我们先只转义TypeScript语法试一下。配置文件：
+
+```js
+{
+  "presets": [
+    [
+      "@babel/preset-typescript",
+      {
+        "isTSX": true,
+        "allExtensions": true
+      }
+    ]
+  ]
+}
+```
+
+然后执行命令：`babel src --out-dir lib --extensions ".tsx"`。可以看到结果中TS声明没有了，但是JSX是没有被转义的。因此@babel/preset-typescript是可以解析TSX语法的，但是不转义。
+
+```js
+// 生成结果
+const jz = 1;
+const list = [jz];
+const stru = {
+  jz,
+  list
+};
+const p = new Promise(() => {});
+function Comp() {
+  const a = 1;
+  const str = "jzplp";
+  return <div>
+      <span>{str}</span>
+      <span>{a}</span>
+    </div>;
+}
+```
+
+然后我们在配置文件中增加JSX语法和ECMAScript新语法转义。修改配置文件：
+
+```js
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "ie": "11"
+        },
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
+    ],
+    "@babel/preset-react",
+    [
+      "@babel/preset-typescript",
+      {
+        "isTSX": true,
+        "allExtensions": true
+      }
+    ]
+  ]
+}
+```
+
+还是执行上面tsx的命令行，查看结果发现三种语法都被转义了。同样的，三个插件在配置文件的顺序无论如何更换结果都一致。
+
+```js
+// 生成结果
+"use strict";
+
+require("core-js/modules/es.object.to-string.js");
+require("core-js/modules/es.promise.js");
+var jz = 1;
+var list = [jz];
+var stru = {
+  jz: jz,
+  list: list,
+};
+var p = new Promise(function () {});
+function Comp() {
+  var a = 1;
+  var str = "jzplp";
+  return /*#__PURE__*/ React.createElement(
+    "div",
+    null,
+    /*#__PURE__*/ React.createElement("span", null, str),
+    /*#__PURE__*/ React.createElement("span", null, a)
+  );
+}
+```
 
 ## 如何开发Babel插件
 
