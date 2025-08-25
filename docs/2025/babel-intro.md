@@ -774,3 +774,5 @@ function Comp() {
   https://github.com/zloirock/core-js
 - JavaScript语法树简介：AST/CST/词法/语法分析/ESTree/生成工具\
   https://jzplp.github.io/2025/js-ast.html
+- Babel 插件手册\
+  https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/plugin-handbook.md
