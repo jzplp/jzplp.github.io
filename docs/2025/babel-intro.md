@@ -759,9 +759,138 @@ function Comp() {
 
 ## 如何开发Babel插件
 
+### 新建插件
+开发Babal插件需要用到前面描述的相关工具能力。插件实际上就是一个修改AST的函数，这里举个例子。
+
+```js
+export default function plugin1(babel) {
+  console.log("plugin1", babel.version);
+  return {
+    visitor: {
+      BinaryExpression(path) {
+        if (path.node.operator === "+") path.node.operator = "-";
+      },
+    },
+  };
+}
+```
+
+插件函数返回一个对象，对象中的visitor就是我们在前面AST遍历中传给@babel/traverse的对象，里面描述了遍历和修改AST的方法。然后修改Babel配置，引入插件，设置为相对路径：
+
+```js
+{
+  "plugins": ["./plugins/plugin1.js"]
+}
+```
+
+然后准备好要处理的代码：
+```js
+const a = 1 - 1;
+new Promise(() => {});
+Object.is(a, a);
+```
+
+从生成结果中可以看到，+号变为了-号，我们的插件确实生效了。
+
+```js
+// 生成结果
+const a = 1 - 1;
+new Promise(() => {});
+Object.is(a, a);
+```
+
+### 插件参数
+在前面@babel/preset-env的使用中，可以看到插件可以接受参数，我们的自定义插件也可以做到。首先修改配置文件，传入插件参数：
+
+```js
+{
+  "plugins": [
+    [
+      "./plugins/plugin1.js",
+      {
+        "option1": "jzplp",
+        "option2": "hello,jz"
+      }
+    ]
+  ]
+}
+```
+
+然后在插件代码中打印配置。可以看到通过state.opts可以获取。
+
+```js
+module.exports = function plugin1(babel) {
+  return {
+    visitor: {
+      BinaryExpression(path, state) {
+        if (path.node.operator === "+") {
+          console.log(state.opts);
+          path.node.operator = "-";
+        }
+      },
+    },
+  };
+};
+
+/* 命令行输出
+{ option1: 'jzplp', option2: 'hello,jz' }
+*/
+```
+
+### 多文件与触发时间
+
+插件还可以定义在插件运行前和运行后的函数，再加上创建插件时也可以插入逻辑，我们在这些位置都加入输出：
+
+```js
+module.exports = function plugin1(babel) {
+  console.log("plugin1 init");
+  return {
+    pre(state) {
+      console.log("plugin1 pre");
+    },
+    visitor: {
+      BinaryExpression(path, state) {
+        if (path.node.operator === "+") {
+          console.log("plugin1 visitor");
+          path.node.operator = "-";
+        }
+      },
+    },
+    post(state) {
+      console.log("plugin1 post");
+    },
+  };
+};
+```
+
+然后我们在要处理的代码目录中放入两个文件，执行命令行，输出结果如下：
+
+```
+plugin1 init
+plugin1 pre
+plugin1 visitor
+plugin1 post
+plugin1 pre
+plugin1 visitor
+plugin1 post
+Successfully compiled 2 files with Babel (160ms).
+```
+
+对应我们上面代码的输出，可以看到插件仅初始化了一次，但是处理前/处理后的函数却是每个文件分别执行的。
+
+### 其它参数说明
+
 ## 如何开发Babel预设
 
-## 搞一个应用？
+## 多插件和多预设顺序
+
+### 多插件顺序
+
+todo 参考 多文件与触发时间
+
+### 多预设顺序
+
+### 综合顺序
 
 ## 总结
 
