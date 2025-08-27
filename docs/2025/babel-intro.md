@@ -879,6 +879,25 @@ Successfully compiled 2 files with Babel (160ms).
 对应我们上面代码的输出，可以看到插件仅初始化了一次，但是处理前/处理后的函数却是每个文件分别执行的。
 
 ### 其它参数说明
+前面我们的自定义插件中包含很多参数，例如初始化的babel对象，遍历AST的path对象，包含插件参数的state对象。这里我们一一解释这些对象是什么。
+
+#### path连接对象
+使用@babel/traverse或者Babel插件对AST遍历时，我们拿到的并不是直接是一个AST结点，而是一个path对象。path是表示两个节点之间连接的对象，其中不仅有我们当前访问的AST结点，还有很多其它对象和方法，这里列举一下一部分：
+
+* path.node 当前访问的AST结点
+* path.parent 当前访问结点的父AST结点
+* path.parentPath 父AST节点的path对象
+* path.scope 作用域对象，后面单独描述
+* path.isXXX 各种判断结点类型的函数，例如isisArrayExpression
+* 各种辅助函数，例如：getSource获取当前结点的代码字符串，getNextSibling获取下一个兄弟结点
+
+通过这些对象和方法，可以方便的对AST树进行查询和修改等。假设遍历的时候不给path，只给了当前访问的AST结点本身，那么查询父节点或者向上回溯就变的困难了。
+
+#### scope作用域对象
+
+#### state对象
+
+#### babel对象
 
 ## 如何开发Babel预设
 
@@ -905,3 +924,5 @@ todo 参考 多文件与触发时间
   https://jzplp.github.io/2025/js-ast.html
 - Babel 插件手册\
   https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/plugin-handbook.md
+- 带你玩转babel工具链（二）@babel/traverse\
+  https://juejin.cn/post/7113800415057018894
