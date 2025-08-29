@@ -816,15 +816,16 @@ Object.is(a, a);
 }
 ```
 
-然后在插件代码中打印配置。可以看到通过state.opts可以获取。
+然后在插件代码中打印配置。可以看到通过几种方式都可以获取。
 
 ```js
-module.exports = function plugin1(babel) {
+module.exports = function plugin1(babel, options) {
+  console.log('1', options)
   return {
     visitor: {
       BinaryExpression(path, state) {
         if (path.node.operator === "+") {
-          console.log(state.opts);
+          console.log('2', state.opts);
           path.node.operator = "-";
         }
       },
@@ -833,7 +834,9 @@ module.exports = function plugin1(babel) {
 };
 
 /* 命令行输出
-{ option1: 'jzplp', option2: 'hello,jz' }
+1 { option1: 'jzplp', option2: 'hello,jz' }
+2 { option1: 'jzplp', option2: 'hello,jz' }
+Successfully compiled 1 file with Babel (1382ms).
 */
 ```
 
@@ -894,6 +897,89 @@ Successfully compiled 2 files with Babel (160ms).
 通过这些对象和方法，可以方便的对AST树进行查询和修改等。假设遍历的时候不给path，只给了当前访问的AST结点本身，那么查询父节点或者向上回溯就变的困难了。
 
 #### scope作用域对象
+作用域是变量在编程语言中的有效范围或者可用范围，例如在JavaScript中有全局作用域，块级作用域，函数作用域等等，在作用域外不能访问作用域内部的变量。在遍历AST时，我们可以通过scope对象拿到当前代码的作用域相关信息，获取作用域方式可以是path.scope。首先介绍一下scope对象中的内容：
+
+* scope.bindings 当前作用域内的变量
+* scope.block 创建当前作用域的AST结点（例如函数）
+* scope.path 创建当前作用域的AST结点的path
+* scope.getAllBindings() 从当前作用域到根作用域的所有变量
+* scope.dump() 命令行打印作用域链
+* 其它查找变量/移动/删除变量的方法等
+
+这里我们做一个代码示例，其中有三层作用域（根作用域，函数fun1，函数fun2）:
+
+```js
+const a1 = 1 + 1;
+function fun1() {
+  const a2 = 2 + 2;
+  function fun2() {
+    const a3 = 3 + 3;
+  }
+}
+```
+
+然后是插件代码，插件中输出了一些scope对象的内容。
+
+```js
+module.exports = function plugin1() {
+  return {
+    visitor: {
+      BinaryExpression(path) {
+        if (path.node.operator === "+") {
+          const scope = path.scope;
+          // 创建当前作用域的AST结点的类型和函数名（如果有）
+          console.log(scope.block.type, scope.block?.id?.name);
+          // 使用Object.keys仅输出变量名
+          console.log(Object.keys(scope.bindings));
+          console.log(Object.keys(scope.getAllBindings()));
+          scope.dump();
+          // 输出空行
+          console.log();
+        }
+      },
+    },
+  };
+};
+```
+
+然后我们查看输出结果：输出了每一个作用域的创建者，作用域的独有和所有变量等。
+
+```sh
+Program undefined
+[ 'a1', 'fun1' ]
+[ 'a1', 'fun1' ]
+------------------------------------------------------------
+# Program
+ - a1 { constant: true, references: 0, violations: 0, kind: 'const' }
+ - fun1 { constant: true, references: 0, violations: 0, kind: 'hoisted' }
+------------------------------------------------------------
+
+FunctionDeclaration fun1
+[ 'a2', 'fun2' ]
+[ 'a2', 'fun2', 'a1', 'fun1' ]
+------------------------------------------------------------
+# FunctionDeclaration
+ - a2 { constant: true, references: 0, violations: 0, kind: 'const' }
+ - fun2 { constant: true, references: 0, violations: 0, kind: 'hoisted' }
+# Program
+ - a1 { constant: true, references: 0, violations: 0, kind: 'const' }
+ - fun1 { constant: true, references: 0, violations: 0, kind: 'hoisted' }
+------------------------------------------------------------
+
+FunctionDeclaration fun2
+[ 'a3' ]
+[ 'a3', 'a2', 'fun2', 'a1', 'fun1' ]
+------------------------------------------------------------
+# FunctionDeclaration
+ - a3 { constant: true, references: 0, violations: 0, kind: 'const' }
+# FunctionDeclaration
+ - a2 { constant: true, references: 0, violations: 0, kind: 'const' }
+ - fun2 { constant: true, references: 0, violations: 0, kind: 'hoisted' }
+# Program
+ - a1 { constant: true, references: 0, violations: 0, kind: 'const' }
+ - fun1 { constant: true, references: 0, violations: 0, kind: 'hoisted' }
+------------------------------------------------------------
+```
 
 #### state对象
 
