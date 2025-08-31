@@ -881,10 +881,10 @@ Successfully compiled 2 files with Babel (160ms).
 
 对应我们上面代码的输出，可以看到插件仅初始化了一次，但是处理前/处理后的函数却是每个文件分别执行的。
 
-### 其它参数说明
-前面我们的自定义插件中包含很多参数，例如初始化的babel对象，遍历AST的path对象，包含插件参数的state对象。这里我们一一解释这些对象是什么。
+## 插件参数说明
+在自定义插件中包含很多入参，例如初始化的babel对象，遍历AST的path对象，包含插件参数的state对象。这里我们一一解释这些对象是什么。
 
-#### path连接对象
+### path连接对象
 使用@babel/traverse或者Babel插件对AST遍历时，我们拿到的并不是直接是一个AST结点，而是一个path对象。path是表示两个节点之间连接的对象，其中不仅有我们当前访问的AST结点，还有很多其它对象和方法，这里列举一下一部分：
 
 * path.node 当前访问的AST结点
@@ -896,7 +896,7 @@ Successfully compiled 2 files with Babel (160ms).
 
 通过这些对象和方法，可以方便的对AST树进行查询和修改等。假设遍历的时候不给path，只给了当前访问的AST结点本身，那么查询父节点或者向上回溯就变的困难了。
 
-#### scope作用域对象
+### scope作用域对象
 作用域是变量在编程语言中的有效范围或者可用范围，例如在JavaScript中有全局作用域，块级作用域，函数作用域等等，在作用域外不能访问作用域内部的变量。在遍历AST时，我们可以通过scope对象拿到当前代码的作用域相关信息，获取作用域方式可以是path.scope。首先介绍一下scope对象中的内容：
 
 * scope.bindings 当前作用域内的变量
@@ -981,9 +981,51 @@ FunctionDeclaration fun2
 ------------------------------------------------------------
 ```
 
-#### state对象
+### babel对象
+babel对象是插件函数初始化时接受的第一个入参（第二个入参是插件配置参数）。babel对象像一个工具集合，里面提供了很多前面介绍的工具，这里列举一部分：
 
-#### babel对象
+* babel.version 当前Babel版本
+* babel.DEFAULT_EXTENSIONS 支持的默认扩展名列表(@babel/core属性)
+* babel.types 实际为@babel/types包的内容
+* babel.traverse 实际为@babel/traverse包的内容
+* babel.template 实际为@babel/template包的内容
+* @babel/core提供的很多方法，例如parse, transformAsync, transformFile
+
+这里我们试着比较一下部分对象和工具，可以看到直接引入包或者包的方法，和我们在babel对象中拿到的实际就是一个对象或方法。
+
+```js
+const babelCore = require("@babel/core");
+const babelTypes = require("@babel/types");
+const babelTraverse = require("@babel/traverse").default;
+const babelTemplate = require("@babel/template").default;
+
+module.exports = function plugin1(babel) {
+  console.log(babel.version, babel.DEFAULT_EXTENSIONS);
+
+  console.log("@babel/types", babel.types === babelTypes);
+  console.log("@babel/traverse", babel.traverse === babelTraverse);
+  console.log("@babel/template", babel.template === babelTemplate);
+
+  console.log(
+    "@babel/core",
+    babel.parse === babelCore.parse,
+    babel.transformAsync === babelCore.transformAsync,
+    babel.transformFile === babelCore.transformFile
+  );
+  return {};
+};
+
+/* 输出结果
+7.28.0 [ '.js', '.jsx', '.es6', '.es', '.mjs', '.cjs' ]
+@babel/types true
+@babel/traverse true
+@babel/template true
+@babel/core true true true
+*/
+```
+
+### state对象
+
 
 ## 如何开发Babel预设
 
