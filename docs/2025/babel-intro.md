@@ -1025,7 +1025,71 @@ module.exports = function plugin1(babel) {
 ```
 
 ### state对象
+state对象是visitor中访问函数的第二个入参。我们看下它包含的部分对象：
 
+* state.opts 插件参数配置
+* state.cwd 当前工作目录
+* state.filename 当前转义的文件路径
+* state.file file对象
+* state.file.ast 当前文件的AST
+* state.file.path 当前Program的path对象
+* state.file.scope 当前根作用域scope对象
+
+可以看到，state对象中多半包含配置和文件相关内容，和当前遍历的位置好像没什么关系。这里我们举例输出试一下：
+
+```js
+// 转义代码
+const a1 = 1;
+function fun1() {
+  const a2 = 2 + 2;
+}
+
+// 插件代码
+module.exports = function plugin1(babel, options) {
+  return {
+    visitor: {
+      BinaryExpression(path, state) {
+        console.log('state.opts', state.opts === options);
+        console.log(state.cwd, state.filename);
+        const file = state.file;
+        console.log(file.ast.type, file.path.node.type, file.path.parent.type);
+        file.scope.dump();
+      },
+    },
+  };
+};
+
+/* 输出结果
+state.opts true
+E:\testProj\babel E:\testProj\babel\src\index.js
+File Program File
+------------------------------------------------------------
+# Program
+ - a1 { constant: true, references: 0, violations: 0, kind: 'const' }
+ - fun1 { constant: true, references: 0, violations: 0, kind: 'hoisted' }
+*/
+```
+
+通过上面例子可以看到，遍历时命中BinaryExpression函数是在函数作用域内部，但state.file.scope输出的依然是根作用域。file.ast的类型是File，file.path的当前结点是Program，Program的父节点才是File。因此，file.ast和file.path指向的并不是一个结点。这是不是因为File对象没有父节点，所以没办法拥有自己的path对象？我尝试了一下，File对象的函数并不会被命中：
+
+```js
+module.exports = function plugin1(babel, options) {
+  return {
+    visitor: {
+      File(path, state) {
+        console.log(1)
+      },
+      Program(path, state) {
+        console.log(2)
+      }
+    },
+  };
+};
+
+/* 输出结果
+2
+*/
+```
 
 ## 如何开发Babel预设
 
