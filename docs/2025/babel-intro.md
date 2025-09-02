@@ -1092,6 +1092,48 @@ module.exports = function plugin1(babel, options) {
 ```
 
 ## 如何开发Babel预设
+### 简单预设
+Babel预设实际上是Babel配置的集合，里面可以包含Babel配置，插件甚至是其它预设。这里我们先做一个简单的预设，内容为之前使用转义TSX的配置（有一点变化）：
+
+```js
+module.exports = function preset1() {
+  return {
+    sourceMaps: true,
+    presets: [
+      [
+        "@babel/preset-typescript",
+        {
+          isTSX: true,
+          allExtensions: true,
+        },
+      ],
+      "@babel/preset-react",
+      [
+        "@babel/preset-env",
+        {
+          targets: {
+            ie: "11",
+          },
+          useBuiltIns: "usage",
+          corejs: 3,
+        },
+      ],
+    ],
+  };
+};
+```
+
+可以看到，上面的插件就是一个函数，将Babel配置作为函数返回值即可。然后我们在真正的babel配置文件中引入预设，然后执行，可以看到TSX被成功转义，且SourceMap也被生成了。
+
+```js
+{
+  "presets": ["./config/preset1"]
+}
+```
+
+
+### 预设参数
+
 
 ## 多插件和多预设顺序
 
