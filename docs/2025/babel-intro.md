@@ -1123,7 +1123,7 @@ module.exports = function preset1() {
 };
 ```
 
-可以看到，上面的插件就是一个函数，将Babel配置作为函数返回值即可。然后我们在真正的babel配置文件中引入预设，然后执行，可以看到TSX被成功转义，且SourceMap也被生成了。
+可以看到，上面的插件就是一个函数，将Babel配置作为函数返回值即可。我们在真正的babel配置文件中引入预设，然后执行，可以看到TSX被成功转义，且SourceMap也被生成了。
 
 ```js
 {
@@ -1131,21 +1131,178 @@ module.exports = function preset1() {
 }
 ```
 
-
 ### 预设参数
+预设也可以像插件一样接收参数，我们在使用官方预设的时候已经用过了。这里再举例说明一下：
 
+```js
+{
+  "presets": [
+    [
+      "./config/preset1",
+      {
+        "option1": "jzplp",
+        "option2": "hello,jz"
+      }
+    ]
+  ]
+}
+```
+
+然后在预设代码中输出收到的配置项，结果也列在下面：
+
+```js
+module.exports = function preset1(babel, options) {
+  console.log(babel.version, options);
+  return {};
+};
+
+/* 输出结果
+7.28.0 { option1: 'jzplp', option2: 'hello,jz' }
+*/
+```
+
+通过预设代码可以看到，预设函数的第一个入参是babel对象（前面介绍过），第二个参数就是预设参数配置。事实上预设函数和插件函数的入参是一样的。
 
 ## 多插件和多预设顺序
+在Babel文档中描述了插件和预设的执行顺序：插件在前，预设再后；插件是从前往后执行，预设是从后往前执行。这里我们通过一个实验，体验分析一下顺序的逻辑。
 
-### 多插件顺序
+### 实验代码与结果
+首先做一个插件，接收一个index参数，并在各个环节输出，方便后面查看顺序：
 
-todo 参考 多文件与触发时间
+```js
+module.exports = function plugin(babel, option) {
+  const index = option.index;
+  console.log("plugin init", index);
+  return {
+    pre() {
+      console.log("plugin pre", index);
+    },
+    visitor: {
+      BinaryExpression(path) {
+        if (path.node.operator === "+") {
+          console.log("plugin visitor", index);
+        }
+      },
+    },
+    post() {
+      console.log("plugin post", index);
+    },
+  };
+};
+```
 
-### 多预设顺序
+然后再做两个预设，分别包含两个插件和一个相反的sourceMaps配置。由于babel不允许同名插件，因此这里给每个重复插件一个独立的名称（数组第三个参数）。
 
-### 综合顺序
+```js
+module.exports = function preset1() {
+  console.log('preset1');
+  return {
+    sourceMaps: true,
+    plugins: [
+      ["./config/plugin1.js", { index: 1 }, "1"],
+      ["./config/plugin1.js", { index: 2 }, "2"],
+    ],
+  };
+};
+
+module.exports = function preset2() {
+  console.log('preset2');
+  return {
+    sourceMaps: false,
+    plugins: [
+      ["./config/plugin1.js", { index: 3 }, "3"],
+      ["./config/plugin1.js", { index: 4 }, "4"],
+    ],
+  };
+};
+```
+
+然后是Babel本身的配置babel.config.json中，引入这两个预设，同时再引入两个插件。
+
+```js
+{
+  "plugins": [
+    ["./config/plugin1.js", { "index": 5 }, "5"],
+    ["./config/plugin1.js", { "index": 6 }, "6"]
+  ],
+  "presets": ["./config/preset1", "./config/preset2"]
+}
+```
+
+然后再要转义的目录中放置两个文件，每个文件内容如下（触发一次plugin visitor输出）：
+
+```js
+const a1 = 1;
+function fun1() {
+  const a2 = 2 + 2;
+}
+```
+
+最后命令行执行Babel，输出结果如下。
+
+```
+preset1
+preset2
+plugin init 5
+plugin init 6
+plugin init 3
+plugin init 4
+plugin init 1
+plugin init 2
+plugin pre 5
+plugin pre 6
+plugin pre 3
+plugin pre 4
+plugin pre 1
+plugin pre 2
+plugin visitor 5
+plugin visitor 6
+plugin visitor 3
+plugin visitor 4
+plugin visitor 1
+plugin visitor 2
+plugin post 5
+plugin post 6
+plugin post 3
+plugin post 4
+plugin post 1
+plugin post 2
+plugin pre 5
+plugin pre 6
+plugin pre 3
+plugin pre 4
+plugin pre 1
+plugin pre 2
+plugin visitor 5
+plugin visitor 6
+plugin visitor 3
+plugin visitor 4
+plugin visitor 1
+plugin visitor 2
+plugin post 5
+plugin post 6
+plugin post 3
+plugin post 4
+plugin post 1
+plugin post 2
+```
+
+同时按照上面的顺序，也输出了sourceMap。如果我们预设顺序颠倒，`"presets": ["./config/preset2","./config/preset1"]`，此时不会输出了sourceMap。
+
+### 结果分析
+
+* 多插件顺序：1和2，3和4，5和6分别是有前后顺序的插件。可以看到不管在插件初始化，访问文件和遍历AST中，都是位置在前的先执行，位置在后的后执行。
+* 多预设初始化顺序：preset1在前，preset2在后，这与预设的配置顺序一致。
+* 多预设中配置顺序：通过对比sourceMap生成发现，位置在前的预设覆盖了位置在后预设的配置。因此多预设中配置执行顺序为从后往前，后面覆盖前面的配置。
+* 预设与插件初始化顺序：通过初始化时的输出顺序，可以看到预设初始化在前，插件初始化在后。
+* 预设中插件与预设外插件执行顺序：1，2，3和4都是预设内插件，5和6是预设外的插件。通过输出发现无论是遍历前，遍历中还是遍历后，5和6的执行顺序都在前。
+* 多预设中插件执行顺序：预设1包含插件1和2，预设2包含插件3和4。通过输出可以看到3和4的执行顺序始终在1和2前面，这与预设的配置顺序相反。
+
+通过这些结果分析，我们再回来看Babel文档中的顺序描述：“插件在前，预设再后；插件是从前往后执行，预设是从后往前执行”。按照插件和预设的遍历顺序与配置顺序，是符合这个描述的。但在初始化上却不一样：预设初始化是从前往后执行，预设初始化在插件初始化之前。
 
 ## 总结
+
+
 
 ## 参考
 - Babel 文档\
