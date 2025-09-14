@@ -11,6 +11,10 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
+        text: "sourcemap",
+        link: "/2025/js-sourcemap",
+      },
+      {
         text: "解锁Babel核心功能：从转义语法到插件开发",
         link: "/2025/babel-intro",
       },
