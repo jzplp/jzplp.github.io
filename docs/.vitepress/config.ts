@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
-        text: "sourcemap",
+        text: "SourceMap",
         link: "/2025/js-sourcemap",
       },
       {
