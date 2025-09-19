@@ -141,13 +141,40 @@ fun();
 //# sourceMappingURL/*防止报错*/=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJnbG9iYWxqeiIsImZ1biIsImp6cGxwMSIsImp6cGxwMiIsImp6cGxwMyIsImp6MSIsImp6MiIsImUiLCJjb25zb2xlIiwibG9nIl0sInNvdXJjZXMiOlsic3JjL2luZGV4LmpzIl0sInNvdXJjZXNDb250ZW50IjpbImNvbnN0IGdsb2JhbGp6ID0gMTIzO1xyXG5mdW5jdGlvbiBmdW4oKSB7XHJcbiAgY29uc3QganpwbHAxID0gXCJhXCIgKyBcImJcIjtcclxuICBjb25zdCBqenBscDIgPSAxMjM0NTtcclxuICBjb25zdCBqenBscDMgPSB7IGp6MTogMSwganoyOiAxMjIxIH07XHJcbiAgdHJ5IHtcclxuICAgIGp6cGxwMSgpO1xyXG4gIH0gY2F0Y2ggKGUpIHtcclxuICAgIGNvbnNvbGUubG9nKGUpO1xyXG4gICAgdGhyb3cgZTtcclxuICB9XHJcbiAgY29uc29sZS5sb2coanpwbHAxLCBqenBscDIsIGp6cGxwMyk7XHJcbn1cclxuZnVuKCk7XHJcbiJdLCJtYXBwaW5ncyI6Ijs7QUFBQSxJQUFNQSxRQUFRLEdBQUcsR0FBRztBQUNwQixTQUFTQyxHQUFHQSxDQUFBLEVBQUc7RUFDYixJQUFNQyxNQUFNLEdBQUcsR0FBRyxHQUFHLEdBQUc7RUFDeEIsSUFBTUMsTUFBTSxHQUFHLEtBQUs7RUFDcEIsSUFBTUMsTUFBTSxHQUFHO0lBQUVDLEdBQUcsRUFBRSxDQUFDO0lBQUVDLEdBQUcsRUFBRTtFQUFLLENBQUM7RUFDcEMsSUFBSTtJQUNGSixNQUFNLENBQUMsQ0FBQztFQUNWLENBQUMsQ0FBQyxPQUFPSyxDQUFDLEVBQUU7SUFDVkMsT0FBTyxDQUFDQyxHQUFHLENBQUNGLENBQUMsQ0FBQztJQUNkLE1BQU1BLENBQUM7RUFDVDtFQUNBQyxPQUFPLENBQUNDLEdBQUcsQ0FBQ1AsTUFBTSxFQUFFQyxNQUFNLEVBQUVDLE1BQU0sQ0FBQztBQUNyQztBQUNBSCxHQUFHLENBQUMsQ0FBQyIsImlnbm9yZUxpc3QiOltdfQ==
 ```
 
-文件最后有一行注释，里面是Base64格式的数据，将数据放到浏览器地址栏，解析出数据如下，内容和前面独立文件的sourceMap一致。
-
-```json
-{"version":3,"names":["globaljz","fun","jzplp1","jzplp2","jzplp3","jz1","jz2","e","console","log"],"sources":["src/index.js"],"sourcesContent":["const globaljz = 123;\r\nfunction fun() {\r\n  const jzplp1 = \"a\" + \"b\";\r\n  const jzplp2 = 12345;\r\n  const jzplp3 = { jz1: 1, jz2: 1221 };\r\n  try {\r\n    jzplp1();\r\n  } catch (e) {\r\n    console.log(e);\r\n    throw e;\r\n  }\r\n  console.log(jzplp1, jzplp2, jzplp3);\r\n}\r\nfun();\r\n"],"mappings":";;AAAA,IAAMA,QAAQ,GAAG,GAAG;AACpB,SAASC,GAAGA,CAAA,EAAG;EACb,IAAMC,MAAM,GAAG,GAAG,GAAG,GAAG;EACxB,IAAMC,MAAM,GAAG,KAAK;EACpB,IAAMC,MAAM,GAAG;IAAEC,GAAG,EAAE,CAAC;IAAEC,GAAG,EAAE;EAAK,CAAC;EACpC,IAAI;IACFJ,MAAM,CAAC,CAAC;EACV,CAAC,CAAC,OAAOK,CAAC,EAAE;IACVC,OAAO,CAACC,GAAG,CAACF,CAAC,CAAC;IACd,MAAMA,CAAC;EACT;EACAC,OAAO,CAACC,GAAG,CAACP,MAAM,EAAEC,MAAM,EAAEC,MAAM,CAAC;AACrC;AACAH,GAAG,CAAC,CAAC","ignoreList":[]}
-```
+文件最后有一行注释，里面是Base64格式的数据，将数据放到浏览器地址栏，解析出数据内容和前面独立文件的sourceMap一致。
 
 ### Terser生成SourceMap
+Terser是一个代码压缩混淆工具，我们在命令行中执行`terser src/index.js --compress --mangle -o dist.js --source-map url=dist.js.map`命令。其中compress表示代码开启压缩，去掉代码中未被使用和无意义的内容。mangle表示开启混淆，将代码转换为难以阅读的形式。我们看一下生成结果。首先是生成的代码dist.js：
+
+```js
+const globaljz=123;function fun(){const o="ab";try{o()}catch(o){throw console.log(o),o}console.log(o,12345,{jz1:1,jz2:1221})}fun();
+//# sourceMappingURL/*防止报错*/=dist.js.map
+```
+
+可以看到局部变量名都被重新命名了，有些简单的字面量计算如"a" + "b"也直接以结果的形式展现。使用代码压缩混淆后，代码的样子和之前相比区别不小。我们再看看生成的sourceMap文件：
+
+```js
+{
+  "version": 3,
+  "names": [
+    "globaljz",
+    "fun",
+    "jzplp1",
+    "e",
+    "console",
+    "log",
+    "jz1",
+    "jz2"
+  ],
+  "sources": [
+    "src/index.js"
+  ],
+  "mappings": "AAAA,MAAMA,SAAW,IACjB,SAASC,MACP,MAAMC,EAAS,KAGf,IACEA,GACF,CAAE,MAAOC,GAEP,MADAC,QAAQC,IAAIF,GACNA,CACR,CACAC,QAAQC,IAAIH,EARG,MACA,CAAEI,IAAK,EAAGC,IAAK,MAQhC,CACAN",
+  "ignoreList": []
+}
+```
+
+sourceMap文件形式与Babel的基本一致，都是通用的。
 
 ## 浏览器使用SourceMap
 
@@ -203,3 +230,5 @@ fun();
   https://babeljs.io/
 - 解锁Babel核心功能：从转义语法到插件开发\
   https://jzplp.github.io/2025/babel-intro.html
+- Terser 中文文档\
+  https://terser.nodejs.cn/
