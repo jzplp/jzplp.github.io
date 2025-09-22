@@ -209,7 +209,20 @@ sourceMap文件形式与Babel的基本一致，都是通用的。
 
 ![图片](/2025/sourcemap-5.png)
 
-### 请求相关
+### 后添加SourceMap
+假设我们页面访问时没有提供SourceMap，浏览器也支持我们后添加SourceMap进去。这里我们把生成代码中的最后一行注释去掉，模拟没有提供SourceMap的场景。去掉的是这一行：`//# sourceMappingURL/*防止报错*/=dist.js.map`。然后在浏览器运行，如下面作图，此时的报错信息没有经过SourceMap处理。
+
+![图片](/2025/sourcemap-6.png)
+
+我们点击报错文件位置信息到右侧查看dist.js，在空白处点鼠标右键，选择Add source map，可以将SourceMap添加到这个文件上。我们添加之后的的效果如下：
+
+![图片](/2025/sourcemap-7.png)
+
+可以看到文件下方出现SourceMap加载成功的通知，左侧文件目录出现了我们的源码文件。此时回到Console，发现以前产生的报错栈文件位置信息，也已经被修改为SourceMap处理之后的位置了。
+
+这种场景适用于工程构建时生成SourceMap，但并不直接附加到页面上。这种情况下用户无法访问到源代码。当遇到有错误需要排查的场景，再将SourceMap文件附加到浏览器中进行调试，这样兼顾了安全性和可调试性。
+
+### SourceMap请求时间
 
 什么时机请求SourceMap的（验证打开浏览器调试工具）
 
