@@ -229,9 +229,41 @@ sourceMap文件形式与Babel的基本一致，都是通用的。
 
 从上图中可以看到，Network中并不展示SourceMap相关请求，而是在下方的Developer resources中出现。而且除了dist.js.map，还有src/index.js，也就是我们的源码文件。这是因为SourceMap中只有对应关系，没有真正的源码，如果希望像前面一样在浏览器中表示具体出错代码，那还是要请求源码文件。
 
-那么这里还有一个疑问，SourceMap会造成额外的资源请求，而且这个文件还挺大（比生成的代码本身更大），那么它是什么时间请求的？会不会造成过多请求浪费服务器资源？从上面的浏览器调试工具中看不出来，我们自己搞个简易的服务器试一下。
+那么这里还有一个疑问，SourceMap会造成额外的资源请求，而且这个文件还挺大（比生成的代码本身更大），那么它是什么时间请求的？会不会造成过多请求浪费服务器资源？从上面的浏览器调试工具中看不出来，我们自己搞个简易的服务试一下。
 
+```js
+const http = require("http");
+const fs = require("fs");
 
+http
+  .createServer((req, res) => {
+    try {
+      const data = fs.readFileSync("." + req.url);
+      console.log(new Date(Date.now()).toLocaleString(), `Url: ${req.url}`);
+      res.end(data);
+    } catch (e) {
+      res.writeHead(404, { "Content-Type": "text/plain" });
+      res.end("Not found");
+    }
+  })
+  .listen(8000, () => {
+    console.log("server start!");
+  });
+```
+
+上面的代码启动了一个简单的Node.js服务，当收到请求时，读取本地文件并返回。请求到来时还会输出当前时间，这使我们可以看到浏览器请求SourceMap的时机。我们的操作流程如下：
+
+1. 访问`http://localhost:8000/index.html`。（此时浏览器调试工具未打开）
+2. 10秒后，打开浏览器调试工具。
+3. 再10秒后，点击错误文件位置信息，查看浏览器中展示的出错源码文件。
+
+![图片](/2025/sourcemap-9.png)
+
+由于人手操作，因此时间并不是那么精确，但已经能得到规律了。即正常访问页面时不请求，只有调试时才请求SourceMap文件。这样不会因此SourceMap造成服务器请求过多，也不会阻碍调试。
+
+* 正常访问页面的时候，只请求页面相关的内容，不请求SourceMap文件。
+* 浏览器调试工具的时候，浏览器会发送SourceMap文件请求。
+* 当在浏览器中查看对应错误源码时，浏览器会发送源码文件请求。
 
 ## SourceMap文件内容
 
