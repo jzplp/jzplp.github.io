@@ -222,7 +222,7 @@ sourceMap文件形式与Babel的基本一致，都是通用的。
 
 这种场景适用于工程构建时生成SourceMap，但并不直接附加到页面上。这种情况下用户无法访问到源代码。当遇到有错误需要排查的场景，再将SourceMap文件附加到浏览器中进行调试，这样兼顾了安全性和可调试性。
 
-### SourceMap文件请求
+### SourceMap浏览器请求
 在实际开发中，由于前端工程化工具的广泛应用，SourceMap是非常常用的调试工具。有些同学也会好奇，既然SourceMap是独立的文件，为啥我们在浏览器调试工具中的Network中从来没看到过。这是因为SourceMap相关的请求并不在这里展示，而是在Developer resources这个模块中展示（需要在More tools中将它选中展示）。
 
 ![图片](/2025/sourcemap-8.png)
@@ -275,11 +275,12 @@ http
 | sources | `Array<string>` | ["index1.js", "index2.js"] | 转换前代码的文件名，多个文件可以包含在一个转换后文件内，因此是一个数组 |
 | names | `Array<string>` | ["a", "jzplp1"] | 转换前代码中的变量和属性名 |
 | mappings | string | ";;AAAA,IAAMA" | 转换前后代码中的变量和属性名 |
-| sourcesContent  | `Array<string>` |  |  |
-| sourceRoot  | string |  |  |
-| ignoreList  | string |  |  |
+| sourcesContent  | `Array<string>` | ["const a = 1"] | 转换前代码的文件内容 |
+| sourceRoot  | string | "src" | 转换前代码的文件所在的目录，如果和转换后代码一致则省略 |
 
-其中版本号我们在前面介绍SourceMap历史的时候介绍过，现在使用的都是第三版。
+其中版本号我们在前面介绍SourceMap历史的时候介绍过，现在使用的都是第三版。mappings中保存着最核心的转换关系。
+
+转换前代码的文件名sources是个数组，这是因为可以将多个文件打包到一个转换后文件中，因此来源可能有多个(多对一)。那有人会问：有没有一个转换前文件被多个转换后文件打包的情况(一对多)？有的。这种情况每个转换后文件中都有同一个转换前文件。sourcesContent中是对应转换前文件的源码，可以省略。关于这些字段具体起到的作用，在以后描述SourceMap原理的时候再详细说。
 
 ## SourceMap生成工具使用
 
