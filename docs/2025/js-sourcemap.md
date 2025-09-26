@@ -268,15 +268,15 @@ http
 ## SourceMap文件内容
 前面我们介绍了如何使用哪些转换代码的工具来生成SourcaMap，还列出了用Babel与Terser生成的SourceMap，是一个JSON文件。这里介绍一下文件内容：
 
-| 字段名 | 类型 | 示例值 | 含义描述 |
-| - | - | - | - |
-| version | number | 3 | SourcaMap版本号 |
-| file | string | "dist.js" | 转换后代码的文件名 |
-| sources | `Array<string>` | ["index1.js", "index2.js"] | 转换前代码的文件名，多个文件可以包含在一个转换后文件内，因此是一个数组 |
-| names | `Array<string>` | ["a", "jzplp1"] | 转换前代码中的变量和属性名 |
-| mappings | string | ";;AAAA,IAAMA" | 转换前后代码中的变量和属性名 |
-| sourcesContent  | `Array<string>` | ["const a = 1"] | 转换前代码的文件内容 |
-| sourceRoot  | string | "src" | 转换前代码的文件所在的目录，如果和转换后代码一致则省略 |
+| 字段名 | 类型 | 必填 | 示例值 | 含义描述 |
+| - | - | - | - | - |
+| version | number | 是 | 3 | SourcaMap版本号 |
+| file | string | 是 | "dist.js" | 转换后代码的文件名 |
+| sources | `Array<string>` | 是 | ["index1.js", "index2.js"] | 转换前代码的文件名，多个文件可以包含在一个转换后文件内，因此是一个数组 |
+| names | `Array<string>` | 是 | ["a", "jzplp1"] | 转换前代码中的变量和属性名 |
+| mappings | string | 是 | ";;AAAA,IAAMA" | 转换前后代码中的变量和属性名 |
+| sourcesContent  | `Array<string>` | 否 | ["const a = 1"] | 转换前代码的文件内容 |
+| sourceRoot  | string | 否 | "src" | 转换前代码的文件所在的目录，如果和转换后代码一致则省略 |
 
 其中版本号我们在前面介绍SourceMap历史的时候介绍过，现在使用的都是第三版。mappings中保存着最核心的转换关系。
 
