@@ -265,13 +265,13 @@ http
 * 浏览器调试工具的时候，浏览器会发送SourceMap文件请求。
 * 当在浏览器中查看对应错误源码时，浏览器会发送源码文件请求。
 
-## SourceMap文件内容
+## SourceMap文件
 前面我们介绍了如何使用哪些转换代码的工具来生成SourcaMap，还列出了用Babel与Terser生成的SourceMap，是一个JSON文件。这里介绍一下文件内容：
 
 | 字段名 | 类型 | 必填 | 示例值 | 含义描述 |
 | - | - | - | - | - |
 | version | number | 是 | 3 | SourcaMap版本号 |
-| file | string | 是 | "dist.js" | 转换后代码的文件名 |
+| file | string | 否 | "dist.js" | 转换后代码的文件名 |
 | sources | `Array<string>` | 是 | ["index1.js", "index2.js"] | 转换前代码的文件名，多个文件可以包含在一个转换后文件内，因此是一个数组 |
 | names | `Array<string>` | 是 | ["a", "jzplp1"] | 转换前代码中的变量和属性名 |
 | mappings | string | 是 | ";;AAAA,IAAMA" | 转换前后代码中的变量和属性名 |
@@ -282,7 +282,16 @@ http
 
 转换前代码的文件名sources是个数组，这是因为可以将多个文件打包到一个转换后文件中，因此来源可能有多个(多对一)。那有人会问：有没有一个转换前文件被多个转换后文件打包的情况(一对多)？有的。这种情况每个转换后文件中都有同一个转换前文件。sourcesContent中是对应转换前文件的源码，可以省略。关于这些字段具体起到的作用，在以后描述SourceMap原理的时候再详细说。
 
-## SourceMap生成工具使用
+## SourceMap生成工具
+有一个source-map包，提供了生成和使用SourceMap数据的功能，很多工具都是引用这个包来生成SourceMap。
+
+### 使用SourceMap数据
+
+
+
+### 生成SourceMap数据
+
+
 
 ## Webpack中的SourceMap选项
 
