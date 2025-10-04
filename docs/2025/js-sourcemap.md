@@ -283,18 +283,93 @@ http
 转换前代码的文件名sources是个数组，这是因为可以将多个文件打包到一个转换后文件中，因此来源可能有多个(多对一)。那有人会问：有没有一个转换前文件被多个转换后文件打包的情况(一对多)？有的。这种情况每个转换后文件中都有同一个转换前文件。sourcesContent中是对应转换前文件的源码，可以省略。关于这些字段具体起到的作用，在以后描述SourceMap原理的时候再详细说。
 
 ## source-map包
-有一个source-map包，提供了生成和使用SourceMap数据的功能，支持在Node.js和浏览器中使用，很多前端工具都是引用这个包来生成SourceMap。这里我们简单介绍下它在Node.js中的使用方法。
+有一个source-map包，提供生成和使用SourceMap数据的功能，支持在Node.js和浏览器中使用，很多前端工具都是引用这个包来生成SourceMap。这里我们简单介绍下它在Node.js中的使用方法。
 
 ### 使用SourceMap数据
-首先看一下，当我们有了SourceMap数据之后，如何转换代码位置。首先介绍一下从生成代码位置到源代码位置，这也是最常见的用法：
+当我们有了SourceMap数据之后，可以source-map包转换代码位置。这里还是使用前面Terser生成的代码和SourceMap。首先创建SourceMapConsumer对象，用来解析已创建的SourceMap。
+
+```js
+const sourceMap = require('source-map');
+const fs = require('fs');
+
+const data = fs.readFileSync('./dist.js.map', 'utf-8');
+
+async function jzplpfun() {
+    const consumer = await new sourceMap.SourceMapConsumer(data);
+    // do some thing
+}
+jzplpfun();
+```
+
+然后再介绍一下最常见的用法，originalPositionFor函数，用生成代码的位置获取源代码的位置。
+
+```js
+const oplist = [];
+oplist[0] = consumer.originalPositionFor({ line: 1, column: 10 });
+oplist[1] = consumer.originalPositionFor({ line: 1, column: 11 });
+oplist[2] = consumer.originalPositionFor({ line: 1, column: 33 });
+oplist[3] = consumer.originalPositionFor({ line: 1, column: 34 });
+oplist[4] = consumer.originalPositionFor({ line: 1, column: 40 });
+console.log(oplist);
+
+/* 输出结果
+[
+  { source: 'src/index.js', line: 1, column: 6, name: 'globaljz' },
+  { source: 'src/index.js', line: 1, column: 6, name: 'globaljz' },
+  { source: 'src/index.js', line: 2, column: 9, name: 'fun' },
+  { source: 'src/index.js', line: 3, column: 2, name: null },
+  { source: 'src/index.js', line: 3, column: 8, name: 'jzplp1' }
+]
+*/
 
 ```
 
+例子尝试获取了五个原代码位置，生成前后实际内容对比如下：
+
+| 生成代码位置 | 生成代码内容 | 实际原代码位置 | 实际原代码内容 | 获取原代码位置 | 获取原代码内容 |
+| - | - | - | - | - | - |
+| 行1列10 | globaljz中的a | 行1列10 | globaljz中的a | 行1列6 | globaljz |
+| 行1列11 | globaljz中的l | 行1列11 | globaljz中的l | 行1列6 | globaljz |
+| 行1列33 | 函数的{ | 行2列15 | 函数的{ | 行2列9 | 函数名fun |
+| 行1列34 | const中的c | 行3列2 | const中的c | 行3列2 | - |
+| 行1列40 | 变量o | 行3列8 | jzplp1 | 行3列8 | jzplp1 |
+
+可以看到，实际位置并不是完全精准的，尤其是程序关键字和符号。但是对于标识符（变量名，属性名等）的位置还是能精准识别到原代码中的变量位置的，不过对于标识符内部的字符不能精确识别。这是因为SourceMap实际记录的就是标识符的对应位置关系，其他内容的位置关系并不会记录。
+
+再介绍一下反向定位的功能，即有了源代码的位置，尝试获取生成代码的位置，这次的方法是generatedPositionFor。
+
+```js
+const gplist = [];
+gplist[0] = consumer.generatedPositionFor({ source: "src/index.js", line: 1, column: 10 });
+gplist[1] = consumer.generatedPositionFor({ source: "src/index.js", line: 1, column: 11 });
+gplist[2] = consumer.generatedPositionFor({ source: "src/index.js", line: 2, column: 15 });
+gplist[3] = consumer.generatedPositionFor({ source: "src/index.js", line: 3, column: 2 });
+gplist[4] = consumer.generatedPositionFor({ source: "src/index.js", line: 3, column: 8 });
+console.log(gplist);
+
+/* 输出结果
+[
+  { line: 1, column: 6, lastColumn: 14 },
+  { line: 1, column: 6, lastColumn: 14 },
+  { line: 1, column: 28, lastColumn: 33 },
+  { line: 1, column: 34, lastColumn: 39 },
+  { line: 1, column: 40, lastColumn: 41 }
+]
+*/
 ```
 
-从源代码位置到生成代码位置
+与获取原代码位置不同，获取的生成代码位置是有一个行号范围的。这里使用的原代码位置就是上个例子的“实际原代码位置”。这里我们依然列个表格对比一下。
 
 
+| 实际原代码位置 | 实际原代码内容 | 生成代码位置 | 生成代码内容 | 获取生成代码位置 | 获取生成代码内容 |
+| - | - | - | - | - | - |
+| 行1列10 | globaljz中的a | 行1列10 | globaljz中的a | 行1列6-14 | globaljz |
+| 行1列11 | globaljz中的l | 行1列11 | globaljz中的l | 行1列6-14 | globaljz |
+| 行2列15 | 函数的{ | 行1列33 | 函数的{ | 行1列28-33 | fun(){ |
+| 行3列2 | const中的c | 行1列34 | const中的c | 行1列34-39 | const |
+| 行3列8 | jzplp1中的j | 行1列40 | 变量o | 行1列40-41 | 变量o |
+
+SourceMapConsumer对象还提供了其他使用SourceMap数据的方法，这里就不多描述了。
 
 ### 生成SourceMap数据
 
