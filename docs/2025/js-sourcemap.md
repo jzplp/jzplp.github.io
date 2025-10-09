@@ -369,9 +369,43 @@ console.log(gplist);
 | 行3列2 | const中的c | 行1列34 | const中的c | 行1列34-39 | const |
 | 行3列8 | jzplp1中的j | 行1列40 | 变量o | 行1列40-41 | 变量o |
 
+SourceMapConsumer对象还有遍历每个位置关系的方法eachMapping，可以按照生成代码或原代码顺序输出每个位置关系：
+
+```js
+consumer.eachMapping(m => console.log(m));
+
+/* 部分输出结果
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 0,
+  lastGeneratedColumn: null,
+  source: 'src/index.js',
+  originalLine: 1,
+  originalColumn: 0,
+  name: null
+}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 6,
+  lastGeneratedColumn: null,
+  source: 'src/index.js',
+  originalLine: 1,
+  originalColumn: 6,
+  name: 'globaljz'
+}
+...
+*/
+```
+
 SourceMapConsumer对象还提供了其他使用SourceMap数据的方法，这里就不多描述了。
 
-### 生成SourceMap数据
+### 生成SourceMap（低级API）
+source-map包生成SourceMap数据有两种方式，分别是低级API与高级API。低级API使用SourceMapGenerator，是通过直接提供位置关系本身来生成SourceMap。
+
+
+
+
+### 生成SourceMap（高级API）
 
 
 ## Webpack中的SourceMap选项
