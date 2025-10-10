@@ -399,13 +399,124 @@ Mapping {
 
 SourceMapConsumer对象还提供了其他使用SourceMap数据的方法，这里就不多描述了。
 
-### 生成SourceMap（低级API）
-source-map包生成SourceMap数据有两种方式，分别是低级API与高级API。低级API使用SourceMapGenerator，是通过直接提供位置关系本身来生成SourceMap。
+### 低级API生成SourceMap
+source-map包生成SourceMap数据有两种方式，分别是低级API与高级API。低级API使用SourceMapGenerator，是通过直接提供位置关系本身来生成SourceMap。这里我们举例试一下：
+
+```js
+const sourceMap = require("source-map");
+
+const generator1 = new sourceMap.SourceMapGenerator({
+  file: "dist1.js",
+});
+
+generator1.addMapping({
+  source: "src1.js",
+  original: { line: 11, column: 11 },
+  generated: { line: 1, column: 1 },
+});
+generator1.addMapping({
+  source: "src1.js",
+  original: { line: 22, column: 22 },
+  generated: { line: 2, column: 2 },
+});
+
+const data1 = generator1.toString();
+console.log(data1);
+
+async function jzplpfun() {
+    const consumer = await new sourceMap.SourceMapConsumer(data1);
+    consumer.eachMapping(m => console.log(m));
+}
+jzplpfun();
+
+/* 输出结果
+{"version":3,"sources":["src1.js"],"names":[],"mappings":"CAUW;EAWW","file":"dist1.js"}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 1,
+  lastGeneratedColumn: null,
+  source: 'src1.js',
+  originalLine: 11,
+  originalColumn: 11,
+  name: null
+}
+Mapping {
+  generatedLine: 2,
+  generatedColumn: 2,
+  lastGeneratedColumn: null,
+  source: 'src1.js',
+  originalLine: 22,
+  originalColumn: 22,
+  name: null
+}
+*/
+```
+
+可以看到，我们创建了一个SourceMapGenerator对象，然后使用addMapping往里面一个一个添加位置关系，最后输出SourceMap结果。SourceMapGenerator对象还可以从已存在的SourceMapConsumer对象来创建SourceMap，这里我们试一下：
+
+```js
+const sourceMap = require("source-map");
+
+async function jzplpfun() {
+  // 第一个SourceMap
+  const generator1 = new sourceMap.SourceMapGenerator({
+    file: "dist1.js",
+  });
+  generator1.addMapping({
+    source: "src1.js",
+    original: { line: 11, column: 11 },
+    generated: { line: 1, column: 1 },
+  });
+  const data1 = generator1.toString();
+  const consumer1 = await new sourceMap.SourceMapConsumer(data1);
+
+  // 第二个SourceMap
+  const generator2 = sourceMap.SourceMapGenerator.fromSourceMap(consumer1);
+  generator2.addMapping({
+    source: "src2.js",
+    original: { line: 22, column: 22 },
+    generated: { line: 2, column: 2 },
+  });
+
+  // 输出结果
+  const data2 = generator2.toString();
+  console.log(data2);
+  const consumer2 = await new sourceMap.SourceMapConsumer(data2);
+  consumer2.eachMapping((m) => console.log(m));
+}
+
+jzplpfun();
+
+/* 输出结果
+{"version":3,"sources":["src1.js","src2.js"],"names":[],"mappings":"CAUW;ECWW","file":"dist1.js"}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 1,
+  lastGeneratedColumn: null,
+  source: 'src1.js',
+  originalLine: 11,
+  originalColumn: 11,
+  name: null
+}
+Mapping {
+  generatedLine: 2,
+  generatedColumn: 2,
+  lastGeneratedColumn: null,
+  source: 'src2.js',
+  originalLine: 22,
+  originalColumn: 22,
+  name: null
+}
+*/
+```
+
+我们先创建了第一个SourceMap，将其转换为SourceMapConsumer对象；然后让第二个SourceMap利用这个对象创建SourceMapGenerator对象，并向其中继续添加位置关系。最后输出结果，可以看到所有数据都包含在其中。
+
+### 低级API映射生成SourceMap
 
 
 
-
-### 生成SourceMap（高级API）
+### 高级API生成SourceMap
 
 
 ## Webpack中的SourceMap选项
