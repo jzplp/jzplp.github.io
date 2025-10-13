@@ -513,6 +513,63 @@ Mapping {
 我们先创建了第一个SourceMap，将其转换为SourceMapConsumer对象；然后让第二个SourceMap利用这个对象创建SourceMapGenerator对象，并向其中继续添加位置关系。最后输出结果，可以看到所有数据都包含在其中。
 
 ### 低级API映射生成SourceMap
+在生成SourceMap的低级API中，还有一个applySourceMap方法，它同样是接受一个SourceMapConsumer对象，但并不是创建SourceMapGenerator对象，而是对已有的SourceMapGenerator对象合并。合并的方式也不是简单的把位置关系合并，而是映射。这里我们先列举一个错误例子：
+
+```js
+// 错误例子
+const sourceMap = require("source-map");
+
+async function jzplpfun() {
+  // 第一个SourceMap
+  const generator1 = new sourceMap.SourceMapGenerator({
+    file: "dist1.js",
+  });
+  generator1.addMapping({
+    source: "src1.js",
+    original: { line: 11, column: 11 },
+    generated: { line: 1, column: 1 },
+  });
+  const data1 = generator1.toString();
+  const consumer1 = await new sourceMap.SourceMapConsumer(data1);
+
+  // 第二个SourceMap
+  const generator2 = new sourceMap.SourceMapGenerator({
+    file: "dist1.js",
+  });
+  generator2.addMapping({
+    source: "src2.js",
+    original: { line: 22, column: 22 },
+    generated: { line: 2, column: 2 },
+  });
+  // 第二个合并第一个
+  generator2.applySourceMap(consumer1);
+
+  // 输出结果
+  const data2 = generator2.toString();
+  console.log(data2);
+  const consumer2 = await new sourceMap.SourceMapConsumer(data2);
+  consumer2.eachMapping((m) => console.log(m));
+}
+
+jzplpfun();
+
+/* 输出结果
+{"version":3,"sources":["src2.js"],"names":[],"mappings":";EAqBsB","file":"dist1.js"}
+Mapping {
+  generatedLine: 2,
+  generatedColumn: 2,
+  lastGeneratedColumn: null,
+  source: 'src2.js',
+  originalLine: 22,
+  originalColumn: 22,
+  name: null
+}
+*/
+```
+
+在上面的例子中，我们创建了两个SourceMap，指向的文件是相同的。第一个被转换为SourceMapConsumer对象，使用applySourceMap方法从合并进第二个SourceMap中。但是输出第二个SourceMap，里面却没有包含第一个SourceMap中的内容（即使指向文件是同一个，位置关系也不冲突）。因此上面的例子并不是其真正的用法。下面列举一个正确用法：
+
+
 
 
 
