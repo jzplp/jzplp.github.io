@@ -569,9 +569,66 @@ Mapping {
 
 在上面的例子中，我们创建了两个SourceMap，指向的文件是相同的。第一个被转换为SourceMapConsumer对象，使用applySourceMap方法从合并进第二个SourceMap中。但是输出第二个SourceMap，里面却没有包含第一个SourceMap中的内容（即使指向文件是同一个，位置关系也不冲突）。因此上面的例子并不是其真正的用法。下面列举一个正确用法：
 
+```js
+const sourceMap = require("source-map");
 
+async function jzplpfun() {
+  // 第一个SourceMap
+  const generator1 = new sourceMap.SourceMapGenerator({
+    file: "dist1.js",
+  });
+  generator1.addMapping({
+    source: "src1.js",
+    original: { line: 1, column: 1 },
+    generated: { line: 2, column: 2 },
+  });
+  const data1 = generator1.toString();
+  const consumer1 = await new sourceMap.SourceMapConsumer(data1);
 
+  // 第二个SourceMap
+  const generator2 = new sourceMap.SourceMapGenerator({
+    file: "dist2.js",
+  });
+  generator2.addMapping({
+    source: "dist1.js",
+    original: { line: 2, column: 2 },
+    generated: { line: 3, column: 3 },
+  });
+  // 第二个合并第一个
+  generator2.applySourceMap(consumer1);
 
+  // 输出结果
+  const data2 = generator2.toString();
+  console.log(data2);
+  const consumer2 = await new sourceMap.SourceMapConsumer(data2);
+  consumer2.eachMapping((m) => console.log(m));
+}
+
+jzplpfun();
+
+/* 输出结果
+{"version":3,"sources":["src1.js"],"names":[],"mappings":";;GAAC","file":"dist2.js"}
+Mapping {
+  generatedLine: 3,
+  generatedColumn: 3,
+  lastGeneratedColumn: null,
+  source: 'src1.js',
+  originalLine: 1,
+  originalColumn: 1,
+  name: null
+}
+*/
+```
+
+在这个例子中，同样是两个SourceMap使用applySourceMap方法合并，同样最后结果中只留下了一个位置关系，但这个位置关系却与上一个错误例子不同。上一个错误例子只保留了第二个SourceMap的位置关系，第一个根本没合并进来；这个例子中生成的位置关系却是由两个SourceMap的位置关系映射而来。我们仔细观察：
+
+* 第一个SourceMap的源代码是 src1.js 1行1列；生成代码是 dist1.js 2行2列
+* 第二个SourceMap的源代码是 dist1.js 2行2列；生成代码是 dist2.js 3行3列
+* 合并后SourceMap的源代码是 src1.js 1行1列；生成代码是 dist2.js 3行3列
+
+![图片](/2025/sourcemap-10.png)
+
+第一个SourceMap的生成代码是第二个SourceMap的源代码。事实上它们的生成路径应该是：src1.js生成dist1.js，dist1.js再生成dist2.js。这两次生成产生了两个SourceMap，而applySourceMap方法可以使得SourceMap合并，可以实现源头到最终产物代码的位置关系映射。
 
 ### 高级API生成SourceMap
 
