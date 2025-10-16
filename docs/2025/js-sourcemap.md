@@ -631,7 +631,127 @@ Mapping {
 第一个SourceMap的生成代码是第二个SourceMap的源代码。事实上它们的生成路径应该是：src1.js生成dist1.js，dist1.js再生成dist2.js。这两次生成产生了两个SourceMap，而applySourceMap方法可以使得SourceMap合并，可以实现源头到最终产物代码的位置关系映射。
 
 ### 高级API生成SourceMap
+高级API使用SourceNodes对象，在生成代码的时候同时保留了源码的位置信息，最后将生成代码合并的同时，也创建了SourceMap。我们以一个例子为例说明一下。
 
+假设我们的源代码文件是src.js，其中的内容为`jz = src1 + src2`。我们生成文件是dist.js，其中的代码为 `jz = out1 + out2`。那么我们可以创建这样一个SourceNodes对象结构：
+
+```js
+const { SourceNode } = require("source-map");
+// new SourceNode([line, column, source[, chunk[, name]]])
+const node = new SourceNode(1, 0, "src.js", [
+  new SourceNode(1, 0, "src.js", "jz", "jz"),
+  " = ",
+  new SourceNode(1, 5, "src.js", [
+    new SourceNode(1, 5, "src.js", "out1", "src1"),
+    " + ",
+    new SourceNode(1, 12, "src.js", "out2", "src2"),
+  ]),
+]);
+```
+
+line, column表示源文件中的位置，source表示源文件名，chunk表示要生成的代码。通过上面的例子可以看到，SourceNode可以嵌套字符串或者SourceNode数组，其中标识符（也就是SourceMap要记录的核心信息）是SourceNode对象，而非标识符可以直接使用字符串。事实上这是一棵树形结构，而且这个结构和抽象语法树AST类似，其中的源码行列信息可以直接通过AST数据得到。因此，可以用遍历抽象语法树的形式生成SourceNode树。
+
+SourceNode树组成之后，通过toString方法可以直接获取生成的源码。而且此时SourceMap本身也可以获取到。
+
+```js
+console.log(node.toString());
+const data = node.toStringWithSourceMap({ file: "dist.js" });
+console.log(data);
+const mapString = data.map.toString();
+console.log(mapString);
+
+async function jzplpfun() {
+  const consumer2 = await new SourceMapConsumer(mapString);
+  consumer2.eachMapping((m) => console.log(m));
+}
+
+jzplpfun();
+
+/* 输出结果
+jz = out1 + out2
+{
+  code: 'jz = out1 + out2',
+  map: SourceMapGenerator { ...省略 }
+}
+{"version":3,"sources":["src.js"],"names":["jz","src1","src2"],"mappings":"AAAAA,EAAA,GAAKC,IAAA,GAAOC","file":"dist.js"}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 0,
+  lastGeneratedColumn: null,
+  source: 'src.js',
+  originalLine: 1,
+  originalColumn: 0,
+  name: 'jz'
+}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 2,
+  lastGeneratedColumn: null,
+  source: 'src.js',
+  originalLine: 1,
+  originalColumn: 0,
+  name: null
+}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 5,
+  lastGeneratedColumn: null,
+  source: 'src.js',
+  originalLine: 1,
+  originalColumn: 5,
+  name: 'src1'
+}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 9,
+  lastGeneratedColumn: null,
+  source: 'src.js',
+  originalLine: 1,
+  originalColumn: 5,
+  name: null
+}
+Mapping {
+  generatedLine: 1,
+  generatedColumn: 12,
+  lastGeneratedColumn: null,
+  source: 'src.js',
+  originalLine: 1,
+  originalColumn: 12,
+  name: 'src2'
+}
+*/
+```
+
+使用toStringWithSourceMap方法，SourceNode树可以同时生成代码和SourceMapGenerator对象，里面存放的就是SourceMaps数据。通过转换成SourceMapConsumer对象并遍历，我们发现其中不仅有标识符，连其它元素（在SourceNode树中是字符串形式）也生成了映射关系。所以看到映射关系一共有5条。SourceNode还有其它方法，例如添加元素，遍历等，这里也给一下示例：
+
+```js
+const { SourceNode } = require("source-map");
+
+const node = new SourceNode(1, 0, "src.js", [
+  new SourceNode(1, 0, "src.js", "jz", "jz"),
+  " = ",
+]);
+
+node.add(
+  new SourceNode(1, 5, "src2.js", [
+    new SourceNode(1, 5, "src2.js", "out1", "src1"),
+    " + ",
+    new SourceNode(1, 12, "src2.js", "out2", "src2"),
+  ])
+);
+
+node.walk(function (code, loc) {
+  console.log("walk:", code, loc);
+});
+
+/* 输出结果
+walk: jz { source: 'src.js', line: 1, column: 0, name: 'jz' }
+walk:  =  { source: 'src.js', line: 1, column: 0, name: null }
+walk: out1 { source: 'src2.js', line: 1, column: 5, name: 'src1' }
+walk:  +  { source: 'src2.js', line: 1, column: 5, name: null }
+walk: out2 { source: 'src2.js', line: 1, column: 12, name: 'src2' }
+*/
+```
 
 ## Webpack中的SourceMap选项
 
@@ -676,3 +796,5 @@ Mapping {
   https://jzplp.github.io/2025/babel-intro.html
 - Terser 中文文档\
   https://terser.nodejs.cn/
+- 探究 source map 在编译过程中的生成原理\
+  https://cloud.tencent.com/developer/article/1528134
