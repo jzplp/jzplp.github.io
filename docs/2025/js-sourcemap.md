@@ -4,23 +4,22 @@
 ### 什么是SourceMap
 SourceMap，中文名叫“源映射”。在前端开发中，打包后的文件中除了我们写的代码与npm包的代码之外，经常还会出现一个后缀名为.map的文件。这就是SourceMap文件，也是我们今天要讲的主题。
 
-我们写的代码一般并不直接作为成果提供，而且使用各类框架后，大多数代码也没办法直接在浏览器运行。代码通常需要经过转义，打包，压缩，混淆等操作，最后作为成果提供。但这时候生成的代码与我们写的代码相比，已经面目全非了（尤其是代码量很多的项目）。如果这时候代码在运行中报错，我们很难找到错误原因，以及原来代码中的位置。
+我们写的代码一般并不直接作为成果提供，而且使用各类框架处理，否则大多数代码也没办法直接在浏览器运行。代码通常需要经过转义，打包，压缩，混淆等操作，最后作为成果提供。但这时候生成的代码与我们写的代码相比，已经面目全非了（尤其是代码量很多的项目）。如果此时代码在运行中报错，我们很难找到错误原因，以及源代码中的错误位置。
 
 因此，很多前端工具在修改完代码后，会生成一个SourceMap文件，这个文件中记录了我们写的源代码和生成代码中标识符(主要包含变量名，属性名等)的文件位置对应关系。有了这个关系之后，当代码出错时，浏览器或者其它工具可以将出错位置定位到源代码的具体位置上，方便排查运行时问题。如果没有这个文件，则只能定位到生成代码的位置。例如这是经过压缩后的部分jQuery代码，在这种生成代码中排查问题太难了。
 
 ![图片](/2025/sourcemap-1.png)
 
 ### SourceMap的历史
-历史内容基本来源于网络。其中部分描述现在可能还不太了解，别担心，我们在后面会逐渐介绍。
 
 * 在2009年时，Google推出了一个JavaScript代码压缩工具Cloure Compiler。在推出时，还附带了一个浏览器调试插件Closure Inspector，方便调试生成的代码。这个工具就是SourceMap的雏形。（第一版）
 * 在2010年时，Closure Compiler Source Map 2.0中，SourceMap确定了统一的JSON格式，使用Base64编码等，这时候的SourceMap已经基本成型。（第二版）
 * 在2011年，Source Map Revision 3 Proposal中，此时SourceMap已经脱离了Closure Compiler，成为了独立的工具。这一代使用Base64 VLQ编码，压缩了文件体积。这是第三版，也是现在广泛流行的，作为标准使用的版本。
 
-这三个版本的map文件文件体积逐渐缩小，但即使是第三版，也要比源文件更大。SourceMap一开始作为一款Cloure Compiler的辅助小工具诞生，最后却被当作标准广泛应用，名气比Cloure Compiler本身要大的多。
+这三个版本的map文件文件体积逐渐缩小，但即使是第三版，也要比源文件更大。SourceMap一开始作为一款Cloure Compiler的辅助小工具诞生，最后却被当作标准广泛应用，名气比Cloure Compiler本身要大的多。历史内容基本来源于网络。
 
 ## 转换代码工具生成SourceMap
-JavaScript中有非常多转换代码的工具，这些工具大多数在转换代码的同时，都提供了SourceMap生成功能。这里我们选择两个来介绍一下。首先构造一下要被转换的源代码：
+JavaScript中有非常多转换代码的工具，这些工具大多数在转换代码的同时，都提供了SourceMap生成功能。这里我们选择两个来介绍一下。首先构造一个要被转换的源代码：
 
 ```js
 const globaljz = 123;
@@ -40,7 +39,7 @@ fun();
 ```
 
 ### Babel生成SourceMap
-Babel是一个JavaScript编译器，主要作用是将新版本的ECMAScript代码转换为兼容的旧版本JavaScript代码，之前我们有文章介绍过：[解锁Babel核心功能：从转义语法到插件开发](https://jzplp.github.io/2025/babel-intro.html)。Babel也带有生成SourceMap的功能，首先配置babel.config.json：
+Babel是一个JavaScript编译器，主要作用是将新版本的ECMAScript代码转义为兼容的旧版本JavaScript代码，之前我们有文章介绍过：[解锁Babel核心功能：从转义语法到插件开发](https://jzplp.github.io/2025/babel-intro.html)。Babel也带有生成SourceMap的功能，首先配置babel.config.json：
 
 ```json
 {
@@ -177,7 +176,7 @@ const globaljz=123;function fun(){const o="ab";try{o()}catch(o){throw console.lo
 sourceMap文件形式与Babel的基本一致，都是通用的。
 
 ## 浏览器使用SourceMap
-上一节的示例代码中故意留了一个错误，而且为了输出栈先捕捉异常再进行抛出。这里以上一节中使用Terser生成的代码为例，描述在Chrome浏览器中如何使用SourceMap。
+上一节的示例代码中故意留了一个错误，而且为了输出栈，先捕捉异常再进行抛出。这里以上一节中使用Terser生成的代码为例，描述在Chrome浏览器中如何使用SourceMap。
 
 ### 不使用SourceMap
 作为对比，首先来看一下不使用SourceMap的现象。执行命令`terser src/index.js --compress --mangle -o dist.js`重新生成代码，但是不包含SourceMap。然后将代码使用HTML包裹，以便浏览器打开：
@@ -192,7 +191,7 @@ sourceMap文件形式与Babel的基本一致，都是通用的。
 
 在浏览器中打开调试工具的Console(上图中左侧)，可以看到白底的字是我捕获并打印的错误栈，红底是抛出的错误。错误栈中标明了报错的具体位置：文件名，行号和列号。点击蓝色的位置文字可以跳到右边查看具体的报错代码。红底因为被浏览器解析过了所以没有列号，但是点击蓝字同样可以跳过去。
 
-因为dist文件只有一行，因此可以看到行号都是1。看右边的所有文件目录树中并没有源码文件，定位到的位置是生成代码中的出错位置（红色波浪线和x号的位置）。生成的代码实际只有一行，浏览器在这里美化展示了，但从错误栈的行号上还是能看到只有一行。在复杂代码的情况下。，这样是很难定位到源码出错位置和逻辑的。
+因为dist文件只有一行，因此可以看到行号都是1。看右边的所有文件目录树中并没有源码文件，定位到的位置是生成代码中的出错位置（红色波浪线和x号的位置）。生成的代码实际只有一行，浏览器在这里美化展示了，但从错误栈的行号上还是能看到只有一行。在复杂代码的情况下，这样是很难定位到源码出错位置和逻辑的。
 
 ### 使用SourceMap
 首先打开浏览器的SourceMap开关（默认是打开状态）：
@@ -259,22 +258,22 @@ http
 
 ![图片](/2025/sourcemap-9.png)
 
-由于人手操作，因此时间并不是那么精确，但已经能得到规律了。即正常访问页面时不请求，只有调试时才请求SourceMap文件。这样不会因此SourceMap造成服务器请求过多，也不会阻碍调试。
+由于人手操作，因此时间并不是那么精确，但已经能得到规律了：正常访问页面时不请求，只有打开调试时才请求SourceMap文件。这样不会因此SourceMap造成服务器请求过多，也不会阻碍调试。
 
 * 正常访问页面的时候，只请求页面相关的内容，不请求SourceMap文件。
-* 浏览器调试工具的时候，浏览器会发送SourceMap文件请求。
+* 打开浏览器调试工具的时候，浏览器会发送SourceMap文件请求。
 * 当在浏览器中查看对应错误源码时，浏览器会发送源码文件请求。
 
 ## SourceMap文件
-前面我们介绍了如何使用哪些转换代码的工具来生成SourcaMap，还列出了用Babel与Terser生成的SourceMap，是一个JSON文件。这里介绍一下文件内容：
+前面我们介绍了如何使用转换代码工具来生成SourcaMap，还列出了用Babel与Terser生成的SourceMap，是一个JSON文件。这里介绍一下文件内容：
 
 | 字段名 | 类型 | 必填 | 示例值 | 含义描述 |
 | - | - | - | - | - |
 | version | number | 是 | 3 | SourcaMap版本号 |
 | file | string | 否 | "dist.js" | 转换后代码的文件名 |
 | sources | `Array<string>` | 是 | ["index1.js", "index2.js"] | 转换前代码的文件名，多个文件可以包含在一个转换后文件内，因此是一个数组 |
-| names | `Array<string>` | 是 | ["a", "jzplp1"] | 转换前代码中的变量和属性名 |
-| mappings | string | 是 | ";;AAAA,IAAMA" | 转换前后代码中的变量和属性名 |
+| names | `Array<string>` | 是 | ["a", "jzplp1"] | 转换前代码中的变量/属性名 |
+| mappings | string | 是 | ";;AAAA,IAAMA" | 转换前后代码中的变量/属性名的位置关系记录 |
 | sourcesContent  | `Array<string>` | 否 | ["const a = 1"] | 转换前代码的文件内容 |
 | sourceRoot  | string | 否 | "src" | 转换前代码的文件所在的目录，如果和转换后代码一致则省略 |
 
@@ -286,7 +285,7 @@ http
 有一个source-map包，提供生成和使用SourceMap数据的功能，支持在Node.js和浏览器中使用，很多前端工具都是引用这个包来生成SourceMap。这里我们简单介绍下它在Node.js中的使用方法。
 
 ### 使用SourceMap数据
-当我们有了SourceMap数据之后，可以source-map包转换代码位置。这里还是使用前面Terser生成的代码和SourceMap。首先创建SourceMapConsumer对象，用来解析已创建的SourceMap。
+当我们有了SourceMap数据之后，可以使用source-map包转换代码位置。这里还是使用前面Terser生成的代码和SourceMap。首先创建SourceMapConsumer对象，用来解析已创建的SourceMap。
 
 ```js
 const sourceMap = require('source-map');
@@ -324,9 +323,9 @@ console.log(oplist);
 
 ```
 
-例子尝试获取了五个原代码位置，生成前后实际内容对比如下：
+例子尝试获取了五个源代码位置，生成前后实际内容对比如下：
 
-| 生成代码位置 | 生成代码内容 | 实际原代码位置 | 实际原代码内容 | 获取原代码位置 | 获取原代码内容 |
+| 生成代码位置 | 生成代码内容 | 实际源代码位置 | 实际源代码内容 | 获取源代码位置 | 获取源代码内容 |
 | - | - | - | - | - | - |
 | 行1列10 | globaljz中的a | 行1列10 | globaljz中的a | 行1列6 | globaljz |
 | 行1列11 | globaljz中的l | 行1列11 | globaljz中的l | 行1列6 | globaljz |
@@ -334,7 +333,7 @@ console.log(oplist);
 | 行1列34 | const中的c | 行3列2 | const中的c | 行3列2 | - |
 | 行1列40 | 变量o | 行3列8 | jzplp1 | 行3列8 | jzplp1 |
 
-可以看到，实际位置并不是完全精准的，尤其是程序关键字和符号。但是对于标识符（变量名，属性名等）的位置还是能精准识别到原代码中的变量位置的，不过对于标识符内部的字符不能精确识别。这是因为SourceMap实际记录的就是标识符的对应位置关系，其他内容的位置关系并不会记录。
+可以看到，实际位置并不是完全精准的，尤其是程序关键字和符号。但是对于标识符（变量名，属性名等）的位置还是能精准识别到源代码中的变量位置的，不过对于标识符内部的字符不能精确识别。这是因为SourceMap实际记录的就是标识符的对应位置关系，其他内容的位置关系并不会记录。
 
 再介绍一下反向定位的功能，即有了源代码的位置，尝试获取生成代码的位置，这次的方法是generatedPositionFor。
 
@@ -358,10 +357,10 @@ console.log(gplist);
 */
 ```
 
-与获取原代码位置不同，获取的生成代码位置是有一个行号范围的。这里使用的原代码位置就是上个例子的“实际原代码位置”。这里我们依然列个表格对比一下。
+与获取源代码位置不同，获取的生成代码位置是有一个行号范围的。这里使用的源代码位置就是上个例子的“实际源代码位置”。这里我们依然列个表格对比一下。
 
 
-| 实际原代码位置 | 实际原代码内容 | 生成代码位置 | 生成代码内容 | 获取生成代码位置 | 获取生成代码内容 |
+| 实际源代码位置 | 实际源代码内容 | 生成代码位置 | 生成代码内容 | 获取生成代码位置 | 获取生成代码内容 |
 | - | - | - | - | - | - |
 | 行1列10 | globaljz中的a | 行1列10 | globaljz中的a | 行1列6-14 | globaljz |
 | 行1列11 | globaljz中的l | 行1列11 | globaljz中的l | 行1列6-14 | globaljz |
@@ -369,7 +368,7 @@ console.log(gplist);
 | 行3列2 | const中的c | 行1列34 | const中的c | 行1列34-39 | const |
 | 行3列8 | jzplp1中的j | 行1列40 | 变量o | 行1列40-41 | 变量o |
 
-SourceMapConsumer对象还有遍历每个位置关系的方法eachMapping，可以按照生成代码或原代码顺序输出每个位置关系：
+SourceMapConsumer对象还有遍历每个位置关系的方法eachMapping，可以按照生成代码或源代码顺序输出每个位置关系：
 
 ```js
 consumer.eachMapping(m => console.log(m));
@@ -762,13 +761,9 @@ source-map-visualization是一个可视化查看SourceMap代码位置关系的�
 
 ![图片](/2025/sourcemap-12.png)
 
-## Webpack中的SourceMap选项
+## 总结
 
-## SourceMap生成原理
 
-## 实际从生成到解析的例子
-
-最后用一个简单的例子实际生成SourceMap到解析SourceMap
 
 ## 参考
 - sourcemap这么讲，我彻底理解了\
