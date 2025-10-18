@@ -753,6 +753,15 @@ walk: out2 { source: 'src2.js', line: 1, column: 12, name: 'src2' }
 */
 ```
 
+## source-map-visualization
+source-map-visualization是一个可视化查看SourceMap代码位置关系的应用，网络上提供了很多在线工具可供使用（参考链接有描述）。上传源文件，生成文件和SourceMap文件，即可查看位置关系。例如这样上传文件：
+
+![图片](/2025/sourcemap-11.png)
+
+然后选中某个生成代码，对应的源代码位置也会变为高亮。有些工具还提供了更多功能，这里就不介绍了。
+
+![图片](/2025/sourcemap-12.png)
+
 ## Webpack中的SourceMap选项
 
 ## SourceMap生成原理
@@ -760,8 +769,6 @@ walk: out2 { source: 'src2.js', line: 1, column: 12, name: 'src2' }
 ## 实际从生成到解析的例子
 
 最后用一个简单的例子实际生成SourceMap到解析SourceMap
-
-## source-map-visualization
 
 ## 参考
 - sourcemap这么讲，我彻底理解了\
@@ -798,3 +805,7 @@ walk: out2 { source: 'src2.js', line: 1, column: 12, name: 'src2' }
   https://terser.nodejs.cn/
 - 探究 source map 在编译过程中的生成原理\
   https://cloud.tencent.com/developer/article/1528134
+- source-map-visualization\
+  https://sokra.github.io/source-map-visualization/
+- Source Map Visualization\
+  https://evanw.github.io/source-map-visualization/
