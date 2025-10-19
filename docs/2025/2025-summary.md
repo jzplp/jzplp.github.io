@@ -38,6 +38,7 @@ http://localhost:5173/2025/2025-summary.html
 * 前端工程化相关
   * Babel的功能和使用方式，阅读官方文档
   * 前端抽象语法树AST相关知识和工具
+  * SourceMap生成与使用
   * http-proxy前端代理功能，以及上层的Vite和Webpack代理配置
 * React相关
   * React Router的使用方法，阅读官方文档
@@ -58,7 +59,6 @@ http://localhost:5173/2025/2025-summary.html
 * React TypeScript Cheatsheet文档（部分）
 * Babel 文档（正在读）
 * mozilla/source-map 文档
-
 
 虽然阅读的英文技术文档不多，但还是能感觉到英语文档阅读能力的少量提升，以后应该需要持续英语文档阅读。不过由于阅读速度太慢，当真的需要快速了解工具而去看文档时，依然选择直接网页翻译而不是直接阅读英文文档。这也很合理，毕竟不可能没经过多少训练就可以快速阅读。
 
