@@ -1,4 +1,4 @@
-# SourceMap（未完成）
+# 快速定位源码问题：SourceMap的生成/使用/文件格式与历史
 
 ## SourceMap简介
 ### 什么是SourceMap
@@ -762,8 +762,11 @@ source-map-visualization是一个可视化查看SourceMap代码位置关系的�
 ![图片](/2025/sourcemap-12.png)
 
 ## 总结
+这篇文章对SourceMap进行了基础介绍，包括SourceMap的历史，文件格式，转换代码工具生成SourceMap，浏览器使用SourceMap，以及source-map包的使用。而通过source-map包生成SourceMap，可以看到即使并非标识符，也可以生成位置对应关系。
 
+第一次见SourceMap的时候，感觉很神奇，好奇它是如何实现“将代码反过来转换的”。当了解通过标识符位置关系记录这种并不复杂的机制，就能解决了前端工程化中打包后代码难以理解不好调试的困难，还是觉得挺有意思的。
 
+关于SourceMap，我还有其它想要了解和介绍的，包括Wbepack配置中非常多的SourceMap配置项都是什么含义与效果；SourceMap文件中mappings这个最重要的内容，是如何记录转换前后代码中标识符的位置关系的。这些内容后面会有单独文章介绍。
 
 ## 参考
 - sourcemap这么讲，我彻底理解了\

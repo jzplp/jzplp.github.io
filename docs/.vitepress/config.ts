@@ -19,7 +19,7 @@ const sidebarLists = [
         link: "/2025/webpack-sourcemap",
       },
       {
-        text: "SourceMap",
+        text: "快速定位源码问题：SourceMap的生成/使用/文件格式与历史",
         link: "/2025/js-sourcemap",
       },
       {
