@@ -5,8 +5,53 @@
 Webpack是一个打包工具，在修改源代码的同时，也会生成SourceMap文件。Webpack提供了几十种生成的SourceMap的生成方式，生成的文件内容和性能各不相同，这次我们就来了解下Webpack中的SourceMap配置。
 
 ## 创建Webpack基础示例
+首先创建一个使用Webpack打包的基础示例，后面各种配置都基于这个示例修改。首先命令行执行：
 
+```sh
+# 创建工程
+npm init -y
+# 安装Webpack相关依赖
+npm install webpack webpack-cli --save-dev
+```
 
+然后创建文件src/index.js，这就是我们要打包的文件。内容如下：
+
+```js
+const a = 1;
+function fun() {
+  console.log(a + 2);
+}
+fun();
+```
+
+然后在package.json文件的scripts中增加命令：`"build": "webpack"`。最后是Webpack配置文件`webpack.config.js`:
+
+```js
+const path = require('path');
+
+module.exports = {
+  entry: './src/index.js',
+  output: {
+    filename: 'main.js',
+    path: path.resolve(__dirname, 'dist'),
+  },
+  devtool: 'source-map'
+};
+```
+
+其中devtool表示SourceMap的生成配置，后面主要修改的就是它。命令行运行`npm run build`，即可使用Webpack打包，同时生成SourceMap文件。生成后目录结构如下：
+
+```
+|-- webpack1
+    |-- package-lock.json
+    |-- package.json
+    |-- webpack.config.js
+    |-- dist
+    |   |-- main.js
+    |   |-- main.js.map
+    |-- src
+        |-- index.js
+```
 
 ## xx配置
 
