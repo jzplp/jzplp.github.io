@@ -53,11 +53,17 @@ module.exports = {
         |-- index.js
 ```
 
-## xx配置
+## none与source-map值
 
-## xx配置
+## inline-值
 
-## 
+## nosources-值
+
+## eval-值
+
+## ...值
+
+## Rule.extractSourceMap
 
 ## SourceMapDevToolPlugin
 
