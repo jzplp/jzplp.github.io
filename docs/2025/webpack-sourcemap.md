@@ -4,7 +4,10 @@
 
 Webpack是一个打包工具，在修改源代码的同时，也会生成SourceMap文件。Webpack提供了几十种生成的SourceMap的生成方式，生成的文件内容和性能各不相同，这次我们就来了解下Webpack中的SourceMap配置。
 
-## 创建Webpack基础示例
+Webpack中的devtool配置不仅涉及SourceMap，还与代码生成，开发/生产模式有关系。本文更多使用生产模式，更在意SourceMap数据本身，而不是Webpack构建过程。
+
+## 创建基础示例
+### 创建Webpack示例
 首先创建一个使用Webpack打包的基础示例，后面各种配置都基于这个示例修改。首先命令行执行：
 
 ```sh
@@ -53,6 +56,47 @@ module.exports = {
         |-- index.js
 ```
 
+### 解析SourceMap工具
+这里还需要一段解析SourceMap文件的代码，方便后续拿到map文件后分析数据。这里使用sourcemap包，详细描述可以看[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)中的source-map包部分。创建一个mapAnalysis.js文件，内容如下：
+
+```js
+const sourceMap = require("source-map");
+const fs = require("fs");
+// 打开SourceMap文件
+const data = fs.readFileSync("./dist/main.js.map", "utf-8");
+
+function outputData(data) {
+  if (data || data === 0) return String(data);
+  return "空";
+}
+
+async function jzplpfun() {
+  const consumer = await new sourceMap.SourceMapConsumer(data);
+  // 遍历内容
+  consumer.eachMapping((item) => {
+    // 美化输出
+    console.log(
+      `生成代码行${outputData(item.generatedLine).padEnd(2)} 列${outputData(
+        item.generatedColumn
+      ).padEnd(2)} 源代码行${outputData(item.originalLine).padEnd(
+        2
+      )} 列${outputData(item.originalColumn).padEnd(2)} 源名称${outputData(
+        item.name
+      ).padEnd(12)} 源文件:${outputData(item.source)}`
+    );
+  });
+}
+jzplpfun();
+```
+
+代码的内容是读取SourceMap文件，解析并输出其中的位置对应关系。执行`node mapAnalysis.js`即可。解析后的结果示例如下。后面会直接利用这段代码解析生成的SourceMap。
+
+```
+生成代码行1  列0  源代码行3  列2  源名称console      源文件:webpack://webpack1/src/index.js
+生成代码行1  列8  源代码行3  列10 源名称log          源文件:webpack://webpack1/src/index.js
+生成代码行1  列12 源代码行3  列14 源名称a            源文件:webpack://webpack1/src/index.js
+```
+
 ## none与source-map值
 
 ## inline-值
@@ -68,6 +112,10 @@ module.exports = {
 ## SourceMapDevToolPlugin
 
 ## source-map-loader
+
+## spurceURL
+
+## webpack://
 
 ## 参考
 - 快速定位源码问题：SourceMap的生成/使用/文件格式与历史\
