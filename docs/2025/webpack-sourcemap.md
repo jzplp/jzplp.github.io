@@ -155,7 +155,53 @@ console.log(3);
 }
 ```
 
-## nosources-值
+SourceMap数据附加在生成代码文件中会使得文件体积大幅增加，进而造成页面文件下载速度变慢。
+
+## 值nosources-前缀
+配置中可以增加nosources-前缀，表示源代码不包含在SourceMap数据中。这里以`devtool: 'nosources-source-map`为例生成试试。
+
+```js
+// main.js
+console.log(3);
+//# sourceMappingURL/* 防止报错 */=main.js.map
+
+// main.js.map
+{
+  "version": 3,
+  "file": "main.js",
+  "mappings": "AAEEA,QAAQC,IAAIC",
+  "sources": [ "webpack://webpack1/./src/index.js"],
+  "names": ["console", "log", "a"],
+  "sourceRoot": ""
+}
+```
+
+生成的SourceMap数据与前面`devtool: 'source-map'`生成的相比，缺少了sourcesContent属性，这个属性包含的就是源代码内容。
+
+## 值hidden-前缀
+配置中可以增加hidden-前缀，表示生成的SourceMap，但是在源码中并不生成引用注释。这里以`devtool: 'hidden-source-map`为例生成试试。
+
+```js
+// main.js
+console.log(3);
+
+// main.js.map
+{
+  "version": 3,
+  "file": "main.js",
+  "mappings": "AAEEA,QAAQC,IAAIC",
+  "sources": ["webpack://webpack1/./src/index.js"],
+  "sourcesContent": [
+    "const a = 1;\r\nfunction fun() {\r\n  console.log(a + 2);\r\n}\r\nfun();"
+  ],
+  "names": ["console", "log", "a"],
+  "sourceRoot": ""
+}
+```
+
+通过结果可以看到，生成的SourceMap数据与前面`devtool: 'source-map'`生成的相比一致。但是生成代码最后一行表示SourceMap文件地址的注释却没有了。
+
+这种配置一般用于生成SourceMap文件，但并不提供给用户下载的场景。可以使用浏览器代码主动附加SourceMap，上报收集报错栈数据，利用其它工具解析SourceMap并处理报错数据。
 
 ## eval-值
 
