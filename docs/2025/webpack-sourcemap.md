@@ -33,6 +33,7 @@ fun();
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: './src/index.js',
   output: {
     filename: 'main.js',
@@ -97,9 +98,62 @@ jzplpfun();
 生成代码行1  列12 源代码行3  列14 源名称a            源文件:webpack://webpack1/src/index.js
 ```
 
-## none与source-map值
+## 值(none)与值source-map
+首先我们来看一看devtool中最简单的两个取值，(none)和source-map。(none)表示不设置devtool，也就是不生成SourceMap数据。dist目录中只有main.js。
 
-## inline-值
+与之对应的，是`devtool: 'source-map'`这个配置会生成打包后的代码和独立的SourceMap文件。生成内容如下：
+
+```js
+// main.js
+console.log(3);
+//# sourceMappingURL/* 防止报错 */=main.js.map
+
+// main.js.map
+{
+  "version": 3,
+  "file": "main.js",
+  "mappings": "AAEEA,QAAQC,IAAIC",
+  "sources": ["webpack://webpack1/./src/index.js"],
+  "sourcesContent": [
+    "const a = 1;\r\nfunction fun() {\r\n  console.log(a + 2);\r\n}\r\nfun();"
+  ],
+  "names": ["console", "log", "a"],
+  "sourceRoot": ""
+}
+```
+
+使用工具解析，SourceMap中的位置关系如下：
+
+```
+生成代码行1  列0  源代码行3  列2  源名称console      源文件:webpack://webpack1/src/index.js
+生成代码行1  列8  源代码行3  列10 源名称log          源文件:webpack://webpack1/src/index.js
+生成代码行1  列12 源代码行3  列14 源名称a            源文件:webpack://webpack1/src/index.js
+```
+
+## 值inline-前缀
+配置中可以增加inline-前缀，表示SourceMap数据附加在生成的文件中，而不是作为一个独立的文件存在。这里以`devtool: 'inline-source-map`为例生成试试。
+
+```js
+// main.js
+console.log(3);
+//# sourceMappingURL/* 防止报错 */=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFpbi5qcyIsIm1hcHBpbmdzIjoiQUFFRUEsUUFBUUMsSUFBSUMiLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly93ZWJwYWNrMS8uL3NyYy9pbmRleC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJjb25zdCBhID0gMTtcclxuZnVuY3Rpb24gZnVuKCkge1xyXG4gIGNvbnNvbGUubG9nKGEgKyAyKTtcclxufVxyXG5mdW4oKTsiXSwibmFtZXMiOlsiY29uc29sZSIsImxvZyIsImEiXSwic291cmNlUm9vdCI6IiJ9
+```
+
+可以看到没由生成main.js.map，但是最后多了一行注释，sourceMappingURL的值为Data URL格式的SourceMap数据。复制到浏览器地址栏中，得到结果如下。这个JSON数据和前面`devtool: 'source-map'`中生成的完全一致。
+
+```json
+{
+  "version": 3,
+  "file": "main.js",
+  "mappings": "AAEEA,QAAQC,IAAIC",
+  "sources": ["webpack://webpack1/./src/index.js"],
+  "sourcesContent": [
+    "const a = 1;\r\nfunction fun() {\r\n  console.log(a + 2);\r\n}\r\nfun();"
+  ],
+  "names": ["console", "log", "a"],
+  "sourceRoot": ""
+}
+```
 
 ## nosources-值
 
