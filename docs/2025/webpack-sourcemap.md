@@ -132,29 +132,21 @@ console.log(1+b);
 ![图片](/2025/devtool-1.png)
 
 ## 值source-map
-
-todo
-
-
-首先我们来看一看devtool中最简单的两个取值，(none)和source-map。(none)表示不设置devtool，也就是不生成SourceMap数据。dist目录中只有main.js。
-
-与之对应的，是`devtool: 'source-map'`这个配置会生成打包后的代码和独立的SourceMap文件。生成内容如下：
+`devtool: 'source-map'`这个配置会生成打包后的代码和独立的SourceMap文件。生成内容如下：
 
 ```js
 // main.js
-console.log(3);
+console.log(1+b);
 //# sourceMappingURL/* 防止报错 */=main.js.map
 
 // main.js.map
 {
   "version": 3,
   "file": "main.js",
-  "mappings": "AAEEA,QAAQC,IAAIC",
+  "mappings": "AACAA,QAAQC,IADE,EACMC",
   "sources": ["webpack://webpack1/./src/index.js"],
-  "sourcesContent": [
-    "const a = 1;\r\nfunction fun() {\r\n  console.log(a + 2);\r\n}\r\nfun();"
-  ],
-  "names": ["console", "log", "a"],
+  "sourcesContent": ["const a = 1;\r\nconsole.log(a + b);"],
+  "names": ["console", "log", "b"],
   "sourceRoot": ""
 }
 ```
@@ -162,18 +154,23 @@ console.log(3);
 使用工具解析，SourceMap中的位置关系如下：
 
 ```
-生成代码行1  列0  源代码行3  列2  源名称console      源文件:webpack://webpack1/src/index.js
-生成代码行1  列8  源代码行3  列10 源名称log          源文件:webpack://webpack1/src/index.js
-生成代码行1  列12 源代码行3  列14 源名称a            源文件:webpack://webpack1/src/index.js
+生成代码行1  列0  源代码行2  列0  源名称console      源文件:webpack://webpack1/src/index.js
+生成代码行1  列8  源代码行2  列8  源名称log          源文件:webpack://webpack1/src/index.js
+生成代码行1  列12 源代码行1  列10 源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行1  列14 源代码行2  列16 源名称b            源文件:webpack://webpack1/src/index.js
 ```
+
+在浏览器中打开页面，看到Console报错中指示的文件为源代码文件index.js，第二行。点击文件名查看也是源代码文件的代码，标出了错误的位置，如下图：
+
+![图片](/2025/devtool-2.png)
 
 ## 值inline-前缀
 配置中可以增加inline-前缀，表示SourceMap数据附加在生成的文件中，而不是作为一个独立的文件存在。这里以`devtool: 'inline-source-map`为例生成试试。
 
 ```js
 // main.js
-console.log(3);
-//# sourceMappingURL/* 防止报错 */=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFpbi5qcyIsIm1hcHBpbmdzIjoiQUFFRUEsUUFBUUMsSUFBSUMiLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly93ZWJwYWNrMS8uL3NyYy9pbmRleC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJjb25zdCBhID0gMTtcclxuZnVuY3Rpb24gZnVuKCkge1xyXG4gIGNvbnNvbGUubG9nKGEgKyAyKTtcclxufVxyXG5mdW4oKTsiXSwibmFtZXMiOlsiY29uc29sZSIsImxvZyIsImEiXSwic291cmNlUm9vdCI6IiJ9
+console.log(1+b);
+//# sourceMappingURL/* 防止报错 */=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFpbi5qcyIsIm1hcHBpbmdzIjoiQUFDQUEsUUFBUUMsSUFERSxFQUNNQyIsInNvdXJjZXMiOlsid2VicGFjazovL3dlYnBhY2sxLy4vc3JjL2luZGV4LmpzIl0sInNvdXJjZXNDb250ZW50IjpbImNvbnN0IGEgPSAxO1xyXG5jb25zb2xlLmxvZyhhICsgYik7Il0sIm5hbWVzIjpbImNvbnNvbGUiLCJsb2ciLCJiIl0sInNvdXJjZVJvb3QiOiIifQ==
 ```
 
 可以看到没由生成main.js.map，但是最后多了一行注释，sourceMappingURL的值为Data URL格式的SourceMap数据。复制到浏览器地址栏中，得到结果如下。这个JSON数据和前面`devtool: 'source-map'`中生成的完全一致。
@@ -182,63 +179,69 @@ console.log(3);
 {
   "version": 3,
   "file": "main.js",
-  "mappings": "AAEEA,QAAQC,IAAIC",
+  "mappings": "AACAA,QAAQC,IADE,EACMC",
   "sources": ["webpack://webpack1/./src/index.js"],
-  "sourcesContent": [
-    "const a = 1;\r\nfunction fun() {\r\n  console.log(a + 2);\r\n}\r\nfun();"
-  ],
-  "names": ["console", "log", "a"],
+  "sourcesContent": ["const a = 1;\r\nconsole.log(a + b);"],
+  "names": ["console", "log", "b"],
   "sourceRoot": ""
 }
 ```
 
-SourceMap数据附加在生成代码文件中会使得文件体积大幅增加，进而造成页面文件下载速度变慢。
+SourceMap数据附加在生成代码文件中会使得文件体积大幅增加，进而造成页面文件下载速度变慢。这里浏览器效果和`devtool: 'source-map'`一致，就不展示了。
 
 ## 值nosources-前缀
 配置中可以增加nosources-前缀，表示源代码不包含在SourceMap数据中。这里以`devtool: 'nosources-source-map`为例生成试试。
 
 ```js
 // main.js
-console.log(3);
+console.log(1+b);
 //# sourceMappingURL/* 防止报错 */=main.js.map
 
 // main.js.map
 {
   "version": 3,
   "file": "main.js",
-  "mappings": "AAEEA,QAAQC,IAAIC",
-  "sources": [ "webpack://webpack1/./src/index.js"],
-  "names": ["console", "log", "a"],
+  "mappings": "AACAA,QAAQC,IADE,EACMC",
+  "sources": ["webpack://webpack1/./src/index.js"],
+  "names": ["console", "log", "b"],
   "sourceRoot": ""
 }
 ```
 
 生成的SourceMap数据与前面`devtool: 'source-map'`生成的相比，缺少了sourcesContent属性，这个属性包含的就是源代码内容。
 
+在浏览器中打开页面，看到Console报错中指示的文件为源代码文件index.js，第二行，也就是说SAourceMap数据是生效的。但点击文件名查看，却找不到源代码文件，这是因为我们没提供文件，webpack生成的文件路径`webpack://`浏览器不能使用它来找到文件。
+
+![图片](/2025/devtool-3.png)
+
 ## 值hidden-前缀
 配置中可以增加hidden-前缀，表示生成的SourceMap，但是在源码中并不生成引用注释。这里以`devtool: 'hidden-source-map`为例生成试试。
 
 ```js
 // main.js
-console.log(3);
+console.log(1+b);
 
 // main.js.map
 {
   "version": 3,
   "file": "main.js",
-  "mappings": "AAEEA,QAAQC,IAAIC",
+  "mappings": "AACAA,QAAQC,IADE,EACMC",
   "sources": ["webpack://webpack1/./src/index.js"],
-  "sourcesContent": [
-    "const a = 1;\r\nfunction fun() {\r\n  console.log(a + 2);\r\n}\r\nfun();"
-  ],
-  "names": ["console", "log", "a"],
+  "sourcesContent": ["const a = 1;\r\nconsole.log(a + b);"],
+  "names": ["console", "log", "b"],
   "sourceRoot": ""
 }
 ```
 
-通过结果可以看到，生成的SourceMap数据与前面`devtool: 'source-map'`生成的相比一致。但是生成代码最后一行表示SourceMap文件地址的注释却没有了。
+通过结果可以看到，生成的SourceMap数据与前面`devtool: 'source-map'`生成的相比一致。但是生成代码最后一行表示SourceMap文件地址的注释却没有了。我们使用浏览器打开，发现错误定位依然到的是生成文件，SourceMap未生效。
 
-这种配置一般用于生成SourceMap文件，但并不提供给用户下载的场景。可以使用浏览器代码主动附加SourceMap，上报收集报错栈数据，利用其它工具解析SourceMap并处理报错数据。
+![图片](/2025/devtool-4.png)
+
+这种配置一般用于生成SourceMap文件，但并不提供给用户下载的场景。可以使用浏览器主动附加SourceMap，上报收集报错栈数据，或者利用其它工具解析SourceMap并处理报错数据。
+
+这里我们试一下浏览器主动附加SourceMap：右键点击生成代码文件内容，出现Add source map选项，把我们刚才生成的SourceMap文件添加进去。结果与在源码中指定了SourceMap文件地址的现象一致，错误信息被SourceMap处理了。
+
+![图片](/2025/devtool-5.png)
 
 ## eval-值
 
