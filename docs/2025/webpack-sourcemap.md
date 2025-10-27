@@ -1,4 +1,4 @@
-# Webpack中的SourceMap（未完成）
+# Webpack中的devtool SourceMap（未完成）
 ## 简述
 在之前的文章中，我们对SourceMap进行了简要的了解:[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)。SourceMap的出现，是为了应对前端工程化工具在转义，打包，压缩等操作后，代码变化非常大，出错后排查报错位置困难的问题，原理是记录源和生成代码中标识符的位置关系。
 
@@ -14,36 +14,40 @@ Webpack中的devtool配置不仅涉及SourceMap，还与代码生成，开发/�
 # 创建工程
 npm init -y
 # 安装Webpack相关依赖
-npm install webpack webpack-cli --save-dev
+npm install webpack webpack-cli html-webpack-plugin --save-dev
 ```
 
 然后创建文件src/index.js，这就是我们要打包的文件。内容如下：
 
 ```js
 const a = 1;
-function fun() {
-  console.log(a + 2);
-}
-fun();
+console.log(a + b);
 ```
 
 然后在package.json文件的scripts中增加命令：`"build": "webpack"`。最后是Webpack配置文件`webpack.config.js`:
 
 ```js
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  mode: 'production',
-  entry: './src/index.js',
+  mode: 'production', // 生产模式
+  entry: './src/index.js', // 源码入口
+  plugins: [
+    new HtmlWebpackPlugin({ // 生成HTML页面入口
+      title: 'jzplp的SourceMap实验', // 页面标题
+    }),
+  ],
   output: {
-    filename: 'main.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: 'main.js', // 生成文件名
+    path: path.resolve(__dirname, 'dist'),  // 生成文件目录
+    clean: true, // 生成前删除dist目录内容
   },
   devtool: 'source-map'
 };
 ```
 
-其中devtool表示SourceMap的生成配置，后面主要修改的就是它。命令行运行`npm run build`，即可使用Webpack打包，同时生成SourceMap文件。生成后目录结构如下：
+devtool表示SourceMap的生成配置，后面主要修改的就是它。命令行运行`npm run build`，即可使用Webpack打包，同时生成SourceMap文件。生成后目录结构如下：
 
 ```
 |-- webpack1
@@ -51,10 +55,26 @@ module.exports = {
     |-- package.json
     |-- webpack.config.js
     |-- dist
+    |   |-- index.html
     |   |-- main.js
     |   |-- main.js.map
     |-- src
         |-- index.js
+```
+
+使用浏览器打开index.html，即可看到代码执行效果，查看错误信息。生成的HTML文件内容如下：
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>jzplp的SourceMap实验</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script defer="defer" src="main.js"></script>
+  </head>
+  <body></body>
+</html>
 ```
 
 ### 解析SourceMap工具
@@ -68,7 +88,7 @@ const data = fs.readFileSync("./dist/main.js.map", "utf-8");
 
 function outputData(data) {
   if (data || data === 0) return String(data);
-  return "空";
+  return "-";
 }
 
 async function jzplpfun() {
@@ -93,12 +113,29 @@ jzplpfun();
 代码的内容是读取SourceMap文件，解析并输出其中的位置对应关系。执行`node mapAnalysis.js`即可。解析后的结果示例如下。后面会直接利用这段代码解析生成的SourceMap。
 
 ```
-生成代码行1  列0  源代码行3  列2  源名称console      源文件:webpack://webpack1/src/index.js
-生成代码行1  列8  源代码行3  列10 源名称log          源文件:webpack://webpack1/src/index.js
-生成代码行1  列12 源代码行3  列14 源名称a            源文件:webpack://webpack1/src/index.js
+生成代码行1  列0  源代码行2  列0  源名称console      源文件:webpack://webpack1/src/index.js
+生成代码行1  列8  源代码行2  列8  源名称log          源文件:webpack://webpack1/src/index.js
+生成代码行1  列12 源代码行1  列10 源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行1  列14 源代码行2  列16 源名称b            源文件:webpack://webpack1/src/index.js
 ```
 
-## 值(none)与值source-map
+## 值(none)
+(none)表示不设置devtool，也就是不生成SourceMap数据。（注意`devtool: 'none`是错误值）。我们生成试一下，作为对比：
+
+```js
+// main.js
+console.log(1+b);
+```
+
+可以看到只生成了代码，没有SourceMap。在浏览器中打开页面，看到Console报错中指示的文件为生成文件main.js。点击文件名查看也是生成文件的代码，如下图：
+
+![图片](/2025/devtool-1.png)
+
+## 值source-map
+
+todo
+
+
 首先我们来看一看devtool中最简单的两个取值，(none)和source-map。(none)表示不设置devtool，也就是不生成SourceMap数据。dist目录中只有main.js。
 
 与之对应的，是`devtool: 'source-map'`这个配置会生成打包后的代码和独立的SourceMap文件。生成内容如下：
