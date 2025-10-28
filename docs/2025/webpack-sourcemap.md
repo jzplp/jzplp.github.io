@@ -47,7 +47,9 @@ module.exports = {
 };
 ```
 
-devtool表示SourceMap的生成配置，后面主要修改的就是它。命令行运行`npm run build`，即可使用Webpack打包，同时生成SourceMap文件。生成后目录结构如下：
+devtool表示SourceMap的生成配置，后面主要修改的就是它。它为什么叫做devtool而不直接而叫做sourcemap，是因为它除了控制SourceMap生成之外，也控制代码如何生成，后面我们会看到例子。
+
+命令行运行`npm run build`，即可使用Webpack打包，同时生成SourceMap文件。生成后目录结构如下：
 
 ```
 |-- webpack1
@@ -243,7 +245,28 @@ console.log(1+b);
 
 ![图片](/2025/devtool-5.png)
 
-## eval-值
+## 值eval
+devtool可以直接取值为eval，此时不生成SourceMap，而是直接控制代码生成。这也是为什么devtool不叫sourcemap的原因，因为它不只控制SourceMap的生成。我们来看一下配置为`devtool: 'eval'`时的生成结果：
+
+```js
+// main.js
+(() => {
+  var __webpack_modules__ = {
+      44: () => {
+        eval(
+          "{const a = 1;\r\nconsole.log(a + b);\n\n//# sourceURL=webpack://webpack1/./src/index.js?\n}"
+        );
+      },
+    },
+    __webpack_exports__ = {};
+  __webpack_modules__[44]();
+})();
+```
+
+
+
+
+## 值eval-前缀
 
 ## ...值
 
@@ -270,6 +293,5 @@ console.log(1+b);
   https://webpack.js.org/plugins/source-map-dev-tool-plugin/
 - Webpack文档 source-map-loader\
   https://webpack.js.org/loaders/source-map-loader
-
-
-
+- 彻底搞懂 Webpack 的 sourcemap 配置原理\
+  https://juejin.cn/post/7136049758837145630
