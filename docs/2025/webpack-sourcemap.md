@@ -281,7 +281,7 @@ eval除了可以作为值，还可以作为前缀，例如`devtool: 'eval-source
   var __webpack_modules__ = {
       44: () => {
         eval(
-          "{const a = 1;\r\nconsole.log(a + b);//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiNDQuanMiLCJtYXBwaW5ncyI6IkFBQUE7QUFDQSIsInNvdXJjZXMiOlsid2VicGFjazovL3dlYnBhY2sxLy4vc3JjL2luZGV4LmpzP2I2MzUiXSwic291cmNlc0NvbnRlbnQiOlsiY29uc3QgYSA9IDE7XHJcbmNvbnNvbGUubG9nKGEgKyBiKTsiXSwibmFtZXMiOltdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///44\n\n}"
+          "{const a = 1;\r\nconsole.log(a + b);//# sourceURL=[module]\n//# sourceMappingURL/* 防止报错 */=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiNDQuanMiLCJtYXBwaW5ncyI6IkFBQUE7QUFDQSIsInNvdXJjZXMiOlsid2VicGFjazovL3dlYnBhY2sxLy4vc3JjL2luZGV4LmpzP2I2MzUiXSwic291cmNlc0NvbnRlbnQiOlsiY29uc3QgYSA9IDE7XHJcbmNvbnNvbGUubG9nKGEgKyBiKTsiXSwibmFtZXMiOltdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///44\n\n}"
         );
       },
     },
@@ -290,7 +290,7 @@ eval除了可以作为值，还可以作为前缀，例如`devtool: 'eval-source
 })();
 ```
 
-首先解析一下里面的SourceMap数据，内容如下：
+看生成代码中源码也是被eval包裹的，但在后面出现了三条注释，其中一条是sourceMappingURL，也就是SourceMap数据。两条是sourceURL，其中第一条`sourceURL=[module]`是没有用处的，我尝试过是否删除这条对现象没有影响，应该是被第二条覆盖了。我们先来解析一下里面的SourceMap数据，内容如下：
 
 ```json
 {
@@ -312,6 +312,14 @@ eval除了可以作为值，还可以作为前缀，例如`devtool: 'eval-source
 ![图片](/2025/devtool-7.png)
 
 ![图片](/2025/devtool-8.png)
+
+打开浏览器，发现此时错误信息是经过转换的，定位到了源码文件，但是仅定位到了行，没有具体到错误的列位置。而且右侧除了出现源码和生成代码外，还出现了另一个叫做44的文件。这里我们结合生成代码和浏览器现象，一起分析一下：
+
+![图片](/2025/devtool-9.png)
+
+index.js是源码，经过WebPack打包生成了mian.js。其中包含了eval内代码和SourceMap数据。这部分代码由于包含注释sourceURL，因此被浏览器展示为独立的文件44。由于sourceMappingURL在eval内代码中，因此这个SourceMap被认为是源码index.js和eval内代码的转换关系，并不是index.js与mian.js的转换关系。
+
+至于为什么但是仅定位到了行，我们看SourceMap解析后的数据，发现它仅仅是将每行关联起来，没有详细的记录每个标识符的转换关系。因此才只定位到行号。至于为合适呢么这么做，这是因为性能考虑，毕竟eval内代码也是将源码直接拿过来用，因此也就不费力生成高质量的SourceMap了。
 
 ## ...值
 
