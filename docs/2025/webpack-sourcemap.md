@@ -216,7 +216,7 @@ console.log(1+b);
 ![图片](/2025/devtool-3.png)
 
 ## 值hidden-前缀
-配置中可以增加hidden-前缀，表示生成的SourceMap，但是在源码中并不生成引用注释。这里以`devtool: 'hidden-source-map`为例生成试试。
+配置中可以增加hidden-前缀，表示生成SourceMap，但是在源码中并不生成引用注释。这里以`devtool: 'hidden-source-map`为例生成试试。
 
 ```js
 // main.js
@@ -321,6 +321,36 @@ index.js是源码，经过WebPack打包生成了mian.js。其中包含了eval内
 
 至于为什么但是仅定位到了行，我们看SourceMap解析后的数据，发现它仅仅是将每行关联起来，没有详细的记录每个标识符的转换关系。因此才只定位到行号。至于为合适呢么这么做，这是因为性能考虑，毕竟eval内代码也是将源码直接拿过来用，因此也就不费力生成高质量的SourceMap了。
 
+## 值cheap-前缀
+配置中可以增加cheap-前缀，表示生成简略版的SourceMap，只有行号没有列号。这里以`devtool: 'cheap-source-map`为例生成试试。
+
+```js
+// main.js
+console.log(1+b);
+//# sourceMappingURL/* 防止报错 */=main.js.map
+
+// main.js.map
+{
+  "version": 3,
+  "file": "main.js",
+  "mappings": "AACA",
+  "sources": ["webpack://webpack1/./src/index.js"],
+  "sourcesContent": ["const a = 1;\r\nconsole.log(a + b);"],
+  "names": [],
+  "sourceRoot": ""
+}
+
+/* 解析后位置关系数据
+生成代码行1  列0  源代码行2  列0  源名称-            源文件:webpack://webpack1/src/index.js
+*/
+```
+
+可以看到，正常生成了代码与SourceMap文件，但是SourceMap中却只有一条行对行的转换关系，没有列信息，更没有标识符。我们在浏览器中看一下效果：
+
+![图片](/2025/devtool-10.png)
+
+可以看到，与`devtool: 'source-map`的效果不同，它的错误指向的是源码中的一整行，并不精确。为什么明明有更精确的选项，却存在这种模糊的SourceMap数据呢？这是因为它虽然信息模糊，但生成速度更快，可以适用于开发模式或者追求速度的场景。
+
 ## ...值
 
 ## Rule.extractSourceMap
@@ -332,6 +362,11 @@ index.js是源码，经过WebPack打包生成了mian.js。其中包含了eval内
 ## sourceURL
 
 ## webpack://和webpack-internal://
+
+## 总结
+
+
+
 
 ## 参考
 - 快速定位源码问题：SourceMap的生成/使用/文件格式与历史\
