@@ -351,7 +351,229 @@ console.log(1+b);
 
 可以看到，与`devtool: 'source-map`的效果不同，它的错误指向的是源码中的一整行，并不精确。为什么明明有更精确的选项，却存在这种模糊的SourceMap数据呢？这是因为它虽然信息模糊，但生成速度更快，可以适用于开发模式或者追求速度的场景。
 
-## ...值
+## 值module-前缀
+配置中可以增加module-前缀，可以实现SourceMap映射生成的功能。与这个场景非常相似的例子，我们在source-map包的SourceMapGenerator对象中的applySourceMap方法中描述过。这个场景是将已生成的代码作为源代码，继续生成代码，同时生成SourceMap，实现最终生成代码与最开始的源代码的位置关系映射。这个场景经常用于希望关联npm包中的SourceMap，进行错误排查或调试使用。Webpack限制module-前缀必须与cheap-前缀一起使用，因此我们以`devtool: 'cheap-module-source-map`生成试试。
+
+### 模拟npm包
+这里有两步，第一步我们模拟一个npm包的打包并生成SourceMap。这里我们使用前面【创建Webpack示例】中的方法创建新一个项目，项目名称为project1。源码文件改名为index2.js（不和主示例项目用同一个文件名），Webpack配置文件webpack.config.js有改动：
+
+```js
+// index2.js
+const a = 1;
+console.log(a, b);
+
+// webpack.config.js
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  mode: 'production', // 生产模式
+  entry: './src/index2.js', // 源码入口
+  output: {
+    filename: 'project1.js', // 生成文件名
+    path: path.resolve(__dirname, 'dist'),  // 生成文件目录
+    clean: true, // 生成前删除dist目录内容
+  },
+  devtool: 'source-map'
+};
+```
+
+我们只需要它生成的Javascript代码，并不需要HTML，因此就不生成了。这里并不限制SourceMap数据类型，我们生成一个最简单的`devtool: 'source-map`。生成的结果如下：
+
+```js
+// project1.js
+console.log(1,b);
+//# sourceMappingURL/* 防止报错 */=project1.js.map
+
+// project1.js.map
+{
+  "version": 3,
+  "file": "project1.js",
+  "mappings": "AACAA,QAAQC,IADE,EACKC",
+  "sources": ["webpack://webpack1/./src/index.js"],
+  "sourcesContent": ["const a = 1;\r\nconsole.log(a, b);"],
+  "names": ["console", "log", "b"],
+  "sourceRoot": ""
+}
+
+/* 解析后位置关系数据
+生成代码行1  列0  源代码行2  列0  源名称console      源文件:webpack://webpack1/src/index.js
+生成代码行1  列8  源代码行2  列8  源名称log          源文件:webpack://webpack1/src/index.js
+生成代码行1  列12 源代码行1  列10 源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行1  列14 源代码行2  列15 源名称b            源文件:webpack://webpack1/src/index.js
+*/
+```
+
+这里我们把package.json里面的main属性改成project1.js，它即是这个包的入口文件；增加"type": "module"，表示是一个ESModule的包。这里不污染npm仓库，就不发包了。我们在主示例项目的根目录中新建project1文件夹，然后将package.json, 以及dist目录里面的文件都放进去。最后主示例项目的目录结构如下：
+
+```
+|-- webpack1
+    |-- mapAnalysis.js
+    |-- package-lock.json
+    |-- package.json
+    |-- webpack.config.js
+    |-- dist
+    |   |-- index.html
+    |   |-- main.js
+    |   |-- main.js.map
+    |-- project1
+    |   |-- package.json
+    |   |-- project1.js
+    |   |-- project1.js.map
+    |-- src
+        |-- index.js
+```
+
+### 主示例不使用module-前缀
+修改主示例中的index.js，引入project1包中的代码，否则project1包的代码不会被打包进来。
+
+Webpack解析已有的SourceMap文件需要loader。首先命令行执行`npm install source-map-loader --save-dev`安装依赖，然后修改Webpack配置文件webpack.config.js。注意这里我们首先使用`devtool: "cheap-source-map"`试一下效果。这里关闭了代码压缩，实测打开的时候使用cheap-前缀不会生成SourceMap数据。
+
+```js
+// index.js
+import "../project1";
+
+const c = 3;
+console.log(c, d);
+
+// webpack.config.js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  optimization: {
+    minimize: false, // 关闭代码压缩
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "jzplp的SourceMap实验",
+    }),
+  ],
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: "source-map-loader",
+      },
+    ],
+  },
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
+  },
+  devtool: "cheap-source-map",
+};
+```
+
+这里我们生成的代码和SourceMap数据如下：
+
+```js
+// mian.js
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+
+;// ./project1/project1.js
+console.log(1,b);
+
+;// ./src/index.js
+
+
+const c = 3;
+console.log(c, d);
+
+/******/ })()
+;
+//# sourceMappingURL/* 防止报错 */=main.js.map
+
+// main.js.map
+{
+  "version": 3,
+  "file": "main.js",
+  "mappings": ";;;;AAAA;;;ACAA;AACA;AACA;AACA",
+  "sources": [
+    "webpack://webpack1/./project1/project1.js",
+    "webpack://webpack1/./src/index.js"
+  ],
+  "sourcesContent": [
+    "console.log(1,b);\n",
+    "import \"../project1\";\r\n\r\nconst c = 3;\r\nconsole.log(c, d);\r\n"
+  ],
+  "names": [],
+  "sourceRoot": ""
+}
+
+/* 解析后位置关系数据
+生成代码行5  列0  源代码行1  列0  源名称-            源文件:webpack://webpack1/project1/project1.js
+生成代码行8  列0  源代码行1  列0  源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行9  列0  源代码行2  列0  源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行10 列0  源代码行3  列0  源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行11 列0  源代码行4  列0  源名称-            源文件:webpack://webpack1/src/index.js
+*/
+```
+
+通过SourceMap数据可以看到，使用cheap-source-map，报错信息是关键到npm包中的生成文件project1.js中的，并没有使用project1.js.map数据。我们在浏览器看下效果。
+
+![图片](/2025/devtool-11.png)
+
+可以看到错误被识别为了project1.js内部的，我们主项目SourceMap数据起作用了，但是没有关联到project1中的源码。
+
+### 主示例使用module-前缀
+修改Webpack配置为`devtool: 'cheap-module-source-map`，然后重新生成代码。
+
+```js
+// mian.js
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+
+;// ./project1/project1.js
+console.log(1,b);
+
+;// ./src/index.js
+
+
+const c = 3;
+console.log(c, d);
+
+/******/ })()
+;
+//# sourceMappingURL/* 防止报错 */=main.js.map
+
+// main.js.map
+{
+  "version": 3,
+  "file": "main.js",
+  "mappings": ";;;;AACA;;;ACDA;AACA;AACA;AACA",
+  "sources": [
+    "webpack://webpack1/webpack1/./src/index2.js",
+    "webpack://webpack1/./src/index.js"
+  ],
+  "sourcesContent": [
+    "const a = 1;\r\nconsole.log(a, b);",
+    "import \"../project1\";\r\n\r\nconst c = 3;\r\nconsole.log(c, d);\r\n"
+  ],
+  "names": [],
+  "sourceRoot": ""
+}
+
+/* 解析后位置关系数据
+生成代码行5  列0  源代码行2  列0  源名称-            源文件:webpack://webpack1/webpack1/src/index2.js
+生成代码行8  列0  源代码行1  列0  源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行9  列0  源代码行2  列0  源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行10 列0  源代码行3  列0  源名称-            源文件:webpack://webpack1/src/index.js
+生成代码行11 列0  源代码行4  列0  源名称-            源文件:webpack://webpack1/src/index.js
+*/
+```
+
+生成的mian.js依然是一致的，可以忽略。但是main.js.map却不一样了。通过解析可以看到，它直接与project1中的源码文件index2.js产生了关系，因此Webpack内部将project1.js.map利用上了，因此可以直接定位到npm包中的源码。我们看一下浏览器效果：
+
+![图片](/2025/devtool-12.png)
+
+可以看到，错误直接定位到了源文件index2.js。右侧浏览器目录中的project1.js消失了，取代的是index2.js的源码和错误位置信息。通过这种方式，可以排查和调试npm包中的错误。
+
+## 混合devtool
 
 ## Rule.extractSourceMap
 
