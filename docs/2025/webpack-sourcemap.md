@@ -427,7 +427,9 @@ console.log(1,b);
 ### 主示例不使用module-前缀
 修改主示例中的index.js，引入project1包中的代码，否则project1包的代码不会被打包进来。
 
-Webpack解析已有的SourceMap文件需要loader。首先命令行执行`npm install source-map-loader --save-dev`安装依赖，然后修改Webpack配置文件webpack.config.js。注意这里我们首先使用`devtool: "cheap-source-map"`试一下效果。这里关闭了代码压缩，实测打开的时候使用cheap-前缀不会生成SourceMap数据。
+Webpack解析已有的SourceMap文件需要loader。首先命令行执行`npm install source-map-loader --save-dev`安装依赖，然后修改Webpack配置文件webpack.config.js。使用Rule.extractSourceMap选项也能解析已有的SourceMap文件，可以看注释。
+
+注意这里我们首先使用`devtool: "cheap-source-map"`试一下效果。这里关闭了代码压缩，实测打开的时候使用cheap-前缀不会生成SourceMap数据。
 
 ```js
 // index.js
@@ -457,6 +459,12 @@ module.exports = {
         test: /\.js$/,
         use: "source-map-loader",
       },
+      /*
+      {
+        test: /\.m?js$/,
+        extractSourceMap: true,
+      },
+      */
     ],
   },
   output: {
@@ -576,13 +584,23 @@ console.log(c, d);
 ![图片](/2025/devtool-13.png)
 
 
-## 混合devtool
+## 混合前缀值
+前面我们介绍了devtool中的各种前缀值，这些前缀值可以互相组合成几十种选项。选项需要符合这个规则：`[inline-|hidden-|eval-][nosources-][cheap-[module-]]source-map`。例如eval-cheap-module-source-map, hidden-nosources-cheap-source-map等等，这里就不完整列举了。
 
-## Rule.extractSourceMap
+这些值分别满足前面这些前缀值的相关特性。在实际开发中，会根据不同的场景选择不同的模式，这里我们简单列举一下不同的前缀符合的特点，详细的可以参考Webpack文档。
+
+| 前缀值 | 构建速度 | 是否适合生产模式 | SourceMap质量 |
+| - | - | - | - |
+| eval | 快 | 否 | 差 |
+| cheap | 快 | 否 | 差 |
+| inline | - | 否 | - |
+| cheap | 快 | 否 | 差 |
+| nosources | - | 是 | - |
+| hidden | - | 是 | - |
+| inline | - | 否 | - |
+| module | 慢 | 否 | - |
 
 ## SourceMapDevToolPlugin
-
-## source-map-loader
 
 ## sourceURL
 
