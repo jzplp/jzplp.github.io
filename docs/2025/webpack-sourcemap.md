@@ -724,3 +724,5 @@ try {
   https://webpack.js.org/loaders/source-map-loader
 - 彻底搞懂 Webpack 的 sourcemap 配置原理\
   https://juejin.cn/post/7136049758837145630
+- 动态调试JS脚本文件：（JS源映射 - sourceURL）与 debugger\
+  https://blog.csdn.net/qq_16559905/article/details/78346717
