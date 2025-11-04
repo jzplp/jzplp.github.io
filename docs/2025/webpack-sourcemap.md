@@ -600,7 +600,69 @@ console.log(c, d);
 | inline | - | 否 | - |
 | module | 慢 | 否 | - |
 
-## SourceMapDevToolPlugin
+## SourceMapDevToolPlugin插件
+SourceMapDevToolPlugin是一个Webpack插件，对比devtool，它可以更精细的控制SourceMap生成行为。详细说明可以看参考中的SourceMapDevToolPlugin文档，这里我们列举几个简单场景。由于生成的SOurceMap内容和上面相似，这里就不重复写了，只描述配置项和效果。
+
+```js
+module.exports = {
+  // ...
+  devtool: false,
+  plugins: [new webpack.SourceMapDevToolPlugin({})],
+};
+```
+
+这是默认场景，由于没有指定SourceMap的filename，因此不生成独立文件，生成效果和`devtool: inline-source-map`一致。
+
+```js
+module.exports = {
+  // ...
+  devtool: false,
+  plugins: [new webpack.SourceMapDevToolPlugin({
+    filename: '[file].map',
+  })],
+};
+```
+
+指定了filename，生成独立的SourceMap文件，生成效果和`devtool: source-map`一致。
+
+```js
+module.exports = {
+  // ...
+  devtool: false,
+  plugins: [new webpack.SourceMapDevToolPlugin({
+    filename: 'mapDir/[file].map',
+  })],
+};
+```
+
+将所有生成的SourceMap文件放到独立的mapDir目录中。这是devtool选项无法做到的。
+
+
+```js
+module.exports = {
+  // ...
+  devtool: false,
+  plugins: [new webpack.SourceMapDevToolPlugin({
+    filename: '[file].map',
+    append: '\n//# sourceMappingURL=https://jzplp.com/sourcemap/[url]',
+  })],
+};
+```
+
+修改生成代码中记录的SourceMap文件地址，适用于SourceMap的url与生成代码有区别的场景。
+
+```js
+module.exports = {
+  // ...
+  devtool: false,
+  plugins: [new webpack.SourceMapDevToolPlugin({
+    filename: '[file].map',
+    columns : 'false',
+  })],
+};
+```
+
+生成SourceMap的时候，不记录SourceMap的列信息。类似于`devtool: 'cheap-source-map`的效果。
 
 ## sourceURL
 
@@ -626,3 +688,5 @@ console.log(c, d);
   https://webpack.js.org/loaders/source-map-loader
 - 彻底搞懂 Webpack 的 sourcemap 配置原理\
   https://juejin.cn/post/7136049758837145630
+- Webpack文档 SourceMapDevToolPlugin\
+  https://webpack.js.org/plugins/source-map-dev-tool-plugin
