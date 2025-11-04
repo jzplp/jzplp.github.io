@@ -765,8 +765,9 @@ module.exports = {
 生成SourceMap的时候，不记录SourceMap的列信息。类似于`devtool: 'cheap-source-map`的效果。
 
 ## 总结
+这篇文章总结了Webpack中生成SourceMap数据的配置与具体效果，尤其详细描述了各种devtool配置项的逻辑。devtool虽然有即使中配置，但都是由几个前缀组合而成的，用有几个前缀的特性。还介绍了SourceMapDevToolPlugin插件，相比于devtool可以更灵活的生成SourceMap。
 
-
+通过上面的各种例子，也可以看到生成的SourceMap数据并不是完全符合SourceMap规范，而是有一些变化，比如没有列信息，没有标识符名称等等。而浏览器也能适应这些变化，例如没有列信息就表示为整行错误。
 
 ## 参考
 - 快速定位源码问题：SourceMap的生成/使用/文件格式与历史\
