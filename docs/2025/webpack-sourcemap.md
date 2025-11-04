@@ -600,6 +600,106 @@ console.log(c, d);
 | inline | - | 否 | - |
 | module | 慢 | 否 | - |
 
+## sourceURL注释
+在前面eval相关配置中，我们看到了sourceURL注释，指向一个地址。浏览器会解析这个注释，把这个地址作为这个代码的源文件。但与SourceMap不同的是，sourceMappingURL会真的请求文件，sourceURL并不会请求，而是把代码本身当作文件内容。这里我们尝试script标签和eval两种请求。
+
+### script标签
+首先我们构造简单的场景，里面包含三个script标签的例子a,b和c。首先是index.html:
+
+```html
+<html>
+  <script src="./a.js"></script>
+  <script>
+    try {
+      console.log("jzplp", b);
+    } catch (e) {
+      console.log(e);
+    }
+  </script>
+  <script>
+    //# sourceURL=./c.js
+    try {
+      console.log("jzplp", c);
+    } catch (e) {
+      console.log(e);
+    }
+  </script>
+</html>
+```
+
+因为需要同时输出三个错误，因此我们将错误捕获之后输出，这样依然可以关联到源文件。具体可以看[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)中的浏览器浏览器使用SourceMap部分。然后是两个独立的js文件，a.js和c.js。其中a是被HTML直接引用的，c并没有被引用，只是用来尝试有没有被请求。
+
+```js
+// a.js
+try {
+  console.log("jzplp", a);
+} catch (e) {
+  console.log(e);
+}
+
+// c.js
+try {
+  console.log("jzplp", c);
+} catch (e) {
+  // is c
+  console.log(e);
+}
+```
+
+然后我们在浏览器中打开index.html文件，在Console中查看输出结果，以及点击文件名称查看文件：
+
+![图片](/2025/devtool-14.png)
+
+- 例子a：标签直接引用文件，浏览器加载的也是文件，因此报错栈信息和浏览器文件中都能展示正确的文件。
+- 例子b：标签中直接写代码，浏览器无法与独立文件相关联，因此认为是index.html中的一部分。
+- 例子c：标签中直接写代码，但是增加了sourceURL注释。浏览器认为它来源于独立的文件，因此把标签中的内容作为独立的c.js文件展示。
+
+注意此时查看Developer resources，发现其中没有c.js的文件请求，文件内容也与独立的c.js不一致。因此，浏览器读取sourceURL注释后，并不会真的请求源文件，而只是把当前代码（在这里是标签内代码）作为独立文件展示。而sourceURL值作为文件路径。
+
+### eval
+我们最开始是在Webpack的eval中发现sourceURL的，因此eval肯定也如同script标签一样支持sourceURL。这里我们再举d,e,f三个例子：
+
+```html
+<html>
+  <script>
+    eval(`
+    try {
+      console.log("jzplp", d);
+    } catch (e) {
+      console.log(e);
+    }
+    `);
+  </script>
+  <script>
+    eval(`
+    //# sourceURL=./e.js
+    try {
+      console.log("jzplp", e);
+    } catch (e) {
+      console.log(e);
+    }
+    `);
+  </script>
+  <script>
+    //# sourceURL=./f1.js
+    eval(`
+    //# sourceURL=./f2.js
+    try {
+      console.log("jzplp", f);
+    } catch (e) {
+      console.log(e);
+    }
+    `);
+  </script>
+</html>
+```
+
+![图片](/2025/devtool-15.png)
+
+- 例子d：直接写eval，浏览器无法关联文件，认为是index2.html中的一部分。
+- 例子b：eval中增加了sourceURL注释，浏览器认为它来源于独立的文件，因此把eval中的内容作为独立的e.js文件展示。（图中左下）
+- 例子c：标签和eval都有sourceURL注释。浏览器认为它们都是来源于独立的文件，因此文件相当于是嵌套引用的，f1内部引用了f2：index2.html -> f1.js -> f2.js。（图中右边）
+
 ## SourceMapDevToolPlugin插件
 SourceMapDevToolPlugin是一个Webpack插件，对比devtool，它可以更精细的控制SourceMap生成行为。详细说明可以看参考中的SourceMapDevToolPlugin文档，这里我们列举几个简单场景。由于生成的SOurceMap内容和上面相似，这里就不重复写了，只描述配置项和效果。
 
@@ -664,12 +764,7 @@ module.exports = {
 
 生成SourceMap的时候，不记录SourceMap的列信息。类似于`devtool: 'cheap-source-map`的效果。
 
-## sourceURL
-
-## webpack://和webpack-internal://
-
 ## 总结
-
 
 
 
@@ -688,5 +783,7 @@ module.exports = {
   https://webpack.js.org/loaders/source-map-loader
 - 彻底搞懂 Webpack 的 sourcemap 配置原理\
   https://juejin.cn/post/7136049758837145630
+- 动态调试JS脚本文件：（JS源映射 - sourceURL）与 debugger\
+  https://blog.csdn.net/qq_16559905/article/details/78346717
 - Webpack文档 SourceMapDevToolPlugin\
   https://webpack.js.org/plugins/source-map-dev-tool-plugin
