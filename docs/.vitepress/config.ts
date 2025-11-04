@@ -15,7 +15,7 @@ const sidebarLists = [
         link: "/2025/sourcemap-principle",
       },
       {
-        text: "Webpack中的SourceMap（未完成）",
+        text: "Webpack中各种devtool配置的含义与SourceMap生成逻辑",
         link: "/2025/webpack-sourcemap",
       },
       {
