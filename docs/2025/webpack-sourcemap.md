@@ -1,13 +1,13 @@
 # Webpack中的devtool SourceMap（未完成）
 ## 简述
-在之前的文章中，我们对SourceMap进行了简要的了解:[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)。SourceMap的出现，是为了应对前端工程化工具在转义，打包，压缩等操作后，代码变化非常大，出错后排查报错位置困难的问题，原理是记录源和生成代码中标识符的位置关系。
+在之前的文章中，我们对SourceMap进行简单的了解：[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)。SourceMap的出现，是为了应对前端工程化工具在转义，打包，压缩等操作后，代码变化非常大，出错后排查报错位置困难的问题，原理是记录源和生成代码中标识符的位置关系。
 
-Webpack是一个打包工具，在修改源代码的同时，也会生成SourceMap文件。Webpack提供了几十种生成的SourceMap的生成方式，生成的文件内容和性能各不相同，这次我们就来了解下Webpack中的SourceMap配置。
+Webpack是目前流行的前端打包工具，在修改源代码的同时，也会生成SourceMap文件。Webpack提供了几十种生成的SourceMap的生成方式，生成的文件内容和性能各不相同，这次我们就来了解下Webpack中的SourceMap配置。
 
 Webpack中的devtool配置不仅涉及SourceMap，还与代码生成，开发/生产模式有关系。本文更多使用生产模式，更在意SourceMap数据本身，而不是Webpack构建过程。
 
 ## 创建Webpack示例
-首先创建一个使用Webpack打包的基础示例，后面各种配置都基于这个示例修改。首先命令行执行：
+创建一个使用Webpack打包的基础示例，后面各种配置都基于这个示例修改。首先命令行执行：
 
 ```sh
 # 创建工程
@@ -16,7 +16,7 @@ npm init -y
 npm install webpack webpack-cli html-webpack-plugin --save-dev
 ```
 
-然后创建文件src/index.js，这就是我们要打包的文件。内容如下：
+然后创建文件src/index.js，这就是我们要打包的文件。内容如下（执行到第二行会出现找不到变量的报错）：
 
 ```js
 const a = 1;
@@ -79,7 +79,7 @@ devtool表示SourceMap的生成配置，后面主要修改的就是它。它为�
 ```
 
 ## 解析SourceMap工具
-这里还需要一段解析SourceMap文件的代码，方便后续拿到map文件后分析数据。这里使用sourcemap包，详细描述可以看[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)中的source-map包部分。创建一个mapAnalysis.js文件，内容如下：
+这里还需要一段解析SourceMap文件的代码，方便后续拿到map文件后分析数据。这里使用source-map包，详细描述可以看[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)。创建一个mapAnalysis.js文件，内容如下：
 
 ```js
 const sourceMap = require("source-map");
@@ -121,7 +121,7 @@ jzplpfun();
 ```
 
 ## 值(none)
-(none)表示不设置devtool，也就是不生成SourceMap数据。（注意`devtool: 'none`是错误值）。我们生成试一下，作为对比：
+(none)表示不设置devtool，也就是不生成SourceMap数据。（注意`devtool: 'none'`是错误值）。我们生成试一下，作为对比：
 
 ```js
 // main.js
@@ -211,7 +211,7 @@ console.log(1+b);
 
 生成的SourceMap数据与前面`devtool: 'source-map'`生成的相比，缺少了sourcesContent属性，这个属性包含的就是源代码内容。
 
-在浏览器中打开页面，看到Console报错中指示的文件为源代码文件index.js，第二行，也就是说SAourceMap数据是生效的。但点击文件名查看，却找不到源代码文件，这是因为我们没提供文件，webpack生成的文件路径`webpack://`浏览器不能使用它来找到文件。
+在浏览器中打开页面，看到Console报错中指示的文件为源代码文件index.js，第二行，也就是说SourceMap数据是生效的。但点击文件名查看，却找不到源代码文件，这是因为我们没提供文件，webpack生成的文件路径`webpack://`浏览器不能使用它来找到文件。
 
 ![图片](/2025/devtool-3.png)
 
@@ -319,7 +319,7 @@ eval除了可以作为值，还可以作为前缀，例如`devtool: 'eval-source
 
 index.js是源码，经过WebPack打包生成了mian.js。其中包含了eval内代码和SourceMap数据。这部分代码由于包含注释sourceURL，因此被浏览器展示为独立的文件44。由于sourceMappingURL在eval内代码中，因此这个SourceMap被认为是源码index.js和eval内代码的转换关系，并不是index.js与mian.js的转换关系。
 
-至于为什么但是仅定位到了行，我们看SourceMap解析后的数据，发现它仅仅是将每行关联起来，没有详细的记录每个标识符的转换关系。因此才只定位到行号。至于为合适呢么这么做，这是因为性能考虑，毕竟eval内代码也是将源码直接拿过来用，因此也就不费力生成高质量的SourceMap了。
+至于为什么但是仅定位到了行，我们看SourceMap解析后的数据，发现它仅仅是将每行关联起来，没有详细的记录每个标识符的转换关系。因此才只定位到行号。至于为什么这么做，这是因为性能考虑，毕竟eval内代码也是将源码直接拿过来用，因此也就不费力生成高质量的SourceMap了。
 
 ## 值cheap-前缀
 配置中可以增加cheap-前缀，表示生成简略版的SourceMap，只有行号没有列号。这里以`devtool: 'cheap-source-map`为例生成试试。
@@ -429,7 +429,7 @@ console.log(1,b);
 
 Webpack解析已有的SourceMap文件需要loader。首先命令行执行`npm install source-map-loader --save-dev`安装依赖，然后修改Webpack配置文件webpack.config.js。使用Rule.extractSourceMap选项也能解析已有的SourceMap文件，可以看注释。
 
-注意这里我们首先使用`devtool: "cheap-source-map"`试一下效果。这里关闭了代码压缩，实测打开的时候使用cheap-前缀不会生成SourceMap数据。
+注意这里我们首先使用`devtool: "cheap-source-map"`试一下效果。这里关闭了代码压缩，实测打开压的时候使用cheap-前缀不会生成SourceMap数据。
 
 ```js
 // index.js
@@ -522,11 +522,11 @@ console.log(c, d);
 */
 ```
 
-通过SourceMap数据可以看到，使用cheap-source-map，报错信息是关键到npm包中的生成文件project1.js中的，并没有使用project1.js.map数据。我们在浏览器看下效果。
+通过SourceMap数据可以看到，使用cheap-source-map，报错信息是关联到npm包中的生成文件project1.js中的，并没有使用project1.js.map数据。我们在浏览器看下效果。
 
 ![图片](/2025/devtool-11.png)
 
-可以看到错误被识别为了project1.js内部的，我们主项目SourceMap数据起作用了，但是没有关联到project1中的源码。
+可以看到错误被识别到了project1.js文件中，我们主项目SourceMap数据起作用了，但是没有关联到project1中的源码。
 
 ### 主示例使用module-前缀
 修改Webpack配置为`devtool: 'cheap-module-source-map`，然后重新生成代码。
@@ -587,7 +587,7 @@ console.log(c, d);
 ## 混合前缀值
 前面我们介绍了devtool中的各种前缀值，这些前缀值可以互相组合成几十种选项。选项需要符合这个规则：`[inline-|hidden-|eval-][nosources-][cheap-[module-]]source-map`。例如eval-cheap-module-source-map, hidden-nosources-cheap-source-map等等，这里就不完整列举了。
 
-这些值分别满足前面这些前缀值的相关特性。在实际开发中，会根据不同的场景选择不同的模式，这里我们简单列举一下不同的前缀符合的特点，详细的可以参考Webpack文档。
+这些值分别满足前面这些前缀值的相关特性。在实际开发中，会根据不同的场景选择不同的模式，这里我们简单列举一下不同前缀符合的特点，详细的可以参考Webpack文档。
 
 | 前缀值 | 构建速度 | 是否适合生产模式 | SourceMap质量 |
 | - | - | - | - |
@@ -601,10 +601,10 @@ console.log(c, d);
 | module | 慢 | 否 | - |
 
 ## sourceURL注释
-在前面eval相关配置中，我们看到了sourceURL注释，指向一个地址。浏览器会解析这个注释，把这个地址作为这个代码的源文件。但与SourceMap不同的是，sourceMappingURL会真的请求文件，sourceURL并不会请求，而是把代码本身当作文件内容。这里我们尝试script标签和eval两种请求。
+在前面eval相关配置中，我们看到了sourceURL注释，指向一个地址。浏览器会解析这个注释，把这个地址作为这个代码的源文件。但与SourceMap不同的是，sourceMappingURL会真的请求文件，sourceURL并不会请求，而是把代码本身当作文件内容。这里我们尝试script标签和eval两种场景。
 
 ### script标签
-首先我们构造简单的场景，里面包含三个script标签的例子a,b和c。首先是index.html:
+首先我们构造一段代码，里面包含三个script标签的例子a,b和c。首先是index.html:
 
 ```html
 <html>
@@ -627,7 +627,7 @@ console.log(c, d);
 </html>
 ```
 
-因为需要同时输出三个错误，因此我们将错误捕获之后输出，这样依然可以关联到源文件。具体可以看[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)中的浏览器浏览器使用SourceMap部分。然后是两个独立的js文件，a.js和c.js。其中a是被HTML直接引用的，c并没有被引用，只是用来尝试有没有被请求。
+因为需要同时输出三个错误，因此我们将错误捕获之后输出，这样依然可以关联到源文件。具体可以看[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)文章中的浏览器使用SourceMap部分。然后是两个独立的js文件，a.js和c.js。其中a是被HTML直接引用的，c并没有被引用，只是用来尝试有没有被请求。
 
 ```js
 // a.js
@@ -701,7 +701,7 @@ try {
 - 例子c：标签和eval都有sourceURL注释。浏览器认为它们都是来源于独立的文件，因此文件相当于是嵌套引用的，f1内部引用了f2：index2.html -> f1.js -> f2.js。（图中右边）
 
 ## SourceMapDevToolPlugin插件
-SourceMapDevToolPlugin是一个Webpack插件，对比devtool，它可以更精细的控制SourceMap生成行为。详细说明可以看参考中的SourceMapDevToolPlugin文档，这里我们列举几个简单场景。由于生成的SOurceMap内容和上面相似，这里就不重复写了，只描述配置项和效果。
+SourceMapDevToolPlugin是一个Webpack插件，对比devtool，它可以更精细的控制SourceMap生成行为。详细说明可以看参考中的SourceMapDevToolPlugin文档，这里我们列举几个简单场景。由于生成的SourceMap内容和上面相似，这里就不重复写了，只描述配置项和效果。
 
 ```js
 module.exports = {
@@ -765,7 +765,7 @@ module.exports = {
 生成SourceMap的时候，不记录SourceMap的列信息。类似于`devtool: 'cheap-source-map`的效果。
 
 ## 总结
-这篇文章总结了Webpack中生成SourceMap数据的配置与具体效果，尤其详细描述了各种devtool配置项的逻辑。devtool虽然有即使中配置，但都是由几个前缀组合而成的，用有几个前缀的特性。还介绍了SourceMapDevToolPlugin插件，相比于devtool可以更灵活的生成SourceMap。
+这篇文章总结了Webpack中生成SourceMap数据的配置与具体效果，尤其详细描述了各种devtool配置项的逻辑。devtool虽然有几十个配置选项，但都是由几个前缀组合而成的，拥有对应前缀的特性。还介绍了SourceMapDevToolPlugin插件，相比于devtool可以更灵活的生成SourceMap。
 
 通过上面的各种例子，也可以看到生成的SourceMap数据并不是完全符合SourceMap规范，而是有一些变化，比如没有列信息，没有标识符名称等等。而浏览器也能适应这些变化，例如没有列信息就表示为整行错误。
 
