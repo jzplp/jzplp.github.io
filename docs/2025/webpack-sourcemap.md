@@ -593,8 +593,6 @@ console.log(c, d);
 | - | - | - | - |
 | eval | 快 | 否 | 差 |
 | cheap | 快 | 否 | 差 |
-| inline | - | 否 | - |
-| cheap | 快 | 否 | 差 |
 | nosources | - | 是 | - |
 | hidden | - | 是 | - |
 | inline | - | 否 | - |
@@ -698,7 +696,7 @@ try {
 
 - 例子d：直接写eval，浏览器无法关联文件，认为是index2.html中的一部分。
 - 例子b：eval中增加了sourceURL注释，浏览器认为它来源于独立的文件，因此把eval中的内容作为独立的e.js文件展示。（图中左下）
-- 例子c：标签和eval都有sourceURL注释。浏览器认为它们都是来源于独立的文件，因此文件相当于是嵌套引用的，f1内部引用了f2：index2.html -> f1.js -> f2.js。（图中右边）
+- 例子f：标签和eval都有sourceURL注释。浏览器认为它们都是来源于独立的文件，因此文件相当于是嵌套引用的，f1内部引用了f2：index2.html -> f1.js -> f2.js。（图中右边）
 
 ## SourceMapDevToolPlugin插件
 SourceMapDevToolPlugin是一个Webpack插件，对比devtool，它可以更精细的控制SourceMap生成行为。详细说明可以看参考中的SourceMapDevToolPlugin文档，这里我们列举几个简单场景。由于生成的SourceMap内容和上面相似，这里就不重复写了，只描述配置项和效果。
