@@ -71,11 +71,44 @@ throw o}
 生成代码行2  列7  源代码行6  列0  源名称-            源文件:src/index.js
 ```
 
+注意source-map中的行号从1开始，列号从0开始。我们后面都按照这个标准来计算。
+
+## 整理对应关系
+首先第一步，我们分析源代码和生成代码，将对应关系整理出来。首先我们整理一下对应关系拥有的字段，这些字段值对于SourceMap转换来说是必须的。
+
+* 源代码文件名
+* 源代码行号
+* 源代码列号
+* 源代码标识符
+* 生成代码文件名
+* 生成代码行号
+* 生成代码列号
+* 生成代码标识符
+
+| 源代码文件名 | 源代码标识符 | 源代码行号 | 源代码列号  | 生成代码文件名 | 生成代码标识符 | 生成代码行号 | 生成代码列号 |
+| - | - | - | - | - | - | - | - |
+| src/index.js | sum | 2 | 8 | dist.js | o | 1 | 10 |
+| src/index.js | jzplp | 2 | 14 | dist.js | jzplp | 1 | 12 |
+| src/index.js | err | 3 | 9 | dist.js | o | 1 | 27 |
+| src/index.js | console | 4 | 2 | dist.js | console | 1 | 30 |
+| src/index.js | log | 4 | 10 | dist.js | log | 1 | 38 |
+| src/index.js | err | 4 | 14 | dist.js | o | 1 | 42 |
+| src/index.js | err | 5 | 8 | dist.js | o | 2 | 6 |
+
+可以看到这个表格和上面我们解析SourceMap数据得到的值是一样的。但是前面SourceMap中还多了一些没有标识符的对应关系数据，通过对比了解那是代码中其它内容的对应，这里我们忽略，按照标准的标识符关系来计算。
+
+## 文件名精简
+
+## 源代码标识符精简
+
+
+
 ## SourceMap生成原理
 
-## 实际从生成到解析的例子
 
-最后用一个简单的例子实际生成SourceMap到解析SourceMap
+## 生成测试
+用我们自己计算得到的SourceMap数据解析和在浏览器实际使用试试。
+
 
 ## 参考
 - 快速定位源码问题：SourceMap的生成/使用/文件格式与历史\
@@ -84,3 +117,5 @@ throw o}
   https://jzplp.github.io/2025/webpack-sourcemap.html
 - Terser 文档
   https://terser.org/
+- sourcemap 这么讲，我彻底理解了\
+  https://juejin.cn/post/7199895323187347514

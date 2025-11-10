@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
-        text: "SourceMap数据生成原理（没开始）",
+        text: "SourceMap数据生成原理",
         link: "/2025/sourcemap-principle",
       },
       {
