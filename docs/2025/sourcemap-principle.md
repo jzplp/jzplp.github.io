@@ -52,23 +52,25 @@ throw o}
 </html>
 ```
 
-最后还有一个解析SourceMap数据的工具，这里我们直接采用这篇文章中使用的解析SourceMap工具代码即可，[Webpack中各种devtool配置的含义与SourceMap生成逻辑](https://jzplp.github.io/2025/webpack-sourcemap.html)。注意要修改下文件路径，这里解析上面生成的SourceMap数据结果如下：
+最后还有一个解析SourceMap数据的工具，这里我们直接采用这篇文章中使用的解析SourceMap工具代码即可，[Webpack中各种devtool配置的含义与SourceMap生成逻辑](https://jzplp.github.io/2025/webpack-sourcemap.html)。注意要修改下文件路径。
+
+source-map中的行号从1开始，列号从0开始。但是我们为了符合SourceMap数据规范，后面所有的标号都从0开始，包括行号和列号。因此我们对代码稍作改造，后面都按照这个标准来计算。这里解析上面生成的SourceMap数据结果如下：
 
 ```
-生成代码行1  列0  源代码行1  列0  源名称-            源文件:src/index.js
-生成代码行1  列4  源代码行2  列2  源名称-            源文件:src/index.js
-生成代码行1  列10 源代码行2  列8  源名称sum          源文件:src/index.js
-生成代码行1  列12 源代码行2  列14 源名称jzplp        源文件:src/index.js
-生成代码行1  列18 源代码行2  列22 源名称-            源文件:src/index.js
-生成代码行1  列20 源代码行3  列0  源名称-            源文件:src/index.js
-生成代码行1  列21 源代码行3  列2  源名称-            源文件:src/index.js
-生成代码行1  列27 源代码行3  列9  源名称err          源文件:src/index.js
-生成代码行1  列30 源代码行4  列2  源名称console      源文件:src/index.js
-生成代码行1  列38 源代码行4  列10 源名称log          源文件:src/index.js
-生成代码行1  列42 源代码行4  列14 源名称err          源文件:src/index.js
-生成代码行2  列0  源代码行5  列2  源名称-            源文件:src/index.js
-生成代码行2  列6  源代码行5  列8  源名称err          源文件:src/index.js
-生成代码行2  列7  源代码行6  列0  源名称-            源文件:src/index.js
+生成代码行0  列0  源代码行0  列0  源名称-            源文件:src/index.js
+生成代码行0  列4  源代码行1  列2  源名称-            源文件:src/index.js
+生成代码行0  列10 源代码行1  列8  源名称sum          源文件:src/index.js
+生成代码行0  列12 源代码行1  列14 源名称jzplp        源文件:src/index.js
+生成代码行0  列18 源代码行1  列22 源名称-            源文件:src/index.js
+生成代码行0  列20 源代码行2  列0  源名称-            源文件:src/index.js
+生成代码行0  列21 源代码行2  列2  源名称-            源文件:src/index.js
+生成代码行0  列27 源代码行2  列9  源名称err          源文件:src/index.js
+生成代码行0  列30 源代码行3  列2  源名称console      源文件:src/index.js
+生成代码行0  列38 源代码行3  列10 源名称log          源文件:src/index.js
+生成代码行0  列42 源代码行3  列14 源名称err          源文件:src/index.js
+生成代码行1  列0  源代码行4  列2  源名称-            源文件:src/index.js
+生成代码行1  列6  源代码行4  列8  源名称err          源文件:src/index.js
+生成代码行1  列7  源代码行5  列0  源名称-            源文件:src/index.js
 ```
 
 注意source-map中的行号从1开始，列号从0开始。我们后面都按照这个标准来计算。
@@ -87,17 +89,46 @@ throw o}
 
 | 源代码文件名 | 源代码标识符 | 源代码行号 | 源代码列号  | 生成代码文件名 | 生成代码标识符 | 生成代码行号 | 生成代码列号 |
 | - | - | - | - | - | - | - | - |
-| src/index.js | sum | 2 | 8 | dist.js | o | 1 | 10 |
-| src/index.js | jzplp | 2 | 14 | dist.js | jzplp | 1 | 12 |
-| src/index.js | err | 3 | 9 | dist.js | o | 1 | 27 |
-| src/index.js | console | 4 | 2 | dist.js | console | 1 | 30 |
-| src/index.js | log | 4 | 10 | dist.js | log | 1 | 38 |
-| src/index.js | err | 4 | 14 | dist.js | o | 1 | 42 |
-| src/index.js | err | 5 | 8 | dist.js | o | 2 | 6 |
+| src/index.js | sum | 1 | 8 | dist.js | o | 0 | 10 |
+| src/index.js | jzplp | 1 | 14 | dist.js | jzplp | 0 | 12 |
+| src/index.js | err | 2 | 9 | dist.js | o | 0 | 27 |
+| src/index.js | console | 3 | 2 | dist.js | console | 0 | 30 |
+| src/index.js | log | 3 | 10 | dist.js | log | 0 | 38 |
+| src/index.js | err | 3 | 14 | dist.js | o | 0 | 42 |
+| src/index.js | err | 4 | 8 | dist.js | o | 1 | 6 |
 
-可以看到这个表格和上面我们解析SourceMap数据得到的值是一样的。但是前面SourceMap中还多了一些没有标识符的对应关系数据，通过对比了解那是代码中其它内容的对应，这里我们忽略，按照标准的标识符关系来计算。
+可以看到这个表格和上面我们解析SourceMap数据得到的值是一样的。但是前面SourceMap中还多了一些没有标识符的对应关系数据，通过对比了解那是代码中其它内容的对应，这里我们忽略，按照标准的标识符关系来计算。此时我们创建一个JSON，存放我们生成的SourceMap数据。现在里面只有版本号：
+
+```json
+{
+  "version": 3,
+}
+```
 
 ## 文件名精简
+首先是生成代码文件名，这个字段无需表示，因为SourceMap数据是从生成文件的注释中指定的，那么SourceMap数据对应的生成文件就是这个指定的文件，无需标明。
+
+然后是源代码文件名，这个我们用一个专门的数组存放，取名叫做sources。此时我们的SourceMap内容如下：
+
+```json
+{
+  "version": 3,
+  "sources": ["src/index.js"],
+}
+```
+
+然后记录表格中的源代码文件名变成数组的下标，从0开始。这时我们的表格变成了这样：
+
+| 源代码文件名 | 源代码标识符 | 源代码行号 | 源代码列号  | 生成代码标识符 | 生成代码行号 | 生成代码列号 |
+| - | - | - | - | - | - | - |
+| 0 | sum | 1 | 8 | o | 0 | 10 |
+| 0 | jzplp | 1 | 14 | jzplp | 0 | 12 |
+| 0 | err | 2 | 9 | o | 0 | 27 |
+| 0 | console | 3 | 2 | console | 0 | 30 |
+| 0 | log | 3 | 10 | log | 0 | 38 |
+| 0 | err | 3 | 14 | o | 0 | 42 |
+| 0 | err | 4 | 8 | o | 1 | 6 |
+
 
 ## 源代码标识符精简
 
