@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
-        text: "SourceMap数据生成原理",
+        text: "SourceMap数据生成核心原理：简化字段与Base64VLQ编码",
         link: "/2025/sourcemap-principle",
       },
       {
