@@ -326,7 +326,7 @@ UACQA,EAAMC,eACLC,GACPC,QAAQC,IAAIF;tCACNA
   https://juejin.cn/post/7199895323187347514
 - Base64编码详解与URL安全的Base64编码\
   https://jzplp.github.io/2021/base64-safe.html
-- JavaScript Source Map 详解
+- JavaScript Source Map 详解\
   https://www.ruanyifeng.com/blog/2013/01/javascript_source_map.html
 - BASE64 VLQ CODEC (COder/DECoder) AND SOURCEMAP V3 / ECMA-426 MAPPINGS PARSER\
   https://www.murzwin.com/base64vlq.html
