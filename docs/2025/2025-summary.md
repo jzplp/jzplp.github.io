@@ -31,6 +31,7 @@ http://localhost:5173/2025/2025-summary.html
 
 ## 技术
 
+### 博客文章
 长文时间太长，不容易阅读，而且容易迷失在细节中。因此今年下半年开始我尽量不写长文，如果一个主题想要描述的内容太长，我就将它分成几篇文章来写，做成一个系列。例如xxx
 
 
@@ -39,7 +40,7 @@ http://localhost:5173/2025/2025-summary.html
 * 前端工程化相关
   * Babel的功能和使用方式，阅读官方文档
   * 前端抽象语法树AST相关知识和工具
-  * SourceMap生成与使用
+  * SourceMap的原理，生成和使用以及Webapck中的SourceMap
   * http-proxy前端代理功能，以及上层的Vite和Webpack代理配置
 * React相关
   * React Router的使用方法，阅读官方文档
