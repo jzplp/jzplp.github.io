@@ -9,5 +9,5 @@
   https://postcss.org/
 - PostCSS 中文文档\
   https://www.postcss.com.cn/
-- gitHub PostCSS\
+- GitHub PostCSS\
   https://github.com/postcss/postcss
