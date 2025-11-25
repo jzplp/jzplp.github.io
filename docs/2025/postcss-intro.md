@@ -60,6 +60,16 @@ postcss([autoprefixer])
 可以看到生成的CSS代码中的部分属性添加了浏览器前缀了。具体哪些前缀被添加，要根据Browserslist浏览器兼容范围确定。（在后面介绍插件的部分会提到）
 
 ### 命令行使用
+使用PostCSS CLI可以支持以命令行方式转义CSS文件。首先需要安装postcss-cli依赖。然后命令行执行：
+
+```sh
+# 单个文件
+postcss css/index.css -u autoprefixer -o out.css --no-map
+# 目录
+postcss css -u autoprefixer -d output --no-map
+```
+
+PostCSS CLI支持转义单个文件或者目录，目录会转义其中的每个文件。其中-u表示传入的插件名，-o表示输出的文件名，-d表示输出目录，--no-map表示不输出SourceMap。经过转义后，输出结果与上面API方式一致。如果更多配置，则需要使用PostCSS配置文件，我们在后面单独介绍。
 
 ### Webpack中使用
 
