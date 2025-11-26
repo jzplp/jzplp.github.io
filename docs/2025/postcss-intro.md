@@ -168,6 +168,67 @@ module.exports = {
 ![图片](/2025/postcss-3.png)
 
 ## 配置文件postcss.config.js
+在命令行或Webapck方式使用PostCSS时，都支持postcss.config.js作为配置文件。但是这两种配置文件的居然是不一样的，部分场景互相不兼容。因此这里分别介绍两种方式的配置文件。
+
+### 命令行方式配置文件
+#### 引入插件
+命令行仅支持直接引入插件对象的方式。例如前面我们列举的例子，使用配置文件内容如下：
+
+```js
+const autoprefixer = require("autoprefixer");
+module.exports = {
+  plugins: [autoprefixer],
+};
+```
+
+然后执行的命令进行修改，输出效果一致。
+
+```sh
+# 原命令
+postcss css/index.css -u autoprefixer -o out.css --no-map
+# 新命令
+postcss css/index.css -o out.css
+```
+
+#### 插件参数
+
+
+
+### Webpack方式配置文件
+#### 引入插件
+Webpack方式不仅支持直接引入插件对象的方式，还支持直接写插件名称字符串。两种方式这里都列举下：
+
+```js
+// 直接引入插件对象
+const autoprefixer = require("autoprefixer");
+module.exports = {
+  plugins: [autoprefixer],
+};
+
+// 直接写插件名称字符串
+module.exports = {
+  plugins: ['autoprefixer'],
+};
+```
+
+然后删除Webapck配置中的插件配置，效果一致。Webapack中配置可以是这样（仅展示相关片段）：
+
+```js
+module: {
+  rules: [
+    {
+      test: /\.css$/i,
+      use: ["style-loader", "css-loader", "postcss-loader"],
+    },
+  ],
+},
+```
+
+#### 插件参数
+
+
+### 不同点总结
+
 
 
 ## 各类插件简介
