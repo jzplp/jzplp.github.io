@@ -21,7 +21,7 @@ PostCSS是一个转义CSS代码的工具，它的输入为（广义的）CSS文�
 }
 ```
 
-### API使用
+### API方式
 首先试一下JavaScriptAPI的方式使用PostCSS。执行下面的代码：
 
 ```js
@@ -59,7 +59,7 @@ postcss([autoprefixer])
 
 可以看到生成的CSS代码中的部分属性添加了浏览器前缀了。具体哪些前缀被添加，要根据Browserslist浏览器兼容范围确定。（在后面介绍插件的部分会提到）
 
-### 命令行使用
+### 命令行方式
 使用PostCSS CLI可以支持以命令行方式转义CSS文件。首先需要安装postcss-cli依赖。然后命令行执行：
 
 ```sh
@@ -71,9 +71,104 @@ postcss css -u autoprefixer -d output --no-map
 
 PostCSS CLI支持转义单个文件或者目录，目录会转义其中的每个文件。其中-u表示传入的插件名，-o表示输出的文件名，-d表示输出目录，--no-map表示不输出SourceMap。经过转义后，输出结果与上面API方式一致。如果更多配置，则需要使用PostCSS配置文件，我们在后面单独介绍。
 
-### Webpack中使用
+## Webpack中使用PostCSS
+在Webpack中使用PostCSS，主要依靠postcss-loader。
 
-## 配置文件 ？
+### 创建Webpack项目
+这里我们先创建一个Webpack项目，可以打包CSS，但不包含PostCSS。
+
+```sh
+# 创建项目
+npm init -y
+# 安装依赖
+npm add webpack webpack-cli style-loader css-loader
+```
+
+创建src/index.css，内容为即为前面的CSS代码。再创建src/index.js，引入CSS文件：
+
+```js
+import "./index.css";
+console.log("你好，jzplp");
+```
+
+然后在创建Webapck配置文件webpack.config.js：
+
+```js
+const path = require("path");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+};
+```
+
+其中最关键的是style-loader和css-loader，这是引入CSS文件的必要loader。loader是从后向前链式调用，先css-loader，再style-loader。然后在package.json中增加命令：
+
+```json
+"scripts": {
+  "build": "webpack"
+},
+```
+
+最后执行`npm run build`,结果输出到dist/main.js中。结果较长，这里只截取包含CSS的部分。可以看到，CSS被打包进JavaScript代码中，其内容未变。
+
+![图片](/2025/postcss-2.png)
+
+### 引入postcss-loader
+安装三个相关依赖：postcss postcss-loader autoprefixer。然后修改webpack.config.js，引入postcss：
+
+```js
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [
+          "style-loader",
+          "css-loader",
+          {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: ['autoprefixer'],
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
+};
+```
+
+注意其中重点是新增加了postcss-loader，它的位置在数组的最后。意味着CSS文件先经过它处理，然后再给css-loader和style-loader。postcssOptions选项中可以配置插件。postcss-loader也支持使用配置文件postcss.config.js。
+
+重新执行`npm run build`后，查看结果发现，除了原有代码外，还增加了浏览器前缀，说明代码成功被PostCSS转义了。(下图为了方便用两行展示CSS字符串，实际为一行)
+
+![图片](/2025/postcss-3.png)
+
+## 配置文件postcss.config.js
+
 
 ## 各类插件简介
 
@@ -132,4 +227,9 @@ postcss runner 是啥，是运行程序么
   https://github.com/postcss/autoprefixer
 - GitHub PostCSS CLI\
   https://github.com/postcss/postcss-cli
-
+- GitHub postcss-loader\
+  https://github.com/webpack/postcss-loader
+- Webpack文档\
+  https://webpack.js.org/
+- Webpack中文文档\
+  https://webpack.docschina.org/
