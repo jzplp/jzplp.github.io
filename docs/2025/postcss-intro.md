@@ -233,6 +233,24 @@ module.exports = {
 }
 ```
 
+#### 配置文件名称和格式
+虽然PostCSS CLI中仅仅提到了配置文件名称为postcss.config.js，但我参考隔壁postcss-loader的文件名对PostCSS CLI进行了尝试，发现居然是支持的！这里我们描述一下。
+
+首先是JavaScript类的配置文件，包括.postcssrc.js, .postcssrc.cjs, postcss.config.cjs等，PostCSS CLI是支持的，文件内容和执行效果都与postcss.config.js一致。
+
+然后是JSON格式的配置文件，例如.postcssrc, .postcssrc.json等，PostCSS CLI也是支持的，但是由于插件必须直接引入插件对象，因此JSON格式实际上并不能用。它的报错和在postcss.config.js中直接写插件名称字符串的报错是一致的，因此判定文件本身被读取了，但不支持插件。这里举例下配置文件内容，以.postcssrc.json为例：
+
+```json
+{
+  "plugins": [["postcss-color-gray", { "preserve": true }]]
+}
+```
+
+然后报错内容如下，可以看到是在读插件过程中的错误。使用yaml类的文件格式，报错也是一致的。
+
+![图片](/2025/postcss-3.png)
+
+
 ### Webpack方式配置文件
 #### 引入插件
 Webpack方式不仅支持直接引入插件对象的方式，还支持直接写插件名称字符串。两种方式这里都列举下：
@@ -281,6 +299,27 @@ module.exports = {
 ```
 
 查看结果，两种方式都能正常接收参数，结果与命令行方式一致。这里还举例了传入多个插件的方式。
+
+#### 配置文件名称和格式
+Webpack方式的配置文件，支持多种配置文件格式和文件名，包括.postcssrc, .postcssrc.json, .postcssrc.yaml, .postcssrc.js, postcss.config.cjs等等，具体可以看postcss-loader的文档。其中JSON和YAML类的格式仅支持直接写插件名称字符串，这里示例下配置文件的格式，首先是JSON格式：
+
+```json
+{
+  "plugins": [
+    "postcss-color-gray",
+    ["postcss-color-gray", { "preserve": true }]
+  ]
+}
+```
+
+然后是YAML格式，实际内容一致：
+
+```yaml
+plugins:
+  - postcss-color-gray
+  - - postcss-color-gray
+    - preserve: true
+```
 
 ### 不同点总结
 
