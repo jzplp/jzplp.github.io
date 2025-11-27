@@ -191,8 +191,47 @@ postcss css/index.css -o out.css
 ```
 
 #### 插件参数
+为了描述插件参数，我们换一个postcss-color-gray插件。配置文件内容如下，先不使用插件参数：
 
+```js
+const postcssColorGray = require("postcss-color-gray");
+module.exports = {
+  plugins: [postcssColorGray],
+};
+```
 
+然后使用插件语法，重新写一段CSS代码，转义后的代码也在下面列出：
+
+```css
+/* 源CSS代码 */
+.jzplp {
+  color: gray(0 / 90%);
+}
+
+/* 转义后CSS代码 */
+.jzplp {
+  color: rgba(0,0,0,0.9);
+}
+```
+
+可以看到插件生效了。然后我们修改配置文件，增加插件参数：
+
+```js
+const postcssColorGray = require("postcss-color-gray");
+module.exports = {
+  plugins: [postcssColorGray({ preserve: true })],
+};
+```
+
+重新执行命令行，转义后的代码发生了变化，保留了gray函数，参数生效了。
+
+```css
+/* 转义后CSS代码 */
+.jzplp {
+  color: rgba(0,0,0,0.9);
+  color: gray(0 / 90%);
+}
+```
 
 ### Webpack方式配置文件
 #### 引入插件
@@ -225,7 +264,23 @@ module: {
 ```
 
 #### 插件参数
+这里还使用前面命令行中插件参数一节里面的postcss-color-gray插件和CSS代码。这里尝试用两种插件配置方式：
 
+```js
+// 直接引入插件对象
+const autoprefixer = require("autoprefixer");
+const postcssColorGray = require("postcss-color-gray");
+module.exports = {
+  plugins: [autoprefixer, postcssColorGray({ preserve: true })],
+};
+
+// 直接写插件名称字符串
+module.exports = {
+  plugins: ['postcss-color-gray', ['postcss-color-gray', { preserve: true }]],
+};
+```
+
+查看结果，两种方式都能正常接收参数，结果与命令行方式一致。这里还举例了传入多个插件的方式。
 
 ### 不同点总结
 
