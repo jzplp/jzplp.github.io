@@ -250,7 +250,6 @@ module.exports = {
 
 ![图片](/2025/postcss-3.png)
 
-
 ### Webpack方式配置文件
 #### 引入插件
 Webpack方式不仅支持直接引入插件对象的方式，还支持直接写插件名称字符串。两种方式这里都列举下：
@@ -320,6 +319,16 @@ plugins:
   - - postcss-color-gray
     - preserve: true
 ```
+
+### 其余参数
+这些配置文件都可以接收PostCSS的API中ProcessOptions的参数，除了from和to。这里列举几个：
+
+* parser 传入解析AST的方法
+* stringifier 传入从AST生成字符串的方法
+* syntax 传入AST解析和生成的方法，相当于parser + stringifier
+* map SourceMap选项
+
+这些参数的具体用法会在后面介绍到。
 
 ### 不同点总结
 
