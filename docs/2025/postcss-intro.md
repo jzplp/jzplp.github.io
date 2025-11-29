@@ -250,6 +250,48 @@ module.exports = {
 
 ![图片](/2025/postcss-3.png)
 
+#### 读取上下文
+配置文件还可以导出一个函数，函数可以接收上下文入参，最终返回配置对象。这里我们给出配置文件的示例：
+
+```js
+const postcssColorGray = require("postcss-color-gray");
+module.exports = (ctx) => {
+  console.log(ctx);
+  return {
+    plugins: [
+      postcssColorGray(ctx.env === "development" ? { preserve: true } : {}),
+    ],
+  };
+};
+
+/* 输出结果
+{
+  cwd: 'E:\\testProj\\postcss-test\\apitest',
+  env: undefined,
+  options: {
+    map: { inline: true },
+    parser: undefined,
+    syntax: undefined,
+    stringifier: undefined
+  },
+  file: {
+    dirname: 'E:\\testProj\\postcss-test\\apitest\\css',
+    basename: 'index.css',
+    extname: '.css'
+  }
+}
+*/
+```
+
+通过上面代码可以看到，可以根据上下文入参调整配置对象的内容。这里简单说明上下文入参含义：
+
+* env: 为process.env.NODE_ENV的值
+* file: 文件名相关参数
+  * dirname: 文件路径
+  * basename: 文件名
+  * extname: 文件扩展名
+* options: 命令行中输入的选项
+
 ### Webpack方式配置文件
 #### 引入插件
 Webpack方式不仅支持直接引入插件对象的方式，还支持直接写插件名称字符串。两种方式这里都列举下：
@@ -293,7 +335,7 @@ module.exports = {
 
 // 直接写插件名称字符串
 module.exports = {
-  plugins: ['postcss-color-gray', ['postcss-color-gray', { preserve: true }]],
+  plugins: ['autoprefixer', ['postcss-color-gray', { preserve: true }]],
 };
 ```
 
@@ -305,7 +347,7 @@ Webpack方式的配置文件，支持多种配置文件格式和文件名，包�
 ```json
 {
   "plugins": [
-    "postcss-color-gray",
+    "autoprefixer",
     ["postcss-color-gray", { "preserve": true }]
   ]
 }
@@ -315,10 +357,38 @@ Webpack方式的配置文件，支持多种配置文件格式和文件名，包�
 
 ```yaml
 plugins:
-  - postcss-color-gray
+  - autoprefixer
   - - postcss-color-gray
     - preserve: true
 ```
+
+#### 读取上下文
+Webpack方式的配置文件也可以导出一个函数，函数可以接收上下文入参，最终返回配置对象。这里我们给出配置文件的示例：
+
+```js
+module.exports = (ctx) => {
+  console.log(ctx);
+  return {
+    plugins: [["postcss-color-gray", ctx.mode === "development" ? { preserve: true } : {}]],
+  };
+};
+
+/* 输出结果
+{
+  mode: 'production',
+  file: 'E:\\testProj\\postcss-test\\webpacktest\\src\\index.css',
+  webpackLoaderContext: {} // 内容很多，这里省略
+  env: 'production',
+  options: { plugins: [ 'autoprefixer' ] }
+*/
+```
+
+这里的输出与命令行方式类似，但不完全一样，这里简单说明上下文入参含义：
+
+* env和mode: 为process.env.NODE_ENV的值
+* file: 文件路径
+* options: Webpack配置中的postcssOptions选项
+* webpackLoaderContext:  Webpack loader的上下文，内容很多
 
 ### 其余参数
 这些配置文件都可以接收PostCSS的API中ProcessOptions的参数，除了from和to。这里列举几个：
@@ -331,8 +401,10 @@ plugins:
 这些参数的具体用法会在后面介绍到。
 
 ### 不同点总结
+从上面命令行方式与Webpack方式配置文件的描述，我们可以明确两种方式配置文件的不同点：
 
-
+* 最主要的不同是引入插件方式的不同：命令行仅支持直接引入插件对象的方式，Webpack方式还支持直接写插件名称字符串。这导致了插件传参方式和配置文件格式的限制。
+* 其次是读取上下文参数的不同。这是由于两者运行方式不同，命令行与Webpack方式可以接收到的配置数据不同，因此上下文参数不一样。
 
 ## 各类插件简介
 
