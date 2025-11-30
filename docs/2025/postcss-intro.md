@@ -2,14 +2,14 @@
 ## PostCSS是什么
 PostCSS是一个转义CSS代码的工具，它的输入为（广义的）CSS文件，输出也是CSS文件。在其中把CSS转换为抽象语法树AST，用户使用插件语法树进行修改，最后生成新的CSS代码。它的作用非常像JavaScript中的Babel。
 
-在CSS领域，存在感更强的是SCSS和Less，它们是CSS的预处理器，扩充了CSS的语法和功能，可以编写复用性更强的代码。预处理器经过编译后，是CSS代码。而PostCSS正如它的名字，最常被用做CSS的后处理器，做一些兼容性功能。例如添加浏览器厂商的前缀，转换CSS代码以兼容不支持的浏览器等。预处理器和后处理器的关系类似于这样：
+在CSS领域，存在感更强的是SCSS和Less，它们是CSS的预处理器，扩充了CSS的语法和功能，可以编写复用性更强的代码。预处理器经过编译后，是CSS代码。而PostCSS正如它的名字，最常被用做CSS的后处理器，做一些兼容性功能。例如添加浏览器引擎的前缀，转换CSS代码以兼容不支持的浏览器等。预处理器和后处理器的关系类似于这样：
 
 ![图片](/2025/postcss-1.png)
 
 对比JavaScript的生态位，SCSS和Less像TypeScript扩充语法，PostCSS像Babel转义兼容语法。但PostCSS允许我们自定义语法规则，因此用作预处理器，甚至只用PostCSS也是可以的。
 
 ## PostCSS使用
-这里我们以最常用的插件Autoprefixer举例，这是一个根据兼容性设置添加浏览器厂商标识的插件。首先创建`css/index.css`，作为我们要转义的CSS代码。
+这里我们以最常用的插件Autoprefixer举例，这是一个根据兼容性设置添加浏览器引擎前缀的插件。首先创建`css/index.css`，作为我们要转义的CSS代码。
 
 ```css
 ::placeholder {
@@ -409,6 +409,34 @@ module.exports = (ctx) => {
 ## 各类插件简介
 
 ### Autoprefixer
+Autoprefixer是PostCSS中最知名的插件，它的作用是根据浏览器兼容性，添加浏览器引擎前缀。浏览器引擎前缀是浏览器为了给实验性或者浏览器引擎独有的非标准CSS属性添加的前缀，这样这个实验属性就不会影响到其它浏览器，开发者也能识别这是针对某种浏览器做的优化。常见的前缀有：
+
+* -webkit-: 基于WebKit内核的浏览器，例如Chrome、Safari等
+* -moz-: 火狐浏览器
+* -o-: 旧版(WebKit之前的)Opera浏览器
+* -ms-: IE 浏览器
+
+这里举一个例子，transition属性用上面的浏览器引擎前缀可以写为：
+
+```css
+div {
+  /* 原属性 */
+  transition: all 4s ease;
+  /* 增加浏览器引擎前缀 */
+  -webkit-transition: all 4s ease;
+  -moz-transition: all 4s ease;
+  -ms-transition: all 4s ease;
+  -o-transition: all 4s ease;
+}
+```
+
+现在添加浏览器引擎前缀经常是为了兼容性，为了在旧版本浏览器也可以使用较新的CSS特性。而Autoprefixer插件就可以帮我们做到这件事。
+
+
+
+
+
+
 Autoprefixer 通过 Browserslist 修改。
 
 介绍部分常用插件
@@ -469,3 +497,5 @@ postcss runner 是啥，是运行程序么
   https://webpack.js.org/
 - Webpack中文文档\
   https://webpack.docschina.org/
+- MDN 浏览器引擎前缀\
+  https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix
