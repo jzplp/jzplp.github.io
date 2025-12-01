@@ -407,7 +407,6 @@ module.exports = (ctx) => {
 * 其次是读取上下文参数的不同。这是由于两者运行方式不同，命令行与Webpack方式可以接收到的配置数据不同，因此上下文参数不一样。
 
 ## 各类插件简介
-
 ### Autoprefixer
 Autoprefixer是PostCSS中最知名的插件，它的作用是根据浏览器兼容性，添加浏览器引擎前缀。浏览器引擎前缀是浏览器为了给实验性或者浏览器引擎独有的非标准CSS属性添加的前缀，这样这个实验属性就不会影响到其它浏览器，开发者也能识别这是针对某种浏览器做的优化。常见的前缀有：
 
@@ -430,16 +429,43 @@ div {
 }
 ```
 
-现在添加浏览器引擎前缀经常是为了兼容性，为了在旧版本浏览器也可以使用较新的CSS特性。而Autoprefixer插件就可以帮我们做到这件事。
+现在添加浏览器引擎前缀经常是为了兼容性，为了在旧版本浏览器也可以使用较新的CSS特性。而Autoprefixer插件就可以帮我们做到这件事。这个插件没有浏览器兼容配置，而是读取工程的Browserslist配置。这里举个例子。首先给出我们要转义的CSS代码：
+
+```css
+.jzplp {
+  display: flex;
+  width: stretch;
+}
+```
+
+通过在package.json中设置不同的Browserslist配置，我们能得到不同的代码生成结果，这对应的是不同浏览器版本的兼容性。兼容的版本越多，那么需要处理的就越多。
+
+```css
+/* 配置 "browserslist": "> 1%" 的生成结果 */ 
+.jzplp {
+  display: flex;
+  width: -webkit-fill-available;
+  width: stretch;
+}
+
+/* 配置 "browserslist": "> 0.01%" 的生成结果 */
+.jzplp {
+  display: -moz-box;
+  display: flex;
+  width: -webkit-fill-available;
+  width: -moz-available;
+  width: stretch;
+}
+```
+
+### cssnano
+
+### postcss-custom-properties
+
+### postcss-use
 
 
-
-
-
-
-Autoprefixer 通过 Browserslist 修改。
-
-介绍部分常用插件
+介绍部分常用插件 
 
 PostCSS plugins列表\
   https://github.com/postcss/postcss/blob/main/docs/plugins.md
