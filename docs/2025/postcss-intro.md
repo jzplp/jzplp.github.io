@@ -458,11 +458,54 @@ div {
 }
 ```
 
-### cssnano
-
 ### postcss-custom-properties
+postcss-custom-properties是一个增加CSS变量兼容性的插件，对于不支持的CSS var的浏览器提供后备值。这里来举例试一下：
+
+```css
+/* 源CSS代码 */
+.jzplp {
+  background: var(--jza);
+  color: var(--jzb, red);
+}
+
+/* 生成CSS代码 */
+.jzplp {
+  background: var(--jza);
+  color: red;
+  color: var(--jzb, red);
+}
+```
+
+通过上面例子可以看到，如果提供了CSS var的后备值，那么插件将会生成一个不带CSS var的版本。如果不支持的浏览器读取到不带CSS var的版本，可以正常展示；支持的浏览器则使用var的版本覆盖前一个不支持的属性值。这样实现了CSS var的浏览器兼容性处理。如果我们没有提供后备值，则不会生成兼容性代码。
+
+但是如果在同一个文件中提供了css变量的值，那么即使var函数中没提供后备值，也可以生成兼容性代码。我们看一下例子：
+
+```css
+/* 源CSS代码 */
+:root {
+  --jza: blue;
+}
+.jzplp {
+  background: var(--jza);
+  color: var(--jzb);
+}
+
+/* 生成CSS代码 */
+:root {
+  --jza: blue;
+}
+.jzplp {
+  background: blue;
+  background: var(--jza);
+  color: var(--jzb);
+}
+```
+
+可以看到例子中--jza提供了变量值，因此生成了兼容性代码；jzb没有则不会生成。变量值必须与使用变量的代码在同一个文件中才有效。
 
 ### postcss-use
+
+### cssnano
 
 
 介绍部分常用插件 
@@ -525,3 +568,7 @@ postcss runner 是啥，是运行程序么
   https://webpack.docschina.org/
 - MDN 浏览器引擎前缀\
   https://developer.mozilla.org/zh-CN/docs/Glossary/Vendor_Prefix
+- GitHub postcss-custom-properties\
+  https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-custom-properties
+- MDN CSS var()\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/Reference/Values/var
