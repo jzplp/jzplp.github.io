@@ -556,6 +556,26 @@ module.exports = (ctx) => {
 可以看到在使用postcss-global-data插件的情况下，生成代码中增加了兼容性代码，读取了全局CSS文件中的变量值。但是全局CSS文件global.css中的CSS代码却没有包含进来。
 
 ### cssnano
+cssnano是一个代码压缩工具，将CSS代码进行语义化压缩。与gzip等纯压缩工具的不一样的是，他会根据代码语义对代码本社内进行改动，例如去掉注释，去掉重复属性，合并选择器等等。这里我们举例试试：
+
+```css
+/* 源CSS代码 */
+.jzplp {
+  color: red;
+  /* 我是注释 */
+  color: red;
+}
+.jzplp {
+  width: 20px;
+}
+
+/* 生成CSS代码 */
+.jzplp{color:red;width:20px}
+```
+
+可以看到，同样的选择器被合并，同样的属性值被合并了，注释和中间的换行符空格都去掉了。cssnano还支持预设或者插件，这里就不描述了。
+
+
 
 
 介绍部分常用插件 
@@ -622,3 +642,7 @@ postcss runner 是啥，是运行程序么
   https://github.com/csstools/postcss-plugins/tree/main/plugins/postcss-custom-properties
 - MDN CSS var()\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Reference/Values/var
+- GitHub cssnano\
+  https://github.com/cssnano/cssnano
+- cssnano 文档\
+  https://cssnano.github.io/cssnano/
