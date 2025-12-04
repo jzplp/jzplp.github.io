@@ -579,7 +579,7 @@ cssnano是一个代码压缩工具，将CSS代码进行语义化压缩。与gzip
 
 ## PostCSS兼容性插件
 ### 使用postcss-preset-env
-前面介绍了几个PostCSS的插件，但有一个插件却留到了这一节介绍：postcss-preset-env。类似与Babel中的@babel/preset-env预设，postcss-preset-env中包含了很多PostCSS浏览器兼容性的插件。它会读取我们配置的浏览器兼容版本，根据CSSDB上面的特性列表选择应用哪些插件，从而在浏览器不支持某些CSS新特性的情况下，允许使用新特性。
+前面介绍了几个PostCSS的插件，但有一个插件却留到了这一节介绍：postcss-preset-env。类似与Babel中的@babel/preset-env预设，postcss-preset-env中包含了很多PostCSS浏览器兼容性的插件。它会读取我们配置的浏览器兼容版本，根据CSSDB上面的特性列表以及我们代码使用了哪些新特性，选择应用哪些插件，从而在浏览器不支持某些CSS新特性的情况下，允许使用新特性。
 
 首先接入插件，由于postcss-preset-env是做兼容性处理的，因此需要放在其它插件的后面，让兼容性插件最后处理：
 
@@ -622,8 +622,25 @@ postcss-preset-env插件也是读取工程中的Browserslist配置。这里我�
 
 例如#rrggbbaa，是分别以两个16进制数字表示红R绿G蓝B透明度A表示颜色的方式，只在相对较新的浏览器中支持。当browserslist>1%时不进行转义，当>0.1%时就转义为rgba函数的形式。
 
-### 是否任何都能转义
+### 是否任何语法都能转义
+postcss-preset-env插件可以根据源CSS代码使用的特性来转义代码，增加兼容性。那么是不是什么特性都能转义，转义后的效果是不是与转义前一致？这很显然是否定的。即使是JavaScript代码，转义和Polyfill也做不到将所有新特性的兼容模式运行和新特性完全一致。例如Vue3之所以不兼容IE的一个原因，就是无法兼容JavaScript语法中Proxy的所有特性。至于CSS兼容性的限制就更大了。这里我们依然使用之前的CSS变量代码来举例：
 
+```css
+/* 源CSS代码 */
+.jzplp {
+  background: var(--jza, red);
+  color: var(--jzb);
+}
+
+/* 生成CSS代码 "browserslist": "> 0.001%" */
+.jzplp {
+  background: red;
+  background: var(--jza, red);
+  color: var(--jzb);
+}
+```
+
+即使浏览器兼容性配置的要求很高，生成的代码也是这样。当我们提供了后备值时，插件会为我们生成兼容性的固定值background: red。如果没提供，那插件则无能为例。不管有没有生成固定值，这段代码在不支持CSS变量的浏览器运行时，效果与支持的浏览器不一样：因为变量的运行时变更功能无法被兼容。因此这明显可以得出：转义插件并不是任何属性都能转义，相反它不能做到的事情特别多，只能够尽量。
 
 ## postcss与scss和less
 
