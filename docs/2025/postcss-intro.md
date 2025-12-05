@@ -642,7 +642,13 @@ postcss-preset-env插件可以根据源CSS代码使用的特性来转义代码�
 
 即使浏览器兼容性配置的要求很高，生成的代码也是这样。当我们提供了后备值时，插件会为我们生成兼容性的固定值background: red。如果没提供，那插件则无能为例。不管有没有生成固定值，这段代码在不支持CSS变量的浏览器运行时，效果与支持的浏览器不一样：因为变量的运行时变更功能无法被兼容。因此这明显可以得出：转义插件并不是任何属性都能转义，相反它不能做到的事情特别多，只能够尽量。
 
-## postcss与scss和less
+## PostCSS与SCSS和Less
+
+### PostCSS作为后处理
+
+### PostCSS解析SCSS与Less
+
+### PostCSS编译Less
 
 ## PostCSS AST
 
@@ -701,5 +707,17 @@ postcss runner 是啥，是运行程序么
   https://cssnano.github.io/cssnano/
 - GitHub postcss-preset-env\
   https://github.com/csstools/postcss-plugins/tree/main/plugin-packs/postcss-preset-env
-- MDN hex-color\
+- MDN CSS hex-color\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Reference/Values/hex-color
+- GitHub postcss-scss\
+  https://github.com/postcss/postcss-scss
+- GitHub postcss-less\
+  https://github.com/shellscape/postcss-less
+- GitHub postcss-less\
+  https://github.com/shellscape/postcss-less
+- GitHub postcss-less-engine\
+  https://github.com/Crunch/postcss-less
+- Less文档\
+  https://lesscss.org/
+- SCSS文档\
+  https://sass-lang.com/
