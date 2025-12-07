@@ -643,8 +643,75 @@ postcss-preset-env插件可以根据源CSS代码使用的特性来转义代码�
 即使浏览器兼容性配置的要求很高，生成的代码也是这样。当我们提供了后备值时，插件会为我们生成兼容性的固定值background: red。如果没提供，那插件则无能为例。不管有没有生成固定值，这段代码在不支持CSS变量的浏览器运行时，效果与支持的浏览器不一样：因为变量的运行时变更功能无法被兼容。因此这明显可以得出：转义插件并不是任何属性都能转义，相反它不能做到的事情特别多，只能够尽量。
 
 ## PostCSS与SCSS和Less
+这一部分我们以Webapck作为环境，从直接引入SCSS与Less开始，再到用PostCSS做后处理器，再直接用PostCSS解析甚至编译SCSS与Less。
 
-### PostCSS作为后处理
+### Webapck引入SCSS
+首先尝试在Webpack中引入SCSS。还是前面创建的Webpack工程。安装依赖sass和sass-loader。然后修改webpack.config.js：
+
+```js
+const path = require("path");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.scss$/i,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+    ],
+  },
+};
+```
+
+可以看到，增加了一条规则，匹配SCSS文件，先使用sass-loader把SCSS解析成CSS，然后再用常规的CSS处理。我们要打包的代码如下。首先是入口文件，其中引入了CSS和SCSS文件。
+
+```js
+import "./index.scss";
+import "./index.css";
+console.log("你好，jzplp");
+```
+
+然后是CSS和SCSS文件内容：
+
+```css
+/* index.css */
+.jzplp {
+  color: blue;
+}
+
+/* index.scss */
+$jzabc: red;
+div {
+  color: $jzabc;
+}
+```
+
+SCSS文件中使用了变量的特性，SCSS在编译后会变成它的实际值，我们看看打包结果。文件较长，仅展示相关部分：
+
+```js
+i.push([e.id, ".jzplp {\n  color: blue;\n}", ""]);
+i.push([e.id, "div{color:red}", ""]);
+console.log("你好，jzplp");
+```
+
+可以看到，SCSS文件被编译成功，也打包进了最终成果中。
+
+### Webapck引入Less
+
+### SCSS与PostCSS并存
+
+### Less与PostCSS并存
 
 ### PostCSS解析SCSS与Less
 
