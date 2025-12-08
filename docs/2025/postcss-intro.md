@@ -646,7 +646,7 @@ postcss-preset-env插件可以根据源CSS代码使用的特性来转义代码�
 这一部分我们以Webapck作为环境，从直接引入SCSS与Less开始，再到用PostCSS做后处理器，再直接用PostCSS解析甚至编译SCSS与Less。
 
 ### Webapck引入SCSS
-首先尝试在Webpack中引入SCSS。还是前面创建的Webpack工程。安装依赖sass和sass-loader。然后修改webpack.config.js：
+首先尝试在Webpack中引入SCSS。还是前面创建的Webpack工程，安装依赖sass和sass-loader，然后修改webpack.config.js：
 
 ```js
 const path = require("path");
@@ -708,16 +708,51 @@ console.log("你好，jzplp");
 可以看到，SCSS文件被编译成功，也打包进了最终成果中。
 
 ### Webapck引入Less
+再尝试在Webpack中引入Less。安装依赖less和less-loader，然后修改webpack.config.js，这里只列出module部分，其它和Webapck引入SCSS一致：
 
-### SCSS与PostCSS并存
+```js
+const path = require("path");
 
-### Less与PostCSS并存
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.less$/i,
+        use: ["style-loader", "css-loader", "less-loader"],
+      },
+    ],
+  },
+};
+```
 
-### PostCSS解析SCSS与Less
+然后将创建index.less，内容如下：
 
-### PostCSS编译Less
+```less
+@jzabc: red;
+div {
+  color: @jzabc;
+}
+```
 
-## PostCSS AST
+在index.js中引入index.less：`import "./index.less";`。其它内容和上面一致，然后进行打包，生成结果如下（仅展示相关部分）。可以看到，Less文件也被编译成功，也打包进了最终成果中。
+
+```js
+i.push([e.id, "div {\n  color: red;\n}\n", ""]);
+i.push([e.id, ".jzplp {\n  color: blue;\n}", ""]);
+console.log("你好，jzplp");
+```
+
+### 用PostCSS做后处理器
+
+### PostCSS直接解析SCSS与Less
+
+### PostCSS直接编译Less
+
+## PostCSS的AST
 
 ## PostCSS的SourceMap
 
