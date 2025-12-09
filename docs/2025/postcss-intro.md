@@ -747,8 +747,93 @@ console.log("你好，jzplp");
 ```
 
 ### 用PostCSS做后处理器
+在文章的一开始，我们介绍了PostCSS最常用作后处理器，这一节我们就在前面引入SCSS与Less的基础上，集成PostCSS用作后处理器。
+
+```js
+const path = require("path");
+
+const postcssConfig = {
+  loader: "postcss-loader",
+  options: {
+    postcssOptions: {
+      plugins: ["autoprefixer"],
+    },
+  },
+};
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader", postcssConfig],
+      },
+      {
+        test: /\.less$/i,
+        use: ["style-loader", "css-loader", postcssConfig, "less-loader"],
+      },
+      {
+        test: /\.scss$/i,
+        use: ["style-loader", "css-loader", postcssConfig, "sass-loader"],
+      },
+    ],
+  },
+};
+```
+
+上面同时支持CSS/SCSS/Less文件引入，都配置了PostCSS。看PostCSS的位置是在SCSS和Less之后，这就是后处理器的含义。然后是要打包的各个文件代码：
+
+```js
+/* index.js */
+import "./index.scss";
+import "./index.less";
+import "./index.css";
+console.log("你好，jzplp");
+
+/* index.scss */
+$jzabc: red;
+.jzplp-scss {
+  color: $jzabc;
+  width: stretch;
+}
+
+/* index.less */
+@jzabc: red;
+.jzplp-less {
+  color: @jzabc;
+  width: stretch;
+}
+
+/* index.css */
+.jzplp-css {
+  color: blue;
+  width: stretch;
+}
+```
+
+最后生成的结果如下：
+
+```js
+".jzplp-scss{color:red;width:-webkit-fill-available;width:-moz-available;width:stretch}",
+".jzplp-css {\n  color: blue;\n  width: -webkit-fill-available;\n  width: -moz-available;\n  width: stretch;\n}",
+".jzplp-less {\n  color: red;\n  width: -webkit-fill-available;\n  width: -moz-available;\n  width: stretch;\n}\n",
+console.log("你好，jzplp");
+```
+
+可以看到，不仅成功编译了SCSS和Less，而且代码经过了PostCSS处理，加上了浏览器引擎前缀。
 
 ### PostCSS直接解析SCSS与Less
+
+上面的loader顺序变一下不行。
+
+
 
 ### PostCSS直接编译Less
 
