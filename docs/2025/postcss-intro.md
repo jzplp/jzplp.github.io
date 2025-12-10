@@ -830,18 +830,115 @@ console.log("你好，jzplp");
 可以看到，不仅成功编译了SCSS和Less，而且代码经过了PostCSS处理，加上了浏览器引擎前缀。
 
 ### PostCSS直接解析SCSS与Less
+在前面PostCSS用作后处理器的方式中，修改一下编译的代码：
 
-上面的loader顺序变一下不行。
+```js
+/* index.js */
+import "./index.scss";
+import "./index.less";
+import "./index.css";
+console.log("你好，jzplp");
 
+/* index.scss */
+$jzabc: red;
+.jzplp-scss {
+  color: $jzabc;
+  width: stretch;
+}
 
+/* index.less */
+@jzabc: red;
+.jzplp-less {
+  color: @jzabc;
+  width: stretch;
+}
+```
 
-### PostCSS直接编译Less
+重新编译，结果如下：
 
-## PostCSS的AST
+```js
+".jzplp-less {\n  width: -webkit-fill-available;\n  width: -moz-available;\n  width: stretch;\n}\n::-moz-placeholder {\n  color: red;\n}\n::placeholder {\n  color: red;\n}\n",
+".jzplp-scss{width:-webkit-fill-available;width:-moz-available;width:stretch}::-moz-placeholder{color:blue}::placeholder{color:blue}",
+console.log("你好，jzplp");
+```
+
+如果我们将postcss-loader与less-loader和sass-loader换一下位置，先处理PostCSS，再编译SCSS和Less，结果会如何呢？参考配置如下，仅展示改动部分：
+
+```js
+{
+  test: /\.less$/i,
+  use: ["style-loader", "css-loader", "less-loader", postcssConfig],
+},
+{
+  test: /\.scss$/i,
+  use: ["style-loader", "css-loader", "sass-loader", postcssConfig],
+},
+```
+
+重新编译，结果如下：
+
+```js
+".jzplp-less {\n  width: stretch;\n}\n::-moz-placeholder {\n  color: red;\n}\n::placeholder {\n  color: red;\n}\n",
+".jzplp-scss{width:stretch}::-moz-placeholder{color:blue}::placeholder{color:blue}",
+console.log("你好，jzplp");
+```
+
+可以看到生成结果并不同。原因是先经过PostCSS处理时，并不能识别SCSS和Less语法，因此无法处理相关的内容。而其中的正常CSS语法，PostCSS依然可以处理。
+
+PostCSS还提供了SCSS和Less语法的解析器postcss-scss和postcss-less，我们引入试一下。首先修改Webapck配置：
+
+```js
+{
+  test: /\.less$/i,
+  use: [
+    "style-loader",
+    "css-loader",
+    "less-loader",
+    {
+      loader: "postcss-loader",
+      options: {
+        postcssOptions: {
+          syntax: 'postcss-less',
+          plugins: ["autoprefixer"],
+        },
+      },
+    },
+  ],
+},
+{
+  test: /\.scss$/i,
+  use: [
+    "style-loader",
+    "css-loader",
+    "sass-loader",
+    {
+      loader: "postcss-loader",
+      options: {
+        postcssOptions: {
+          syntax: 'postcss-scss',
+          plugins: ["autoprefixer"],
+        },
+      },
+    },
+  ],
+},
+```
+
+重新编译，结果如下：
+
+```js
+".jzplp-scss{width:stretch}::-moz-placeholder{color:blue}::placeholder{color:blue}",
+".jzplp-less {\n  width: stretch;\n}\n::-moz-placeholder {\n  color: red;\n}\n::placeholder {\n  color: red;\n}\n",
+console.log("你好，jzplp");
+```
+
+可以看到效果一致，这是因为postcss-scss和postcss-less都是将SCSS和Less代码转换为AST，然后再将AST转换回来，并不编译为CSS代码。因此SCSS和Less变量并未被PostCSS插件转义。它们的作用主要是提供SCSS和Less的AST结点，方便对应的SCSS和Less的PostCSS插件做处理。虽然相关文档的使用场景说了可以直接使用普通PostCSS插件处理，但上面的测试结果说明，可以处理，但并不完美。
 
 ## PostCSS的SourceMap
 
 map: true 生成， 可以配置  SourceMapOptions 选项
+
+## PostCSS的AST
 
 ## 插件开发
 
@@ -855,7 +952,6 @@ https://postcss.org/docs/writing-a-postcss-plugin
   https://postcss.org/docs/how-to-write-custom-syntax
 
 
-postcss runner 是啥，是运行程序么
 
 ## 参考
 - PostCSS 文档\
@@ -900,10 +996,6 @@ postcss runner 是啥，是运行程序么
   https://github.com/postcss/postcss-scss
 - GitHub postcss-less\
   https://github.com/shellscape/postcss-less
-- GitHub postcss-less\
-  https://github.com/shellscape/postcss-less
-- GitHub postcss-less-engine\
-  https://github.com/Crunch/postcss-less
 - Less文档\
   https://lesscss.org/
 - SCSS文档\
