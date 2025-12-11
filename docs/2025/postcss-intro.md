@@ -935,6 +935,84 @@ console.log("你好，jzplp");
 可以看到效果一致，这是因为postcss-scss和postcss-less都是将SCSS和Less代码转换为AST，然后再将AST转换回来，并不编译为CSS代码。因此SCSS和Less变量并未被PostCSS插件转义。它们的作用主要是提供SCSS和Less的AST结点，方便对应的SCSS和Less的PostCSS插件做处理。虽然相关文档的使用场景说了可以直接使用普通PostCSS插件处理，但上面的测试结果说明，可以处理，但并不完美。
 
 ## PostCSS的SourceMap
+### 命令行生成SourceMap
+首先来看一下命令行方式如何生成SourceMap。先给出一个简单的源文件：
+
+```css
+.jzplp {
+  width: stretch;
+}
+div {
+  color: var(--abc, red);
+}
+```
+
+然后执行命令：`postcss index.css -u autoprefixer -o out.css`。这种情况下PostCSS不会去读postcss.config.js配置文件，而是仅使用命令行传参来转义。，默认情况下，PostCSS会生成inline，即附加在生成文件中作为注释的SourceMap。生成结果如下：
+
+```css
+.jzplp {
+  width: -webkit-fill-available;
+  width: -moz-available;
+  width: stretch;
+}
+div {
+  color: var(--abc, red);
+}
+
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNzcy9pbmRleC5jc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRSw2QkFBYztFQUFkLHFCQUFjO0VBQWQsY0FBYztBQUNoQjtBQUNBO0VBQ0Usc0JBQXNCO0FBQ3hCIiwiZmlsZSI6Im91dC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIuanpwbHAge1xyXG4gIHdpZHRoOiBzdHJldGNoO1xyXG59XHJcbmRpdiB7XHJcbiAgY29sb3I6IHZhcigtLWFiYywgcmVkKTtcclxufVxyXG4iXX0= */
+```
+
+如果不希望生成SourceMap，那么命令行中附加--no-map即可：`postcss index.css -u autoprefixer -o out.css --no-map`。但如果希望生成独立的SourceMap文件，就必须使用PostCSS配置文件了。我们先把命令行修改为：`postcss index.css -o out.css`。然后配置postcss.config.js：
+
+```js
+const autoprefixer = require("autoprefixer");
+module.exports = {
+  plugins: [autoprefixer],
+};
+```
+
+执行命令行，发现生成文件与--no-map效果一致，不生成SourceMap。如果生成inline的SourceMap，配置文件修改为：
+
+```js
+const autoprefixer = require("autoprefixer");
+module.exports = {
+  plugins: [autoprefixer],
+  map: true,
+};
+```
+
+如果希望生成的独立的配置文件，则配置文件修改为：
+
+```js
+const autoprefixer = require("autoprefixer");
+module.exports = {
+  plugins: [autoprefixer],
+  map: { inline: false },
+};
+```
+
+这时候会生成一个文件out.css.map，其内容如下：
+
+```js
+{
+  "version": 3,
+  "sources": [
+    "css/index.css"
+  ],
+  "names": [],
+  "mappings": "AAAA;EACE,6BAAc;EAAd,qBAAc;EAAd,cAAc;AAChB;AACA;EACE,sBAAsB;AACxB",
+  "file": "out.css",
+  "sourcesContent": [
+    ".jzplp {\r\n  width: stretch;\r\n}\r\ndiv {\r\n  color: var(--abc, red);\r\n}\r\n"
+  ]
+}
+```
+
+可以看到，这个SourceMap文件的格式规范与之前JavaScript的SourceMap规范是一致的。
+
+### API方式生成SourceMap
+
+### SourceMap内容解析
 
 map: true 生成， 可以配置  SourceMapOptions 选项
 
