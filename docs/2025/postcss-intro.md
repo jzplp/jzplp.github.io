@@ -962,7 +962,7 @@ div {
 /*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNzcy9pbmRleC5jc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRSw2QkFBYztFQUFkLHFCQUFjO0VBQWQsY0FBYztBQUNoQjtBQUNBO0VBQ0Usc0JBQXNCO0FBQ3hCIiwiZmlsZSI6Im91dC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIuanpwbHAge1xyXG4gIHdpZHRoOiBzdHJldGNoO1xyXG59XHJcbmRpdiB7XHJcbiAgY29sb3I6IHZhcigtLWFiYywgcmVkKTtcclxufVxyXG4iXX0= */
 ```
 
-如果不希望生成SourceMap，那么命令行中附加--no-map即可：`postcss index.css -u autoprefixer -o out.css --no-map`。但如果希望生成独立的SourceMap文件，就必须使用PostCSS配置文件了。我们先把命令行修改为：`postcss index.css -o out.css`。然后配置postcss.config.js：
+如果不希望生成SourceMap，那么命令行中附加--no-map即可：`postcss css/index.css -u autoprefixer -o out.css --no-map`。但如果希望生成独立的SourceMap文件，就必须使用PostCSS配置文件了。我们先把命令行修改为：`postcss css/index.css -o out.css`。然后配置postcss.config.js：
 
 ```js
 const autoprefixer = require("autoprefixer");
@@ -1011,6 +1011,45 @@ module.exports = {
 可以看到，这个SourceMap文件的格式规范与之前JavaScript的SourceMap规范是一致的。
 
 ### API方式生成SourceMap
+API方式与命令行的配置方式类似，首先是生成inline的SourceMap：
+
+```js
+const fs = require("fs");
+const autoprefixer = require("autoprefixer");
+const postcss = require("postcss");
+
+const originData = fs.readFileSync("./css/index.css", "utf-8");
+
+postcss([autoprefixer])
+  .process(originData, { from: "css/index.css", to: "out.css", map: true })
+  .then((res) => {
+    console.log(res.css);
+    fs.writeFileSync('out.css', res.css);
+  });
+```
+
+生成的SourceMap会直接在res.css中作为注释存在，输出到文件中和命令行输出一致。如果不希望生成inline的SourceMap，则是这样配置：
+
+```js
+postcss([autoprefixer])
+  .process(originData, {
+    from: "css/index.css",
+    to: "out.css",
+    map: { inline: false },
+  })
+  .then((res) => {
+    console.log(res.map);
+    const str = res.map.toString();
+    fs.writeFileSync("out.css", res.css);
+    fs.writeFileSync("out.css.map", str);
+  });
+
+/* 输出结果
+SourceMapGenerator{...省略 }
+*/
+```
+
+这时候SourceMap在res.map中，而且不是以字符串的形式存在，而是以SourceMapGenerator对象的形式存在。我们在[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)文章中描述过，这是source-map包中的对象类型，可以直接输出SourceMap字符串，也可以做进一步处理。这里将它输出成字符串，并打印到文件中，内容和命令行输出一致。
 
 ### SourceMap内容解析
 
@@ -1078,3 +1117,5 @@ https://postcss.org/docs/writing-a-postcss-plugin
   https://lesscss.org/
 - SCSS文档\
   https://sass-lang.com/
+- 快速定位源码问题：SourceMap的生成/使用/文件格式与历史\
+  https://jzplp.github.io/2025/js-sourcemap.html
