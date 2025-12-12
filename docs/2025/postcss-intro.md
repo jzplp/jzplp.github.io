@@ -1052,8 +1052,27 @@ SourceMapGenerator{...省略 }
 这时候SourceMap在res.map中，而且不是以字符串的形式存在，而是以SourceMapGenerator对象的形式存在。我们在[快速定位源码问题：SourceMap的生成/使用/文件格式与历史](https://jzplp.github.io/2025/js-sourcemap.html)文章中描述过，这是source-map包中的对象类型，可以直接输出SourceMap字符串，也可以做进一步处理。这里将它输出成字符串，并打印到文件中，内容和命令行输出一致。
 
 ### SourceMap内容解析
+我们使用前面文章[Webpack中各种devtool配置的含义与SourceMap生成逻辑](https://jzplp.github.io/2025/webpack-sourcemap.html)中介绍过的解析SourceMap工具代码，来解析上面生成的SourceMap文件。解析结果如下：
 
-map: true 生成， 可以配置  SourceMapOptions 选项
+```
+生成代码行1  列0  源代码行1  列0  源名称-            源文件:css/index.css
+生成代码行2  列2  源代码行2  列2  源名称-            源文件:css/index.css
+生成代码行2  列31 源代码行2  列16 源名称-            源文件:css/index.css
+生成代码行3  列2  源代码行2  列2  源名称-            源文件:css/index.css
+生成代码行3  列23 源代码行2  列16 源名称-            源文件:css/index.css
+生成代码行4  列2  源代码行2  列2  源名称-            源文件:css/index.css
+生成代码行4  列16 源代码行2  列16 源名称-            源文件:css/index.css
+生成代码行5  列0  源代码行3  列0  源名称-            源文件:css/index.css
+生成代码行6  列0  源代码行4  列0  源名称-            源文件:css/index.css
+生成代码行7  列2  源代码行5  列2  源名称-            源文件:css/index.css
+生成代码行7  列24 源代码行5  列24 源名称-            源文件:css/index.css
+生成代码行8  列0  源代码行6  列0  源名称-            源文件:css/index.css
+```
+
+可以看到，全是生成代码和源码的对应关系，一个标识符都没有。这也正常，毕竟CSS代码中并没有真正意义上JavaScript的那种标识。这里我们表格列一下对应关系指向的具体内容：
+
+
+
 
 ## PostCSS的AST
 
