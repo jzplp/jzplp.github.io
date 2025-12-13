@@ -1,0 +1,6 @@
+.jzplp {
+  width: stretch;
+}
+div {
+  color: var(--abc, red);
+}
