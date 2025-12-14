@@ -1071,12 +1071,279 @@ SourceMapGenerator{...省略 }
 
 可以看到，全是生成代码和源码的对应关系，一个标识符都没有。这也正常，毕竟CSS代码中并没有真正意义上JavaScript的那种标识。这里我们表格列一下对应关系指向的具体内容：
 
-
-
-
 ## PostCSS的AST
+### 生成AST数据
+我们来试一下如何使用PostCSS生成AST数据。首先还是先构造一个CSS文件，里面涵盖了CSS的一些常见场景：
+
+```css
+.jzplp {
+  width: 10px;
+  color: var(--abc, red);
+}
+div .jzplp2 {
+  color: blue !important;
+}
+/* this is comment jzplp */
+.jz1 {
+  margin: 5px;
+  .jz2 {
+    padding: 10px 20px;
+  }
+}
+@media (max-width: 768px) {
+  #jz3 {
+    border: 1px solid red;
+  }
+}
+```
+
+然后使用前面API的方式处理CSS文件，在res.root中就能拿到AST数据：
+
+```js
+const fs = require("fs");
+const postcss = require("postcss");
+
+const originData = fs.readFileSync("./css/index.css", "utf-8");
+postcss()
+  .process(originData, {
+    from: "css/index.css",
+    to: "out.css",
+    map: { inline: false },
+  })
+  .then((res) => {
+    console.log(res.root);
+  });
+```
+
+PostCSS还提供了方法，可以直接解析CSS拿到AST数据：
+
+```js
+const fs = require("fs");
+const postcss = require("postcss");
+
+const originData = fs.readFileSync("./css/index.css", "utf-8");
+const data = postcss.parse(originData);
+const dataJson = JSON.stringify(data.toJSON());
+console.log(dataJson);
+```
+
+然后得到我们最终拿到的AST数据的JSON格式，后面的分析都基于这份数据：
+
+```json
+{
+  "raws": { "semicolon": false, "after": "\r\n" },
+  "type": "root",
+  "nodes": [
+    {
+      "raws": {
+        "before": "",
+        "between": " ",
+        "semicolon": true,
+        "after": "\r\n"
+      },
+      "type": "rule",
+      "nodes": [
+        {
+          "raws": { "before": "\r\n  ", "between": ": " },
+          "type": "decl",
+          "source": {
+            "end": { "column": 14, "line": 2, "offset": 24 },
+            "inputId": 0,
+            "start": { "column": 3, "line": 2, "offset": 12 }
+          },
+          "prop": "width",
+          "value": "10px"
+        },
+        {
+          "raws": { "before": "\r\n  ", "between": ": " },
+          "type": "decl",
+          "source": {
+            "end": { "column": 25, "line": 3, "offset": 51 },
+            "inputId": 0,
+            "start": { "column": 3, "line": 3, "offset": 28 }
+          },
+          "prop": "color",
+          "value": "var(--abc, red)"
+        }
+      ],
+      "source": {
+        "end": { "column": 1, "line": 4, "offset": 54 },
+        "inputId": 0,
+        "start": { "column": 1, "line": 1, "offset": 0 }
+      },
+      "selector": ".jzplp"
+    },
+    {
+      "raws": {
+        "before": "\r\n",
+        "between": " ",
+        "semicolon": true,
+        "after": "\r\n"
+      },
+      "type": "rule",
+      "nodes": [
+        {
+          "raws": { "before": "\r\n  ", "between": ": " },
+          "type": "decl",
+          "source": {
+            "end": { "column": 25, "line": 6, "offset": 96 },
+            "inputId": 0,
+            "start": { "column": 3, "line": 6, "offset": 73 }
+          },
+          "prop": "color",
+          "important": true,
+          "value": "blue"
+        }
+      ],
+      "source": {
+        "end": { "column": 1, "line": 7, "offset": 99 },
+        "inputId": 0,
+        "start": { "column": 1, "line": 5, "offset": 56 }
+      },
+      "selector": "div .jzplp2"
+    },
+    {
+      "raws": { "before": "\r\n", "left": " ", "right": " " },
+      "type": "comment",
+      "source": {
+        "end": { "column": 27, "line": 8, "offset": 128 },
+        "inputId": 0,
+        "start": { "column": 1, "line": 8, "offset": 101 }
+      },
+      "text": "this is comment jzplp"
+    },
+    {
+      "raws": {
+        "before": "\r\n",
+        "between": " ",
+        "semicolon": false,
+        "after": "\r\n"
+      },
+      "type": "rule",
+      "nodes": [
+        {
+          "raws": { "before": "\r\n  ", "between": ": " },
+          "type": "decl",
+          "source": {
+            "end": { "column": 14, "line": 10, "offset": 152 },
+            "inputId": 0,
+            "start": { "column": 3, "line": 10, "offset": 140 }
+          },
+          "prop": "margin",
+          "value": "5px"
+        },
+        {
+          "raws": {
+            "before": "\r\n  ",
+            "between": " ",
+            "semicolon": true,
+            "after": "\r\n  "
+          },
+          "type": "rule",
+          "nodes": [
+            {
+              "raws": { "before": "\r\n    ", "between": ": " },
+              "type": "decl",
+              "source": {
+                "end": { "column": 23, "line": 12, "offset": 187 },
+                "inputId": 0,
+                "start": { "column": 5, "line": 12, "offset": 168 }
+              },
+              "prop": "padding",
+              "value": "10px 20px"
+            }
+          ],
+          "source": {
+            "end": { "column": 3, "line": 13, "offset": 192 },
+            "inputId": 0,
+            "start": { "column": 3, "line": 11, "offset": 156 }
+          },
+          "selector": ".jz2"
+        }
+      ],
+      "source": {
+        "end": { "column": 1, "line": 14, "offset": 195 },
+        "inputId": 0,
+        "start": { "column": 1, "line": 9, "offset": 130 }
+      },
+      "selector": ".jz1"
+    },
+    {
+      "raws": {
+        "before": "\r\n",
+        "between": " ",
+        "afterName": " ",
+        "semicolon": false,
+        "after": "\r\n"
+      },
+      "type": "atrule",
+      "name": "media",
+      "source": {
+        "end": { "column": 1, "line": 19, "offset": 270 },
+        "inputId": 0,
+        "start": { "column": 1, "line": 15, "offset": 197 }
+      },
+      "params": "(max-width: 768px)",
+      "nodes": [
+        {
+          "raws": {
+            "before": "\r\n  ",
+            "between": " ",
+            "semicolon": true,
+            "after": "\r\n  "
+          },
+          "type": "rule",
+          "nodes": [
+            {
+              "raws": { "before": "\r\n    ", "between": ": " },
+              "type": "decl",
+              "source": {
+                "end": { "column": 26, "line": 17, "offset": 262 },
+                "inputId": 0,
+                "start": { "column": 5, "line": 17, "offset": 240 }
+              },
+              "prop": "border",
+              "value": "1px solid red"
+            }
+          ],
+          "source": {
+            "end": { "column": 3, "line": 18, "offset": 267 },
+            "inputId": 0,
+            "start": { "column": 3, "line": 16, "offset": 228 }
+          },
+          "selector": "#jz3"
+        }
+      ]
+    }
+  ],
+  "source": {
+    "end": { "column": 1, "line": 20, "offset": 272 },
+    "inputId": 0,
+    "start": { "column": 1, "line": 1, "offset": 0 }
+  },
+  "inputs": [
+    {
+      "hasBOM": false,
+      "css": ".jzplp {\r\n  width: 10px;\r\n  color: var(--abc, red);\r\n}\r\ndiv .jzplp2 {\r\n  color: blue !important;\r\n}\r\n/* this is comment jzplp */\r\n.jz1 {\r\n  margin: 5px;\r\n  .jz2 {\r\n    padding: 10px 20px;\r\n  }\r\n}\r\n@media (max-width: 768px) {\r\n  #jz3 {\r\n    border: 1px solid red;\r\n  }\r\n}\r\n",
+      "id": "<input css Z2C3cq>"
+    }
+  ]
+}
+```
+
+### 公共属性
+PostCSS的AST结点类型不多，且不同的结点有一些公共属性，这里列举一下：
+
+
+
+
+### CSS结点类型和私有属性
+
+
 
 ## 插件开发
+
+### AST遍历
 
 https://github.com/postcss/postcss/blob/main/docs/writing-a-plugin.md
 （github同级目录有更多文档）
@@ -1138,3 +1405,7 @@ https://postcss.org/docs/writing-a-postcss-plugin
   https://sass-lang.com/
 - 快速定位源码问题：SourceMap的生成/使用/文件格式与历史\
   https://jzplp.github.io/2025/js-sourcemap.html
+- MDN CSS语法\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/Guides/Syntax/Introduction
+- MDN CSS At规则\
+  https://developer.mozilla.org/zh-CN/docs/Web/CSS/Guides/Syntax/At-rules
