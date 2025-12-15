@@ -1354,12 +1354,28 @@ PostCSS的AST结点类型不多，且不同的结点有一些公共属性，这�
 | 属性名 | 属性含义 | 数据举例 | 数据举例说明 |
 | - | - | - | - |
 | type | 结点类型 | decl | CSS声明类型 |
-| nodes | 子节点列表 | [...] | 子节点数组 |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| nodes | 子结点列表 | [...] | 子结点数组 |
+| raws | 结点中的空白字符 | { "semicolon": false, "after": "\r\n" } | 下面单独说明 |
+| source | 结点的源码位置 | {...} | 下面单独说明 |
 
-其中最重要的是type和nodes属性，一个表示结点的类型，一个是包含的子结点列表。
+其中最重要的是type和nodes属性，一个表示结点的类型，一个是包含的子结点列表。raws中分类整理了结点中的空白字符，这里列举一下属性含义：
+
+* raws.before 结点前的空白符
+* raws.after 结点后的空白符
+* raws.between 属性和值中间的空白符。例如`key: value`中间的`： `
+* raws.semicolon 如果最后一个子结点有分号则为true
+* raws.afterName 在at规则和它的条件之间的空白。例如`@media (`中间
+* raws.left 注释中/*之后，注释内容之前。
+* raws.right 注释内容之后，注释*/之前。
+
+source是生成SourceMap使用的数据，通过文件标识+起点终点的行号列号，可以精确找到结点在源文件的位置。这里也列举一下属性含义：
+
+* source.inputId 源文件标识
+* source.start 起点位置信息
+* source.end 终点位置信息
+* source.start.line或source.end.line 行号
+* source.start.column或source.end.column 列号
+* source.start.offset或source.end.offset 距离文件起始的偏移量
 
 ### CSS结点类型和私有属性
 
