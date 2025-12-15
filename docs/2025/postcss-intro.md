@@ -1380,10 +1380,12 @@ source是生成SourceMap使用的数据，通过文件标识+起点终点的行�
 ### CSS结点类型和私有属性
 这里列举一下PostCSS的AST结点类型，以及它们私有的属性：
 
-#### root结点类型
+**root结点类型**
+
 标识一个CSS文件，其中包含所有解析的结点。
 
-#### rule结点类型
+**rule结点类型**
+
 rule结点是一个CSS规则，包含选择器，后面跟着一个声明块。举例如下：
 
 ```css
@@ -1404,17 +1406,20 @@ rule结点是一个CSS规则，包含选择器，后面跟着一个声明块。�
 
 rule结点有一个私有属性selector，表示这个结点的选择器，值例如`.jzplp`，或者组合选择器`div .jzplp2`。
 
-#### comment结点类型
+**comment结点类型**
+
 comment结点表示一个注释。它有个私有属性text，表示注释内容。
 
-#### decl结点类型
+**decl结点类型**
+
 decl结点表示一个CSS声明，即`key: value;`的结构。例如`width: 10px;`或者`border: 1px solid red;`。即使值包含函数或者多个值集合，decl结点也不再细分，不包含子结点。decl结点的私有属性如下：
 
 * prop: CSS声明属性名，例如width
 * value: CSS声明属性值，例如10px
 * important: 如果声明设置了`!important`，这里的值为true
 
-#### atrule结点类型
+**atrule结点类型**
+
 atrule结点表示一个at规则，即以@符号开头的规则。举例如下：
 
 ```css
