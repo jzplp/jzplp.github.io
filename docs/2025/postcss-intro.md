@@ -1435,13 +1435,82 @@ atrule结点表示一个at规则，即以@符号开头的规则。举例如下�
 atrule结点有私有属性name，表示@后面跟的标识符，例如上面的media。还有一个私有属性params，表示at规则内的参数，例如上面的`(max-width: 768px)`。
 
 ## 插件开发
+### 新建插件
+首先我们创建pluginJzplp.js文件存放插件代码，然后再PostCSS配置文件中引入：
 
-### AST遍历
+```js
+// pluginJzplp.js
+function pluginJzplp() {
+  console.log('init');
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Root() {
+      console.log('Root');
+    },
+    Declaration() {},
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
 
-https://github.com/postcss/postcss/blob/main/docs/writing-a-plugin.md
-（github同级目录有更多文档）
+// postcss.config.js
+const pluginJzplp = require('./pluginJzplp');
+module.exports = {
+  plugins: [pluginJzplp],
+};
+```
 
-https://postcss.org/docs/writing-a-postcss-plugin
+可以看到，插件就是一个函数，函数的返回值是一个对象，其中postcssPlugin属性表示函数名称，其它属性大部分都和遍历AST有关。这个函数本身还需要设置postcss属性为true，这样才能被PostCSS认为是插件。我们看下执行后的输出：
+
+```
+// 转义单文件
+init
+init
+Root
+// 转义两个文件
+init
+init
+Root
+init
+init
+Root
+```
+
+可以看到，每转义一个文件，插件函数会被执行两次，但实际遍历（输出Root）只有一次。我们再来看下函数入参：
+
+```js
+// pluginJzplp.js
+function pluginJzplp(p1, p2, p3) {
+  console.log(p1, p2, p3);
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Root() {
+      console.log('Root');
+    },
+    Declaration() {},
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
+
+// postcss.config.js
+const pluginJzplp = require('./pluginJzplp');
+module.exports = {
+  plugins: [pluginJzplp('jz1', 'jz2', 3)],
+};
+
+/* 单文件输出结果
+jz1 jz2 3
+Root
+Root
+*/
+```
+
+可以看到，插件函数的入参全部是插件引入时传的参数。
+
+### 遍历AST
+
+### 修改AST
 
 ## 编写自定义语法规则
 
