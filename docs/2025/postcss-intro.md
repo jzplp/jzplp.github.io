@@ -1509,6 +1509,11 @@ Root
 可以看到，插件函数的入参全部是插件引入时传的参数。
 
 ### 遍历AST
+PostCSS插件遍历AST的方法与Baabel类似，都是以结点类型名作为函数属性。当遍历到对应类型的结点时，函数被出发，入参为对应的结点数据。我们来看一下例子：
+
+```js
+
+```
 
 ### 修改AST
 
@@ -1571,3 +1576,5 @@ Root
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Guides/Syntax/Introduction
 - MDN CSS At规则\
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Guides/Syntax/At-rules
+- 解锁Babel核心功能：从转义语法到插件开发\
+  https://jzplp.github.io/2025/babel-intro.html
