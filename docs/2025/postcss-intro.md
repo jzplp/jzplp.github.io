@@ -1362,7 +1362,7 @@ PostCSS的AST结点类型不多，且不同的结点有一些公共属性，这�
 
 * raws.before 结点前的空白符
 * raws.after 结点后的空白符
-* raws.between 属性和值中间的空白符。例如`key: value`中间的`： `
+* raws.between 对于decl结点是属性和值中间的空白符，例如`key: value`中间的`： `，对于其它结点类型是其它位置的空白。
 * raws.semicolon 如果最后一个子结点有分号则为true
 * raws.afterName 在at规则和它的条件之间的空白。例如`@media (`中间
 * raws.left 注释中/*之后，注释内容之前。
@@ -1509,13 +1509,127 @@ Root
 可以看到，插件函数的入参全部是插件引入时传的参数。
 
 ### 遍历AST
-PostCSS插件遍历AST的方法与Baabel类似，都是以结点类型名作为函数属性。当遍历到对应类型的结点时，函数被出发，入参为对应的结点数据。我们来看一下例子：
+PostCSS插件遍历AST的方法与Baabel类似，都是以结点类型名作为函数属性。当遍历到对应类型的结点时，函数被出发，入参为对应的结点数据。我们来看一个插件例子：
 
 ```js
+function pluginJzplp() {
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Root() {
+      console.log("Root");
+    },
+    Rule(data) {
+      console.log("Rule", data.selector);
+    },
+    Declaration: {
+      color(data) {
+        console.log("Declaration color", data.value);
+      },
+      width(data) {
+        console.log("Declaration width", data.value);
+      },
+    },
+    AtRule: {
+      media(data) {
+        console.log("AtRule media", data.params);
+      },
+    },
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
 
+/* 输出结果
+Root
+Rule .jzplp
+Declaration width 10px
+Declaration color var(--abc, red)
+Rule div .jzplp2
+Declaration color blue
+Rule .jz1
+Rule .jz2
+AtRule media (max-width: 768px)
+Rule #jz3
+*/
 ```
 
+对应节点类型的函数的入参，就是这个类型的结点数据本身，上面的例子中输出了一些节点属性。对于AtRule和Declaration类型的结点可以接受更细分的类型函数，例如Declaration可以把属性名作为key分别定义遍历函数。
+
+每个类型的结点可以定义两种类型的函数，一种是进入结点时，一种是退出结点时。区别在于是否已经遍历过子结点。上面的介绍的函数都是进入结点时的函数，退出函数名则需要在后面加Exit，例如RootExit, RuleExit。只有拥有子结点的类型有退出函数，Declaration这种没有子结点的结点就只有一个函数。
+
+```js
+function pluginJzplp() {
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Once() {
+      console.log("Once");
+    },
+    OnceExit() {
+      console.log("OnceExit");
+    },
+    Root() {
+      console.log("Root");
+    },
+    RootExit() {
+      console.log("RootExit");
+    },
+    Rule(data) {
+      console.log("Rule", data.selector);
+    },
+    RuleExit(data) {
+      console.log("RuleExit", data.selector);
+    },
+    Declaration(data) {
+      console.log("Declaration", data.prop, data.value);
+    },
+    AtRule: {
+      media(data) {
+        console.log("AtRule media", data.params);
+      },
+    },
+    AtRuleExit: {
+      media(data) {
+        console.log("AtRuleExit media", data.params);
+      },
+    },
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
+
+/* 输出结果
+Once
+Root
+Rule .jzplp
+Declaration width 10px
+Declaration color var(--abc, red)
+RuleExit .jzplp
+Rule div .jzplp2
+Declaration color blue
+RuleExit div .jzplp2
+Rule .jz1
+Declaration margin 5px
+Rule .jz2
+Declaration padding 10px 20px
+RuleExit .jz2
+RuleExit .jz1
+AtRule media (max-width: 768px)
+Rule #jz3
+Declaration border 1px solid red
+RuleExit #jz3
+AtRuleExit media (max-width: 768px)
+RootExit
+OnceExit
+*/
+```
+
+通过上面的例子可以看到，先触发进入结点的函数，再访问内部结点，然后再触发退出结点的函数。上面例子中还有Once和OnceExit函数，这两个是最早和最后触发的两个函数，入参是root数据。
+
 ### 修改AST
+
+
+### 辅助工具
+
 
 ## 编写自定义语法规则
 
