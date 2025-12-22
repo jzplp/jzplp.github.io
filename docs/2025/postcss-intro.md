@@ -1625,8 +1625,137 @@ OnceExit
 
 通过上面的例子可以看到，先触发进入结点的函数，再访问内部结点，然后再触发退出结点的函数。上面例子中还有Once和OnceExit函数，这两个是最早和最后触发的两个函数，入参是root数据。
 
-### 修改AST
+### 修改AST结点属性
+首先从修改AST结点的属性开始。下面的插件修改了Declaration和AtRule的属性：
 
+```js
+function pluginJzplp() {
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Root() {
+      console.log("Root");
+    },
+    RootExit() {
+      console.log("RootExit");
+    },
+    Rule(data) {
+      console.log("Rule", data.selector);
+    },
+    RuleExit(data) {
+      console.log("RuleExit", data.selector);
+    },
+    Declaration: {
+      color(data) {
+        data.value = "yellow";
+        console.log("Declaration color");
+      },
+    },
+    AtRule: {
+      media(data) {
+        data.params = "(max-width: 1000px)";
+        console.log("AtRule media");
+      },
+    },
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
+```
+
+我们简化一下转义的CSS代码，运行PostCSS后查看输出结果，发现生成的代码中确实被改掉了。
+
+```css
+/* 源CSS代码 */
+div .jzplp2 {
+  color: blue !important;
+}
+.jz2 {
+  width: 10px;
+}
+@media (max-width: 768px) {
+}
+
+/* 生成CSS代码 */
+div .jzplp2 {
+  color: yellow !important;
+}
+.jz2 {
+  width: 10px;
+}
+@media (max-width: 1000px) {
+}
+
+/* 命令行输出
+Root
+Rule div .jzplp2
+Declaration color
+RuleExit div .jzplp2
+Rule .jz2
+RuleExit .jz2
+AtRule media
+RootExit
+Root
+Rule div .jzplp2
+Declaration color
+RuleExit div .jzplp2
+AtRule media
+RootExit
+*/
+
+/* 插件中删掉修改AtRule的代码 命令行输出
+Root
+Rule div .jzplp2
+Declaration color
+RuleExit div .jzplp2
+Rule .jz2
+RuleExit .jz2
+AtRule media
+RootExit
+Root
+Rule div .jzplp2
+Declaration color
+RuleExit div .jzplp2
+RootExit
+*/
+```
+
+从命令行中输出中，我们还发现，Root被遍历了两次。第一次遍历了全部属性，第二次仅仅遍历了修改过的属性以及他们的父结点。如果把插件中修改AtRule的代码删除再执行，发现Root还是被遍历了两次。因此父结点的再上级结点也会被遍历，一直到根结点。因此，假设我们一直将属性修改为不同的值，就会触发无限循环遍历。开发插件的时候要注意这件事。
+
+```js
+let a = 1;
+function pluginJzplp() {
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Root() {
+      console.log("Root");
+    },
+    RootExit() {
+      console.log("RootExit");
+    },
+    Declaration: {
+      width(data) {
+        data.value = ++a;
+        console.log("Declaration width");
+      },
+    },
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
+
+/* 命令行输出
+Root
+Declaration width
+RootExit
+Root
+Declaration width
+RootExit
+Root
+...无限循环
+*/
+```
+
+### 增删AST结点
 
 ### 辅助工具
 
