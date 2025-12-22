@@ -1672,8 +1672,7 @@ div .jzplp2 {
 .jz2 {
   width: 10px;
 }
-@media (max-width: 768px) {
-}
+@media (max-width: 768px) {}
 
 /* 生成CSS代码 */
 div .jzplp2 {
@@ -1682,8 +1681,7 @@ div .jzplp2 {
 .jz2 {
   width: 10px;
 }
-@media (max-width: 1000px) {
-}
+@media (max-width: 1000px) {}
 
 /* 命令行输出
 Root
@@ -1756,6 +1754,80 @@ Root
 ```
 
 ### 增删AST结点
+PostCSS提供了每个结点的创建函数，可以创建对应类型的结点。每个结点上还挂载了父节点，子结点，各种位置添加结点的函数，可以让我们方便增删和处理结点。例如下面这个插件例子：
+
+```js
+function pluginJzplp() {
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Root() {
+      console.log("Root");
+    },
+    RootExit() {
+      console.log("RootExit");
+    },
+    Declaration: {
+      width(data, { Declaration }) {
+        const decl = new Declaration({ prop: "color", value: "black" });
+        data?.parent?.append(decl);
+      },
+    },
+    Rule(data, { Rule, Declaration }) {
+      if (data.selector === "div .jzplp2") {
+        const decl = new Declaration({ prop: "color", value: "yellow" });
+        const rule = new Rule({ selector: ".jz3", nodes: [decl] });
+        data.before(rule);
+      }
+    },
+    AtRule: {
+      media(data) {
+        if (!data.flag) {
+          data.flag = 1;
+          const cloned = data.clone(data);
+          data.push(cloned);
+        }
+      },
+    },
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
+```
+
+注意部分可能造成无限循环的场景需要进行限制。输出结果如下：
+
+```css
+/* 源CSS代码 */
+div .jzplp2 {
+  color: blue !important;
+}
+.jz2 {
+  width: 10px;
+}
+@media (max-width: 768px) {}
+
+
+/* 生成CSS代码 */
+.jz3 {
+  color: yellow;
+}
+div .jzplp2 {
+  color: blue !important;
+}
+.jz2 {
+  width: 10px;
+  color: black;
+}
+@media (max-width: 768px) {
+@media (max-width: 768px) {}}
+
+/* 命令行输出
+Root
+RootExit
+Root
+RootExit
+*/
+```
 
 ### 辅助工具
 
