@@ -1829,7 +1829,15 @@ RootExit
 */
 ```
 
-### 辅助工具
+## AST辅助工具
+在前面介绍过PostCSS的AST结点类型一共就只有几种，例如规则rule规则结点和decl声明结点。但CSS实际的复杂度要更高，例如结点选择器还可以分为属性选择器，类选择器，标签选择器，还有组合选择器，伪类伪元素选择器等等，有些甚至是函数的形态。CSS声明的值也是多种多样，有字符串，数字，函数，组合值等等。像这类数据PostCSS并没有直接提供解析方式，但有一些开源工具可以帮助解析。下面我们列举几个工具简单介绍：
+
+### postcss-selector-parser
+postcss-selector-parser是一个解析CSS选择器的工具。虽然名字中带postcss，但实际上不依赖PostCSS运行。postcss-selector-parser
+
+
+
+### postcss-value-parser
 
 
 ## 编写自定义语法规则
@@ -1893,3 +1901,9 @@ RootExit
   https://developer.mozilla.org/zh-CN/docs/Web/CSS/Guides/Syntax/At-rules
 - 解锁Babel核心功能：从转义语法到插件开发\
   https://jzplp.github.io/2025/babel-intro.html
+- GitHub postcss-selector-parser\
+  https://github.com/postcss/postcss-selector-parser
+- postcss-selector-parser API Documentation\
+  https://github.com/postcss/postcss-selector-parser/blob/master/API.md
+- GitHub postcss-value-parser\
+  https://github.com/TrySound/postcss-value-parser
