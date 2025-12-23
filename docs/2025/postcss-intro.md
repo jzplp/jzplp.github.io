@@ -1833,7 +1833,77 @@ RootExit
 在前面介绍过PostCSS的AST结点类型一共就只有几种，例如规则rule规则结点和decl声明结点。但CSS实际的复杂度要更高，例如结点选择器还可以分为属性选择器，类选择器，标签选择器，还有组合选择器，伪类伪元素选择器等等，有些甚至是函数的形态。CSS声明的值也是多种多样，有字符串，数字，函数，组合值等等。像这类数据PostCSS并没有直接提供解析方式，但有一些开源工具可以帮助解析。下面我们列举几个工具简单介绍：
 
 ### postcss-selector-parser
-postcss-selector-parser是一个解析CSS选择器的工具。虽然名字中带postcss，但实际上不依赖PostCSS运行。postcss-selector-parser
+postcss-selector-parser是一个解析CSS选择器的工具。虽然名字中带postcss，但实际上不依赖PostCSS运行。postcss-selector-parser可以将选择器字符串解析为AST数据。其中包含一些结点类型，用type字段表示：
+
+* attribute 属性选择器结点
+* class 类选择器结点
+* combinator 组合选择器结点
+* id id选择器结点
+* pseudo 伪类和伪元素选择器结点
+* tag 标签选择器结点
+* selector 选择器容器结点
+
+这里我们构造一个复杂一点的选择器字符串，遍历结点，看能解析出哪些类型：
+
+```js
+const parser = require('postcss-selector-parser');
+const selectorStr = '.jz1, div+jz2:not(#jzplp::first-line)';
+
+const transform = selectors => {
+    selectors.walk(data => {
+      console.log(data.type.padEnd(12), data.toString().padEnd(35), data?.nodes?.map?.(item => item.toString()));
+    });
+};
+const transformed = parser(transform).processSync(selectorStr);
+
+/*
+selector     .jz1                                [ '.jz1' ]
+class        .jz1                                undefined
+selector      div+jz2:not(#jzplp::first-line)    [ ' div', '+', 'jz2', ':not(#jzplp::first-line)' ]
+tag           div                                undefined
+combinator   +                                   undefined
+tag          jz2                                 undefined
+pseudo       :not(#jzplp::first-line)            [ '#jzplp::first-line' ]
+selector     #jzplp::first-line                  [ '#jzplp', '::first-line' ]
+id           #jzplp                              undefined
+pseudo       ::first-line                        []
+*/
+```
+
+可以看到，组合选择器里面并不包含其它选择器，而是仅有连接符号本身。这个工具本身没有直接包含将代码转为JSON形式的AST数据的方法。我试了下ast方法，输出的内容也不是JSON数据，因此这里就不列出了。
+
+```js
+const parser = require('postcss-selector-parser');
+parser(() => {})
+  .ast(selectorStr)
+  .then((data) => console.log(data));
+// 输出非JSON数据
+```
+
+工具内提供了各种创建AST结点的方法，这里我们尝试修改和添加AST结点试试。
+
+```js
+const parser = require("postcss-selector-parser");
+const selectorStr = ".jz1, div+jz2:not(#jzplp::first-line)";
+const transform = (selectors) => {
+  selectors.walk((data) => {
+    // 修改结点属性
+    if (data.type === "tag" && data.value === "jz2") data.value = "h1";
+    // 添加结点
+    if (data.type === "selector" && data.toString() === '.jz1') {
+      const attr = parser.attribute({ attribute: "href" });
+      data.nodes.push(attr);
+    }
+  });
+};
+const transformed = parser(transform).processSync(selectorStr);
+console.log(transformed);
+
+/* 输出结果
+.jz1[href], div+h1:not(#jzplp::first-line)
+*/
+```
+
 
 
 
