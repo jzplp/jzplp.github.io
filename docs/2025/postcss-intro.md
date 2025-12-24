@@ -1892,37 +1892,43 @@ console.log(JSON.stringify(parsedValue));
       "value": "calc",
       "before": "",
       "after": "",
-      "sourceEndIndex": 15,
-      "nodes": [{ "type": "word", "sourceIndex": 5, "sourceEndIndex": 14, "value": "50vh+10px" }]
+      "sourceEndIndex": 17,
+      "nodes": [
+        { "type": "word", "sourceIndex": 5, "sourceEndIndex": 9, "value": "50vh" },
+        { "type": "space", "sourceIndex": 9, "sourceEndIndex": 10, "value": " " },
+        { "type": "word", "sourceIndex": 10, "sourceEndIndex": 11, "value": "+" },
+        { "type": "space", "sourceIndex": 11, "sourceEndIndex": 12, "value": " " },
+        { "type": "word", "sourceIndex": 12, "sourceEndIndex": 16, "value": "10px" }
+      ]
     },
-    { "type": "space", "sourceIndex": 15, "sourceEndIndex": 16, "value": " " },
-    { "type": "word", "sourceIndex": 16, "sourceEndIndex": 21, "value": "solid" },
-    { "type": "space", "sourceIndex": 21, "sourceEndIndex": 22, "value": " " },
+    { "type": "space", "sourceIndex": 17, "sourceEndIndex": 18, "value": " " },
+    { "type": "word", "sourceIndex": 18, "sourceEndIndex": 23, "value": "solid" },
+    { "type": "space", "sourceIndex": 23, "sourceEndIndex": 24, "value": " " },
     {
       "type": "function",
-      "sourceIndex": 22,
+      "sourceIndex": 24,
       "value": "var",
       "before": "",
       "after": "",
-      "sourceEndIndex": 58,
+      "sourceEndIndex": 60,
       "nodes": [
-        { "type": "word", "sourceIndex": 26, "sourceEndIndex": 33, "value": "--jzplp" },
-        { "type": "div", "sourceIndex": 33, "sourceEndIndex": 35, "value": ",", "before": "", "after": " " },
+        { "type": "word", "sourceIndex": 28, "sourceEndIndex": 35, "value": "--jzplp" },
+        { "type": "div", "sourceIndex": 35, "sourceEndIndex": 37, "value": ",", "before": "", "after": " " },
         {
           "type": "function",
-          "sourceIndex": 35,
+          "sourceIndex": 37,
           "value": "rgba",
           "before": "",
           "after": "",
-          "sourceEndIndex": 57,
+          "sourceEndIndex": 59,
           "nodes": [
-            { "type": "word", "sourceIndex": 40, "sourceEndIndex": 43, "value": "255" },
-            { "type": "div", "sourceIndex": 43, "sourceEndIndex": 44, "value": ",", "before": "", "after": "" },
-            { "type": "word", "sourceIndex": 44, "sourceEndIndex": 47, "value": "255" },
-            { "type": "div", "sourceIndex": 47, "sourceEndIndex": 48, "value": ",", "before": "", "after": "" },
-            { "type": "word", "sourceIndex": 48, "sourceEndIndex": 51, "value": "255" },
-            { "type": "div", "sourceIndex": 51, "sourceEndIndex": 53, "value": ",", "before": "", "after": " " },
-            { "type": "word", "sourceIndex": 53, "sourceEndIndex": 56, "value": "0.5" }
+            { "type": "word", "sourceIndex": 42, "sourceEndIndex": 45, "value": "255" },
+            { "type": "div", "sourceIndex": 45, "sourceEndIndex": 46, "value": ",", "before": "", "after": "" },
+            { "type": "word", "sourceIndex": 46, "sourceEndIndex": 49, "value": "255" },
+            { "type": "div", "sourceIndex": 49, "sourceEndIndex": 50, "value": ",", "before": "", "after": "" },
+            { "type": "word", "sourceIndex": 50, "sourceEndIndex": 53, "value": "255" },
+            { "type": "div", "sourceIndex": 53, "sourceEndIndex": 55, "value": ",", "before": "", "after": " " },
+            { "type": "word", "sourceIndex": 55, "sourceEndIndex": 58, "value": "0.5" }
           ]
         }
       ]
@@ -1941,6 +1947,39 @@ console.log(JSON.stringify(parsedValue));
 * comment 注释结点
 * function 函数结点，里面可以包含其它结点，例如 rgba(), var()等
 
+然后我们再试着遍历AST，以及修改结点内容。这里在前面代码的基础上继续写：
+
+```js
+parsedValue.walk(function (node) {
+  console.log(node.type.padEnd(10), "[", node.value.padEnd(10), "]");
+  if (node.type === "word" && node.value === "10px")  node.value = "10em";
+});
+console.log(parsedValue.toString());
+
+/* 输出结果
+function   [ calc       ]
+word       [ 50vh       ]
+space      [            ]
+word       [ +          ]
+space      [            ]
+word       [ 10px       ]
+space      [            ]
+word       [ solid      ]
+space      [            ]
+function   [ var        ]
+word       [ --jzplp    ]
+div        [ ,          ]
+function   [ rgba       ]
+word       [ 255        ]
+div        [ ,          ]
+word       [ 255        ]
+div        [ ,          ]
+word       [ 255        ]
+div        [ ,          ]
+word       [ 0.5        ]
+calc(50vh + 10em) solid var(--jzplp, rgba(255,255,255, 0.5))
+*/
+```
 
 ## 编写自定义语法规则
 
