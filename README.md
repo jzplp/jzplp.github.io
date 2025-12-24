@@ -47,5 +47,13 @@ pnpm docs:preview
 pnpm deploy:win
 ```
 
+设置行字符数.prettierrc.json
+
+```json
+{
+  "printWidth": 120
+}
+```
+
 ## 自动构建部署
 push到GitHub仓库，GitHub Actions 会自动触发，在GtHub服务器上自动构建并部署。

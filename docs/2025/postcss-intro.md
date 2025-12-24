@@ -1148,16 +1148,11 @@ console.log(dataJson);
 
 ```json
 {
-  "raws": { "semicolon": false, "after": "\r\n" },
+  "raws": { "semicolon": false, "after": "" },
   "type": "root",
   "nodes": [
     {
-      "raws": {
-        "before": "",
-        "between": " ",
-        "semicolon": true,
-        "after": "\r\n"
-      },
+      "raws": { "before": "", "between": " ", "semicolon": true, "after": "\r\n" },
       "type": "rule",
       "nodes": [
         {
@@ -1191,12 +1186,7 @@ console.log(dataJson);
       "selector": ".jzplp"
     },
     {
-      "raws": {
-        "before": "\r\n",
-        "between": " ",
-        "semicolon": true,
-        "after": "\r\n"
-      },
+      "raws": { "before": "\r\n", "between": " ", "semicolon": true, "after": "\r\n" },
       "type": "rule",
       "nodes": [
         {
@@ -1230,12 +1220,7 @@ console.log(dataJson);
       "text": "this is comment jzplp"
     },
     {
-      "raws": {
-        "before": "\r\n",
-        "between": " ",
-        "semicolon": false,
-        "after": "\r\n"
-      },
+      "raws": { "before": "\r\n", "between": " ", "semicolon": false, "after": "\r\n" },
       "type": "rule",
       "nodes": [
         {
@@ -1250,12 +1235,7 @@ console.log(dataJson);
           "value": "5px"
         },
         {
-          "raws": {
-            "before": "\r\n  ",
-            "between": " ",
-            "semicolon": true,
-            "after": "\r\n  "
-          },
+          "raws": { "before": "\r\n  ", "between": " ", "semicolon": true, "after": "\r\n  " },
           "type": "rule",
           "nodes": [
             {
@@ -1286,13 +1266,7 @@ console.log(dataJson);
       "selector": ".jz1"
     },
     {
-      "raws": {
-        "before": "\r\n",
-        "between": " ",
-        "afterName": " ",
-        "semicolon": false,
-        "after": "\r\n"
-      },
+      "raws": { "before": "\r\n", "between": " ", "afterName": " ", "semicolon": false, "after": "\r\n" },
       "type": "atrule",
       "name": "media",
       "source": {
@@ -1303,12 +1277,7 @@ console.log(dataJson);
       "params": "(max-width: 768px)",
       "nodes": [
         {
-          "raws": {
-            "before": "\r\n  ",
-            "between": " ",
-            "semicolon": true,
-            "after": "\r\n  "
-          },
+          "raws": { "before": "\r\n  ", "between": " ", "semicolon": true, "after": "\r\n  " },
           "type": "rule",
           "nodes": [
             {
@@ -1334,15 +1303,15 @@ console.log(dataJson);
     }
   ],
   "source": {
-    "end": { "column": 1, "line": 20, "offset": 272 },
+    "end": { "column": 2, "line": 19, "offset": 270 },
     "inputId": 0,
     "start": { "column": 1, "line": 1, "offset": 0 }
   },
   "inputs": [
     {
       "hasBOM": false,
-      "css": ".jzplp {\r\n  width: 10px;\r\n  color: var(--abc, red);\r\n}\r\ndiv .jzplp2 {\r\n  color: blue !important;\r\n}\r\n/* this is comment jzplp */\r\n.jz1 {\r\n  margin: 5px;\r\n  .jz2 {\r\n    padding: 10px 20px;\r\n  }\r\n}\r\n@media (max-width: 768px) {\r\n  #jz3 {\r\n    border: 1px solid red;\r\n  }\r\n}\r\n",
-      "id": "<input css Z2C3cq>"
+      "css": ".jzplp {\r\n  width: 10px;\r\n  color: var(--abc, red);\r\n}\r\ndiv .jzplp2 {\r\n  color: blue !important;\r\n}\r\n/* this is comment jzplp */\r\n.jz1 {\r\n  margin: 5px;\r\n  .jz2 {\r\n    padding: 10px 20px;\r\n  }\r\n}\r\n@media (max-width: 768px) {\r\n  #jz3 {\r\n    border: 1px solid red;\r\n  }\r\n}",
+      "id": "<input css abVh40>"
     }
   ]
 }
@@ -1842,6 +1811,7 @@ postcss-selector-parser是一个解析CSS选择器的工具。虽然名字中带
 * pseudo 伪类和伪元素选择器结点
 * tag 标签选择器结点
 * selector 选择器容器结点
+* 等等...
 
 这里我们构造一个复杂一点的选择器字符串，遍历结点，看能解析出哪些类型：
 
@@ -1904,10 +1874,72 @@ console.log(transformed);
 */
 ```
 
-
-
-
 ### postcss-value-parser
+postcss-selector-parser是一个解析CSS值的工具，也可以脱离PostCSS运行。它将CSS声明中的值字符串解析为AST数据。首先我们构造一个复杂的值例子，输出对应的AST数据：
+
+```js
+const valueParser = require("postcss-value-parser");
+const valueStr = "calc(50vh+10px) solid var(--jzplp, rgba(255,255,255, 0.5))";
+var parsedValue = valueParser(valueStr);
+console.log(JSON.stringify(parsedValue));
+
+/* 输出结果
+{
+  "nodes": [
+    {
+      "type": "function",
+      "sourceIndex": 0,
+      "value": "calc",
+      "before": "",
+      "after": "",
+      "sourceEndIndex": 15,
+      "nodes": [{ "type": "word", "sourceIndex": 5, "sourceEndIndex": 14, "value": "50vh+10px" }]
+    },
+    { "type": "space", "sourceIndex": 15, "sourceEndIndex": 16, "value": " " },
+    { "type": "word", "sourceIndex": 16, "sourceEndIndex": 21, "value": "solid" },
+    { "type": "space", "sourceIndex": 21, "sourceEndIndex": 22, "value": " " },
+    {
+      "type": "function",
+      "sourceIndex": 22,
+      "value": "var",
+      "before": "",
+      "after": "",
+      "sourceEndIndex": 58,
+      "nodes": [
+        { "type": "word", "sourceIndex": 26, "sourceEndIndex": 33, "value": "--jzplp" },
+        { "type": "div", "sourceIndex": 33, "sourceEndIndex": 35, "value": ",", "before": "", "after": " " },
+        {
+          "type": "function",
+          "sourceIndex": 35,
+          "value": "rgba",
+          "before": "",
+          "after": "",
+          "sourceEndIndex": 57,
+          "nodes": [
+            { "type": "word", "sourceIndex": 40, "sourceEndIndex": 43, "value": "255" },
+            { "type": "div", "sourceIndex": 43, "sourceEndIndex": 44, "value": ",", "before": "", "after": "" },
+            { "type": "word", "sourceIndex": 44, "sourceEndIndex": 47, "value": "255" },
+            { "type": "div", "sourceIndex": 47, "sourceEndIndex": 48, "value": ",", "before": "", "after": "" },
+            { "type": "word", "sourceIndex": 48, "sourceEndIndex": 51, "value": "255" },
+            { "type": "div", "sourceIndex": 51, "sourceEndIndex": 53, "value": ",", "before": "", "after": " " },
+            { "type": "word", "sourceIndex": 53, "sourceEndIndex": 56, "value": "0.5" }
+          ]
+        }
+      ]
+    }
+  ]
+}
+*/
+```
+
+通过上面的例子，CSS声明值被解析成了JSON形式的AST数据。其中每个结点以type属性来区分类型。我们列举下其中的常用AST结点：
+
+* word 普通值结点，例如 10px, 255等
+* string 字符串节点，例如 "/jz/123"
+* div 分隔节点，例如 逗号，斜杠等
+* space 空格结点
+* comment 注释结点
+* function 函数结点，里面可以包含其它结点，例如 rgba(), var()等
 
 
 ## 编写自定义语法规则
