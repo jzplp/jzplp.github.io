@@ -1981,19 +1981,99 @@ calc(50vh + 10em) solid var(--jzplp, rgba(255,255,255, 0.5))
 */
 ```
 
-## 编写自定义语法规则
-PostCSS编写自定义语法的方法，就是实现parser/stringifier/syntax方法。然后在PostCSS参数中传入对应方法即可。
+## 自定义语法规则
+PostCSS不仅可以编译CSS语法，还可以自定义语法规则实现功能扩展。
+
+### 编写自定义语法规则
+PostCSS编写自定义语法的方法，就是实现parser/stringifier/syntax方法，然后在PostCSS参数中传入对应方法即可。
 
 * parser方法 将字符串转为抽象语法树
 * stringifier方法 将抽象语法树转为字符串
 * syntax 相当于parser + stringifier
 
-编写自定义语法规则是一件很复杂的事情，需要经过词法分析句法分析等步骤，很显然超出了这篇文章的范畴。因此这里我们只给出一个非常简单的demo，示意一下自定义语法的开发接口：
+编写自定义语法规则是一件很复杂的事情，需要经过词法分析句法分析等步骤，很显然超出了这篇文章的范畴。因此这里我们只给出一个非常简单的demo，示意一下自定义语法的开发接口。首先来看下自定义语法的方式：
 
 ```js
+/* 需要解析的文件内容：
+jzplp=12345
+*/
 
+const postcss = require("postcss");
 
+function parse(cssStr) {
+  console.log('parser!');
+  const strList = cssStr.split("=");
+  const root = postcss.root();
+  const customKey = { type: "customKey", value: strList[0] };
+  const customValue = { type: "customValue", value: strList[1] };
+  const equal = { type: "equal", value: "=", nodes: [customKey, customValue] };
+  root.nodes.push(equal);
+  return root;
+}
+
+function recursion(node) {
+  if (node.type === "customKey" || node.type === "customValue") return node.value;
+  if (node.type === "equal") return recursion(node.nodes[0]) + node.value + recursion(node.nodes[1]);
+  return node.nodes.map((item) => recursion(item)).join("");
+}
+
+function stringify(root, builder) {
+  console.log('stringify!');
+  builder(recursion(root), root);
+}
+
+module.exports = {
+  parse,
+  stringify,
+};
 ```
+
+这里我们设置文件内容为xxx=xxx，尝试用自定义语法解析和生成这样的结构。首先是parse方法，外面包裹一个PostCSS的root结点，里面首先是一个equal等号结点，子结点为customKey和customValue两个。解析成AST数据后返回。stringify方法这里我们使用了递归，针对不同的结点类型输出不同的字符串，进行拼合。最后将字符串和root结点传回builder回调。然后我们尝试使用一下自定义规则：
+
+```js
+const fs = require("fs");
+const postcss = require("postcss");
+const customParser = require("./parser");
+
+const originData = fs.readFileSync("./css/index.jzcss", "utf-8");
+postcss()
+  .process(originData, {
+    from: "css/index.jzcss",
+    to: "out.css",
+    syntax: customParser,
+  })
+  .then((res) => {
+    console.log(res.css);
+    console.log(JSON.stringify(res.root.toJSON()));
+  });
+
+/* 输出结果
+parser!
+stringify!
+jzplp=12345
+{
+  "raws": {},
+  "type": "root",
+  "nodes": [
+    {
+      "type": "equal",
+      "value": "=",
+      "nodes": [
+        { "type": "customKey", "value": "jzplp" },
+        { "type": "customValue", "value": "12345" }
+      ]
+    }
+  ],
+  "lastEach": 1,
+  "indexes": {},
+  "inputs": []
+}
+*/
+```
+
+可以看到，我们创建的自定义规则被成功调用，同时输出了我们创建的AST数据。
+
+### 为自定义规则编写插件
 
 
 ## 总结
