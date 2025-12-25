@@ -1982,9 +1982,23 @@ calc(50vh + 10em) solid var(--jzplp, rgba(255,255,255, 0.5))
 ```
 
 ## 编写自定义语法规则
+PostCSS编写自定义语法的方法，就是实现parser/stringifier/syntax方法。然后在PostCSS参数中传入对应方法即可。
 
-  https://postcss.org/docs/how-to-write-custom-syntax
+* parser方法 将字符串转为抽象语法树
+* stringifier方法 将抽象语法树转为字符串
+* syntax 相当于parser + stringifier
 
+编写自定义语法规则是一件很复杂的事情，需要经过词法分析句法分析等步骤，很显然超出了这篇文章的范畴。因此这里我们只给出一个非常简单的demo，示意一下自定义语法的开发接口：
+
+```js
+
+
+```
+
+
+## 总结
+
+csstree cssom  
 
 
 ## 参考
@@ -2048,3 +2062,13 @@ calc(50vh + 10em) solid var(--jzplp, rgba(255,255,255, 0.5))
   https://github.com/postcss/postcss-selector-parser/blob/master/API.md
 - GitHub postcss-value-parser\
   https://github.com/TrySound/postcss-value-parser
+- PostCSS文档 How to Write Custom Syntax\
+  https://postcss.org/docs/how-to-write-custom-syntax
+- JavaScript语法树简介：AST/CST/词法/语法分析/ESTree/生成工具\
+  https://jzplp.github.io/2025/js-ast.html
+- CSSTree docs & tools\
+  https://csstree.github.io/docs/
+- GitHub CSSTree\
+  https://github.com/csstree/csstree
+- GitHub CSSOM\
+  https://github.com/NV/CSSOM
