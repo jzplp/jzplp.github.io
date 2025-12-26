@@ -47,7 +47,7 @@ pnpm docs:preview
 pnpm deploy:win
 ```
 
-设置行字符数.prettierrc.json
+博客中创建小工程，设置行字符数.prettierrc.json
 
 ```json
 {

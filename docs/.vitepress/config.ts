@@ -11,10 +11,6 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
-        text: "关于css的ast相关（没开始）",
-        link: "/2025/css-ast",
-      },
-      {
         text: "PostCSS（未完成）",
         link: "/2025/postcss-intro",
       },

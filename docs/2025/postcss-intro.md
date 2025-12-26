@@ -1994,31 +1994,38 @@ PostCSS编写自定义语法的方法，就是实现parser/stringifier/syntax方
 编写自定义语法规则是一件很复杂的事情，需要经过词法分析句法分析等步骤，很显然超出了这篇文章的范畴。因此这里我们只给出一个非常简单的demo，示意一下自定义语法的开发接口。首先来看下自定义语法的方式：
 
 ```js
-/* 需要解析的文件内容：
+/* 需要解析的文件 index.jzcss
 jzplp=12345
+jz2=98765
 */
 
 const postcss = require("postcss");
 
-function parse(cssStr) {
-  console.log('parser!');
-  const strList = cssStr.split("=");
-  const root = postcss.root();
+function parseLine(strLine) {
+  const strList = strLine.split("=");
   const customKey = { type: "customKey", value: strList[0] };
   const customValue = { type: "customValue", value: strList[1] };
   const equal = { type: "equal", value: "=", nodes: [customKey, customValue] };
-  root.nodes.push(equal);
+  return equal;
+}
+
+function parse(cssStr) {
+  console.log("parser!");
+  const strList = cssStr.split("\n");
+  const nodes = strList.map(line => parseLine(line));
+  const root = postcss.root();
+  root.nodes = nodes;
   return root;
 }
 
 function recursion(node) {
   if (node.type === "customKey" || node.type === "customValue") return node.value;
   if (node.type === "equal") return recursion(node.nodes[0]) + node.value + recursion(node.nodes[1]);
-  return node.nodes.map((item) => recursion(item)).join("");
+  return node.nodes.map((item) => recursion(item)).join("\n");
 }
 
 function stringify(root, builder) {
-  console.log('stringify!');
+  console.log("stringify!");
   builder(recursion(root), root);
 }
 
@@ -2028,17 +2035,17 @@ module.exports = {
 };
 ```
 
-这里我们设置文件内容为xxx=xxx，尝试用自定义语法解析和生成这样的结构。首先是parse方法，外面包裹一个PostCSS的root结点，里面首先是一个equal等号结点，子结点为customKey和customValue两个。解析成AST数据后返回。stringify方法这里我们使用了递归，针对不同的结点类型输出不同的字符串，进行拼合。最后将字符串和root结点传回builder回调。然后我们尝试使用一下自定义规则：
+这里我们设置文件内容的每行为xxx=xxx，尝试用自定义语法解析和生成这样的结构。首先是parse方法，外面包裹一个PostCSS的root结点。里面切分出每行，对每行切分出equal等号结点，子结点为customKey和customValue两个。解析成AST数据后返回。stringify方法这里我们使用了递归，针对不同的结点类型输出不同的字符串，进行拼合。最后将字符串和root结点传回builder回调。然后我们尝试使用一下自定义规则：
 
 ```js
 const fs = require("fs");
 const postcss = require("postcss");
 const customParser = require("./parser");
 
-const originData = fs.readFileSync("./css/index.jzcss", "utf-8");
+const originData = fs.readFileSync("./index.jzcss", "utf-8");
 postcss()
   .process(originData, {
-    from: "css/index.jzcss",
+    from: "index.jzcss",
     to: "out.css",
     syntax: customParser,
   })
@@ -2051,6 +2058,7 @@ postcss()
 parser!
 stringify!
 jzplp=12345
+jz2=98765
 {
   "raws": {},
   "type": "root",
@@ -2060,7 +2068,15 @@ jzplp=12345
       "value": "=",
       "nodes": [
         { "type": "customKey", "value": "jzplp" },
-        { "type": "customValue", "value": "12345" }
+        { "type": "customValue", "value": "12345\r" }
+      ]
+    },
+    {
+      "type": "equal",
+      "value": "=",
+      "nodes": [
+        { "type": "customKey", "value": "jz2" },
+        { "type": "customValue", "value": "98765" }
       ]
     }
   ],
@@ -2074,12 +2090,58 @@ jzplp=12345
 可以看到，我们创建的自定义规则被成功调用，同时输出了我们创建的AST数据。
 
 ### 为自定义规则编写插件
+创建了自定义规则结点之后，我们再为这种规则结点编写一个插件，尝试修改AST结点再生成代码。
 
+```js
+function pluginJzplp() {
+  return {
+    postcssPlugin: "postcss-plugin-jzplp",
+    Once(root) {
+      root.walk((node) => {
+        if (node.type === "equal") {
+          node.value = "==";
+          if (node.nodes[0].value === "jz2")
+            node.nodes[0].value = "jzplp2";
+        }
+      });
+    },
+  };
+}
+pluginJzplp.postcss = true;
+module.exports = pluginJzplp;
+```
+
+我们自己创建的结点类型太简陋了，不能被PostCSS识别为结点，不能使用结点类型名称开头的函数；walk函数也无法遍历更深层的结点。因此我们手动修改子结点的属性。最后引入插件并执行，从输出结果看改动成功了。
+
+```js
+const fs = require("fs");
+const postcss = require("postcss");
+const customParser = require("./parser");
+const pluginJzplp = require("./pluginJzplp");
+const originData = fs.readFileSync("./index.jzcss", "utf-8");
+
+postcss([pluginJzplp])
+  .process(originData, {
+    from: "index.jzcss",
+    to: "out.css",
+    syntax: customParser,
+  })
+  .then((res) => {
+    console.log(res.css);
+  });
+
+/* 输出结果
+jzplp==12345
+jzplp2==98765
+*/
+```
 
 ## 总结
+这篇文章介绍了PostCSS的作用：转换CSS的代码成AST，经过插件处理再生成新CSS代码；经常用作后处理和添加兼容性；还介绍了各种使用方法：命令行方式，API方式，Webapck）；然后介绍了几个插件的作用，以及与SCSS和Less组合使用。后面又介绍了PostCSS的SourceMap与AST结构，如何开发插件与自定义语法。
 
-csstree cssom  
+从作用上来，虽然CSS本身不是完整的编程语言，但PostCSS对CSS却像编程语言一样处理。只不过AST结点类型只有几种，看起来有点简陋，还需要额外的辅助工具，比如解析选择器和声明值。这些辅助工具也是用AST来实现的。
 
+除了PostCSS之外，还有CSSTree，CSSOM等都可以将CSS转换为AST语法树，但都没有PostCSS知名度高，有的甚至已经不维护了。
 
 ## 参考
 - PostCSS 文档\
