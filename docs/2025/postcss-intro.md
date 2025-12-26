@@ -1,6 +1,6 @@
 # PostCSS（未完成）
 ## PostCSS是什么
-PostCSS是一个转义CSS代码的工具，它的输入为（广义的）CSS文件，输出也是CSS文件。在其中把CSS转换为抽象语法树AST，用户使用插件语法树进行修改，最后生成新的CSS代码。它的作用非常像JavaScript中的Babel。
+PostCSS是一个转义CSS代码的工具，它的输入为CSS文件，输出也是CSS文件。它首先把CSS转换为抽象语法树AST，再使用插件对语法树进行修改，最后生成新的CSS代码。它的作用非常像JavaScript中的Babel。
 
 在CSS领域，存在感更强的是SCSS和Less，它们是CSS的预处理器，扩充了CSS的语法和功能，可以编写复用性更强的代码。预处理器经过编译后，是CSS代码。而PostCSS正如它的名字，最常被用做CSS的后处理器，做一些兼容性功能。例如添加浏览器引擎的前缀，转换CSS代码以兼容不支持的浏览器等。预处理器和后处理器的关系类似于这样：
 
@@ -39,7 +39,7 @@ postcss([autoprefixer])
   });
 ```
 
-我们读取CSS文件为字符串，放入PostCSS中进行转义，最后手动写入输出文件。虽然PostCSS要求指定from和to表示输入输出的文件路径，但实际上它们是给SourceMap用的，并不会真正帮我们读取写入（但还是要求必须指定）。最后生成的结果如下：
+我们读取CSS文件为字符串，放入PostCSS中进行转义，最后手动写入输出文件。虽然PostCSS要求指定from和to表示输入输出的文件路径，但实际上它们是给SourceMap用的，并不会真正帮我们读取写入（但还是必填）。最后生成的结果如下：
 
 ```css
 ::-moz-placeholder {
@@ -60,7 +60,7 @@ postcss([autoprefixer])
 可以看到生成的CSS代码中的部分属性添加了浏览器前缀了。具体哪些前缀被添加，要根据Browserslist浏览器兼容范围确定。（在后面介绍插件的部分会提到）
 
 ### 命令行方式
-使用PostCSS CLI可以支持以命令行方式转义CSS文件。首先需要安装postcss-cli依赖。然后命令行执行：
+使用PostCSS CLI可以支持以命令行方式转义CSS文件。首先需要安装postcss-cli依赖，然后命令行执行：
 
 ```sh
 # 单个文件
@@ -75,7 +75,7 @@ PostCSS CLI支持转义单个文件或者目录，目录会转义其中的每个
 在Webpack中使用PostCSS，主要依靠postcss-loader。
 
 ### 创建Webpack项目
-这里我们先创建一个Webpack项目，可以打包CSS，但不包含PostCSS。
+我们先创建一个Webpack项目，可以打包CSS，但不包含PostCSS。
 
 ```sh
 # 创建项目
@@ -91,7 +91,7 @@ import "./index.css";
 console.log("你好，jzplp");
 ```
 
-然后在创建Webapck配置文件webpack.config.js：
+然后再创建Webapck配置文件webpack.config.js：
 
 ```js
 const path = require("path");
@@ -128,7 +128,7 @@ module.exports = {
 ![图片](/2025/postcss-2.png)
 
 ### 引入postcss-loader
-安装三个相关依赖：postcss postcss-loader autoprefixer。然后修改webpack.config.js，引入postcss：
+安装三个相关依赖：postcss postcss-loader autoprefixer。然后修改webpack.config.js，引入PostCSS：
 
 ```js
 module.exports = {
@@ -508,7 +508,7 @@ postcss-custom-properties是一个增加CSS变量兼容性的插件，对于不�
 ### postcss-global-data
 在前面postcss-custom-properties插件中我们看到，只有在同一个文件中提供了CSS变量值，才能生成兼容性代码。但是工程中的全局变量与使用位置一般不会在一个文件内，这会导致postcss-custom-properties插件无法识别。而postcss-global-data就可以解决这个问题。
 
-postcss-global-data插件允许我们提供一些全局CSS文件，作为每个被编译文件的的附加数据使用。但这些全局文件的编译结果会在输出前被移除，因此不会使每个编译后文件的代码体积增加。我们来看一下例子，首先是PostCSS配置文件, 注意postcss-global-data插件必须在前：
+postcss-global-data插件允许我们提供一些全局CSS文件，作为每个被编译文件的附加数据使用。但这些全局文件的编译结果会在输出前被移除，因此不会使每个编译后文件的代码体积增加。我们来看一下例子，首先是PostCSS配置文件, 注意postcss-global-data插件必须在前：
 
 ```js
 const postcssCustomProperties = require("postcss-custom-properties");
@@ -558,7 +558,7 @@ module.exports = (ctx) => {
 可以看到在使用postcss-global-data插件的情况下，生成代码中增加了兼容性代码，读取了全局CSS文件中的变量值。但是全局CSS文件global.css中的CSS代码却没有包含进来。
 
 ### cssnano
-cssnano是一个代码压缩工具，将CSS代码进行语义化压缩。与gzip等纯压缩工具的不一样的是，他会根据代码语义对代码本社内进行改动，例如去掉注释，去掉重复属性，合并选择器等等。这里我们举例试试：
+cssnano是一个代码压缩工具，将CSS代码进行语义化压缩。与gzip等纯压缩工具的不一样的是，它会根据语义对代码本身进行改动，例如去掉注释，去掉重复属性，合并选择器等等。这里我们举例试试：
 
 ```css
 /* 源CSS代码 */
@@ -643,7 +643,7 @@ postcss-preset-env插件可以根据源CSS代码使用的特性来转义代码�
 即使浏览器兼容性配置的要求很高，生成的代码也是这样。当我们提供了后备值时，插件会为我们生成兼容性的固定值background: red。如果没提供，那插件则无能为例。不管有没有生成固定值，这段代码在不支持CSS变量的浏览器运行时，效果与支持的浏览器不一样：因为变量的运行时变更功能无法被兼容。因此这明显可以得出：转义插件并不是任何属性都能转义，相反它不能做到的事情特别多，只能够尽量。
 
 ## PostCSS与SCSS和Less
-这一部分我们以Webapck作为环境，从直接引入SCSS与Less开始，再到用PostCSS做后处理器，再直接用PostCSS解析甚至编译SCSS与Less。
+这一部分我们以Webapck作为环境，从直接引入SCSS与Less开始，再到用PostCSS做后处理器，再直接用PostCSS解析SCSS与Less。
 
 ### Webapck引入SCSS
 首先尝试在Webpack中引入SCSS。还是前面创建的Webpack工程，安装依赖sass和sass-loader，然后修改webpack.config.js：
@@ -674,7 +674,7 @@ module.exports = {
 };
 ```
 
-可以看到，增加了一条规则，匹配SCSS文件，先使用sass-loader把SCSS解析成CSS，然后再用常规的CSS处理。我们要打包的代码如下。首先是入口文件，其中引入了CSS和SCSS文件。
+可以看到，增加了一条规则匹配SCSS文件。先使用sass-loader把SCSS解析成CSS，然后再用常规的CSS处理。我们要打包的代码如下。首先是入口文件，其中引入了CSS和SCSS文件。
 
 ```js
 import "./index.scss";
@@ -729,7 +729,7 @@ module.exports = {
 };
 ```
 
-然后将创建index.less，内容如下：
+然后创建index.less，内容如下：
 
 ```less
 @jzabc: red;
@@ -840,25 +840,23 @@ import "./index.css";
 console.log("你好，jzplp");
 
 /* index.scss */
-$jzabc: red;
+$jzabc: stretch;
 .jzplp-scss {
-  color: $jzabc;
-  width: stretch;
+  width: $jzabc;
 }
 
 /* index.less */
-@jzabc: red;
+@jzabc: stretch;
 .jzplp-less {
-  color: @jzabc;
-  width: stretch;
+  width: @jzabc;
 }
 ```
 
 重新编译，结果如下：
 
 ```js
-".jzplp-less {\n  width: -webkit-fill-available;\n  width: -moz-available;\n  width: stretch;\n}\n::-moz-placeholder {\n  color: red;\n}\n::placeholder {\n  color: red;\n}\n",
-".jzplp-scss{width:-webkit-fill-available;width:-moz-available;width:stretch}::-moz-placeholder{color:blue}::placeholder{color:blue}",
+".jzplp-less {\n  width: -webkit-fill-available;\n  width: -moz-available;\n  width: stretch;\n}\n"
+".jzplp-scss{width:-webkit-fill-available;width:-moz-available;width:stretch}"
 console.log("你好，jzplp");
 ```
 
@@ -878,12 +876,12 @@ console.log("你好，jzplp");
 重新编译，结果如下：
 
 ```js
-".jzplp-less {\n  width: stretch;\n}\n::-moz-placeholder {\n  color: red;\n}\n::placeholder {\n  color: red;\n}\n",
-".jzplp-scss{width:stretch}::-moz-placeholder{color:blue}::placeholder{color:blue}",
+".jzplp-less {\n  width: stretch;\n}\n"
+".jzplp-scss{width:stretch}"
 console.log("你好，jzplp");
 ```
 
-可以看到生成结果并不同。原因是先经过PostCSS处理时，并不能识别SCSS和Less语法，因此无法处理相关的内容。而其中的正常CSS语法，PostCSS依然可以处理。
+可以看到生成结果并不同，stretch没有增加浏览器引擎前缀。原因是先经过PostCSS处理时，并不能识别SCSS和Less语法，因此无法处理相关的内容。而其中的正常CSS语法，PostCSS依然可以处理。
 
 PostCSS还提供了SCSS和Less语法的解析器postcss-scss和postcss-less，我们引入试一下。首先修改Webapck配置：
 
@@ -927,12 +925,12 @@ PostCSS还提供了SCSS和Less语法的解析器postcss-scss和postcss-less，�
 重新编译，结果如下：
 
 ```js
-".jzplp-scss{width:stretch}::-moz-placeholder{color:blue}::placeholder{color:blue}",
-".jzplp-less {\n  width: stretch;\n}\n::-moz-placeholder {\n  color: red;\n}\n::placeholder {\n  color: red;\n}\n",
+".jzplp-less {\n  width: stretch;\n}\n"
+".jzplp-scss{width:stretch}"
 console.log("你好，jzplp");
 ```
 
-可以看到效果一致，这是因为postcss-scss和postcss-less都是将SCSS和Less代码转换为AST，然后再将AST转换回来，并不编译为CSS代码。因此SCSS和Less变量并未被PostCSS插件转义。它们的作用主要是提供SCSS和Less的AST结点，方便对应的SCSS和Less的PostCSS插件做处理。虽然相关文档的使用场景说了可以直接使用普通PostCSS插件处理，但上面的测试结果说明，可以处理，但并不完美。
+可以看到效果与上面PostCSS先处理的情况一致，stretch没有增加浏览器引擎前缀。这是因为postcss-scss和postcss-less都是将SCSS和Less代码转换为AST，然后再将AST转换回来，并不编译为CSS代码。因此SCSS和Less变量并未被PostCSS插件转义。它们的作用主要是提供SCSS和Less的AST结点，方便对应的SCSS和Less的PostCSS插件做处理。虽然相关文档的使用场景说了可以直接使用普通PostCSS插件处理，但上面的测试结果说明，可以处理但并不完美。
 
 ## PostCSS的SourceMap
 ### 命令行生成SourceMap
@@ -959,7 +957,7 @@ div {
   color: var(--abc, red);
 }
 
-/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNzcy9pbmRleC5jc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRSw2QkFBYztFQUFkLHFCQUFjO0VBQWQsY0FBYztBQUNoQjtBQUNBO0VBQ0Usc0JBQXNCO0FBQ3hCIiwiZmlsZSI6Im91dC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIuanpwbHAge1xyXG4gIHdpZHRoOiBzdHJldGNoO1xyXG59XHJcbmRpdiB7XHJcbiAgY29sb3I6IHZhcigtLWFiYywgcmVkKTtcclxufVxyXG4iXX0= */
+/*# sourceMappingURL* 防止报错 *=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNzcy9pbmRleC5jc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFDRSw2QkFBYztFQUFkLHFCQUFjO0VBQWQsY0FBYztBQUNoQjtBQUNBO0VBQ0Usc0JBQXNCO0FBQ3hCIiwiZmlsZSI6Im91dC5jc3MiLCJzb3VyY2VzQ29udGVudCI6WyIuanpwbHAge1xyXG4gIHdpZHRoOiBzdHJldGNoO1xyXG59XHJcbmRpdiB7XHJcbiAgY29sb3I6IHZhcigtLWFiYywgcmVkKTtcclxufVxyXG4iXX0= */
 ```
 
 如果不希望生成SourceMap，那么命令行中附加--no-map即可：`postcss css/index.css -u autoprefixer -o out.css --no-map`。但如果希望生成独立的SourceMap文件，就必须使用PostCSS配置文件了。我们先把命令行修改为：`postcss css/index.css -o out.css`。然后配置postcss.config.js：
@@ -1086,7 +1084,7 @@ SourceMapGenerator{...省略 }
 | ; | 5 | 24 | ; | 7 | 24 |
 | } | 6 | 0 | } | 8 | 0 |
 
-通过上面的表格，可以看到PostCSS记录SourceMap的规则：标记选择器的开头，选择器大括号的结尾}；标记属性的开头，属性值的结尾;。
+通过上面的表格，可以看到PostCSS记录SourceMap的规律：标记规则选择器的开头，规则大括号的结尾}。标记CSS声明的开头，声明值的结尾;。
 
 ## PostCSS的AST
 ### 生成AST数据
@@ -1405,7 +1403,7 @@ atrule结点有私有属性name，表示@后面跟的标识符，例如上面的
 
 ## 插件开发
 ### 新建插件
-首先我们创建pluginJzplp.js文件存放插件代码，然后再PostCSS配置文件中引入：
+首先我们创建pluginJzplp.js文件存放插件代码，然后在PostCSS配置文件中引入：
 
 ```js
 // pluginJzplp.js
@@ -1478,7 +1476,7 @@ Root
 可以看到，插件函数的入参全部是插件引入时传的参数。
 
 ### 遍历AST
-PostCSS插件遍历AST的方法与Baabel类似，都是以结点类型名作为函数属性。当遍历到对应类型的结点时，函数被出发，入参为对应的结点数据。我们来看一个插件例子：
+PostCSS插件遍历AST的方法与Babel类似，都是以结点类型名作为函数属性。当遍历到对应类型的结点时，函数被触发，入参为对应的结点数据。我们来看一个插件例子：
 
 ```js
 function pluginJzplp() {
@@ -1522,7 +1520,7 @@ Rule #jz3
 */
 ```
 
-对应节点类型的函数的入参，就是这个类型的结点数据本身，上面的例子中输出了一些节点属性。对于AtRule和Declaration类型的结点可以接受更细分的类型函数，例如Declaration可以把属性名作为key分别定义遍历函数。
+对应节点类型函数的入参，就是这个类型的结点数据本身，上面的例子中输出了一些节点属性。对于AtRule和Declaration类型的结点可以接受更细分的类型函数，例如Declaration可以把属性名作为key分别定义遍历函数。
 
 每个类型的结点可以定义两种类型的函数，一种是进入结点时，一种是退出结点时。区别在于是否已经遍历过子结点。上面的介绍的函数都是进入结点时的函数，退出函数名则需要在后面加Exit，例如RootExit, RuleExit。只有拥有子结点的类型有退出函数，Declaration这种没有子结点的结点就只有一个函数。
 
@@ -1879,7 +1877,7 @@ postcss-selector-parser是一个解析CSS值的工具，也可以脱离PostCSS�
 
 ```js
 const valueParser = require("postcss-value-parser");
-const valueStr = "calc(50vh+10px) solid var(--jzplp, rgba(255,255,255, 0.5))";
+const valueStr = "calc(50vh + 10px) solid var(--jzplp, rgba(255,255,255, 0.5))";
 var parsedValue = valueParser(valueStr);
 console.log(JSON.stringify(parsedValue));
 
@@ -1991,7 +1989,7 @@ PostCSS编写自定义语法的方法，就是实现parser/stringifier/syntax方
 * stringifier方法 将抽象语法树转为字符串
 * syntax 相当于parser + stringifier
 
-编写自定义语法规则是一件很复杂的事情，需要经过词法分析句法分析等步骤，很显然超出了这篇文章的范畴。因此这里我们只给出一个非常简单的demo，示意一下自定义语法的开发接口。首先来看下自定义语法的方式：
+编写自定义语法规则是一件很复杂的事情，需要经过词法分析句法分析等步骤，很显然超出了这篇文章的范畴。因此这里我们只给出一个非常简单的demo，示意一下自定义语法的开发接口。首先来看下自定义语法的方式。这里我们设置文件内容的每行为xxx=xxx，尝试用自定义语法解析和生成这样的结构。
 
 ```js
 /* 需要解析的文件 index.jzcss
@@ -2035,7 +2033,7 @@ module.exports = {
 };
 ```
 
-这里我们设置文件内容的每行为xxx=xxx，尝试用自定义语法解析和生成这样的结构。首先是parse方法，外面包裹一个PostCSS的root结点。里面切分出每行，对每行切分出equal等号结点，子结点为customKey和customValue两个。解析成AST数据后返回。stringify方法这里我们使用了递归，针对不同的结点类型输出不同的字符串，进行拼合。最后将字符串和root结点传回builder回调。然后我们尝试使用一下自定义规则：
+首先是parse方法，外面包裹一个PostCSS的root结点。里面切分出每行，对每行切分出equal等号结点，子结点为customKey和customValue两个。解析成AST数据后返回。stringify方法使用了递归，针对不同的结点类型输出不同的字符串，进行拼合。最后将字符串和root结点传回builder回调。然后我们尝试使用自定义规则来解析文件，输出AST数据：
 
 ```js
 const fs = require("fs");
@@ -2087,8 +2085,6 @@ jz2=98765
 */
 ```
 
-可以看到，我们创建的自定义规则被成功调用，同时输出了我们创建的AST数据。
-
 ### 为自定义规则编写插件
 创建了自定义规则结点之后，我们再为这种规则结点编写一个插件，尝试修改AST结点再生成代码。
 
@@ -2137,7 +2133,7 @@ jzplp2==98765
 ```
 
 ## 总结
-这篇文章介绍了PostCSS的作用：转换CSS的代码成AST，经过插件处理再生成新CSS代码；经常用作后处理和添加兼容性；还介绍了各种使用方法：命令行方式，API方式，Webapck）；然后介绍了几个插件的作用，以及与SCSS和Less组合使用。后面又介绍了PostCSS的SourceMap与AST结构，如何开发插件与自定义语法。
+这篇文章介绍了PostCSS的作用：转换CSS的代码成AST，经过插件处理再生成新CSS代码，经常被用作后处理和添加兼容性；还介绍了各种使用方法：命令行方式，API方式，Webapck）；然后介绍了几个插件的作用，以及与SCSS和Less组合使用。后面又介绍了PostCSS的SourceMap与AST结构，如何开发插件与自定义语法。
 
 从作用上来，虽然CSS本身不是完整的编程语言，但PostCSS对CSS却像编程语言一样处理。只不过AST结点类型只有几种，看起来有点简陋，还需要额外的辅助工具，比如解析选择器和声明值。这些辅助工具也是用AST来实现的。
 
