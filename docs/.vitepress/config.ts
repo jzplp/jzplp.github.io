@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
-        text: "PostCSS（未完成）",
+        text: "PostCSS完全指南：功能/配置/插件/SourceMap/AST/插件开发/自定义语法",
         link: "/2025/postcss-intro",
       },
       {
@@ -47,7 +47,7 @@ const sidebarLists = [
         link: "/2025/css-float",
       },
       {
-        text: "(非技术)从一公里到半程马拉松：我的一年跑步经历",
+        text: "（非技术）从一公里到半程马拉松：我的一年跑步经历",
         link: "/2025/run-half-marathon",
       },
       {
@@ -228,7 +228,7 @@ const sidebarLists = [
   },
 ];
 
-function handleConfig(list) {
+function handleConfig(list: Array<any>) {
   list.forEach((year) => {
     if (!year?.items.length) return;
 
