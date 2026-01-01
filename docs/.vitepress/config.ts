@@ -20,7 +20,7 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
-        text: "2025年度总结",
+        text: "2025年度总结：前端编译/买房和怀孕",
         link: "/2025/2025-summary",
         tags: ["ANNUAL_SUMMARY"],
       },
