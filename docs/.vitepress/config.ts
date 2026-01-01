@@ -8,8 +8,22 @@ const CONFIG = {
 // 目录列表
 const sidebarLists = [
   {
+    text: "2026",
+    items: [
+      {
+        text: "core-js",
+        link: "/2026/corejs-intro",
+      },
+    ],
+  },
+  {
     text: "2025",
     items: [
+      {
+        text: "2025年度总结",
+        link: "/2025/2025-summary",
+        tags: ["ANNUAL_SUMMARY"],
+      },
       {
         text: "PostCSS完全指南：功能/配置/插件/SourceMap/AST/插件开发/自定义语法",
         link: "/2025/postcss-intro",
