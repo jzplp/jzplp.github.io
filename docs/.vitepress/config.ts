@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "core-js",
+        text: "core-js与Polyfill",
         link: "/2026/corejs-intro",
       },
     ],
