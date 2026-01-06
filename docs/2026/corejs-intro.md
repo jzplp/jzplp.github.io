@@ -7,8 +7,9 @@ core-js是一个知名的前端工具库，里面包含了ECMAScript标准中提
 
 像这种通过注入代码实现浏览器没有提供的API特性，叫做Polyfill。这个单词的本意是填充材料，在JavaScript领域中，这些注入的代码就类似“填充材料”一样，帮助我们提高代码的兼容性。另外core-js还提供了一些还在提议的API的实现，
 
-## core-js使用
-要想实验core-js的使用方式看，首先需要到某个语法和对应的执行环境，在这个环境中对应的语法不存在。我本地是Node.js v18.19.1版本，这个版本并没有实现Promise.try这个方法，因此我们就用这个方法进行实验。首先是没有引入core-js的场景：
+## core-js使用方式
+### 使用前后对比
+要想看到core-js使用前后的效果对比，首先需要到某个语法和对应的执行环境，在这个环境中对应的语法不存在。我本地是Node.js v18.19.1版本，这个版本并没有实现Promise.try这个方法，因此我们就用这个方法进行实验。首先是没有引入core-js的场景：
 
 ```js
 Promise.try(() => {
@@ -22,31 +23,46 @@ TypeError: Promise.try is not a function
 */
 ```
 
-可以看到，我们没有引入core-js时，直接使用Promise.try时，会因为没有该方法而报错。
+可以看到，我们没有引入core-js时，直接使用Promise.try时，会因为没有该方法而报错。然后再试试引入core-js的效果：
 
+```js
+require('core-js')
+Promise.try(() => {
+  console.log('jzplp!')
+})
 
+/* 输出结果
+jzplp!
+*/
+```
 
+可以看到引入core-js后，原本不存在的API被填充了，我们的代码可以正常执行并拿到结果了。这就是core-js提高兼容性的效果。
 
-
-
-
+### 使用方式
 
 引入全部，引入单个对象，引入单个方法
 
 
-## 引入方式
+### 引入方式
 
 全局引入 不全局引入 bundle引入
 core-js core-js-pure  core-js-bundle
 
-## 类型？
+### 类型？
 full actual stable es
 
 
-## 查看一个简单的方法/对象源码
+## core-js源码结构
+
+参考上面的各种方式说明
 
 
-## Babel引入？
+## 用个打包工具引入到浏览器中试试？
+
+
+## Babel与core-js
+
+
 
 
 ## 参考
