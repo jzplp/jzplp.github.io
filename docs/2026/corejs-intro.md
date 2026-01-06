@@ -38,15 +38,85 @@ jzplp!
 
 可以看到引入core-js后，原本不存在的API被填充了，我们的代码可以正常执行并拿到结果了。这就是core-js提高兼容性的效果。
 
-### 使用方式
+### 单个API引入
+core-js不仅可以直接引入全部语法， 还可以针对仅引入单个API，比如某个对象或某个方法。首先看下只引入Promise对象：
 
-引入全部，引入单个对象，引入单个方法
+```js
+// require('core-js/full') 等于 require('core-js')
+require('core-js/full/promise')
+Promise.try(() => {
+  console.log('jzplp!')
+})
 
+/* 输出结果
+jzplp!
+*/
+```
 
-### 引入方式
+然后再看下直接引入对象中的某个方法：
 
-全局引入 不全局引入 bundle引入
-core-js core-js-pure  core-js-bundle
+```js
+require('core-js/full/promise/try')
+Promise.try(() => {
+  console.log('jzplp!')
+})
+
+/* 输出结果
+jzplp!
+*/
+```
+
+### 不注入全局对象
+前面展示的场景，core-js都是将API直接注入到全局，这样我们使用这些API就如环境本身支持一样，基本感受不到区别。但如果我们不希望直接注入到全局时，core-js也给我们提供了使用方式：
+
+```js
+const promise = require('core-js-pure/full/promise');
+promise.try(() => {
+  console.log('jzplp!')
+})
+Promise.try(() => {
+  console.log('jzplp!2')
+})
+/* 输出结果
+jzplp!
+Promise.try(() => {
+           ^
+TypeError: Promise.try is not a function
+*/
+```
+
+可以看到，使用core-js-pure这个包之后，可以直接导出我们希望要的API，而不直接注入到全局。此时直接使用全局对象方法依然报错。而core-js这个包虽然也能导出，但它还是会直接注入全局，我们看下例子：
+
+```js
+const promise = require('core-js/full/promise');
+promise.try(() => {
+  console.log('jzplp!')
+})
+Promise.try(() => {
+  console.log('jzplp!2')
+})
+
+/* 输出结果
+jzplp!
+jzplp!2
+*/
+```
+
+因此，如果希望仅使用导出对象，还是需要使用core-js-pure这个包。core-js-pure也可以仅导出对象方法：
+
+```js
+const try2 = require("core-js-pure/full/promise/try");
+Promise.try = try2;
+Promise.try(() => {
+  console.log("jzplp!");
+});
+
+/* 输出结果
+jzplp!
+*/
+```
+
+因为导出的对象方法不能独立使用，因此在例子中我们还是将其注入到Promise对象后使用。
 
 ### 类型？
 full actual stable es
@@ -56,9 +126,13 @@ full actual stable es
 
 参考上面的各种方式说明
 
+core-js core-js-pure  core-js-bundle
+
+full actual stable es
 
 ## 用个打包工具引入到浏览器中试试？
 
+core-js-bundle
 
 ## Babel与core-js
 
