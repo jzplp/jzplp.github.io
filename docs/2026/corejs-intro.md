@@ -118,13 +118,108 @@ jzplp!
 
 因为导出的对象方法不能独立使用，因此在例子中我们还是将其注入到Promise对象后使用。
 
-### 类型？
-full actual stable es
+### 特性分类引入
+core-js中包含的非常多API特性的兼容代码，有些是已经稳定的特性，有些是还处在提议阶段的，不稳定的特性。我们直接引入core-js会把这些特殊性全部引入，但如果不需要那些不稳定特性，core-js也提供了多种引入方式：
 
+* core-js 引入所有特性，包括早期的提议
+* core-js/full 等于引入core-js
+* core-js/actual 包含稳定的ES和Web标准特性，以及stage3的特性
+* core-js/stable 包含稳定的ES和Web标准特性
+* core-js/es 包含稳定的ES特性
+
+这里我们举两个例子尝试下。首先由于ECMAScript标准一直在更新中，有些特性现在是提议，未来可能就已经被列入正式特性了。因此这里的例子需要明确环境和core-js版本。这里我们使用Node.js v18.19.1和core-js@3.47.0版本，以写这篇文章的时间为准。
+
+首先第一个特性是：数组的lastIndex属性，这是一个stage1阶段的API，这里针对不同的引入方式进行尝试：
+
+```js
+// 不引入core-js尝试
+const arr = ["jz", "plp"];
+console.log(arr.lastIndex);
+/* 输出结果
+undefined
+*/
+
+// 引入core-js/full
+require("core-js/full");
+const arr = ["jz", "plp"];
+console.log(arr.lastIndex);
+/* 输出结果
+1
+*/
+
+// 引入core-js/actual
+require("core-js/actual");
+const arr = ["jz", "plp"];
+console.log(arr.lastIndex);
+
+/* 输出结果
+undefined
+*/
+```
+
+首先当不引入core-js时，因为不支持这个API，所以输出undefined。core-js/full支持stage1阶段的API，可以正确输出结果。但core-js/actual仅支持stage3阶段的API，因此还是不支持这个API。
+
+然后我们再看下另外一个API，数组的groupBy方法。这是一个stage3阶段的API：
+
+```js
+// 不引入core-js尝试
+const arr = [
+  { group: 1, value: "jz" },
+  { group: 2, value: "jz2" },
+  { group: 1, value: "plp" },
+];
+const arrNew = arr.groupBy(item => item.group);
+console.log(arrNew)
+/* 输出结果
+const arrNew = arr.groupBy(item => item.group);
+                   ^
+TypeError: arr.groupBy is not a function
+*/
+
+// 引入core-js/actual
+require("core-js/actual");
+const arr = [
+  { group: 1, value: "jz" },
+  { group: 2, value: "jz2" },
+  { group: 1, value: "plp" },
+];
+const arrNew = arr.groupBy(item => item.group);
+console.log(arrNew)
+/* 输出结果
+[Object: null prototype] {
+  '1': [ { group: 1, value: 'jz' }, { group: 1, value: 'plp' } ],
+  '2': [ { group: 2, value: 'jz2' } ]
+}
+*/
+
+// 引入core-js/stable
+require("core-js/stable");
+const arr = [
+  { group: 1, value: "jz" },
+  { group: 2, value: "jz2" },
+  { group: 1, value: "plp" },
+];
+const arrNew = arr.groupBy(item => item.group);
+console.log(arrNew)
+/* 输出结果
+const arrNew = arr.groupBy(item => item.group);
+                   ^
+TypeError: arr.groupBy is not a function
+*/
+```
+
+可以看到，不引入core-js时不支持，引入了core-js/actual（包含stage3阶段的API）后支持并能输出正确的结果。core-js/stable中不支持又报错了。
 
 ## core-js源码结构
+前面描述了很多core-js的引入方式，这里我们看一下源码结构，看看core-js内部是如何组织的。
 
-参考上面的各种方式说明
+### core-js源码结构
+
+### core-js-pure与core-js-bundle
+
+
+
+参考上面的各种方式说明  看源码目录中每个文件夹有啥
 
 core-js core-js-pure  core-js-bundle
 
