@@ -213,7 +213,42 @@ TypeError: arr.groupBy is not a function
 ## core-js源码结构
 前面描述了很多core-js的引入方式，这里我们看一下源码结构，看看core-js内部是如何组织的。
 
-### core-js源码结构
+### core-js源码目录
+```
+core-js
+├─actual
+│   ├─array
+│   │  ├─at.js
+│   │  ├─concat.js
+│   │  └─...
+│   ├─set
+│   │  └─...
+│   └─...
+├─es
+│   └─...
+├─features
+│   └─...
+├─index.js
+└─...
+```
+首先列出core-js源码目录的示意图，可以看到core-js内部有很多目录，对应前面的各种引入方式。这里我们列出每个目录的内容：
+
+* actual 包含稳定的ES和Web标准特性，以及stage3的特性
+* es 包含稳定的ES特性
+* features 没有说明，猜测和full类似
+* full 所以特性包括早期提议
+* internals 包内部使用的逻辑
+* modules 实际特性的代码实现
+* proposals 包含提议的特性
+* stable 包含稳定的ES和Web标准特性
+* stage 按照stage阶段列出提议特性
+* web 包含Web标准特性
+* configurator.js 是否强制引入逻辑，后面会描述
+* index.js 内容为导出full目录，因此导入core-js等于导入core-js/full
+
+
+### 互相引用
+
 
 ### core-js-pure与core-js-bundle
 
@@ -230,6 +265,14 @@ full actual stable es
 core-js-bundle
 
 ## Babel与core-js
+
+
+
+core-js/configurator
+
+core-js-builder
+
+core-js-compact
 
 
 
