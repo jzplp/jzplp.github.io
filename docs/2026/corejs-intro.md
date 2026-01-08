@@ -246,9 +246,28 @@ core-js
 * configurator.js 是否强制引入逻辑，后面会描述
 * index.js 内容为导出full目录，因此导入core-js等于导入core-js/full
 
+### 层层引用
+在目录中actual, es, full, stable, es是我们已经介绍过的。另外还有web目录仅包含web标准的特性，features和full类似（index.js中直接导出full目录）。
 
-### 互相引用
+proposals目录包含提议的特性，特性名来命名文件名。而stage目录中包含0.js, 1.js, 2.js等等，是根据stage阶段来整理的，方便质疑和纳入对应阶段的特性。
 
+这样整理目录虽然清晰，但这些目录中的特性都是重复的，不可能在每个目录中都把他也行实现一遍。因此上面这些目录的文件中，存放的都是实现的引用，并不是特性代码实现本身。真正的实现在modules目录中。modules目录中是特性名作为命名的文件，文件有固定的前缀名：es.表示ES标准；esnext.表示提议中的标准；web.表示web标准。
+
+这里以我们上面提到过的两个特性为例，看看引用路径，首先是Promise.try：
+
+* 使用者引入 core-js/full/promise/try.js
+* 引入 actual/promise/try.js
+* 引入 actual/promise/try.js
+* 引入 stable/promise/try.js
+* 引入 es/promise/try.js
+* 最终引入 modules/es.promise.try.js
+
+然后是groupBy方法：
+
+* 使用者引入 core-js/actual/array/group-by.js
+* 最终引入 modules/esnext.array.group-by.js
+
+可以看到，core-js内部的特性是经过层层引入，最终引入具体的实现代码的。
 
 ### core-js-pure与core-js-bundle
 
