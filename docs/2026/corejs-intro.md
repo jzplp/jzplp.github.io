@@ -270,24 +270,31 @@ proposals目录包含提议的特性，特性名来命名文件名。而stage目
 可以看到，core-js内部的特性是经过层层引入，最终引入具体的实现代码的。
 
 ### core-js-pure与core-js-bundle
+除了core-js之外，core-js-pure与core-js-bundle这两个包也提供了兼容性。core-js-pure内部的目录结构与core-js一致，只不过core-js-pure不将特性注入到全局。core-js-bundle比较特殊，它是将core-js代码经过打包后再提供，它的结构如下：
 
+```
+core-js-bundle
+├─index.js
+├─minified.js
+├─minified.js.map
+└─...
+```
 
-
-参考上面的各种方式说明  看源码目录中每个文件夹有啥
-
-core-js core-js-pure  core-js-bundle
-
-full actual stable es
+其中index.js是打包过后得到特性集合代码，minified.js是经过压缩混淆后的代码。core-js-bundle只能全部引入并注入到全局，不能引入部分目录或者导出某个属性。
 
 ## 用个打包工具引入到浏览器中试试？
 
+下面这些都试试
+
+core-js
+core-js-pure 
 core-js-bundle
 
 ## Babel与core-js
 
 
 
-core-js/configurator
+core-js/configurator 看看能否试试注入和不注入的区别
 
 core-js-builder
 
