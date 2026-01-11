@@ -341,12 +341,20 @@ console.log(arr.lastIndex);
 
 如果引入`require("core-js/full/array/last-index")`，此时新特性也可以生效。因为只引入了这一个特性，因此main.js的大小为12.2KB。
 
-### core-js-pure打包
-
-### core-js-bundle打包
-
 
 ## Babel与core-js
+从前面打包的例子中可以看到，core-js整个打包进项目中是非常巨大的，可能比你正常项目的大小还要更大。这样明显会造成占用资源更多，页面加载时间变慢等问题。一个解决办法是，只引入我们代码中使用到的特性，以及我们要适配的浏览器版本中不兼容的特性，用不到的特性不打包进代码中。Babel就提供了这样的功能。
+
+### preset-env配置entry
+
+### preset-env配置usage
+
+
+### @babel/polyfill
+
+### @babel/runtime
+
+
 
 
 
@@ -355,9 +363,6 @@ core-js/configurator 看看能否试试注入和不注入的区别
 core-js-builder
 
 core-js-compact
-
-
-
 
 ## 参考
 - core-js文档\
