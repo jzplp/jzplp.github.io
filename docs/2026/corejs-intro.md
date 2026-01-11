@@ -282,13 +282,69 @@ core-js-bundle
 
 其中index.js是打包过后得到特性集合代码，minified.js是经过压缩混淆后的代码。core-js-bundle只能全部引入并注入到全局，不能引入部分目录或者导出某个属性。
 
-## 用个打包工具引入到浏览器中试试？
+## 打包和浏览器效果
+### 创建Webpack示例
+首先创建一个Webapck项目，方便后续打包查看效果。首先执行：
 
-下面这些都试试
+```bash
+# 创建项目
+npm init -y
+# 安装webpack依赖
+npm add webpack webpack-cli html-webpack-plugin
+# 安装core-js依赖
+npm add core-js core-js-pure core-js-bundle
+```
 
-core-js
-core-js-pure 
-core-js-bundle
+创建src/index.js，内容如下：
+
+```js
+const arr = ["jz", "plp"];
+console.log(arr.lastIndex);
+```
+
+在package.json文件的scripts中增加命令："build": "webpack"。最后是Webpack配置文件webpack.config.js:
+
+```js
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  mode: 'production', // 生产模式
+  entry: './src/index.js', // 源码入口
+  plugins: [
+    new HtmlWebpackPlugin({ // 生成HTML页面入口
+      title: 'jzplp的core-js实验', // 页面标题
+    }),
+  ],
+  output: {
+    filename: 'main.js', // 生成文件名
+    path: path.resolve(__dirname, 'dist'),  // 生成文件目录
+    clean: true, // 生成前删除dist目录内容
+  },
+};
+```
+
+命令行运行npm run build，即可使用Webpack打包。在dist目录中生成了两个文件，一个是main.js，里面是打包后的js代码；index.html可以让我们在浏览器查看效果。由于我们没有引入core-js，浏览器没有预置lastIndex这个提议中的特性，因此输出undefined。
+
+### core-js打包
+这里引入core-js，然后打包查看效果。首先是全量引入：
+
+```js
+require("core-js");
+const arr = ["jz", "plp"];
+console.log(arr.lastIndex);
+```
+
+此时浏览器输出1，表示core-js注入成功，lastIndex特性生效了。但是我们查看main.js，发现居然有267KB。这是因为它把所有特性都引入了。
+
+如果引入`require("core-js/full/array")`，此时新特性也可以生效。因为只引入了数组相关特性，因此main.js的大小为59.3KB，比全量引入小很多。
+
+如果引入`require("core-js/full/array/last-index")`，此时新特性也可以生效。因为只引入了这一个特性，因此main.js的大小为12.2KB。
+
+### core-js-pure打包
+
+### core-js-bundle打包
+
 
 ## Babel与core-js
 
