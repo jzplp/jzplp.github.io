@@ -345,7 +345,106 @@ console.log(arr.lastIndex);
 ## Babel与core-js
 从前面打包的例子中可以看到，core-js整个打包进项目中是非常巨大的，可能比你正常项目的大小还要更大。这样明显会造成占用资源更多，页面加载时间变慢等问题。一个解决办法是，只引入我们代码中使用到的特性，以及我们要适配的浏览器版本中不兼容的特性，用不到的特性不打包进代码中。Babel就提供了这样的功能。
 
+### 创建Babel示例
+```bash
+# 创建项目
+npm init -y
+# 安装webpack依赖
+npm add @babel/core @babel/cli @babel/preset-env
+# 安装core-js依赖
+npm add core-js core-js-pure core-js-bundle
+```
+
+创建src/index.js，内容如下：
+
+```js
+require('core-js');
+const jzplp = 1;
+```
+
+在package.json文件的scripts中增加命令："babel": "babel src --out-dir lib"。最后是Babel配置文件babel.config.json:
+
+```json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "100"
+        }
+      }
+    ]
+  ]
+}
+```
+
+targets中表示我们需要兼容的浏览器版本。执行npm run babel，生成结果再lib/index.js中，内容如下。可以看到未对core-js做任何处理。
+
+```js
+"use strict";
+
+require('core-js');
+const jzplp = 1;
+```
+
 ### preset-env配置entry
+@babel/preset-env是一个Babel预设，可以根据配置为代码增加兼容性处理。前面创建Babel示例时已经增加了这个预设，但是没有增加core-js配置。这里我们加一下：
+
+```json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "100"
+        },
+        "useBuiltIns": "entry",
+        "corejs": "3.47.0"
+      }
+    ]
+  ]
+}
+```
+
+这里增加了corejs版本和useBuiltIns配置，值为entry。配置这个值，会使得@babel/preset-env根据配置的浏览器版本兼容性，选择引入哪些core-js中的特性。这里再执行命令行，结果如下：
+
+```js
+"use strict";
+
+require("core-js/modules/es.symbol.async-dispose.js");
+require("core-js/modules/es.symbol.dispose.js");
+// ... 更多es特性省略
+require("core-js/modules/esnext.array.filter-out.js");
+require("core-js/modules/esnext.array.filter-reject.js");
+// ... 更多esnext特性省略
+require("core-js/modules/web.dom-exception.stack.js");
+require("core-js/modules/web.immediate.js");
+// ... 更多web特性省略
+const jzplp = 1;
+```
+
+可以看到，core-js被拆开，直接引入了特性本身。在配置chrome: 100版本时，引入的特性为215个。我们修改配置chrome: 140版本时，再重新生成代码，此时引入的特性为150个。可以看到确实时根据浏览器版本选择不同的特性引入。这对于其它core-js的引入方式也生效：
+
+```js
+// 源代码
+require('core-js/stable');
+const jzplp = 1;
+
+// 生成代码
+"use strict";
+
+require("core-js/modules/es.symbol.async-dispose.js");
+require("core-js/modules/es.symbol.dispose.js");
+// ... 更多es特性省略
+require("core-js/modules/web.dom-exception.stack.js");
+require("core-js/modules/web.immediate.js");
+// ... 更多web特性省略
+const jzplp = 1;
+```
+
+我们引入core-js/stable，可以看到生成代码中不引入esnext特性了。在配置chrome: 100版本时，引入的特性为71个，配置chrome: 100版本时，引入的特性为6个。同样的，如果引入换成core-js/full/array，就会只引入数组相关特性，而且也是根据浏览器兼容版本引入。
 
 ### preset-env配置usage
 
@@ -371,3 +470,6 @@ core-js-compact
   https://github.com/zloirock/core-js
 - 解锁Babel核心功能：从转义语法到插件开发\
   https://jzplp.github.io/2025/babel-intro.html
+- @babel/preset-env文档\
+  https://babeljs.io/docs/babel-preset-env.html
+
