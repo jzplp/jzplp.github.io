@@ -447,7 +447,79 @@ const jzplp = 1;
 我们引入core-js/stable，可以看到生成代码中不引入esnext特性了。在配置chrome: 100版本时，引入的特性为71个，配置chrome: 100版本时，引入的特性为6个。同样的，如果引入换成core-js/full/array，就会只引入数组相关特性，而且也是根据浏览器兼容版本引入。
 
 ### preset-env配置usage
+@babel/preset-env的useBuiltIns配置值为usage时，Babel不仅会跟根据配置的浏览器版本兼容性，还会根据代码中实际使用的特性，来选择引入哪些core-js中的特性。首先是Babel配置：
 
+```json
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "100"
+        },
+        "useBuiltIns": "usage",
+        "corejs": "3.47.0"
+      }
+    ]
+  ]
+}
+```
+
+然后是要处理的代码，注意配置usage时是不需要手动引入core-js的。我们在配置不同的Chrome浏览器版本，看看输出结果如何：
+
+```js
+// 源代码
+const jzplp = new Promise();
+const b = new Map();
+
+// chrome 50 生成代码 
+"use strict";
+
+require("core-js/modules/es.array.iterator.js");
+require("core-js/modules/es.map.js");
+require("core-js/modules/es.promise.js");
+require("core-js/modules/web.dom-collections.iterator.js");
+const jzplp = new Promise();
+const b = new Map();
+
+// chrome 100 生成代码 
+"use strict";
+
+const jzplp = new Promise();
+const b = new Map();
+```
+
+首先可以看到，引入core-js中的特性数量变得非常少了，代码中没有用到的特性不再引入。其次不同的浏览器版本引入的特性不一样，因此还是会根据浏览器兼容性引入特性。我们再修改一下源代码试试：
+
+```js
+// 源代码
+const jzplp = new Promise();
+const b = new Map();
+Promise.try(() =>{});
+
+// chrome 50 生成代码 
+"use strict";
+
+require("core-js/modules/es.array.iterator.js");
+require("core-js/modules/es.map.js");
+require("core-js/modules/es.promise.js");
+require("core-js/modules/es.promise.try.js");
+require("core-js/modules/web.dom-collections.iterator.js");
+const jzplp = new Promise();
+const b = new Map();
+Promise.try(() => {});
+
+// chrome 100 生成代码 
+"use strict";
+
+require("core-js/modules/es.promise.try.js");
+const jzplp = new Promise();
+const b = new Map();
+Promise.try(() => {});
+```
+
+可以看到，源代码中增加了Promise.try，引入的特性也随之增加了对应的core-js特性引入。因此，使用@babel/preset-env的usage配置，可以保证兼容性的同时，最小化引入core-js特性。
 
 ### @babel/polyfill
 
