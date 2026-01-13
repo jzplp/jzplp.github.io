@@ -519,14 +519,20 @@ const b = new Map();
 Promise.try(() => {});
 ```
 
-可以看到，源代码中增加了Promise.try，引入的特性也随之增加了对应的core-js特性引入。因此，使用@babel/preset-env的usage配置，可以保证兼容性的同时，最小化引入core-js特性。
+可以看到，源代码中增加了Promise.try，引入的特性也随之增加了对应的core-js特性引入。因此，使用@babel/preset-env的usage配置，可以保证兼容性的同时，最小化引入core-js特性。另外这个配置并不会自动引入提议特性，需要额外配置proposals为true。
 
 ### @babel/polyfill
+@babel/polyfill是一个已经被弃用的包，推荐直接使用core-js/stable。查看@babel/polyfill源码，发现他就是引入了core-js特性与regenerator-runtime这个包。（regenerator-runtime也是一个兼容性相关的包，我们在后面单独介绍）作为替代可以这样引入：
+
+```js
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
+```
 
 ### @babel/runtime
 
 
-
+## regenerator-runtime
 
 
 core-js/configurator 看看能否试试注入和不注入的区别
@@ -536,12 +542,17 @@ core-js-builder
 core-js-compact
 
 ## 参考
-- core-js文档\
+- core-js 文档\
   https://core-js.io/
 - Github core-js\
   https://github.com/zloirock/core-js
 - 解锁Babel核心功能：从转义语法到插件开发\
   https://jzplp.github.io/2025/babel-intro.html
-- @babel/preset-env文档\
-  https://babeljs.io/docs/babel-preset-env.html
-
+- @babel/preset-env 文档\
+  https://babeljs.io/docs/babel-preset-env
+- @babel/polyfill 文档\
+  https://babeljs.io/docs/babel-polyfill
+- @babel/runtime 文档\
+  https://babeljs.io/docs/babel-runtime
+- Github regenerator-runtime\
+  https://github.com/facebook/regenerator/tree/main/packages/runtime
