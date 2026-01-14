@@ -530,7 +530,36 @@ import 'regenerator-runtime/runtime';
 ```
 
 ### @babel/runtime
+@babel/runtime就像自动引入版的core-js-pure。它还是根据代码实际使用的特性来注入core-js特性，但它不注入到全局，而是引入这些API再调用。这里我们使用@babel/plugin-transform-runtime插件，里面包含了@babel/runtime相关逻辑。首先看下Babel配置：
 
+```json
+{
+  "plugins": [["@babel/plugin-transform-runtime", { "corejs": 3 }]]
+}
+```
+
+再转义上一节中的代码，结果如下：
+
+```js
+// 源代码
+const jzplp = new Promise();
+const b = new Map();
+Promise.try(() =>{});
+
+// 生成代码
+import _Promise from "@babel/runtime-corejs3/core-js-stable/promise";
+import _Map from "@babel/runtime-corejs3/core-js-stable/map";
+const jzplp = new _Promise();
+const b = new _Map();
+_Promise.try(() => {});
+```
+
+可以看到，虽然没有直接引入core-js-pure，但效果是一样的。打开@babel/runtime-corejs3这个包查看，里面实际上就是导出了core-js-pure中的特性。例如：
+
+```js
+// @babel/runtime-corejs3/core-js-stable/map.js 文件内容
+module.exports = require("core-js-pure/stable/map");
+```
 
 ## regenerator-runtime
 
