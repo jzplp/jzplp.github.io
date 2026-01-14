@@ -561,14 +561,116 @@ _Promise.try(() => {});
 module.exports = require("core-js-pure/stable/map");
 ```
 
+## core-js/configurator强制控制
+如果希望在正常引入core-js时，对于部分特殊属性进行引入或者不引入的控制，就需要用到core-js/configurator。这个工具可以配置三种选项：
+
+* useNative: 当环境中有这个特性时不引入，当确定没有时才引入
+* usePolyfill: 明确引入这个特性
+* useFeatureDetection: 默认行为，和不使用core-js/configurator一致
+
+### useNative不引入
+首先试试不引入特性，这里我们使用Promise这个特性为例。首先是不引入core-js的效果，可以看到全局Promise对象被我们改掉了。
+
+```js
+const jzplp = {};
+Promise = jzplp;
+console.log(Promise, Promise === jzplp);
+
+/* 输出结果
+{} true
+*/
+```
+
+然后在中间引入core-js试试。可以看到我们改掉的Promise，被core-js给改回去了。
+
+```js
+const jzplp = {};
+Promise = jzplp;
+require("core-js/actual");
+console.log(Promise, Promise === jzplp);
+
+/* 输出结果
+[Function: Promise] false
+*/
+```
+
+这时候，如果不希望core-js改掉我们自定义的Promise，可以利用useNative配置，强制core-js不引入这个特性。看结果core-js引入之后，我们自定义的Promise依然存在。
+
+```js
+const configurator = require("core-js/configurator");
+configurator({
+  useNative: ["Promise"],
+});
+const jzplp = {};
+Promise = jzplp;
+require("core-js/actual");
+console.log(Promise, Promise === jzplp);
+
+/* 输出结果
+{} true
+*/
+```
+
+### usePolyfill强制引入
+想要验证usePolyfill的效果，需要找一个环境中本来存在的特性，core-js即使引入也不会修改的特性。Promise不行，因为core-js引入时会对这个Promise增加子特性。Promise.try也不行，因为原来环境中不存在。这里试一下Promise.any，这是环境中本来就存在的特性：
+
+```js
+console.log(Promise.any);
+const jzplp = () => {};
+Promise.any = jzplp;
+console.log(Promise.any, Promise.any === jzplp);
+
+/* 输出结果
+[Function: any]
+[Function: jzplp] true
+*/
+```
+
+可以看到，Promise.any原来就存在，但是被我们修改成了新函数。再引入core-js试试：
+
+```js
+console.log(Promise.any);
+const jzplp = () => {};
+Promise.any = jzplp;
+require('core-js');
+console.log(Promise.any, Promise.any === jzplp);
+
+/* 输出结果
+[Function: any]
+[Function: jzplp] true
+*/
+```
+
+引入了core-js之后，结果没有变化。这说明core-js并不会修改我们自定义的函数。这时候就可以试一下usePolyfill的效果了：
+
+```js
+const configurator = require("core-js/configurator");
+configurator({
+  usePolyfill: ["Promise.any"],
+});
+console.log(Promise.any);
+const jzplp = () => {};
+Promise.any = jzplp;
+require('core-js');
+console.log(Promise.any, Promise.any === jzplp);
+
+/* 输出结果
+[Function: any]
+[Function: any] false
+*/
+```
+
+可以看到，Promise.any又被改为了真正起效果的函数，这说明usePolyfill的强制引入特性是有效的。
+
+## core-js-builder
+
+## core-js-compact
+
 ## regenerator-runtime
 
+## 总结
 
-core-js/configurator 看看能否试试注入和不注入的区别
-
-core-js-builder
-
-core-js-compact
+core-js并不是所有都能处理，有些处理不了
 
 ## 参考
 - core-js 文档\
