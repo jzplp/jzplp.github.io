@@ -662,13 +662,138 @@ console.log(Promise.any, Promise.any === jzplp);
 
 可以看到，Promise.any又被改为了真正起效果的函数，这说明usePolyfill的强制引入特性是有效的。
 
-## core-js-builder
+## core-js中的特性选择
+前面我们体验了Babel根据浏览器兼容性，选择不同的core-js特性引入，那么不同浏览器兼容哪些特性的数据是从哪里获取呢？core-js本身就提供了这个功能。
 
-## core-js-compact
+### core-js-compat
+core-js-compat提供了不同浏览器对应特性的兼容性数据。它有好几个参数，这里先列举一下含义：
+
+* targets: Browserslist格式的浏览器兼容配置
+* modules: 需要设置兼容性配置的模块，可以是core-js/full，也可以是某个特性，甚至是正则
+* exclude: 需要排除的模块
+* version: 使用的core-js版本
+* inverse: 反向输出，即输出不需要兼容的特性列表
+
+这里举几个例子试一下：
+
+```js
+const compat = require("core-js-compat");
+const data = compat({
+  targets: "> 10%",
+  modules: ["core-js/actual"],
+  version: "3.47",
+});
+console.log(data);
+
+/* 输出结果
+{
+  list: [
+    'es.iterator.concat',
+    'es.math.sum-precise',
+    'es.async-iterator.async-dispose',
+    'esnext.array.group',
+    'esnext.array.group-by',
+    ...其它特性
+  ],
+  targets: {
+    'es.iterator.concat': { 'chrome-android': '143' },
+    'es.math.sum-precise': { 'chrome-android': '143' },
+    'es.async-iterator.async-dispose': { 'chrome-android': '143' },
+    'esnext.array.group': { 'chrome-android': '143' },
+    'esnext.array.group-by': { 'chrome-android': '143' },
+    ...其它特性
+  }
+}
+*/
+```
+
+compat会根据我们设置的浏览器兼容性配置，输出特性列表，包含两个字段：list是一个特性名称列表；targets是一个Map结构，key为特性名，值为可以兼容的浏览器。假设我们把上面的 targets改成 > 50%，此时会输出空值：
+
+```js
+const compat = require("core-js-compat");
+const data = compat({
+  targets: "> 50%",
+  modules: ["core-js/actual"],
+  version: "3.47",
+});
+console.log(data);
+
+/* 输出结果
+{ list: [], targets: {} }
+*/
+```
+
+我们增加exclude，排除部分属性，可以看到特性数量大大减少：
+
+```js
+const compat = require("core-js-compat");
+const data = compat({
+  targets: "> 10%",
+  modules: ["core-js/actual"],
+  exclude: ["esnext"],
+  version: "3.47",
+});
+console.log(data);
+
+/* 输出结果
+{
+  list: [
+    'es.iterator.concat',
+    'es.math.sum-precise',
+    'es.async-iterator.async-dispose',
+    'web.dom-exception.stack',
+    'web.immediate',
+    'web.structured-clone'
+  ],
+  targets: {
+    'es.iterator.concat': { 'chrome-android': '143' },
+    'es.math.sum-precise': { 'chrome-android': '143' },
+    'es.async-iterator.async-dispose': { 'chrome-android': '143' },
+    'web.dom-exception.stack': { 'chrome-android': '143' },
+    'web.immediate': { 'chrome-android': '143' },
+    'web.structured-clone': { 'chrome-android': '143' }
+  }
+}
+*/
+```
+
+再试一下inverse的效果：
+
+```js
+const compat = require("core-js-compat");
+const data = compat({
+  targets: "> 10%",
+  modules: ["core-js/actual"],
+  version: "3.47",
+  inverse: true
+});
+console.log(data);
+
+/* 输出结果
+{
+  list: [
+    'es.symbol',
+    'es.symbol.description',
+    ...其它特性
+  ],
+  targets: {
+    'es.symbol': {},
+    'es.symbol.description': {},
+    ...其它特性
+  }
+}
+*/
+```
+
+因为输出的是不需要引入core-js兼容的特性，所以特性数量非常多，而且targets中没有列出支持的浏览器版本。
+
+### core-js-builder
+
 
 ## regenerator-runtime
 
 ## 总结
+core-js的开源文章
 
 core-js并不是所有都能处理，有些处理不了
 
@@ -687,3 +812,7 @@ core-js并不是所有都能处理，有些处理不了
   https://babeljs.io/docs/babel-runtime
 - Github regenerator-runtime\
   https://github.com/facebook/regenerator/tree/main/packages/runtime
+- Github core-js-compat\
+  https://github.com/zloirock/core-js/blob/master/packages/core-js-compat
+- Github core-js-builder\
+  https://github.com/zloirock/core-js/tree/master/packages/core-js-builder
