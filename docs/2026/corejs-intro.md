@@ -788,7 +788,56 @@ console.log(data);
 因为输出的是不需要引入core-js兼容的特性，所以特性数量非常多，而且targets中没有列出支持的浏览器版本。
 
 ### core-js-builder
+前面介绍的core-js-compat是接收参数之后，输出core-js的特性列表数组。而core-js-builder接收类似的参数，直接输出引用core-js的代码。我们首先列举一下参数：
 
+* targets: Browserslist格式的浏览器兼容配置
+* modules: 需要设置兼容性配置的模块，可以是core-js/full，也可以是某个特性，甚至是正则
+* exclude: 需要排除的模块
+* format: 'bundle'输出打包后的源码；'cjs'和'esm'输出对应格式的引用代码
+* filename: 输出的文件名
+
+我们先试一下例子。首先是format格式的：
+
+```js
+const builder = require("core-js-builder");
+async function funJzplp() {
+  const data = await builder({
+    targets: "> 30%",
+    modules: ["core-js/actual"],
+    format: 'bundle',
+  });
+  console.log(data);
+}
+funJzplp();
+
+/* 输出结果
+...代码很长，这里节选部分
+ (function(module, exports, __webpack_require__) {
+"use strict";
+var NATIVE_BIND = __webpack_require__(8);
+var FunctionPrototype = Function.prototype;
+*/
+```
+
+可以看到，builder函数输出了非常长的代码，内容实际为输出的属性打包之后的结果代码。再试一下'cjs'和'esm':
+
+```js
+// format: 'cjs' 输出结果
+...代码很长，这里节选部分
+require('core-js/modules/es.iterator.concat');
+require('core-js/modules/es.math.sum-precise');
+require('core-js/modules/es.async-iterator.async-dispose');
+*/
+
+// format: 'esm' 输出结果
+...代码很长，这里节选部分
+import 'core-js/modules/es.iterator.concat.js';
+import 'core-js/modules/es.math.sum-precise.js';
+import 'core-js/modules/es.async-iterator.async-dispose.js';
+*/
+```
+
+如果设置了filename，core-js-builder会创建该名称的文件，并将代码写入到文件中。
 
 ## regenerator-runtime
 
