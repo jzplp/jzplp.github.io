@@ -5,7 +5,7 @@
 
 core-js是一个知名的前端工具库，里面包含了ECMAScript标准中提供的新对象/新方法等，而且是使用旧版本支持的语法来实现这些新的API。这样，即使浏览器的没有实现标准中的新API，也能通过注入core-js代码来提供对应的功能。
 
-像这种通过注入代码实现浏览器没有提供的API特性，叫做Polyfill。这个单词的本意是填充材料，在JavaScript领域中，这些注入的代码就类似“填充材料”一样，帮助我们提高代码的兼容性。另外core-js还提供了一些还在提议的API的实现，
+像这种通过注入代码实现浏览器没有提供的API特性，叫做Polyfill。这个单词的本意是填充材料，在JavaScript领域中，这些注入的代码就类似“填充材料”一样，帮助我们提高代码的兼容性。另外core-js还提供了一些还在提议中的API的实现。
 
 ## core-js使用方式
 ### 使用前后对比
@@ -522,7 +522,7 @@ Promise.try(() => {});
 可以看到，源代码中增加了Promise.try，引入的特性也随之增加了对应的core-js特性引入。因此，使用@babel/preset-env的usage配置，可以保证兼容性的同时，最小化引入core-js特性。另外这个配置并不会自动引入提议特性，需要额外配置proposals为true。
 
 ### @babel/polyfill
-@babel/polyfill是一个已经被弃用的包，推荐直接使用core-js/stable。查看@babel/polyfill源码，发现他就是引入了core-js特性与regenerator-runtime这个包。（regenerator-runtime也是一个兼容性相关的包，我们在后面单独介绍）作为替代可以这样引入：
+@babel/polyfill是一个已经被弃用的包，推荐直接使用core-js/stable。查看@babel/polyfill源码，发现他就是引入了core-js特性与regenerator-runtime这个包。regenerator-runtime也是一个兼容性相关的包，可以帮助添加generatore和async/await相关语法。作为替代可以这样引入：
 
 ```js
 import 'core-js/stable';
@@ -839,12 +839,10 @@ import 'core-js/modules/es.async-iterator.async-dispose.js';
 
 如果设置了filename，core-js-builder会创建该名称的文件，并将代码写入到文件中。
 
-## regenerator-runtime
-
 ## 总结
-core-js的开源文章
+这篇文章描述了core-js相关包的代码内容和使用方式。core-js实际上就是提供了JavaScript中一些API特性的兼容实现方式。它与实现语法兼容的Babel一起，可以做到大部分JavaScript的兼容性。当然core-js和Babel也不是万能的，它们都有各自无法转义和兼容的语法和特性。
 
-core-js并不是所有都能处理，有些处理不了
+core-js这个包名字起的非常好，一听就是JavaScript的“核心”包。由于它实现了很多API特性，而且引用数量非常非常大，因此叫“核心”也不为过。虽然这个包引用量很大，但不如React/Vue或者一些其它包出名。因为这个包是处理的更底层的兼容性有问题，因此用户感知不强。core-js包的作者还因为没有钱而遇到很多问题，这个包并没有让他变的富有。
 
 ## 参考
 - core-js 文档\
@@ -865,3 +863,5 @@ core-js并不是所有都能处理，有些处理不了
   https://github.com/zloirock/core-js/blob/master/packages/core-js-compat
 - Github core-js-builder\
   https://github.com/zloirock/core-js/tree/master/packages/core-js-builder
+- So, what's next?\
+  https://github.com/zloirock/core-js/blob/master/docs/2023-02-14-so-whats-next.md
