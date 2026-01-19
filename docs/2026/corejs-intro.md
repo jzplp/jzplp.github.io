@@ -3,13 +3,13 @@
 ## 简介
 在之前我介绍过Babel：[解锁Babel核心功能：从转义语法到插件开发](https://jzplp.github.io/2025/babel-intro.html)，Babel是一个使用AST转义JavaScript语法，提高代码在浏览器兼容性的工具。但有些ECMAScript并不是新的语法，而是一些新对象，新方法等等，这些并不能使用AST抽象语法树来转义。因此Babel利用core-js实现这些代码的兼容性。
 
-core-js是一个知名的前端工具库，里面包含了ECMAScript标准中提供的新对象/新方法等，而且是使用旧版本支持的语法来实现这些新的API。这样，即使浏览器的没有实现标准中的新API，也能通过注入core-js代码来提供对应的功能。
+core-js是一个知名的前端工具库，里面包含了ECMAScript标准中提供的新对象/新方法等，而且是使用旧版本支持的语法来实现这些新的API。这样即使浏览器没有实现标准中的新API，也能通过注入core-js代码来提供对应的功能。
 
 像这种通过注入代码实现浏览器没有提供的API特性，叫做Polyfill。这个单词的本意是填充材料，在JavaScript领域中，这些注入的代码就类似“填充材料”一样，帮助我们提高代码的兼容性。另外core-js还提供了一些还在提议中的API的实现。
 
 ## core-js使用方式
 ### 使用前后对比
-要想看到core-js使用前后的效果对比，首先需要到某个语法和对应的执行环境，在这个环境中对应的语法不存在。我本地是Node.js v18.19.1版本，这个版本并没有实现Promise.try这个方法，因此我们就用这个方法进行实验。首先是没有引入core-js的场景：
+要想看到core-js使用前后的效果对比，首先需要确定某个特性和对应的执行环境，在这个环境中对应的特性不存在。我本地是Node.js v18.19.1版本，这个版本并没有实现Promise.try这个方法，因此我们就用这个方法进行实验。首先是没有引入core-js的场景：
 
 ```js
 Promise.try(() => {
@@ -23,7 +23,7 @@ TypeError: Promise.try is not a function
 */
 ```
 
-可以看到，我们没有引入core-js时，直接使用Promise.try时，会因为没有该方法而报错。然后再试试引入core-js的效果：
+可以看到没有引入core-js，直接使用Promise.try时，会因为没有该方法而报错。然后再试试引入core-js的效果：
 
 ```js
 require('core-js')
@@ -39,7 +39,7 @@ jzplp!
 可以看到引入core-js后，原本不存在的API被填充了，我们的代码可以正常执行并拿到结果了。这就是core-js提高兼容性的效果。
 
 ### 单个API引入
-core-js不仅可以直接引入全部语法， 还可以针对仅引入单个API，比如某个对象或某个方法。首先看下只引入Promise对象：
+core-js不仅可以直接引入全部语法，还可以仅引入单个API，比如某个对象或某个方法。首先看下只引入Promise对象：
 
 ```js
 // require('core-js/full') 等于 require('core-js')
@@ -67,7 +67,7 @@ jzplp!
 ```
 
 ### 不注入全局对象
-前面展示的场景，core-js都是将API直接注入到全局，这样我们使用这些API就如环境本身支持一样，基本感受不到区别。但如果我们不希望直接注入到全局时，core-js也给我们提供了使用方式：
+前面展示的场景，core-js都是将API直接注入到全局，这样使用这些API就如环境本身支持一样，基本感受不到区别。但如果我们不希望直接注入到全局时，core-js也提供了使用方式：
 
 ```js
 const promise = require('core-js-pure/full/promise');
@@ -119,7 +119,7 @@ jzplp!
 因为导出的对象方法不能独立使用，因此在例子中我们还是将其注入到Promise对象后使用。
 
 ### 特性分类引入
-core-js中包含的非常多API特性的兼容代码，有些是已经稳定的特性，有些是还处在提议阶段的，不稳定的特性。我们直接引入core-js会把这些特殊性全部引入，但如果不需要那些不稳定特性，core-js也提供了多种引入方式：
+core-js中包含非常多API特性的兼容代码，有些是已经稳定的特性，有些是还处在提议阶段的，不稳定的特性。我们直接引入core-js会把这些特性全部引入，但如果不需要那些不稳定特性，core-js也提供了多种引入方式：
 
 * core-js 引入所有特性，包括早期的提议
 * core-js/full 等于引入core-js
@@ -249,9 +249,9 @@ core-js
 ### 层层引用
 在目录中actual, es, full, stable, es是我们已经介绍过的。另外还有web目录仅包含web标准的特性，features和full类似（index.js中直接导出full目录）。
 
-proposals目录包含提议的特性，特性名来命名文件名。而stage目录中包含0.js, 1.js, 2.js等等，是根据stage阶段来整理的，方便质疑和纳入对应阶段的特性。
+proposals目录包含提议的特性，以特性名来命名文件名。而stage目录中包含0.js, 1.js, 2.js等等，是根据stage阶段来整理的，方便整理和引入对应阶段的特性。
 
-这样整理目录虽然清晰，但这些目录中的特性都是重复的，不可能在每个目录中都把他也行实现一遍。因此上面这些目录的文件中，存放的都是实现的引用，并不是特性代码实现本身。真正的实现在modules目录中。modules目录中是特性名作为命名的文件，文件有固定的前缀名：es.表示ES标准；esnext.表示提议中的标准；web.表示web标准。
+这样整理目录虽然清晰，但这些目录中的特性都是重复的，不可能在每个目录中把特性都实现一遍。因此上面这些目录的文件中，存放的都是实现的引用，并不是特性代码实现本身。真正的实现在modules目录中。modules目录中是以特性名作为命名的文件，文件有固定的前缀名：es.表示ES标准；esnext.表示提议中的标准；web.表示web标准。
 
 这里以我们上面提到过的两个特性为例，看看引用路径，首先是Promise.try：
 
@@ -280,7 +280,7 @@ core-js-bundle
 └─...
 ```
 
-其中index.js是打包过后得到特性集合代码，minified.js是经过压缩混淆后的代码。core-js-bundle只能全部引入并注入到全局，不能引入部分目录或者导出某个属性。
+其中index.js是打包过后的特性集合代码，minified.js是经过压缩混淆后的代码。core-js-bundle只能全部引入并注入到全局，不能引入部分目录或者导出某个属性。
 
 ## 打包和浏览器效果
 ### 创建Webpack示例
@@ -425,7 +425,7 @@ require("core-js/modules/web.immediate.js");
 const jzplp = 1;
 ```
 
-可以看到，core-js被拆开，直接引入了特性本身。在配置chrome: 100版本时，引入的特性为215个。我们修改配置chrome: 140版本时，再重新生成代码，此时引入的特性为150个。可以看到确实时根据浏览器版本选择不同的特性引入。这对于其它core-js的引入方式也生效：
+可以看到core-js被拆开，直接引入了特性本身。在配置chrome: 100版本时，引入的特性为215个。我们修改配置chrome: 140版本时，再重新生成代码，此时引入的特性为150个。可以看到确实时根据浏览器版本选择不同的特性引入。这对于其它core-js的引入方式也生效：
 
 ```js
 // 源代码
@@ -447,7 +447,7 @@ const jzplp = 1;
 我们引入core-js/stable，可以看到生成代码中不引入esnext特性了。在配置chrome: 100版本时，引入的特性为71个，配置chrome: 100版本时，引入的特性为6个。同样的，如果引入换成core-js/full/array，就会只引入数组相关特性，而且也是根据浏览器兼容版本引入。
 
 ### preset-env配置usage
-@babel/preset-env的useBuiltIns配置值为usage时，Babel不仅会跟根据配置的浏览器版本兼容性，还会根据代码中实际使用的特性，来选择引入哪些core-js中的特性。首先是Babel配置：
+@babel/preset-env的useBuiltIns配置值为usage时，Babel不仅会跟根据配置的浏览器版本兼容性，还会根据代码中实际使用的特性来选择引入哪些core-js中的特性。首先是Babel配置：
 
 ```json
 {
@@ -466,7 +466,7 @@ const jzplp = 1;
 }
 ```
 
-然后是要处理的代码，注意配置usage时是不需要手动引入core-js的。我们在配置不同的Chrome浏览器版本，看看输出结果如何：
+然后是要处理的代码，注意配置usage时是不需要手动引入core-js的。我们配置不同的Chrome浏览器版本，看看输出结果如何：
 
 ```js
 // 源代码
@@ -519,7 +519,7 @@ const b = new Map();
 Promise.try(() => {});
 ```
 
-可以看到，源代码中增加了Promise.try，引入的特性也随之增加了对应的core-js特性引入。因此，使用@babel/preset-env的usage配置，可以保证兼容性的同时，最小化引入core-js特性。另外这个配置并不会自动引入提议特性，需要额外配置proposals为true。
+可以看到，源代码中增加了Promise.try，引入的特性也随之增加了对应的core-js特性引入。因此，使用@babel/preset-env的usage配置，可以保证兼容性的同时，最小化引入core-js特性。另外这个配置并不会自动引入提议特性，如果需要则额外配置proposals为true。
 
 ### @babel/polyfill
 @babel/polyfill是一个已经被弃用的包，推荐直接使用core-js/stable。查看@babel/polyfill源码，发现他就是引入了core-js特性与regenerator-runtime这个包。regenerator-runtime也是一个兼容性相关的包，可以帮助添加generatore和async/await相关语法。作为替代可以这样引入：
@@ -819,7 +819,7 @@ var FunctionPrototype = Function.prototype;
 */
 ```
 
-可以看到，builder函数输出了非常长的代码，内容实际为输出的属性打包之后的结果代码。再试一下'cjs'和'esm':
+可以看到，builder函数输出了非常长的代码，内容实际为输出的特性经过打包之后的结果代码。再试一下'cjs'和'esm'，输出的是对应木块的引用代码：
 
 ```js
 // format: 'cjs' 输出结果
