@@ -1,4 +1,4 @@
-# core-js与Polyfill（未完成）
+# Polyfill方式解决前端兼容性问题：core-js包结构与各种配置策略
 
 ## 简介
 在之前我介绍过Babel：[解锁Babel核心功能：从转义语法到插件开发](https://jzplp.github.io/2025/babel-intro.html)，Babel是一个使用AST转义JavaScript语法，提高代码在浏览器兼容性的工具。但有些ECMAScript并不是新的语法，而是一些新对象，新方法等等，这些并不能使用AST抽象语法树来转义。因此Babel利用core-js实现这些代码的兼容性。

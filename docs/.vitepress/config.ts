@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "core-js与Polyfill",
+        text: "Polyfill方式解决前端兼容性问题：core-js包结构与各种配置策略",
         link: "/2026/corejs-intro",
       },
     ],
