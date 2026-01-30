@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "生孩子",
+        text: "<非技术>怀孕37周生产：从产房到NICU的闯关实录",
         link: "/2026/new-born",
       },
       {
@@ -65,7 +65,7 @@ const sidebarLists = [
         link: "/2025/css-float",
       },
       {
-        text: "（非技术）从一公里到半程马拉松：我的一年跑步经历",
+        text: "<非技术>从一公里到半程马拉松：我的一年跑步经历",
         link: "/2025/run-half-marathon",
       },
       {
