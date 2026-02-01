@@ -11,6 +11,10 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
+        text: "CSS组件化方案概述：BEM/CSS-Modules/CSS-in-js/原子化CSS等",
+        link: "/2026/css-component",
+      },
+      {
         text: "<非技术>怀孕37周生产：从产房到NICU的闯关实录",
         link: "/2026/new-born",
       },
