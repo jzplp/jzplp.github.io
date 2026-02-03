@@ -13,18 +13,27 @@ todo 标题后面看一下如何优化
 
 ```html
 <!-- 三种代码合并 -->
-<div style= "color: red" onClick="consoel.log('click')"> 你好 </div>
+<div style= "color: red" onclick="console.log('click')"> 你好 </div>
 
 <!-- 三种代码分离 -->
+<div class="texts" onclick="handleClick()"> 你好 </div>
 
+<style>
+.texts {
+  color: red;
+}
+</style>
 
-
+<script>
+function handleClick() {
+  console.log('click');
+}
+</script>
 ```
-
 
 这样
 
-
+                                                                                                                                       
 这篇文章
 
 
@@ -65,3 +74,7 @@ todo 标题后面看一下如何优化
   https://juejin.cn/post/7529660423999848500
 - 为什么 CSS in JS 这样的解决方案在国外很火，在国内却热度特别低？\
   https://www.zhihu.com/question/452075622
+- React 文档\
+  https://react.docschina.org/
+- Vue 文档\
+  https://cn.vuejs.org/
