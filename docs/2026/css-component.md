@@ -64,8 +64,32 @@ function handleClick() {
 ```
 
 ### React模式
+React框架则首先发明了JSX语法，可以在JavaScript中编写标签模板。这样使得JavaScript和HTML的关系非常紧密：
 
+```jsx
+import './index.css';
 
+function Comp() {
+  const handleClick = () => {
+    console.log('click');
+  };
+  const styles = { fontSize: '14px' };
+  return <div className="texts" style={styles} onclick={handleClick}> 你好 </div>;
+}
+```
+
+可以看到，React中一个函数即为一个组件，组件函数直接返回JSX标签语法，作为HTML渲染的模板。虽然Vue等组件后来也支持JSX，但还是React的使用最广泛。并且它们的标签语法都是类似于“HTML模板”，而不是一种真正的HTML。
+
+React其中CSS可以直接作为内联style属性的数据，在JavaScript中控制样式。React对于CSS的封装比较弱，因此很多开发者还是喜欢使用独立的CSS等样式文件来控制样式。例如：
+
+```css
+/* index.css */
+.texts {
+  color: red;
+}
+```
+
+但这样事实上就造成了React组件中HTML和JavaScript的代码位置联系紧密，但与CSS的联系却有些松散。再加上不管哪种框架，在组件中引入的CSS不仅在组件内生效，而且对于页面全局都生效，这样会造成不同组件的样式冲突和污染。为了解决这些问题，使得CSS和组件紧密联系，开源社区中涌现了很多关于CSS的组件化技术。下面我们就跟随着技术出现的时间顺序和进化方向，介绍一些CSS组件化相关方案。
 
 ## 搞一个React工程示例
 
