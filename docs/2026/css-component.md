@@ -91,17 +91,23 @@ React其中CSS可以直接作为内联style属性的数据，在JavaScript中控
 
 但这样事实上就造成了React组件中HTML和JavaScript的代码位置联系紧密，但与CSS的联系却有些松散。再加上不管哪种框架，在组件中引入的CSS不仅在组件内生效，而且对于页面全局都生效，这样会造成不同组件的样式冲突和污染。为了解决这些问题，使得CSS和组件紧密联系，开源社区中涌现了很多关于CSS的组件化技术。下面我们就跟随着技术出现的时间顺序和进化方向，介绍一些CSS组件化相关方案。
 
-## 搞一个React工程示例
-
-同时提供不使用 下面技术的场景示例 这次用vite？
-
 ## BEM
+CSS样式冲突和污染主要的原因在于，不同组件中class类名都是公用的，假设两个组件中起了同样的类名，那么就会出现样式污染。既然问题出在名字，那么让不同组件的类名不同不就能解决问题了。因此，社区中出现了一些CSS命名规范，希望使用规范将CSS的冲突污染减少，同时通过命名起到和HTML标签关系更紧密的作用。
+
+BEM是最知名的CSS命名规范，由Yandex团队开发。
+
 
 ## OOCSS
 
 ## SMACSS
 
 ## 其它命名方案？
+OOCSS、AMCSS、SMACSS、SUITCSS
+
+## 搞一个React工程示例
+
+同时提供不使用 下面技术的场景示例 这次用vite？
+
 
 ## CSS Modules
 
@@ -134,3 +140,13 @@ React其中CSS可以直接作为内联style属性的数据，在JavaScript中控
   https://cn.vuejs.org/
 - 单文件组件 Vue文档\
   https://cn.vuejs.org/guide/scaling-up/sfc
+- 如何看待 CSS 中 BEM 的命名方式？\
+  https://www.zhihu.com/question/21935157
+- BEM 文档\
+  https://getbem.com/
+- 快收藏！4种大厂常用的CSS命名法(Ⅰ)：BEM\
+  https://juejin.cn/post/7377683176229224475
+- BEM方法论：构建可维护的前端CSS架构\
+  https://juejin.cn/post/7564304007763591220
+- 优秀框架都在使用的CSS规范: BEM、OOCSS、SMACSS\
+  https://juejin.cn/post/7438994542769520680
