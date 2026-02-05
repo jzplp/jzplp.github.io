@@ -94,7 +94,36 @@ React其中CSS可以直接作为内联style属性的数据，在JavaScript中控
 ## BEM
 CSS样式冲突和污染主要的原因在于，不同组件中class类名都是公用的，假设两个组件中起了同样的类名，那么就会出现样式污染。既然问题出在名字，那么让不同组件的类名不同不就能解决问题了。因此，社区中出现了一些CSS命名规范，希望使用规范将CSS的冲突污染减少，同时通过命名起到和HTML标签关系更紧密的作用。
 
-BEM是最知名的CSS命名规范，由Yandex团队开发。
+### BEM简介
+BEM是最知名的CSS命名规范，由Yandex团队开发。BEM的全称为Block Element Modifier，翻译成和中文就是块，元素和修饰符。BEM使用这三种层级来规范CSS的命名：
+
+* Block 区块 表示页面中一个独立可复用的模块或者组件
+* Element 元素 表示区块中的一个组成元素
+* Modifier 修饰符 修饰元素的状态或者行为
+
+每个层级内部使用串行命名法（Kebab Case），中间分隔单词使用单中线-。元素前的分隔符为双下划线__，修饰符前的分隔符为双中线--。元素不能独立存在，必须依附于区块内。修饰符则必须跟在元素或者区块后面。因此可以这样组合命名：
+
+* block 单区块
+* block__element 区块+元素
+* block--modifier 区块+修饰符
+* block__element--modifier 区块+元素
+
+```html
+<div class="container">
+  <input class="container__input" />
+  <button class="container__button--primary">提交<button>
+</div>
+
+<style>
+.container {}
+.container__input {}
+.container__button--primary {}
+</style>
+```
+
+在上面的例子中，container是区块，input和button是元素，primary则是修饰符。这样每个元素都有自己的类型，不需要考虑名称冲突的问题，而且这样命名是有页面结构含义在的，即通过命名就知道这个元素属于哪个组件，有什么用处。因此，BEM也不推荐使用嵌套选择器。
+
+### BEM的应用和优势
 
 
 ## OOCSS
