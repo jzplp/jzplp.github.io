@@ -17,6 +17,18 @@ http://localhost:5173/2026/2026-summary.html
 
 
 ### 学习技术
+todo 今年开始对于学习的技术更详细的统计
+
+* core-js与Polyfill技术
+  * core-js使用方式与源码结构
+  * Babel与core-js，根据浏览器兼容性和代码使用注入Polyfill
+  * core-js/configurator, core-js-compat, core-js-builder
+* CSS组件化方案
+  * CSS命名规范：BEM, 
+* 多语言技术相关
+  * ICU信息语法，intl-messageformat渲染多语言
+  * react-intl, react-intl-universal等React多语言工具
+
 
 ### 算法题
 
