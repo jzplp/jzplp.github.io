@@ -123,7 +123,20 @@ BEM是最知名的CSS命名规范，由Yandex团队开发。BEM的全称为Block
 
 在上面的例子中，container是区块，input和button是元素，primary则是修饰符。这样每个元素都有自己的类型，不需要考虑名称冲突的问题，而且这样命名是有页面结构含义在的，即通过命名就知道这个元素属于哪个组件，有什么用处。因此，BEM也不推荐使用嵌套选择器。
 
-### BEM的应用和优势
+### BEM的应用和优劣势
+BEM的应用比较广泛，很多项目都是使用它来命名class，还有一些项目利用了他的命名思路。这里我们以Vue3的组件库Element-Plus为例，来看一下BEM的应用：
+
+​![流程图](/2026/css-comp-1.png)
+
+这里是一个复合型输入框组件，名称叫做el-input-group。这里包含左边的前置展示元素和右边的输入框，其中组件结构和以BEM方式命名的class如下：
+
+* el-input-group--prepend:  区块 el-input-group 修饰符 prepend
+  * el-input-group__prepend:  区块 el-input-group 元素 prepend
+  * el-input__wrapper:  区块 el-input 元素 wrapper
+    * el-input__inner:  区块 el-input 元素 inner
+
+通过这种方式，Element-Plus有着清晰的元素class名，不仅组件内部开发使用，使用组件库的用户也可以使用这些类名来覆盖组件库样式。
+
 
 
 ## OOCSS
