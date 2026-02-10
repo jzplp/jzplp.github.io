@@ -159,11 +159,62 @@ OOCSS的全称为Object Oriented CSS，即为面对对象的CSS。接触过编�
 
 每一种类都封装了属性和方法。苹果和橘子都是水果的子类，继承了水果的属性和方法。子类可以有自己独立的方法，也能调用父类的方法。调用父类的方法时，可以有子类自己的实现，这是多态。例如苹果和橘子都可以使用切开水果这个方法，但切开的效果不一样。一个类可以生成很多个示例对象，每个对象可以有不同的数据。
 
-JavaScript中也有面对对象相关的方法，老方法有原型链，ES6中直接提供了class关键字，并且在逐渐完善面对对象相关的语法。
+JavaScript中也有面对对象相关的方法，老方法有原型链，ES6中直接提供了class关键字，并且在逐渐完善面对对象相关的语法。但CSS并不是编程语言，无法提供直接提供面对对象语法，只能在概念上简单模拟一下。OOCSS就是利用CSS，对面对对象的概念进行了简单的模拟。
 
-### OOCSS介绍
-JavaScript是一种编程语言，因此它可以提供面对对象相关语法，但CSS并不是编程语言，无法提供直接提供面对对象语法，只能在概念上简单模拟一下。OOCSS就是利用CSS，对面对对象的概念进行了简单的模拟。
+### 分离结构和皮肤
+按照OOCSS的设想，CSS样式可以分为结构structure和皮肤skin。结构表示它的尺寸/位置/边距等内容；皮肤表示颜色，字体，背景等。因为皮肤可能会根据不同的场景变化，而且皮肤可能被多个组件所公用，因此分开作为两个类来处理。这里我们举个例子，首先是不使用OOCSS的做法，两个CSS类独立互相没有依赖
 
+```html
+<div>
+  <button class="btn-small">jzplp按钮1</button>
+  <button class="btn-large">jzplp按钮2</button>
+<div>
+<style>
+.btn-small {
+  width: 20px;
+  height: 20px;
+  Padding: 5px;
+  color: red;
+  background: blue;
+}
+.btn-large {
+  width: 200px;
+  height: 200px;
+  Padding: 50px;
+  color: red;
+  background: blue;
+}
+</style>
+```
+
+这样写会造成一些重复属性存在，例如这里的skin相关属性就是重复的，我们将他抽象出来作为单独的skin共享：
+
+```html
+<div>
+  <button class="btn-small btn-skin">jzplp按钮1</button>
+  <button class="btn-large btn-skin">jzplp按钮2</button>
+<div>
+<style>
+.btn-skin {
+  color: red;
+  background: blue;
+}
+.btn-small {
+  width: 20px;
+  height: 20px;
+  Padding: 5px;
+}
+.btn-large {
+  width: 200px;
+  height: 200px;
+  Padding: 50px;
+}
+</style>
+```
+
+这样皮肤的样式就可以在不同的元素中复用了。如果要修改皮肤，修改一个位置就统一修改了所有元素的皮肤。
+
+### 分离容器和内容
 
 
 ### OOCSS的应用和优缺点
@@ -220,3 +271,7 @@ OOCSS、AMCSS、SMACSS、SUITCSS
   https://juejin.cn/post/7564304007763591220
 - 优秀框架都在使用的CSS规范: BEM、OOCSS、SMACSS\
   https://juejin.cn/post/7438994542769520680
+- Object Oriented CSS\
+  https://github.com/stubbornella/oocss/wiki
+- CSS 架构之OOCSS\
+  https://juejin.cn/post/7021067874139635726
