@@ -275,6 +275,90 @@ JavaScript中也有面对对象相关的方法，老方法有原型链，ES6中�
 总之，OOCSS只是一个组织CSS的思路，我们不需要教条化的拆分，而是根据具体场景拆分和抽象公共CSS规则。
 
 ## SMACSS
+SMACSS的全程叫做Scalable and Modular Architecture for CSS，意思是可扩展和模块化的CSS结构。他与OOCSS类似，也是制定了一些CSS组织的规范，但比OOCSS更细致。这两个命名规范的思想上有很多相似之处。SMACSS将页面的CSS规则分为五种类型，下面我们将分别介绍：
+
+* Base 基础样式
+* Layout 布局样式
+* Module 模块样式
+* State 状态样式
+* Theme 主题样式
+
+### Base基础样式
+基础样式是整个页面通用的公共样式。一个常用的例子是CSS reset样式表。在[CSS优先级，没有想的那么简单！全面介绍影响CSS优先级的各类因素](https://jzplp.github.io/2024/css-specificity.html)中我们介绍过，浏览器会提供一些预置的默认样式，叫做“用户代理样式表”。但是很多用户不希望使用这些默认样式，因此使用一个全局的CSS reset样式表处理这些默认样式。
+
+除了reset样式表之外，基础样式还可以包含一些对于所有元素通用的样式，例如标题样式，默认链接样式，页面背景等。SMACSS不推荐哎基础样式中使用类或者ID选择器。例如：
+
+```css
+body, form {
+  margin: 0;
+  padding: 0;
+}
+a {
+  color: #039;
+}
+a:hover {
+  color: #03F;    
+}
+body {
+  background-color: red;
+}
+```
+
+### Layout布局样式
+布局指的是将页面划分为几个大部分，这几个部分的样式作为布局样式。例如页面可以划分为头部、主内容区、底部、侧边栏等。这些样式通常是全局样式，一个布局元素中可以包含很多个模块。如果布局元素确定只出现一次，甚至可以使用ID选择器。可以使用l-或者layout-前缀来表示是布局样式，但也可以不使用。这里举几个例子：
+
+```css
+#header, #article, #footer {
+    width: 960px;
+    margin: auto;
+}
+.sidebar {
+    float: right;
+}
+```
+
+### Module模块样式
+SMACSS中的模块和其它CSS命名规范中模块的含义一致，都是页面中独立可复用的模块，也就是组件。模块中的规则避免使用ID选择器或者元素选择器，而使用类名。为了规则不发生冲突，每个模块可以用模块名称本身作为前缀，例如.module-。
+
+```css
+.card {
+  padding: 5px;
+}
+.card-top {
+  font-size: 10px;
+}
+```
+
+### State状态样式
+SMACSS中的状态类似于BEM中的修饰符modifier，它表示模块或者布局在某些状态下的外观或者行为。但SMACSS中的状态样式倾向于是全局使用的，即多个模块和布局都可以使用。状态样式也可以是依赖JavaScript驱动的，例如点击或者其它操作展示的效果。状态样式可以用is-作为前缀。因为要覆盖元素本身的默认样式，因此允许使用!important。
+
+```css
+.is-collapsed {
+  width: 10px;
+}
+.is-selected {
+  color: red !important;
+}
+```
+
+### Theme主题样式
+主题描述了模块或布局的外观样式，一些小的页面不要求主题样式，但有些页面以后特殊要求，甚至要求换肤。将皮肤抽象出来作为的独立样式，方便抽象和更改。这里和OOCSS的皮肤规则有点像。
+
+```css
+.normal {
+  color: blue;
+  background: grey;
+}
+
+.primary {
+  color: red;
+  background: white;
+}
+```
+
+### SMACSS的优缺点
+
+Layout也经常用作组件
 
 ## 其它命名方案？
 OOCSS、AMCSS、SMACSS、SUITCSS
@@ -329,3 +413,11 @@ OOCSS、AMCSS、SMACSS、SUITCSS
   https://github.com/stubbornella/oocss/wiki
 - CSS 架构之OOCSS\
   https://juejin.cn/post/7021067874139635726
+- SMACSS 文档\
+  https://smacss.com/
+- 4种大厂常用的CSS命名法(Ⅲ)：SMACSS\
+  https://juejin.cn/post/7402987272504754228
+- 漫谈 SMACSS\
+  https://juejin.cn/post/6844903426585804813
+- CSS优先级，没有想的那么简单！全面介绍影响CSS优先级的各类因素\
+  https://jzplp.github.io/2024/css-specificity.html
