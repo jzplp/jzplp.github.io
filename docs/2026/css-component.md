@@ -373,8 +373,30 @@ SMACSS不仅描述了五种CSS规则类型，还包含很多规范说明，比�
   * 规范太详尽，导致经常出现不符合实际情况的场景
   * 虽然说了不要死板套用，但如果不符合的场景太多，那还是需要重新定义自己的规范
 
-## 其它命名方案？
-AMCSS、SUITCSS
+## 其它命名方案
+除了上面三种之外，还有一些CSS命名规范，这里我们简单介绍一下：
+
+### ITCSS
+ITCSS的全称为Inverted Triangle Cascading Style Sheets，翻译成中文为倒三角CSS。ITCSS把CSS规则分成了七层，并且把这七层展示为了一个倒三角的形式。
+
+​![流程图](/2026/css-comp-2.png)
+
+倒三角的形式指的是从上到下CSS规则的普遍性减少，特殊性增加，即越往下，影响范围和可复用性越低。这里我们说明一下每一层的内容：
+
+* Settings 预先定义的颜色变量，数值变量等
+* Tools 全局使用的mixins和函数等
+* Generic 全局标准化样式，例如CSS reset样式表
+* Elements HTML元素的通用样式
+* Objects 整个工程的布局样式，但不包含外观属性
+* Components 具体的组件样式
+* Trumps 可以覆盖的辅助样式，可以接收!important
+
+可以看到，前两层都没有真正的CSS规则代码；三四层是不带类选择器的CSS规则。ITCSS利用了CSS预处理的特性，例如mixins和函数等。
+
+### AMCSS
+
+### SUITCSS
+
 
 
 这些所有的命名规范都有些过时
@@ -438,3 +460,14 @@ AMCSS、SUITCSS
   https://juejin.cn/post/6844903426585804813
 - CSS优先级，没有想的那么简单！全面介绍影响CSS优先级的各类因素\
   https://jzplp.github.io/2024/css-specificity.html
+- ITCSS模板 GitHub\
+  https://github.com/itcss/itcss-netmag
+- AMCSS 网站\
+  https://amcss.github.io/
+- AMCSS 文档 GitHub\
+  https://github.com/amcss/attribute-module-specification
+- CSS 架构之 ITCSS\
+  https://juejin.cn/post/7025903094202368036
+- 简述BEM, OOCSS，AMCSS，SMACSS，SUITCSS，ITCSS\
+  https://juejin.cn/post/6844904035649077256
+

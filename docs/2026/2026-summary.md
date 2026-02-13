@@ -28,7 +28,7 @@ todo 今年开始对于学习的技术更详细的统计
 * 多语言技术相关
   * ICU信息语法，intl-messageformat渲染多语言
   * react-intl, react-intl-universal等React多语言工具
-
+* Chrome浏览器插件简单开发
 
 ### 算法题
 
