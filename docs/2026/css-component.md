@@ -394,6 +394,49 @@ ITCSS的全称为Inverted Triangle Cascading Style Sheets，翻译成中文为�
 可以看到，前两层都没有真正的CSS规则代码；三四层是不带类选择器的CSS规则。ITCSS利用了CSS预处理的特性，例如mixins和函数等。
 
 ### AMCSS
+AMCSS的全称为Attribute Modules for CSS，即使用属性作为模块的CSS。它与其它CSS命名规范都不相同：其它命名规范主要使用HTML的class属性作为选择器，而它则采用自定义HTML属性作为选择器。
+
+* Modules 模块
+  * 类似于BEM中区块和元素的概念
+  * 使用HTML属性描述，属性名称采用大驼峰命名法BlockName，如果嵌套子模块名使用连字符-
+* Variations 变体
+  * 类似于BEM中的修饰符，表示模块中变化的部分，用来新增和覆盖部分属性
+  * 使用HTML属性值描述，多个用空格分隔
+* Traits 特征
+  * 一组某个用途的CSS规则，可以用来描述一些公共的CSS
+  * 同一组特征的HTMl属性相同，值不同。特征的属性名采用小驼峰式命名法featureName
+
+上面将的有点晦涩，这里还是要用实际例子说明一下。AMCSS要求属性名添加前缀，推荐am-，其它前缀也可以。
+
+```html
+<div am-MainCard>
+</div>
+<div am-Card>
+  <div am-Card-Container> jzplp1 </div>
+</div>
+<div am-Card="sp1 primary"> 
+  <div am-textType="title"> jzplp2 </div>
+</div>
+
+<style>
+  /* 仅模块名 */
+  [am-Card] { color: red; }
+  /* 模块名采用大驼峰命名法 */
+  [am-MainCard] { color: red; }
+  /* 子模块名使用连字符- */
+  [am-Card-Container] { color: red; }
+  /* 变体使用属性 */
+  [am-Card~="primary"] {
+    color: red;
+  }
+  /* 特征名使用小驼峰式命名法 */
+  [am-textType] { color: red; }
+  /* 特征名和限制特征值 */
+  [am-textType~="title"] { color: red; }
+</style>
+```
+
+可以看到，AMCSS实际上就是将类选择器的那一套用法搬到了属性选择器上面，属性选择器的~=符号同样支持多个属性值。而且由于属性有属性名和属性值两种，因此相比于class名更灵活也更清晰。这种属性命名方式并不是推荐的HTML规范，但也可以正常使用。
 
 ### SUITCSS
 
