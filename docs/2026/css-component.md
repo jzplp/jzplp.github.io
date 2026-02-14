@@ -321,12 +321,8 @@ body {
 SMACSS中的模块和其它CSS命名规范中模块的含义一致，都是页面中独立可复用的模块，也就是组件。模块中的规则避免使用ID选择器或者元素选择器，而使用类名。为了规则不发生冲突，每个模块可以用模块名称本身作为前缀，例如.module-。
 
 ```css
-.card {
-  padding: 5px;
-}
-.card-top {
-  font-size: 10px;
-}
+.card { padding: 5px; }
+.card-top { font-size: 10px; }
 ```
 
 ### State状态样式
@@ -426,9 +422,7 @@ AMCSS的全称为Attribute Modules for CSS，即使用属性作为模块的CSS�
   /* 子模块名使用连字符- */
   [am-Card-Container] { color: red; }
   /* 变体使用属性 */
-  [am-Card~="primary"] {
-    color: red;
-  }
+  [am-Card~="primary"] { color: red; }
   /* 特征名使用小驼峰式命名法 */
   [am-textType] { color: red; }
   /* 特征名和限制特征值 */
