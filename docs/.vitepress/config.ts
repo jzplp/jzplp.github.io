@@ -15,6 +15,10 @@ const sidebarLists = [
         link: "/2026/css-component",
       },
       {
+        text: "<非技术>工作、育儿、学习：程序员的时间管理难题",
+        link: "/2026/life-study",
+      },
+      {
         text: "<非技术>怀孕37周生产：从产房到NICU的闯关实录",
         link: "/2026/new-born",
       },
