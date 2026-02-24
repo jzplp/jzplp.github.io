@@ -433,11 +433,19 @@ AMCSS的全称为Attribute Modules for CSS，即使用属性作为模块的CSS�
 可以看到，AMCSS实际上就是将类选择器的那一套用法搬到了属性选择器上面，属性选择器的~=符号同样支持多个属性值。而且由于属性有属性名和属性值两种，因此相比于class名更灵活也更清晰。这种属性命名方式并不是推荐的HTML规范，但也可以正常使用。
 
 ### SUITCSS
+SUITCSS是一套组件化的样式工具。它不仅包含CSS命名规范，而且也提供了一些CSS预设包，构建工具，预处理器（实际上是PostCSS的插件集合），测试工具等。这里我们主要描述一下命名规范：
 
+* 公共样式: 表示一些公共样式
+  * 命名规则 `u-[sm-|md-|lg-]<utilityName>`
+  * 使用-u开头，后面跟骆驼命名法。中间也可以加响应式规则sm-|md-|lg-
+* 组件样式：描述独立组件内部的样式
+  * 命名规则 `[<namespace>-]<ComponentName>[-descendentName][--modifierName]`
+  * namespace 可选的命名空间，例如组件库中的组件避免与业务组件冲突，可以加前缀，例如 el-label, el-tag等。
+  * ComponentName 组件名称，应该用Pascal命名法。组件名称需要与其他组件不同。
+  * descendentName 组件内后代的名称，即为组件内部的元素上的类名，使用骆驼命名法。
+  * modifierName 组件修饰符，修饰元素的状态或者行为。使用骆驼命名法，且前面有两个连字符。
 
-
-这些所有的命名规范都有些过时
-
+SUITCSS命名规范中还规定了组件的设计原则，CSS变量名的命名方式，预置公共样式，甚至是代码风格等。
 
 ## 搞一个React工程示例
 
@@ -453,6 +461,8 @@ AMCSS的全称为Attribute Modules for CSS，即使用属性作为模块的CSS�
 ## 原子化CSS
 
 ## 比较和总结
+
+这些所有的命名规范都有些过时
 
 ## 参考
 - CSS Modules 用法教程 阮一峰\
@@ -507,4 +517,13 @@ AMCSS的全称为Attribute Modules for CSS，即使用属性作为模块的CSS�
   https://juejin.cn/post/7025903094202368036
 - 简述BEM, OOCSS，AMCSS，SMACSS，SUITCSS，ITCSS\
   https://juejin.cn/post/6844904035649077256
-
+- SUITCSS 网站\
+  https://suitcss.github.io/
+- SUITCSS GitHub\
+  https://github.com/suitcss/suit
+- 介绍两种 CSS 方法论 SUITCSS和SMACSS\
+  https://juejin.cn/post/6914279543716970509
+- SUITCSS 命名规范\
+  https://github.com/suitcss/suit/blob/master/doc/naming-conventions.md
+- SUITCSS 文档\
+  https://github.com/suitcss/suit/blob/master/doc/README.md
