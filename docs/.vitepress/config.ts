@@ -14,6 +14,14 @@ const sidebarLists = [
         text: "CSS组件化方案概述：BEM/CSS-Modules/CSS-in-js/原子化CSS等",
         link: "/2026/css-component",
       },
+            {
+        text: "自动实现CSS模块化和组件化：CSS Modules技术详解",
+        link: "/2026/css-modules",
+      },
+      {
+        text: "BEM、OOCSS、SMACSS、ITCSS、AMCSS、SUITCSS：CSS命名规范简介",
+        link: "/2026/css-name",
+      },
       {
         text: "<非技术>工作、育儿、学习：程序员的时间管理难题",
         link: "/2026/life-study",
