@@ -4,12 +4,12 @@ todo 标题后面看一下如何优化
 ## 简介
 在之前的文章中，我们了解了很多CSS命名规范：[BEM、OOCSS、SMACSS、ITCSS、AMCSS、SUITCSS：CSS命名规范简介](https://jzplp.github.io/2026/css-name.html)。它们可以解决CSS样式全局生效容易引发污染和冲突的问题。但方案基本都是写一个前缀或后缀，通过手写命名的方式避免类名重复。但这在多人协作或引入大量外部库时，依然不能完全避免问题，还需依赖团队规范管理。那么，是否有工具可以自动做这件事，而且完全避免组件内的类名与其它组件重复？有的，这就是CSS Modules。
 
-默认情况下，我们定义的CSS类名标识符是全局的。使用CSS Modules之后，每个类名将变为唯一的全局名称，包含不会重复的哈希值。引入CSS文件时，我们可以拿到CSS文件导出的类名到全局名称的对应关系，从而在HTML中提供相应的类名。
+CSS Modules中文叫做CSS模块。默认情况下，我们定义的CSS类名标识符是全局的。使用CSS Modules之后，每个类名将变为唯一的全局名称，包含不会重复的哈希值。引入CSS文件时，我们可以拿到CSS文件导出的类名到全局名称的对应关系，从而在HTML中提供相应的类名。
 
 对于希望共享的类名，CSS Modules也提供了方案使其全局生效。同时CSS Modules还提供了定制标识符，class组合等功能。要想实现CSS Module的功能，代码需要经过打包，而且由于不同前端框架代码的组织方式不一样，CSS Module的具体使用也有区别，下面我们逐一介绍一下。
 
 ## 纯JavaScript使用方式
-首先我们抛开各种前端框架，在纯粹的JavaScript代码中演示CSS Modules的效果。这里选用Vite，首先命令行执行代码，创建项目：
+首先我们抛开各种前端框架，在纯粹的JavaScript代码中演示CSS Modules的效果。这里选用Vite，首先命令行执行代码，创建工程：
 
 ```sh
 npm init -y
@@ -117,6 +117,77 @@ document.body.appendChild(test4);
 通过上面的代码演示，我们能够了解CSS Modules的核心思路，即改变CSS标识符的名称，使其不会重复；需要使用对应标识符的地方要用JavaScript手动引入；同时更改CSS文件中的标识符以匹配新的名称。
 
 ## CSS Modules特性
+CSS Modules除了上面的核心特性之外，还包含一些特性。这里我们介绍和尝试一下它的主要特性：
+
+### 多文件引用CSS模块
+前面我们在同一个JavaScript文件中引入了CSS Modules的CSS文件，多次使用引入的标识符，发现值实际是一样的。那么如果在不同的文件中引入CSS Modules的CSS文件，新标识符会一样么？这里来试一下。首先创建两个CSS文件：
+
+
+```css
+/* index1.module.css */
+.class1 {
+  color: red;
+}
+
+/* index2.module.css */
+.class1 {
+  color: yellow;
+}
+```
+
+可以看到两个CSS文件中类名标识符是一致的，都是class1。然后是两个JavaScript文件index1.js和index2.js，里面总共举了三个例子：
+
+```js
+// index1.js
+import styles1 from "./index1.module.css";
+import styles2 from "./index2.module.css";
+
+const test1 = document.createElement("div");
+test1.className = styles1.class1;
+test1.textContent = "test1";
+document.body.appendChild(test1);
+
+const test2 = document.createElement("div");
+test2.className = styles2.class1;
+test2.textContent = "test2";
+document.body.appendChild(test2);
+
+//index2.js
+import styles1 from "./index1.module.css";
+
+const test3 = document.createElement("div");
+test3.className = styles1.class1;
+test3.textContent = "test3";
+document.body.appendChild(test3);
+```
+
+最后是index.html，引入两个JavaScript文件:
+
+```html
+<html>
+  <script src="./index1.js" type="module"></script>
+  <script src="./index2.js" type="module"></script>
+  <body>
+    <div>jsplp CSS Modules</div>
+  </body>
+</html>
+```
+
+经过Vite打包后，在浏览器看下输出结果：
+
+​![](/2026/css-modules-3.png)
+
+
+* test1和test3对比，分别在两个JavaScript文件中引入了同一个CSS模块文件index1.module.css，最后生成的类标识符是一致的，样式效果也一致。这是因为CSSS文件只有一个，最后只会生成一份CSS规则。而且既然引入同一文件，规则肯定是一样的，没有必要分开两个类名。
+* test1和test2对比，在同一个JavaScript文件中引入了两个CSS模块文件，虽然各自CSS文件中类名是一样的，但因为所属文件不同，因此生成的新类名不一样，这样有效避免了同名的样式冲突问题。
+* test2和test3对比，分别在两个JavaScript文件中引入了两个CSS模块文件，生成的新类名也不一样，也避免了同名的样式冲突问题。
+
+### global
+
+### compose
+
+### ...
+
 
 
 ## React使用方式
@@ -128,11 +199,15 @@ document.body.appendChild(test4);
 css-loader
 
 ## Vite使用方式
-背后是  postcss-modules 和 Lightning CSS
+背后是 postcss-modules 和 Lightning CSS
+
+## postcss-modules
+
+## Lightning CSS
 
 ## Postcss相关插件
 
-## 代码原理？
+## 实现代码原理？
 
 ## 总结
 
