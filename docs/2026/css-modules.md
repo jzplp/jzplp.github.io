@@ -177,16 +177,69 @@ document.body.appendChild(test3);
 
 ​![](/2026/css-modules-3.png)
 
-
 * test1和test3对比，分别在两个JavaScript文件中引入了同一个CSS模块文件index1.module.css，最后生成的类标识符是一致的，样式效果也一致。这是因为CSSS文件只有一个，最后只会生成一份CSS规则。而且既然引入同一文件，规则肯定是一样的，没有必要分开两个类名。
 * test1和test2对比，在同一个JavaScript文件中引入了两个CSS模块文件，虽然各自CSS文件中类名是一样的，但因为所属文件不同，因此生成的新类名不一样，这样有效避免了同名的样式冲突问题。
 * test2和test3对比，分别在两个JavaScript文件中引入了两个CSS模块文件，生成的新类名也不一样，也避免了同名的样式冲突问题。
 
 ### global全局规则
-通过前面的例子可以看到，使用CSS Modules之后，所有自定义标识符名都变成了新的，只有引用才能生效的局部CSS规则。如果希望在这个CSS文件内定义部分全局都能生效的规则，CSS Modules也给出了方法，而且允许全局规则和局部规则混合嵌套使用。
+通过前面的例子可以看到，使用CSS Modules之后，所有自定义标识符名都变成了新的，只有引用才能生效的局部CSS规则。如果希望在这个CSS文件内定义部分全局都能生效的规则，CSS Modules也给出了方法，而且允许全局规则和局部规则混合嵌套使用。使用:global，就可以在CSS模块文件中使用全局规则。我们来看下例子。首先是index.module.css文件：
 
+```css
+/* index.module.css */
+.class1 {
+    color: red;
+}
+:global(.class1) {
+    color: blue;
+}
+:global(.class2) {
+    .class3 {
+        color: yellow;
+    }
+}
+:local(.class4) {
+    color: grey;
+}
+```
 
+然后是index.js，这里给出了四种情况。可以看到带:global的标识符是不会被JavaScript文件导入的：
 
+```js
+import styles from "./index.module.css";
+
+console.log(styles);
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+genEle("test1", styles.class1);
+genEle("test2", "class1");
+
+const div = document.createElement("div");
+div.className = "class2";
+div.innerHTML = `<div class='${styles.class3}'>test3</div>`;
+document.body.appendChild(div);
+
+genEle("test4", styles.class4);
+
+/* 输出结果
+{
+  class1: '_class1_8tmyt_1',
+  class3: '_class3_8tmyt_8',
+  class4: '_class4_8tmyt_12'
+}
+*/
+```
+
+​![](/2026/css-modules-4.png)
+
+* test1: 正常的模块化CSS规则，做对比用
+* test2: 与test1一样都用class1做类名，但这里没有使用导出的新类名，因此匹配到了带:global的全局CSS规则
+* test3: 外层class2是全局类名，里面的class3没有用:global，因此还是局部规则。这是一个混合使用的例子，在CSS模块文件中，只有包裹在:global里面的类名才是全局规则，嵌套选择器和组合选择器需要单独包裹， 或者这样包裹在一起也可以：`:global(.cls1 + .cls2)`
+* test4: :local表示模块化的CSS规则，与不增加标识效果一致。一般为了强调才使用。
 
 ### compose
 
