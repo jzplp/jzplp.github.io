@@ -182,7 +182,11 @@ document.body.appendChild(test3);
 * test1和test2对比，在同一个JavaScript文件中引入了两个CSS模块文件，虽然各自CSS文件中类名是一样的，但因为所属文件不同，因此生成的新类名不一样，这样有效避免了同名的样式冲突问题。
 * test2和test3对比，分别在两个JavaScript文件中引入了两个CSS模块文件，生成的新类名也不一样，也避免了同名的样式冲突问题。
 
-### global
+### global全局规则
+通过前面的例子可以看到，使用CSS Modules之后，所有自定义标识符名都变成了新的，只有引用才能生效的局部CSS规则。如果希望在这个CSS文件内定义部分全局都能生效的规则，CSS Modules也给出了方法，而且允许全局规则和局部规则混合嵌套使用。
+
+
+
 
 ### compose
 
