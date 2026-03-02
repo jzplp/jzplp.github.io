@@ -241,9 +241,64 @@ genEle("test4", styles.class4);
 * test3: 外层class2是全局类名，里面的class3没有用:global，因此还是局部规则。这是一个混合使用的例子，在CSS模块文件中，只有包裹在:global里面的类名才是全局规则，嵌套选择器和组合选择器需要单独包裹， 或者这样包裹在一起也可以：`:global(.cls1 + .cls2)`
 * test4: :local表示模块化的CSS规则，与不增加标识效果一致。一般为了强调才使用。
 
-### compose
+### composes组合规则
+使用CSS Modules，使用composes属性，在规则中可以组合另一个类选择器的规则。这里举个例子看一下是如何组合的。首先是index.module.css文件：
 
-### ...
+```css
+.class1 {
+  background: yellow;
+}
+.class2 {
+  color: red;
+  composes: class1;
+}
+.class1:hover {
+  border: 1px solid blue;
+}
+```
+
+然后是index.js中引入CSS文件，这里仅使用class2做类名：
+
+```js
+import styles from "./index.module.css";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+genEle("test1", styles.class2);
+```
+
+​![](/2026/css-modules-5.png)
+
+我们的test1元素只定义了class2这个类名，但在浏览器中，却同时有了class1的类名。这时因为在CSS文件中定义class2的规则时，增加了composes属性，值为class1的类名。这相当于让class2继承class1，因此元素也具有了class1的类名和样式。同时还举了一个伪类的例子，这个组合规则对于伪类/为元素和选择器组合等都可以生效。composes属性也支持全局规则和跨文件引用，这里也举下例子：
+
+```css
+/* index.module.css */
+:global(.class1) {
+  background: yellow;
+}
+.class2 {
+  color: red;
+  composes: class1 from global;
+  composes: class3 from './index2.module.css';
+}
+
+/* index2.module.css */
+.class3 {
+  border: 1px solid blue;
+}
+```
+
+这里仅更改了index.module.css文件，新增了index2.module.css文件，index.js文件内容没有变化。然后我们查看浏览器效果：
+
+​![](/2026/css-modules-6.png)
+
+通过这个例子我们发现，CSS Modules可以组合全局规则，composes的类名后面加from global即可。同时composes可以在同一个类中使用很多次，都会生效。另外composes也可以跨文件组合，直接from文件名即可。
+
+### 看看还有啥
 
 
 
