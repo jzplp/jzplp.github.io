@@ -346,7 +346,53 @@ componentJz(styleBlue);
 可以看到，将引入的CSS Modules标识符对象传递给组件，组件中的元素使用这个对象作为类名。这样可以实现根据不同的条件传入不同的CSS文件对象，页面主题样式也随之变化。这里其实使用React组件举例更合适，但React使用方式要留到下面介绍，因此先使用纯JS示意。
 
 ## React使用方式
+React中使用CSS Modules与纯JavaScript使用基本一致。这里我们使用Vite创建一个React工程，展示下在React中使用CSS Modules。首先执行命令行：
 
+```sh
+# 提示中选择React
+npm create vite
+# 进入工程
+cd vite-react
+# 安装依赖
+npm install
+# 增加依赖
+npm add -S classnames 
+# 开发模式运行工程
+npm run dev
+```
+
+创建App.module.css文件，内容如下：
+
+```css
+.class1 {
+  color: red;
+}
+.class2 {
+  color: blue;
+}
+:global(.class3) {
+  border: 1px solid yellow;
+}
+```
+
+然后将App.jsx中的内容删掉，替换为下面的代码。这就是React中的使用方式，CSS文件引入的标识符对象作为className属性。同时这里演示了classnames的用法，可以方便的组合多种类名。
+
+```jsx
+import styles from './App.module.css';
+import cn from 'classnames';
+
+export default function App() {
+  return (
+    <div>
+      <div className={styles.class1}>test1</div>
+      <div className='class3'>test2</div>
+      <div className={cn(styles.class2, 'class3')}>test3</div>
+    </div>
+  )
+}
+```
+
+​![](/2026/css-modules-7.png)
 
 ## Vue使用方式
 
@@ -366,10 +412,11 @@ css-loader
 
 ## 总结
 
-在写法上就是普通CSS，没有任何区别，容易被接受。
+在写法上就是普通CSS，没有任何区别，容易被接受。(如果没有使用composes组合规则和global等)
 
 CSS Modules 文档中的一些优势说明这里写。
 
+使用less和scss也可以这么用，（看看有没有演示的价值）。
 
 ## 参考
 - CSS Modules GitHub\
