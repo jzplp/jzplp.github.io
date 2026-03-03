@@ -298,9 +298,52 @@ genEle("test1", styles.class2);
 
 通过这个例子我们发现，CSS Modules可以组合全局规则，composes的类名后面加from global即可。同时composes可以在同一个类中使用很多次，都会生效。另外composes也可以跨文件组合，直接from文件名即可。
 
-### 看看还有啥
+### 实现主题功能
+使用CSS Modules主动引入类名的特性，通过不同场景下的类名切换，可以实现主题功能。首先定义两个CSS文件，其中的选择器一致，但是主题不一样：
 
+```css
+/* red.module.css */
+.class1 {
+  color: red;
+}
+.class2 {
+  border: 1px solid red;
+}
 
+/* blue.module.css */
+.class1 {
+  color: blue;
+}
+.class2 {
+  border: 1px solid blue;
+}
+```
+
+然后是index.js文件：
+
+```js
+import styleRed from "./red.module.css";
+import styleBlue from "./blue.module.css";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+function componentJz(styles) {
+  genEle("test1", styles.class1);
+  genEle("test2", styles.class2);
+}
+
+// 渲染红色主题
+componentJz(styleRed);
+// 渲染蓝色主题
+componentJz(styleBlue);
+```
+
+可以看到，将引入的CSS Modules标识符对象传递给组件，组件中的元素使用这个对象作为类名。这样可以实现根据不同的条件传入不同的CSS文件对象，页面主题样式也随之变化。这里其实使用React组件举例更合适，但React使用方式要留到下面介绍，因此先使用纯JS示意。
 
 ## React使用方式
 
@@ -325,7 +368,14 @@ css-loader
 
 在写法上就是普通CSS，没有任何区别，容易被接受。
 
+CSS Modules 文档中的一些优势说明这里写。
+
+
 ## 参考
+- CSS Modules GitHub\
+  https://github.com/css-modules/css-modules
+- CSS Modules GitHub工程列表\
+  https://github.com/css-modules
 - CSS Modules 用法教程 阮一峰\
   https://www.ruanyifeng.com/blog/2016/06/css_modules.html
 - CSS 模块化方案探讨（BEM、OOCSS、CSS Modules、CSS-in-JS ...）\
@@ -346,3 +396,5 @@ css-loader
   https://webpack.docschina.org/loaders/css-loader/
 - CSS Modules Vite文档\
   https://cn.vitejs.dev/guide/features#css-modules
+- Interoperable CSS (ICSS) GitHub\
+  https://github.com/css-modules/icss
