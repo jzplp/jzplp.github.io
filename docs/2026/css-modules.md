@@ -395,6 +395,108 @@ export default function App() {
 ​![](/2026/css-modules-7.png)
 
 ## Vue使用方式
+Vue框架对于组建的组织方式比较他也别，使用一个“单文件组件”的方式来组织代码，将所属同一个组件的HTML模板，JavaScript代码和CSS样式同时写到一个组件中。而且单文件组件中最流行的写法是“组件作用域CSS”，不是CSS Modules。下面我们分别介绍一下。
+
+### 组件作用域CSS
+使用组件作用域CSS，可以做到本组件的CSS样式就只影响本组件，不会影响别的组件；即使非类名选择器，例如标签选择器，属性选择器等，都仅限在本组件范围内生效。注意组件作用域CSS并不是CSS Modules，只不过功能上有部分相似之处。我们看一下例子，首先使用命令行创建Vue工程：
+
+```sh
+# 根据提示创建Vue工程
+npm create vue@latest
+# 进入工程
+cd vite-vue
+# 安装依赖
+npm install
+# 开发模式运行工程
+npm run dev
+```
+
+然后我们删除App.vue中的内容，填充下面的代码。作为父组件。
+
+```vue
+<script setup>
+import Comp1 from './comp1.vue'
+import Comp2 from './comp2.vue'
+</script>
+
+<template>
+  <div>
+    父组件
+    <div className="class1"> 父组件元素 </div>
+    <p> 父组件p元素 </p>
+  </div>
+  <Comp1 />
+  <Comp2 />
+</template>
+
+<style scoped>
+p {
+  color: yellow;
+}
+.class1 {
+  background-color: aqua;
+}
+</style>
+```
+
+然后是样式选择器与父组件一致的子组件comp1.vue：
+
+```vue
+<template>
+  <div>
+    子组件1
+    <div className="class1"> 子组件1元素 </div>
+    <p> 子组件1p元素 </p>
+  </div>
+</template>
+
+<style scoped>
+p {
+  color: red;
+}
+.class1 {
+  background-color: blue;
+}
+</style>
+```
+
+最后是没有开启组件作用域CSS的comp2.vue组件：
+
+```vue
+<template>
+  <div>
+    子组件2
+    <div className="class1"> 子组件2元素 </div>
+    <p> 子组件2p元素 </p>
+  </div>
+</template>
+
+<style>
+div {
+  border: 1px solid brown;
+}
+.class1 {
+  color: brown;
+}
+</style>
+```
+
+在代码中可以看出，单文件组件将`<template> <script> <style>`在同一个vue文件中封装。如果使用作用域CSS，就在style标签上加scoped属性。有什么效果呢？我们看下浏览器截图：
+
+​![](/2026/css-modules-8.png)
+
+可以看到，在设置了scoped属性之后，组件生成的HTML代码中便会多了dat-v-xxxx的属性，每个组件的属性是单独的不会重复。对应的CSS选择器中也添加了属性选择器的条件。这样不管是类选择器还是标签选择器等，都只有匹配到了对应的data-v属性才会生效。
+
+对于组件内CSS样式污染全局的问题，组件作用域CSS比CSS Modules的隔离更全面，基本可以做到完全不污染全局。例如App.vue组件和comp1.vue组件，两个选择器一致，但是样式却没有被污染。不过要注意，在父组件中引入子组件，子组件的根元素会同时被附加上父组件和子组件的data-v属性，例如comp1.vue组件的根结点。
+
+comp2.vue组件没有使用组件作用域CSS，因此它的CSS能影响全局。包括使用scoped属性的组件内部，如果符合规则也能匹配上。这与CSS Modules不一致，因为CSS Modules修改了类名，因此源码中的符合规则的元素类名，生成代码中就不符合规则了。
+
+### 组件作用域CSS的各种选择器
+与CSS Modules一样，组件作用域CSS也有一些特殊的选择器用于处理一些特殊场景，这里我们简单描述下。
+
+
+### Vue与CSS Modules
+
 
 ## Webpack使用方式
 css-loader
@@ -445,3 +547,5 @@ CSS Modules 文档中的一些优势说明这里写。
   https://cn.vitejs.dev/guide/features#css-modules
 - Interoperable CSS (ICSS) GitHub\
   https://github.com/css-modules/icss
+- 单文件组件 CSS 功能 Vue文档\
+  https://cn.vuejs.org/api/sfc-css-features.html
