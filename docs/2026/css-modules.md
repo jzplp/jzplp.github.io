@@ -491,11 +491,66 @@ div {
 
 comp2.vue组件没有使用组件作用域CSS，因此它的CSS能影响全局。包括使用scoped属性的组件内部，如果符合规则也能匹配上。这与CSS Modules不一致，因为CSS Modules修改了类名，因此源码中的符合规则的元素类名，生成代码中就不符合规则了。
 
-### 组件作用域CSS的各种选择器
-与CSS Modules一样，组件作用域CSS也有一些特殊的选择器用于处理一些特殊场景，这里我们简单描述下。
+### 特殊选择器
+与CSS Modules一样，组件作用域CSS也有一些特殊的选择器用于处理一些特殊场景，主要有这几个：
 
+* :deep() 深度选择器 样式可以影响子组件
+* :slotted() 插槽选择器 样式可以影响插槽内容
+* :global() 全局选择器 样式可以影响全局
+
+另外下面我们举个例子演示一下选择器的使用方法。首先是父组件App.vue文件：
+
+```vue
+<script setup>
+import Comp1 from './comp1.vue'
+</script>
+
+<template>
+  <div>
+    父组件
+    <div className="class1"> 父组件元素 </div>
+    <Comp1>
+      <div className="class2"> slot元素 </div>
+    </Comp1>
+  </div>
+  <Comp1 />
+</template>
+
+<style scoped>
+:global(.class1) {
+  color: red;
+}
+:deep(.class1) {
+  background-color: aqua;
+}
+</style>
+```
+
+然后是子组件comp1.vue：
+
+```vue
+<template>
+  <div>
+    子组件1
+    <div className="class1"> 子组件1元素 </div>
+    <slot> </slot>
+  </div>
+</template>
+
+<style scoped>
+:slotted(.class2) {
+  background-color: blue;
+}
+</style>
+```
+
+​![](/2026/css-modules-9.png)
+
+上面例子中展示了三种选择器的使用方式，其中全局选择器的效果和CSS MOdules基本一致；深度选择器只能影响自己和子组件；插槽选择器影响的父组件中被包括在子组件插槽中的部分。通过对于组件作用域CSS的介绍，可以发现它虽然实现原理与CSS Modules不一致，但作用却有些相似，而且扩展了CSS Modules的作用范围。
 
 ### Vue与CSS Modules
+Vue中不仅有组件作用域CSS，单文件组件也可以直接集成CSS Modules开发。
+
 
 
 ## Webpack使用方式
