@@ -612,7 +612,9 @@ console.log(styles);
 在父组件的template中，使用$style就可以拿到CSS Modules引入的标识符映射对象。如果希望在JavaScript文件中使用，则可以参考子组件的方式，使用useCssModule拿到标识符映射对象，进行处理后再提供给template。
 
 ## Webpack使用方式
-css-loader
+前面介绍了两种前端框架中CSS Modules的使用方式。因为它最终还需要构建工具进行处理才能生效，因此我们再关注一下它在不同构建工具中的使用方式。首先看下在Webpack中的使用。先创建一个Webapck工程，执行如下命令行：
+
+
 
 ## Vite使用方式
 背后是 postcss-modules 和 Lightning CSS
