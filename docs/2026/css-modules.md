@@ -612,7 +612,130 @@ console.log(styles);
 在父组件的template中，使用$style就可以拿到CSS Modules引入的标识符映射对象。如果希望在JavaScript文件中使用，则可以参考子组件的方式，使用useCssModule拿到标识符映射对象，进行处理后再提供给template。
 
 ## Webpack使用方式
-前面介绍了两种前端框架中CSS Modules的使用方式。因为它最终还需要构建工具进行处理才能生效，因此我们再关注一下它在不同构建工具中的使用方式。首先看下在Webpack中的使用。先创建一个Webapck工程，执行如下命令行：
+前面介绍了两种前端框架中CSS Modules的使用方式。因为它最终还需要构建工具进行处理才能生效，因此我们再关注一下它在不同构建工具中的使用方式。首先看下在Webpack中的使用。
+
+### 接入CSS Modules
+先创建一个Webapck工程，执行如下命令行：
+
+```sh
+npm init -y
+npm install webpack webpack-cli style-loader css-loader html-webpack-plugin --save-dev
+```
+
+然后修改package.json中的scripts，增加`"build": "webpack"`，后面执行npm run build即可构建结果。然后创建src/index.js，内容如下：
+
+```js
+import * as styles from "./index.module.css";
+
+console.log(styles);
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+genEle("test1", styles.class1);
+genEle("test2", styles.class2);
+```
+
+然后创建index.module.css，包含内容如下：
+
+```css
+.class1 {
+    color: red;
+}
+.class2 {
+    background: yellow;
+    composes: class1;
+}
+```
+
+然后创建webpack.config.js配置文件，内容如下：
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "管理输出",
+    }),
+  ],
+  output: {
+    path: path.resolve(__dirname, "dist"),
+  },
+};
+
+/* 输出结果
+{
+  class1:  "qbnq8h84_UYLiRusvV1S",
+  class2:  "cofz5uKLVjU6TCKJqeBc qbnq8h84_UYLiRusvV1S",
+  default: undefined,
+  __esModule: true
+  ...其它内容
+}
+*/
+```
+
+然后执行构建命令，生成dist目录。在浏览器中打开dist/index.html，可以看到CSS Modules已经接入成功，类名变成了带哈希的标识符，test2元素因为使用了composes特性，还包含了两个类名，在console输出时也带着。
+
+​![](/2026/css-modules-11.png)
+
+提供CSS Modules功能的，实际上是css-loader。默认情况下，当CSS文件的中间包含.module或者.icss时，css-loader会将其识别为CSS模块处理。可以看到JavaScript代码中引入CSS标识符时使用的是import * as，这也是因为css-loader并不支持默认导出多有标识符到一个对象中，而是只能单个导入，类似于`import { class1 } from "./index.module.css";`。
+
+
+css-loader可以配置全部CSS文件开启CSS模块，配置modules选项为true即可。然后将index.module.css改为index.css也能使用CSS Modules功能。这里展示webpack.config.js中的配置改动：
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
+            options: {
+              modules: true,
+            },
+          },
+        ],
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "管理输出",
+    }),
+  ],
+  output: {
+    path: path.resolve(__dirname, "dist"),
+  },
+};
+```
+
+### 其它特性？
+
+
 
 
 
