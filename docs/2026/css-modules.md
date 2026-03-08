@@ -733,6 +733,31 @@ module.exports = {
 };
 ```
 
+### value变量
+在css-loader文档中描述了开启CSS模块后，可以使用value变量的功能。虽然CSS Modules自己的文档中没写的，但是Webpack和Vite实际上都支持。value变量有点像CSS变量，一次定义，多处使用。这里我们举个例子，直接在前面的基础上修改CSS文件：
+
+```css
+@value varRed red;
+@value borderBlue 1px solid blue;
+
+.class1 {
+  color: varRed;
+}
+.class2 {
+  background: varRed;
+  border: borderBlue;
+}
+```
+
+​![](/2026/css-modules-12.png)
+
+可以看到，使用方式和CSS变量类似，预先定义变量，随后引用标识符。但CSS变量是运行时，CSS Modules的变量是编译时。由于没有CSS变量好用，而且LESS和SCSS等都提供了更完善的编译时变量功能，因此CSS Modules的变量功能好像用的人不多。
+
+### 开关
+
+### 模式
+
+
 ### 其它特性？
 
 
