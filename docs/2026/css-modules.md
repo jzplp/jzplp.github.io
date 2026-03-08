@@ -753,9 +753,15 @@ module.exports = {
 
 可以看到，使用方式和CSS变量类似，预先定义变量，随后引用标识符。但CSS变量是运行时，CSS Modules的变量是编译时。由于没有CSS变量好用，而且LESS和SCSS等都提供了更完善的编译时变量功能，因此CSS Modules的变量功能好像用的人不多。
 
-### 开关
-
 ### 模式
+css-loader的modules配置表示CSS Modules相关配置，其中有一个mode配置，表示模式，有四种选项值，这里列举一下：
+
+* local 将所有标识符编译为局部规则标识符
+* global 将所有标识符编译为全局标识符，相当于不使用CSS Modules
+* pure 
+* icss 
+
+
 
 
 ### 其它特性？
