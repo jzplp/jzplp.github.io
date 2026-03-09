@@ -794,11 +794,37 @@ div {
 
 可以看到选择器div被标出来了，说它不“pure”，应该至少包含一个局部class或者id。这是因为div属性选择器，无法对属性选择器进行局部标识符的处理，因此这个选择器会全局生效，使用pure模式后，css-loader会寻找CSS模块文件中的全局选择器并报错，防止意外影响全局。
 
-### 其它特性？
+### 自定义标识符格式
+在前面用Vite尝试CSS Modules时生成的新标识符格式，与Webpack生成的新标识符格式，看起来有点区别：Vite生成的带原来的类名，但是Webpack不带。这中标识符格式，实际上是可以更改的，使用localIdentName配置项即可：
 
+```js
+{
+  loader: "css-loader",
+  options: {
+    modules: {
+      localIdentName: '[hash:base64]'
+    },
+  },
+}
+```
 
+默认配置是`[hash:base64]`，即原标识符的哈希值。还可以扩展其他格式：
 
+* `[name]` 源文件名称
+* `[path]` 目录名称
+* `[file]` 目录和文件名
+* `[ext]` 文件拓展名
+* `[hash]` 原标识符的哈希值
+* `[local]` 原来的标识符名
+* `[hash:base64]` 将hash做Base64处理
+* `[hash:5]` hash的长度限制为5
 
+这些配置可以组合成模板字符串，例如`[name]_[ext]_[hash]`。这里举几个配置和对应的生成标识符的例子：
+
+| 配置项 | 举例1 | 举例2 | 
+| - | - | - |
+| `[name]_[ext]_[hash:7]` | index-module_-css_a9b9eaf | index-module_-css_f3e6e28 |
+| `[path]_[local]_[hash:base64:5]` | src-_class1_qbnq8 | src-_class2_cofz5 |
 
 ## Vite使用方式
 背后是 postcss-modules 和 Lightning CSS
