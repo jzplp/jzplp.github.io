@@ -757,12 +757,42 @@ module.exports = {
 css-loader的modules配置表示CSS Modules相关配置，其中有一个mode配置，表示模式，有四种选项值，这里列举一下：
 
 * local 将所有标识符编译为局部规则标识符
-* global 将所有标识符编译为全局标识符，相当于不使用CSS Modules
-* pure 
-* icss 
+* global 将所有标识符编译为全局标识符，相当于所有标识符使用:global
+* pure 与local模式一致，但是检测每一个CSS选择器是否存在局部标识符，如果不存在报错
+* icss 仅处理composes特性，但是不转换局部标识符
 
+local模式既是默认模式，与上面正常使用CSS Modules一致。global标识符会处理value变量，但不会转换成局部标识符。icss模式处理composes特性，但是也不转换局部标识符。pure模式则在普通local模式的基础上，增加了对于每个选择器的判断，这么判断的原因为：检测CSS模块文件中是否存在可以全局生效的CSS选择器。这里设置pure模式试一下，我们修改webpack.config.js中的css-loader配置：
 
+```js
+{
+  loader: "css-loader",
+  options: {
+    modules: {
+      mode: 'pure'
+    },
+  },
+}
+```
 
+然后创建修改index.module.scss文件：
+
+```css
+.class1 {
+  color: red;
+}
+.class2 {
+  background: blue;
+}
+div {
+  color: yellow;
+}
+```
+
+执行npm run build，结果失败，命令行输出结果如下：
+
+​![](/2026/css-modules-13.png)
+
+可以看到选择器div被标出来了，说它不“pure”，应该至少包含一个局部class或者id。这是因为div属性选择器，无法对属性选择器进行局部标识符的处理，因此这个选择器会全局生效，使用pure模式后，css-loader会寻找CSS模块文件中的全局选择器并报错，防止意外影响全局。
 
 ### 其它特性？
 
