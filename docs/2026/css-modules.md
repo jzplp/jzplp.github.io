@@ -826,10 +826,46 @@ div {
 | `[name]_[ext]_[hash:7]` | index-module_-css_a9b9eaf | index-module_-css_f3e6e28 |
 | `[path]_[local]_[hash:base64:5]` | src-_class1_qbnq8 | src-_class2_cofz5 |
 
-## Vite使用方式
-背后是 postcss-modules 和 Lightning CSS
+## 使用postcss-modules
+Webpack使用css-loader来支持CSS Modules，Vite背后则采用postcss-modules来支持CSS Modules。如果开启了lightningcss，则使用Lightning CSS来支持CSS Modules。postcss-modules是一个PostCSS插件，这里我们介绍一下。
 
-## postcss-modules
+### 引入postcss-modules
+首先我们创建一个工程，引入PostCSS和postcss-modules，使其可以成功编译CSS Modules。首先执行命令行：
+
+```sh
+npm init -y
+npm add -D postcss postcss-cli postcss-modules
+# 后面执行下面命令行，可以编译CSS
+# src 源文件目录 output 生成文件目录
+npx postcss src -d output --no-map
+```
+
+创建PostCSS的配置文件postcss.config.js，里面引入postcss-modules插件。
+
+```js
+const postcssModules = require("postcss-modules");
+module.exports = {
+  plugins: [postcssModules],
+};
+```
+
+创建src/index.module.css，里面包含如下内容：
+
+```css
+.class1 {
+  color: red;
+}
+.class2 {
+  composes: class1;
+  background: blue;
+}
+```
+
+​![](/2026/css-modules-14.png)
+
+执行编译后，生成结果如上图。首先看左边的目录树，生成了output/index.module.css，内容是标识符改变后的CSS规则。但是在src目录中却还生成了一个index.module.css.json文件，内容为原标识符和新标识符的映射关系。因为PostCSS没有编译JavaScript文件的能力，因此这个映射关系作为额外的JSON文件导出了。
+
+## ？
 
 ## Lightning CSS
 
@@ -874,3 +910,5 @@ CSS Modules 文档中的一些优势说明这里写。
   https://github.com/css-modules/icss
 - 单文件组件 CSS 功能 Vue文档\
   https://cn.vuejs.org/api/sfc-css-features.html
+- PostCSS完全指南：功能/配置/插件/SourceMap/AST/插件开发/自定义语法\
+  https://jzplp.github.io/2025/postcss-intro.html
