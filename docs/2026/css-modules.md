@@ -903,6 +903,45 @@ module.exports = {
 
 ​![](/2026/css-modules-15.png)
 
+### 自定义标识符格式
+在介绍Webpack使用方式时，我们提到css-loader支持自定义标识符格式，同样的postcss-modules也支持，而且格式也一样，通过修改generateScopedName配置：
+
+```js
+const postcssModules = require("postcss-modules");
+module.exports = {
+  plugins: [
+    postcssModules({
+      generateScopedName: '[name]_[ext]_[hash:base64:5]'
+    }),
+  ],
+};
+```
+因此，我们可以参考上面css-loader的文档来修改generateScopedName配置。generateScopedName还支持自定义函数，可以随心所欲的配置：
+
+```js
+const path = require("path");
+const postcssModules = require("postcss-modules");
+module.exports = {
+  plugins: [
+    postcssModules({
+      generateScopedName: (name, filename, css) => {
+        // name 文件路径 filename 文件路径
+        console.log(name, filename);
+        // CSS文件内容
+        console.log(css);
+        console.log('-----');
+        return `${path.basename(filename).replaceAll('.', '-')}_${name}`;
+      }
+    }),
+  ],
+};
+```
+
+在上面的例子中，我们将class名改为文件名+class名（仅供示例，实际使用还是会重复）。我们看下效果，成功的将class类名改为了我们自定义的格式。
+
+​![](/2026/css-modules-16.png)
+
+
 ## Lightning CSS
 
 ## Postcss相关插件
