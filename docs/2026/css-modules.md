@@ -865,7 +865,43 @@ module.exports = {
 
 执行编译后，生成结果如上图。首先看左边的目录树，生成了output/index.module.css，内容是标识符改变后的CSS规则。但是在src目录中却还生成了一个index.module.css.json文件，内容为原标识符和新标识符的映射关系。因为PostCSS没有编译JavaScript文件的能力，因此这个映射关系作为额外的JSON文件导出了。
 
-## ？
+### 获取标识符映射数据
+前面引入postcss-modules中，我们发现生成的标识符映射关系文件被放到了src源文件目录中。这有点让人不适，源代码中不应该被生成的内容污染。postcss-modules提供了我们自行控制标识符映射数据的方式，需要修改配置文件postcss.config.js：
+
+```js
+const path = require("path");
+const fs = require("fs");
+const postcssModules = require("postcss-modules");
+
+module.exports = {
+  plugins: [
+    postcssModules({
+      getJSON: (cssFileName, json, outputFileName) => {
+        // 源CSS文件路径
+        console.log(cssFileName);
+        // 标识符映射数据
+        console.log(json);
+        // 默认要输出的文件路径 可以弃用
+        console.log(outputFileName);
+        console.log("---");
+
+        // 创建目录 如果已经创建则静默成功
+        fs.mkdirSync(path.resolve("./classMap"), { recursive: true });
+        // 获取源文件名
+        const cssName = path.basename(cssFileName);
+        // 拼合新的路径
+        const jsonFileName = path.resolve("./classMap/" + cssName + ".json");
+        // 文件写入新路径
+        fs.writeFileSync(jsonFileName, JSON.stringify(json));
+      },
+    }),
+  ],
+};
+```
+
+可以看到，对getJSON配置项传入函数，可以拿到文件路径和标识符数据，可以对它进行任意处理。上面给出了一个写入其它目录的例子。这里创建两个CSS文件index.module.css和index2.module.css，执行编译输出结果如下：
+
+​![](/2026/css-modules-15.png)
 
 ## Lightning CSS
 
@@ -899,7 +935,7 @@ CSS Modules 文档中的一些优势说明这里写。
 - 单文件组件 Vue文档\
   https://cn.vuejs.org/guide/scaling-up/sfc
 - postcss-modules GitHub\
-  https://github.com/css-modules/postcss-modules
+  https://github.com/madyankin/postcss-modules
 - CSS modules Lightning CSS文档\
   https://lightningcss.dev/css-modules.html
 - css-loader Webpack文档\
