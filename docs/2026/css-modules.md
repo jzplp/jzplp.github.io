@@ -941,6 +941,91 @@ module.exports = {
 
 ​![](/2026/css-modules-16.png)
 
+### 原始标识符转换
+CSS Modules推荐使用camelCase驼峰命名法来写CSS标识符，因为可以轻松在JavaScript中使用，例如styles.abcDef。但如果用kebab-case中划线命名法，在JavaScript中使用就稍微麻烦一些，但也不是不能用，例如：`styles['abc-def']`。但如果已有的CSS规则，postcss-modules提供了localsConvention配置项，可以让我们将原始标识符转换为驼峰命名法的形式。这样即使我们在CSS文件中使用中划线命名法，在JavaScript代码中也能用驼峰命名法引入。它共有四个选项可以配置。
+
+* camelCase 输出为骆驼命名法，输出保留原标识符
+* camelCaseOnly 输出为骆驼命名法，不保留原标识符
+* dashes 仅转换中划线为骆驼命名法，输出保留原标识符
+* dashesOnly 仅转换中划线为骆驼命名法，不保留原标识符
+
+这里我们构造一个CSS文件，带有几种命名法：
+
+```css
+.abcDef {
+  color: red;
+}
+.bcd-efg {
+  color: red;
+}
+.cde_fgh {
+  color: red;
+}
+```
+
+对于不同配置项，我们看一下输出结果：
+
+```js
+// camelCase
+{
+  "abcDef": "_abcDef_cmy82_1",
+  "bcd-efg": "_bcd-efg_cmy82_7",
+  "bcdEfg": "_bcd-efg_cmy82_7",
+  "cde_fgh": "_cde_fgh_cmy82_13",
+  "cdeFgh": "_cde_fgh_cmy82_13"
+}
+
+// camelCaseOnly
+{
+  "abcDef": "_abcDef_cmy82_1",
+  "bcdEfg": "_bcd-efg_cmy82_7",
+  "cdeFgh": "_cde_fgh_cmy82_13"
+}
+
+// dashes
+{
+  "abcDef": "_abcDef_cmy82_1",
+  "bcd-efg": "_bcd-efg_cmy82_7",
+  "bcdEfg": "_bcd-efg_cmy82_7",
+  "cde_fgh": "_cde_fgh_cmy82_13"
+}
+
+// dashesOnly
+{
+  "abcDef": "_abcDef_cmy82_1",
+  "bcdEfg": "_bcd-efg_cmy82_7",
+  "cde_fgh": "_cde_fgh_cmy82_13"
+}
+```
+
+localsConvention配置还可以接受函数入参，这样我们可以自定义JavaScrript引入的标识符名，这里我们举了个例子，将标识符后面加了固定的后缀。
+
+```js
+const path = require("path");
+const postcssModules = require("postcss-modules");
+module.exports = {
+  plugins: [
+    postcssModules({
+      localsConvention: (originalClassName, generatedClassName, filPath) => {
+        // 原标识符 转换后标识符
+        console.log(originalClassName, generatedClassName);
+        // CSS文件路径
+        console.log(filPath);
+        console.log("-----");
+        return originalClassName + "_jzplp";
+      },
+    }),
+  ],
+};
+
+/* 输出结果
+{
+  "abcDef_jzplp": "_abcDef_cmy82_1",
+  "bcd-efg_jzplp": "_bcd-efg_cmy82_7",
+  "cde_fgh_jzplp": "_cde_fgh_cmy82_13"
+}
+*/
+```
 
 ## Lightning CSS
 
