@@ -1001,7 +1001,6 @@ CSS Modules推荐使用camelCase驼峰命名法来写CSS标识符，因为可以
 localsConvention配置还可以接受函数入参，这样我们可以自定义JavaScrript引入的标识符名，这里我们举了个例子，将标识符后面加了固定的后缀。
 
 ```js
-const path = require("path");
 const postcssModules = require("postcss-modules");
 module.exports = {
   plugins: [
@@ -1026,6 +1025,56 @@ module.exports = {
 }
 */
 ```
+
+### 处理路径别名
+在CSS Modules的composes特性中，可以引入其它CSS文件中选择器的规则。很多人喜欢使用路径别名，例如@common/css等，postcss-modules也提供了resolve这个配置项，可以让我们自行控制别名，甚至修改路径。首先我们构造一个文件路径的例子：
+
+```css
+/* src/common/com.css */
+.classCommon {
+  color: red;
+}
+
+/* src/copm1/index.module.css */
+.class1 {
+  background: yellow;
+  composes: classCommon from '@common/com.css';
+}
+```
+
+可以看到，我们先在common目录中设置了CSS文件，然后在copm1目录中，使用@common将其引入。如果不处理，@common这个路径CSS Module肯定是识别不了的。这里我们设置postcss.config.js：
+
+```js
+const path = require("path");
+const postcssModules = require("postcss-modules");
+module.exports = {
+  plugins: [
+    postcssModules({
+      resolve: (file, importer) => {
+        // composes特性引入的文件路径
+        console.log(file);
+        // 当前处理的CSS文件
+        console.log(importer);
+        const newPath = path.resolve(
+          process.cwd() + file.replace("@common", "/src/common"),
+        );
+        return newPath;
+      },
+    }),
+  ],
+};
+
+/*
+命令行输出结果
+@common/com.css
+E:\testProj\css-modules\postcss-proj\src\comp1\index.module.css
+
+index.module.css.json输出结果
+{"class1":"_class1_u2c4w_1 _classCommon_pc5si_1"}
+*/
+```
+
+可以看到，提供自定义的resolve函数，可以接收composes中的路径与当前处理的文件路径，然后将我们的路径别名转化为真正的路径名。
 
 ## Lightning CSS
 
