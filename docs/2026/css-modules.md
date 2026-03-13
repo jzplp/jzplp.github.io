@@ -1076,6 +1076,102 @@ index.module.css.json输出结果
 
 可以看到，提供自定义的resolve函数，可以接收composes中的路径与当前处理的文件路径，然后将我们的路径别名转化为真正的路径名。
 
+### 解析PostHTML模板
+postcss-modules导出的JSON文件，可以被posthtml-css-modules使用，用来提供给PostHTML模板提供新的标识符。首先我们将postcss-modules中的所有选项删除（为了不干扰这个例子）。然后创建一个CSS文件src/index.module.css:
+
+```css
+.class1 {
+  background: yellow;
+}
+.class2 {
+  color: red;
+  composes: class1;
+}
+```
+
+然后创建index.js，处理PostHTML模板：
+
+```js
+const posthtml = require('posthtml');
+const posthtmlCssModules = require("posthtml-css-modules");
+
+const template = `
+<div css-module="class1">test1</div>
+<div css-module="class2">test2</div>
+`
+posthtml([posthtmlCssModules("./src/index.module.css.json")])
+	.process(template)
+	.then(function (result) {
+		console.log(result.html);
+	});
+```
+
+我们还没安装新依赖呢。执行如下命令行，安装依赖和拿到编译结果：
+
+```sh
+# 安装依赖
+npm add posthtml posthtml-css-modules
+# 编译CSS 处理CSS Modules
+postcss src -d output --no-map
+# 执行上面代码，处理PostHTML模板
+node index.js
+```
+
+最后输出结果如下。可以看到关键在于css-module属性，我们将其设置为原始的标识符，经过处理后就变味了转换后的标识符。
+
+```html
+<div class="_class1_go5lk_1">test1</div>
+<div class="_class2_go5lk_7 _class1_go5lk_1">test2</div>
+```
+
+posthtml-css-modules还支持传入目录，可以处理多个文件。同时在css-module中使用点符号分隔文件和属性。但由于postcss-modules默认生成的文件中肯定会出现点，例如 index1.css -> index1.css.json，因此我们先要处理postcss.config.js：
+
+```js
+const path = require("path");
+const fs = require("fs");
+
+const postcssModules = require("postcss-modules");
+module.exports = {
+  plugins: [
+    postcssModules({
+      getJSON: (cssFileName, json) => {
+        // 创建目录 如果已经创建则静默成功
+        fs.mkdirSync(path.resolve("./classMap"), { recursive: true });
+        // 获取源文件名
+        const cssName = path.basename(cssFileName, ".css");
+        // 拼合新的路径
+        const jsonFileName = path.resolve("./classMap/" + cssName + ".json");
+        // 文件写入新路径
+        fs.writeFileSync(jsonFileName, JSON.stringify(json));
+      },
+    }),
+  ],
+};
+```
+
+例如我们有src目录，里面有两个JSON文件insex1.json和insex2.json，此时处理模板的代码修改为：
+
+```js
+const posthtml = require('posthtml');
+const posthtmlCssModules = require("posthtml-css-modules");
+
+// 文件名.标识符
+const template = `
+<div css-module="index1.class1">test1</div>
+<div css-module="index2.class2">test2</div>
+`
+posthtml([posthtmlCssModules("./classMap/")])
+	.process(template)
+	.then(function (result) {
+		console.log(result.html);
+	});
+
+/* 输出结果
+<div class="_class1_1c28r_1">test1</div>
+<div class="_class2_10f6k_1">test2</div>
+*/
+```
+
 ## Lightning CSS
 
 ## Postcss相关插件
