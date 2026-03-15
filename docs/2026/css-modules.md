@@ -1173,6 +1173,48 @@ posthtml([posthtmlCssModules("./classMap/")])
 ```
 
 ## Lightning CSS
+Lightning CSS是一个用Rust编写的CSS编译工具，可以解析，编译，打包和压缩CSS代码，性能比用JavaScript 的同类工具要强很多。Lightning CSS也支持CSS modules，这里我们简单讲一下用法。
+
+### 接入Lightning CSS
+首先执行命令行新建工程，安装lightningcss依赖。然后创建index.mjs，内容如下：
+
+```js
+import { transform } from 'lightningcss';
+
+const cssData = `
+.class1 { color: red }
+.class2 { color: blue }
+`;
+let { code, exports } = transform({
+  cssModules: true,
+  code: Buffer.from(cssData),
+});
+
+console.log(code.toString());
+console.log('-----');
+console.log(exports);
+
+/* 输出结果
+._8Z4fiW_class1 {
+  color: red;
+}
+
+._8Z4fiW_class2 {
+  color: #00f;
+}
+
+-----
+{
+  class1: { name: '_8Z4fiW_class1', composes: [], isReferenced: false },
+  class2: { name: '_8Z4fiW_class2', composes: [], isReferenced: false }
+}
+*/
+```
+
+从上面代码可以看到，Lightning CSS接收和返回的都是Buffer对象；设置cssModules为true可以处理CSS modules。其中code是返回代码，exports是返回的映射关系。Lightning CSS返回的映射关系格式与其它工具不同，它一个标识符为一个对象，其中的name为转换后的标识符。
+
+### composes特性的映射关系
+
 
 ## Postcss相关插件
 
@@ -1217,3 +1259,5 @@ CSS Modules 文档中的一些优势说明这里写。
   https://cn.vuejs.org/api/sfc-css-features.html
 - PostCSS完全指南：功能/配置/插件/SourceMap/AST/插件开发/自定义语法\
   https://jzplp.github.io/2025/postcss-intro.html
+- Lightning CSS 文档\
+  https://lightningcss.dev/
