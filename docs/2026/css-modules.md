@@ -1214,7 +1214,110 @@ console.log(exports);
 从上面代码可以看到，Lightning CSS接收和返回的都是Buffer对象；设置cssModules为true可以处理CSS modules。其中code是返回代码，exports是返回的映射关系。Lightning CSS返回的映射关系格式与其它工具不同，它一个标识符为一个对象，其中的name为转换后的标识符。
 
 ### composes特性的映射关系
+与其它工具不一样，Lightning CSS处理composes特性并不将其直接作为name，而是单独放到composes数组中。这里我们举个例子试一下：
 
+```css
+.class1 { color: red }
+.class2 {
+  color: blue;
+  composes: class1;
+  composes: jzplp from global;
+  composes: abc from './style.css';
+}
+
+/* 输出结果
+._8Z4fiW_class1 {
+  color: red;
+}
+
+._8Z4fiW_class2 {
+  color: #00f;
+}
+
+-----
+{
+  class1: { name: '_8Z4fiW_class1', composes: [], isReferenced: false },
+  class2: {
+    name: '_8Z4fiW_class2',
+    composes: [
+      { type: 'local', name: '_8Z4fiW_class1' },
+      { type: 'global', name: 'jzplp' },
+      { type: 'dependency', name: 'abc', specifier: './style.css' }
+    ],
+    isReferenced: false
+  }
+}
+*/
+```
+
+这里举了三种composes例子，有不同的类型：
+
+* local 本文件中的标识符
+* global 全局标识符
+* dependency 其它文件的标识符
+
+注意dependency类型，这里没有实际读取另一个CSS文件（因为我们使用transform来编译，不能读取其它文件），而且这个name值也并没有变成转换后的值。Lightning CSS的文档中要求调用方自行处理。
+
+### 使用bundle方法
+前面我们提到，在使用composes特性引入另一个文件的标识符，最后映射关系中只给我们返回了文件路径，没有帮我们实际引入。这时候我们不用transform方法，转为使用bundle，Lightning CSS就可以帮我们读取文件了。我们构造一个例子。首先创建两个CSS文件：
+
+```css
+/* index.css */
+.class2 {
+  background-color: red;
+  composes: abc from './style.css';
+}
+
+/* style.css */
+.abc {
+  color: blue;
+}
+.bcd {
+  font-size: 14px;
+}
+```
+
+然后修改index.js：
+
+```js
+import { bundle } from "lightningcss";
+
+let { code, exports } = bundle({
+  cssModules: true,
+  filename: "./index.css",
+});
+
+console.log(code.toString());
+console.log("-----");
+console.dir(exports, { depth: null });
+
+/* 输出结果
+.Zvw1Mq_abc {
+  color: #00f;
+}
+
+.Zvw1Mq_bcd {
+  font-size: 14px;
+}
+
+.vkZoAa_class2 {
+  background-color: red;
+}
+
+-----
+{
+  class2: {
+    name: 'vkZoAa_class2',
+    composes: [ { type: 'local', name: 'Zvw1Mq_abc' } ],
+    isReferenced: false
+  }
+}
+*/
+```
+
+可以看到，虽然我们只输入了一个index.css文件，但两个CSS文件实际上都被编译了。但映射关系还是只输出了index.css。之前的dependency类型消失了，因为拿到了转换后的类名，所以类型也被转为了local。
+
+### 其它功能
 
 ## Postcss相关插件
 
