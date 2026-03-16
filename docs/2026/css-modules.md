@@ -1277,7 +1277,7 @@ console.log(exports);
 }
 ```
 
-然后修改index.js：
+然后修改index.mjs：
 
 ```js
 import { bundle } from "lightningcss";
@@ -1317,7 +1317,120 @@ console.dir(exports, { depth: null });
 
 可以看到，虽然我们只输入了一个index.css文件，但两个CSS文件实际上都被编译了。但映射关系还是只输出了index.css。之前的dependency类型消失了，因为拿到了转换后的类名，所以类型也被转为了local。
 
-### 其它功能
+### 模块化CSS变量
+Lightning CSS并不提供value变量功能，理由是CSS本身已经支持变量了。但Lightning CSS支持了将CSS变量标识符转换为hash标识符的功能，即局部CSS变量。这里我们试一下：
+
+```js
+import { transform } from "lightningcss";
+
+const cssData = `
+.root {
+  --abc: red;
+}
+.class1 {
+  color: var(--abc);
+  background: var(--bcd from global);
+  font-size: var(--def from './style.css');
+}
+`;
+let { code, exports } = transform({
+  cssModules: {
+    dashedIdents: true,
+  },
+  code: Buffer.from(cssData),
+});
+
+console.log(code.toString());
+console.log("-----");
+console.log(exports);
+
+/* 输出结果
+._8Z4fiW_root {
+  --_8Z4fiW_abc: red;
+}
+
+._8Z4fiW_class1 {
+  color: var(--_8Z4fiW_abc);
+  background: var(--bcd);
+  font-size: var(--tCZyqW);
+}
+
+-----
+{
+  class1: { name: '_8Z4fiW_class1', composes: [], isReferenced: false },
+  '--abc': { name: '--_8Z4fiW_abc', composes: [], isReferenced: true },
+  root: { name: '_8Z4fiW_root', composes: [], isReferenced: false }
+}
+*/
+```
+
+开启dashedIdents选项，才能狗局部化CSS变量。 这里列举了三个情形，与composes非常类似：
+
+* 本文件的CSS变量 使用方法与CSS写法一致，工具会自己转换。exports中也导出了对应标识符。
+* 全局CSS变量 使用from global可以设置为全局变量
+* 从其它文件引入局部CSS变量
+
+注意看从其它文件引入的情形，exports中并没有导出这个标识符，但是CSS文件却被转换了。这也是因为transform方法没有访问文件的能力，但这种“自行转换”的形式有些不妥，如果没有和另一个文件匹配，这个CSS变量引入就无法生效。这里我们换成bundle方法试一下。还是创建两个CSS文件：
+
+
+```css
+/* index.css */
+.root {
+  --abc: red;
+}
+.class1 {
+  color: var(--abc);
+  background: var(--bcd from global);
+  font-size: var(--def from './style.css');
+}
+
+/* style.css */
+.root {
+  --def: 14px;
+}
+```
+
+然后修改index.mjs。通过执行结果可以看到，bundle方法将两个文件一起编译，保证结果的正确性。
+
+```js
+import { bundle } from "lightningcss";
+
+let { code, exports } = bundle({
+  cssModules: {
+    dashedIdents: true,
+  },
+  filename: "./index.css",
+});
+
+console.log(code.toString());
+console.log("-----");
+console.dir(exports, { depth: null });
+
+/* 
+.Zvw1Mq_root {
+  --Zvw1Mq_def: 14px;
+}
+
+.vkZoAa_root {
+  --vkZoAa_abc: red;
+}
+
+.vkZoAa_class1 {
+  color: var(--vkZoAa_abc);
+  background: var(--bcd);
+  font-size: var(--Zvw1Mq_def);
+}
+
+-----
+{
+  root: { name: 'vkZoAa_root', composes: [], isReferenced: false },
+  '--abc': { name: '--vkZoAa_abc', composes: [], isReferenced: true },
+  class1: { name: 'vkZoAa_class1', composes: [], isReferenced: false }
+}
+*/
+```
+
+Lightning CSS的CSS Modules还支持一些其它功能，例如自定义标识符，自定义标识符转换范围，pure模式等，这里就不赘述了。
 
 ## Postcss相关插件
 
