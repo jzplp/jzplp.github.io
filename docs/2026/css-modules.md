@@ -1372,7 +1372,6 @@ console.log(exports);
 
 注意看从其它文件引入的情形，exports中并没有导出这个标识符，但是CSS文件却被转换了。这也是因为transform方法没有访问文件的能力，但这种“自行转换”的形式有些不妥，如果没有和另一个文件匹配，这个CSS变量引入就无法生效。这里我们换成bundle方法试一下。还是创建两个CSS文件：
 
-
 ```css
 /* index.css */
 .root {
@@ -1433,6 +1432,90 @@ console.dir(exports, { depth: null });
 Lightning CSS的CSS Modules还支持一些其它功能，例如自定义标识符，自定义标识符转换范围，pure模式等，这里就不赘述了。
 
 ## Postcss相关插件
+观察css-loader和postcss-modules的依赖，发现它们都引用了四个前缀一致的PostCSS插件：
+
+* postcss-modules-local-by-default
+* postcss-modules-scope
+* postcss-modules-extract-imports
+* postcss-modules-values
+
+这四个插件名称都以postcss-modules-开头，都是实现CSS Modules相关的插件，而且也在css-modules官方仓库列表中。下面我们逐一介绍一下这几个插件。首先
+
+### postcss-modules-local-by-default
+postcss-modules-local-by-default插件的作用是将标识符增加:local()，同时将:global()去掉。这样所有应该被局部化处理的标识符都有:local()标志，没有标志则说明无需处理。首先修改postcss.config.js，引入插件：
+
+```js
+const postcssModules = require("postcss-modules-local-by-default");
+module.exports = {
+  plugins: [postcssModules],
+};
+```
+
+然后是要编译的CSS文件和编译结果：
+
+```css
+.class1 {
+  color: red;
+}
+.class2:hover {
+  color: blue;
+}
+:global(.class3) {
+  color: blue;
+}
+
+/* 输出结果
+:local(.class1) {
+  color: red;
+}
+:local(.class2):hover {
+  color: blue;
+}
+.class3 {
+  color: blue;
+}
+*/
+```
+
+### postcss-modules-scope
+postcss-modules-scope插件的作用将带:global()的CSS标识符转换成新标识符，同时输出一个:export，里面包含标识符转换关系。首先修改postcss.config.js，引入插件：
+
+```js
+const postcssModules = require("postcss-modules-scope");
+module.exports = {
+  plugins: [postcssModules],
+};
+```
+
+通过功能说明，我们发现postcss-modules-scope插件的输入实际上就是postcss-modules-local-by-default插件的输出，因此我们把前面的结果拿过来继续编译。可以看到输出的转换关系还是放在CSS文件中。
+
+```css
+:local(.class1) {
+  color: red;
+}
+:local(.class2):hover {
+  color: blue;
+}
+.class3 {
+  color: blue;
+}
+/* 输出结果
+._E_testProj_css_modules_postcss2_proj_src_index__class1 {
+  color: red;
+}
+._E_testProj_css_modules_postcss2_proj_src_index__class2:hover {
+  color: blue;
+}
+.class3 {
+  color: blue;
+}
+:export {
+  class1: _E_testProj_css_modules_postcss2_proj_src_index__class1;
+  class2: _E_testProj_css_modules_postcss2_proj_src_index__class2;
+}
+*/
+```
+
 
 ## 实现代码原理？
 
@@ -1477,3 +1560,11 @@ CSS Modules 文档中的一些优势说明这里写。
   https://jzplp.github.io/2025/postcss-intro.html
 - Lightning CSS 文档\
   https://lightningcss.dev/
+- postcss-modules-local-by-default GitHub\
+  https://github.com/css-modules/postcss-modules-local-by-default
+- postcss-modules-scope GitHub\
+  https://github.com/css-modules/postcss-modules-scope
+- postcss-modules-extract-imports GitHub\
+  https://github.com/css-modules/postcss-modules-extract-imports
+- postcss-modules-values GitHub\
+  https://github.com/css-modules/postcss-modules-values
