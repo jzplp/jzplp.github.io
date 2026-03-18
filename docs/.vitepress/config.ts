@@ -15,7 +15,7 @@ const sidebarLists = [
         link: "/2026/css-component",
       },
             {
-        text: "自动实现CSS模块化和组件化：CSS Modules技术详解",
+        text: "CSS Modules完全指南：CSS模块化的特性，生态工具和实践",
         link: "/2026/css-modules",
       },
       {
