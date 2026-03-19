@@ -15,6 +15,10 @@ const sidebarLists = [
         link: "/2026/css-component",
       },
             {
+        text: "css-in-js",
+        link: "/2026/css-in-js",
+      },
+      {
         text: "CSS Modules完全指南：CSS模块化的特性，生态工具和实践",
         link: "/2026/css-modules",
       },
