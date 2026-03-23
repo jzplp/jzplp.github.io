@@ -1,10 +1,13 @@
 # css-in-js（未完成）
+
 CSS作为前端代码中的重要组成部分，在工程中一般是以独立CSS文件的形式存在的。而CSS in JS，顾名思义，是在JavcaScvript中写CSS代码。尤其是React框架的流行，JavaScript和HTML模板都在JavaScript文件中描述了，只有CSS代码的组织还比较疏离。因此出现了很多CSS in JS的开源库，帮助我们将CSS放到JavcaScvript代码中，实现React组件代码的耦合性。
 
 ## React工程示例
+
 首先我们先展示一下React工程中是如何使用CSS的，React本身有没有CSS in JS的能力。
 
 ### 不使用CSS in JS
+
 首先使用Vite创建React工程，执行命令行：
 
 ```sh
@@ -43,8 +46,8 @@ export default function App({ state }) {
 }
 ```
 
-
 ### 内联样式
+
 使用类名控制样式变化可以生效，但这算是简介控制样式。有没有直接可以在JavaScript代码中控制CSS的方式呢？有的，React提供了内联样式，可以让我们直接控制：
 
 ```jsx
@@ -66,20 +69,90 @@ export default function App({ state }) {
 对style属性设置为对象，对象的key是CSS属性驼峰形式，可以实现对HTML中内联样式的直接控制。看起来这样挺好用的，但是它的限制还是非常大。例如不能使用伪类或者媒体查询这种CSS规则。直接操作DOM可以，但是这不优雅也失去了使用React的优势。因此，如果想要实现真正的CSS in JS，还是要看专门的工具。
 
 ## styled-components
+todo 介绍 styled-components
+
+### 接入styled-components
+首先安装依赖styled-components，然后删除App.css，我们不再需要独立的CSS文件了。修改App.tsx：
+
+```jsx
+import styled from "styled-components";
+
+const Div = styled.div`
+  color: red;
+  font-size: 14px;
+`;
+const Button = styled.button`
+  color: blue;
+  font-size: 14px;
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div>你好 jzplp</Div>
+      <Button>你好 jzplp</Button>
+    </div>
+  );
+}
+```
+
+此时在浏览器上可以看到生效的结果。通过代码可以看到，styled-components是利用了EcmaScript中模板字符串的‘标签模板字符串’特性。因此，我们提供的CSS字符串可以被styled-components对应的函数解析，最终生成样式。
+
+### 如何生效
+上面的代码是如何生效的呢？这里我们修改一下代码，增加不同状态：
+
+```tsx
+import styled from "styled-components";
+import { useState } from "react";
+
+const Div0 = styled.div``;
+const Div = styled.div`
+  color: red;
+  font-size: 14px;
+`;
+const Button = styled.button`
+  color: blue;
+  font-size: 14px;
+`;
+
+export default function App() {
+  const [state, setState] = useState(0);
+
+  return (
+    <div>
+      <Div0>1你好 jzplp</Div0>
+      <Div>2你好 jzplp</Div>
+      {state % 2 === 1 && <Button>3你好 jzplp</Button>}
+      <div onClick={() => setState(state + 1)}>按下+1</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-1.png)
+
+首先看下初始状态的效果。这里有Div0和Div两个组件，都是用styled-components生成的，因此都有一个sc-开头的类名，但这个类名上并不包含样式。Div因为有了样式，所以有另一个类名，这个类名的具体样式写在head中。Button组件因为没有展示，所以对应的样式也没有注入。我们再切换状态试试：
+
+​![](/2026/css-in-js-2.png)
+
+
+
+todo 已注入的不会删除
 
 ## Emotion
 
 ## 非运行时CSS in JS
+
 Panda CSS ?
 
 ## 各类方案比较
 
-
 ## 总结
+
 vue有自己的方案，基本不需要CSS in JS。
 
-
 ## 参考
+
 - styled-components 文档\
   https://styled-components.com/
 - Github styled-components\
@@ -116,3 +189,5 @@ vue有自己的方案，基本不需要CSS in JS。
   https://panda-css.com/
 - Panda CSS GitHub\
   https://github.com/chakra-ui/panda
+- 模板字符串 带标签的模板 MDN\
+  https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals#%E5%B8%A6%E6%A0%87%E7%AD%BE%E7%9A%84%E6%A8%A1%E6%9D%BF
