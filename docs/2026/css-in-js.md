@@ -47,7 +47,6 @@ export default function App({ state }) {
 ```
 
 ### 内联样式
-
 使用类名控制样式变化可以生效，但这算是简介控制样式。有没有直接可以在JavaScript代码中控制CSS的方式呢？有的，React提供了内联样式，可以让我们直接控制：
 
 ```jsx
@@ -68,10 +67,10 @@ export default function App({ state }) {
 
 对style属性设置为对象，对象的key是CSS属性驼峰形式，可以实现对HTML中内联样式的直接控制。看起来这样挺好用的，但是它的限制还是非常大。例如不能使用伪类或者媒体查询这种CSS规则。直接操作DOM可以，但是这不优雅也失去了使用React的优势。因此，如果想要实现真正的CSS in JS，还是要看专门的工具。
 
-## styled-components
-todo 介绍 styled-components
+## styled-components初步
+styled-components是最知名的CSS in JS工具，可以在React中使用。
 
-### 接入styled-components
+### 接入方式
 首先安装依赖styled-components，然后删除App.css，我们不再需要独立的CSS文件了。修改App.tsx：
 
 ```jsx
@@ -98,7 +97,7 @@ export default function App() {
 
 此时在浏览器上可以看到生效的结果。通过代码可以看到，styled-components是利用了EcmaScript中模板字符串的‘标签模板字符串’特性。因此，我们提供的CSS字符串可以被styled-components对应的函数解析，最终生成样式。
 
-### 如何生效
+### 实现方式
 上面的代码是如何生效的呢？这里我们修改一下代码，增加不同状态：
 
 ```tsx
@@ -131,13 +130,17 @@ export default function App() {
 
 ​![](/2026/css-in-js-1.png)
 
-首先看下初始状态的效果。这里有Div0和Div两个组件，都是用styled-components生成的，因此都有一个sc-开头的类名，但这个类名上并不包含样式。Div因为有了样式，所以有另一个类名，这个类名的具体样式写在head中。Button组件因为没有展示，所以对应的样式也没有注入。我们再切换状态试试：
+首先看下初始状态的效果。这里有Div0和Div两个组件，都是用styled-components生成的，因此都有一个sc-开头的类名，但这个类名上并不包含样式。Div因为有了样式，所以有另一个类名，这个类名的具体样式写在head中的style标签里面。Button组件因为没有展示，所以对应的样式也没有注入。我们再切换状态试试：
 
 ​![](/2026/css-in-js-2.png)
 
+切换状态之后，Button组件展示并附带着样式。注意style标签中增加了一行，正是Button的样式。此时如果再次切换状态将Button组件销毁，style标签中对应的样式并不会删除。
+
+通过对于浏览器现象的观察，我们发现了styled-components的实现方式：当组件被渲染时，将JavaScript中的CSS属性集合放到style标签中，同时动态提供hash类名。将类名提供给HTML标签作为属性渲染。这样就实现了JavaScript控制CSS代码，且在组件被渲染时才注入CSS。
+
+## styled-components特性
 
 
-todo 已注入的不会删除
 
 ## Emotion
 
