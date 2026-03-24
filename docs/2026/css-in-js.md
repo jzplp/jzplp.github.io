@@ -95,12 +95,12 @@ export default function App() {
 }
 ```
 
-此时在浏览器上可以看到生效的结果。通过代码可以看到，styled-components是利用了EcmaScript中模板字符串的‘标签模板字符串’特性。因此，我们提供的CSS字符串可以被styled-components对应的函数解析，最终生成样式。
+此时在浏览器上可以看到生效的结果。通过代码可以看到，styled-components是利用了EcmaScript中模板字符串的“标签模板字符串”特性。因此，我们提供的CSS字符串可以被styled-components对应的函数解析，最终生成样式。
 
 ### 实现方式
 上面的代码是如何生效的呢？这里我们修改一下代码，增加不同状态：
 
-```tsx
+```jsx
 import styled from "styled-components";
 import { useState } from "react";
 
@@ -136,7 +136,77 @@ export default function App() {
 
 切换状态之后，Button组件展示并附带着样式。注意style标签中增加了一行，正是Button的样式。此时如果再次切换状态将Button组件销毁，style标签中对应的样式并不会删除。
 
-通过对于浏览器现象的观察，我们发现了styled-components的实现方式：当组件被渲染时，将JavaScript中的CSS属性集合放到style标签中，同时动态提供hash类名。将类名提供给HTML标签作为属性渲染。这样就实现了JavaScript控制CSS代码，且在组件被渲染时才注入CSS。
+通过对于浏览器现象的观察，我们发现了styled-components的实现方式：当组件被渲染时，将JavaScript中的CSS属性集合放到style标签中，同时动态提供hash类名。将类名提供给HTML标签作为属性渲染。这样就实现了JavaScript控制CSS代码，且在组件被渲染时才注入CSS。此时我们执行如下命令：
+
+```sh
+npm run build
+npm run preview
+```
+
+然后查看打包后生产模式的效果，发现style标签中并没有CSS代码了，但样式还是生效的，也是通过hash类名。且在浏览器调试工具上点击类的来源，也能点到那个style标签，只不过浏览器上看不到其中的内容。
+
+### 传参方式
+前面的例子中CSS代码全是字符串，这些例子使用模板字符串除了能换行之外，好像也没有什么优势。使用标签模板字符串的优势在于传参。组件是要可以根据不同的传参切换样式：
+
+```tsx
+import styled from "styled-components";
+
+interface DivProps {
+  bgColor: string;
+  lineHeight?: number;
+}
+
+const Div = styled.div<DivProps>`
+  color: red;
+  background: ${props => props.bgColor};
+  font-size: 14px;
+  line-height: ${props => props.lineHeight || 20}px;
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div bgColor="blue" lineHeight={30}>2你好 jzplp</Div>
+      <Div bgColor="yellow">2你好 jzplp</Div>
+    </div>
+  );
+}
+```
+
+可以看到，首先我们在styled对应标签的函数中增加了props入参的泛型TypeScript类型。然后在模板字符串的插值中传入函数，函数的入参为props，返回对应场景下的CSS代码值。由于我们使用的“标签模板字符串”功能，因此标签函数可以读取并处理模板字符串中的插值，最后整合成完整的CSS代码。我们看下浏览器效果：
+
+​![](/2026/css-in-js-3.png)
+
+可以看到，不同的入参会生成不同的类名。这里我有一个疑问，如果我们的入参一直在变化，会不会一直生成类名？我们试一下：
+
+```tsx
+import styled from "styled-components";
+import { useState } from "react";
+
+interface DivProps {
+  color: number;
+}
+
+const Div = styled.div<DivProps>`
+  color: #${(props) => props.color};
+`;
+
+export default function App() {
+  const [state, setState] = useState(0);
+  return (
+    <div>
+      <Div color={state}>你好 {state}</Div>
+      <div onClick={() => setState(state + 1)}>按下+1</div>
+    </div>
+  );
+}
+```
+
+在上面代码中，点击一下state值加1，同时Div中的入参也会变化，生成的CSS值也会不一样。我们多点几次看看效果：
+
+​![](/2026/css-in-js-4.png)
+
+通过浏览器效果可以看到，我们每点击一次，就会生成一个新的类名和CSS规则。旧的CSS规则虽然永远不会被使用到了，但依然保存在浏览器中。不过代码其实不知道我们的CSS规则今后会不会被使用到。
 
 ## styled-components特性
 
