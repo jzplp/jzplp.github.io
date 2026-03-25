@@ -268,7 +268,60 @@ export default function App() {
 
 通过结果可以看到，组件的参数和子组件都有自己的参数，同时子组件也可以使用父组件的参数，可以同时生效。
 
-### xx
+### 与React组件继承
+前面我们看到的是styled组件互相的继承关系。事实上，它与普通React组件也可以互相继承。首先是普通React组件作为父组件：
+
+```jsx
+import styled from "styled-components";
+
+function Comp({ state, className }) {
+  return <div className={className}>{state}</div>;
+}
+
+const DivComp = styled(Comp)`
+  color: ${(props) => props.color};
+  font-size: 20px;
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Comp state={1} />
+      <DivComp state={2} color='red' />
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-7.png)
+
+可以看到，作为父组件的Comp组件，需要提供className参数，并在组件内部恰当位置作为属性。这样子组件和父组件的props都可以正常使用，styled-components会将接收到的属性透传给父组件。然后我们再看下普通React组件作为子组件的场景：
+
+```jsx
+import styled from "styled-components";
+
+const Div = styled.div`
+  color: ${(props) => props.color};
+  font-size: 20px;
+`;
+
+function Comp(props = {}) {
+  return <Div {...props}>{props.state}</Div>;
+}
+
+export default function App() {
+  return (
+    <div>
+      <Div color="red">1</Div>
+      <Comp state={2} color="yellow" />
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-8.png)
+
+当普通React组件作为子组件时，我们需要手动处理透传需要的prop到子组件中。
 
 ## Emotion
 
