@@ -209,8 +209,66 @@ export default function App() {
 通过浏览器效果可以看到，我们每点击一次，就会生成一个新的类名和CSS规则。旧的CSS规则虽然永远不会被使用到了，但依然保存在浏览器中。不过代码其实不知道我们的CSS规则今后会不会被使用到。
 
 ## styled-components特性
+前面我们引入了styled-components，简单介绍了实现方式和传参。这里再介绍一下更多特性。
 
+### 组件继承
+类似于面对对象，使用styled-components生成的组件也有继承特性，子组件可以继承父组件的样式。我们举个例子：
 
+```jsx
+import styled from "styled-components";
+
+const Div = styled.div`
+  color: red;
+`;
+const DivChild = styled(Div)`
+  background: yellow;
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div>你好 jzplp</Div>
+      <DivChild>你好 jzplp</DivChild>
+      <Div as="p">你好 jzplp</Div>
+    </div>
+  );
+}
+```
+
+我们定义了Div父组件，DivChild继承并提供了自己的样式，通过结果可以看到，两个样式都生效了。第三个组件我们使用了as属性，它可以在使用预定义styled组件的同时，修改标签名。
+
+​![](/2026/css-in-js-5.png)
+
+父组件的props参数，子组件也是继承的，同时子组件也可以有自己的参数。我们看下例子：
+
+```jsx
+import styled from "styled-components";
+
+const Div = styled.div`
+  color: red;
+  font-size:${(props) => props.size}px;
+`;
+const DivChild = styled(Div)`
+  background: yellow;
+  line-height: ${(props) => props.size + 10}px;
+  border: ${(props) => props.borderSize}px solid blue;
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div size={20}>你好 jzplp</Div>
+      <DivChild size={30} borderSize={2}>你好 jzplp</DivChild>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-6.png)
+
+通过结果可以看到，组件的参数和子组件都有自己的参数，同时子组件也可以使用父组件的参数，可以同时生效。
+
+### xx
 
 ## Emotion
 
