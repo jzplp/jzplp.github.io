@@ -323,6 +323,70 @@ export default function App() {
 
 当普通React组件作为子组件时，我们需要手动处理透传需要的prop到子组件中。
 
+### 嵌套选择器
+前面使用React内联样式的时候，我们提到内联样式并不支持嵌套选择器，这其实是直接用React做CSS in JS的最大阻碍。 styled-components引入了stylis工具来处理，支持使用嵌套选择器。这里举下例子：
+
+```jsx
+import styled from "styled-components";
+
+const Div = styled.div`
+  color: red;
+  &:hover {
+    background: yellow;
+  }
+  &.class1 {
+    border: 2px solid blue;
+  }
+  .class2 & {
+    border: 2px solid green;
+  }
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div>1 jzplp</Div>
+      <Div>2 jzplp</Div>
+      <Div className="class1">3 jzplp</Div>
+      <div className="class2">
+        <Div>4 jzplp</Div>
+      </div>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-9.png)
+
+通过例子可以看到，无论是伪类，还是各种选择器都可以，其中使用&标识本标签的选择器。也能生效到子元素中，非styled组件：
+
+```jsx
+import styled from "styled-components";
+
+const Div = styled.div`
+  color: red;
+  .class1 {
+    border: 2px solid blue;
+  }
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div>
+        <div className="class1">3 jzplp</div>
+      </Div>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-10.png)
+
+### &&选择器
+
+
+
 ## Emotion
 
 ## 非运行时CSS in JS
