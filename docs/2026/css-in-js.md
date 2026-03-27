@@ -383,6 +383,70 @@ export default function App() {
 
 ​![](/2026/css-in-js-10.png)
 
+### CSS片段
+styled-components支持创建一个CSS片段，可以提供给组件使用，并且可以带参数，使用css方法即可。
+
+```jsx
+import styled, { css } from "styled-components";
+
+const jzCss = css`
+  color: blue;
+  font-size: ${props => props.size}px;
+`
+
+const Div = styled.div`
+${
+  props => {
+    if(props.type === 1) return jzCss;
+    else return `
+      color: red;
+      background: green;
+    `;
+  }
+}
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div type={1} size={20}>jzplp 1</Div>
+      <Div type={1} size={30}>jzplp 2</Div>
+      <Div type={2}>jzplp 3</Div>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-11.png)
+
+可以看到代码中先创建了一个带参数的CSS片段，然后在组件字符串插值的返回中传入这个片段，参数可以正常生效渲染。else情况则直接返回了字符串CSS属性，看浏览器上也可以生效。那是不是说不需要css函数处理，直接返回模板字符串就可以了？这是肯定不行的，我们举个例子：
+
+```jsx
+import styled from "styled-components";
+
+const Div = styled.div`
+  ${() => {
+    return `
+        color: blue;
+        font-size: ${(props) => props.size}px;
+      `;
+  }}
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div size={20}>jzplp 1</Div>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-12.png)
+
+在浏览器中可以看到，模板字符串中的插值并没有被成功处理，而是被直接转为了普通字符串，最后成了错误的CSS代码。因此必须使用css函数创建CSS片段。
+
+
 ### &&选择器
 
 
