@@ -383,9 +383,42 @@ export default function App() {
 
 ​![](/2026/css-in-js-10.png)
 
-### &&选择器
+### CSS动画
+styled-components也支持创建@keyframes的CSS动画，同时在CSS中被引用。
 
+```jsx
+import styled, { keyframes } from "styled-components";
 
+const colorChange = keyframes`
+  0% {
+    color: red;
+  }
+  50% {
+    color: blue;
+  }
+  100% {
+    color: red;
+  }
+`;
+
+const Div = styled.div`
+  animation: ${colorChange} 2s infinite;
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div>你好，jzplp</Div>
+    </div>
+  );
+}
+```
+
+可以看到我们使用keyframes方法创建了一个keyframes动画，在需要的CSS位置中，当作animation-name属性插入动画即可。效果如下：
+
+​![](/2026/css-in-js-11.gif)
+
+这里只是简单介绍了styled-components的部分特性，如果希望深入了解请看styled-components相关文档。
 
 ## Emotion
 
