@@ -483,7 +483,41 @@ export default function App() {
 
 这里只是简单介绍了styled-components的部分特性，如果希望深入了解请看styled-components相关文档。
 
-## Emotion
+## @emotion/styled
+下面来介绍一下Emotion这个库。这个库有好几种使用方式，首先我们从类似styled-components，即styled组件的使用方式开始介绍，主要使用@emotion/styled这个包。
+
+### 接入@emotion/styled
+首先安装@emotion/styled依赖，然后修改src/App.jsx：
+
+```jsx
+import styled from "@emotion/styled";
+
+const Div = styled.div`
+  color: red;
+  background: ${(props) => props.bg};
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div bg="blue">你好，jzplp</Div>
+      <Div bg="yellow">你好，jzplp</Div>
+    </div>
+  );
+}
+```
+
+上面代码的使用方式与styled-components一模一样，换个包名也能生效。效果也一样，区别在于开发模式下@emotion/styled有两个style标签，如下图。生产模式与styled-components一样，都是一个style标签且看不到内容。
+
+​![](/2026/css-in-js-14.png)
+
+### 
+
+
+
+## @emotion/react
+
+## @emotion/css
 
 ## 非运行时CSS in JS
 
