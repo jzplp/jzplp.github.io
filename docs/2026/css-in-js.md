@@ -588,6 +588,60 @@ export default function App() {
 ​![](/2026/css-in-js-16.png)
 
 ## @emotion/react
+### 接入css Prop
+Emotion除了styled组件使用方式之外，也可以使用组件css属性（css Prop）的使用方式。这种方式是在React中JSX的组件上增加一个css属性。因此这种方式需要修改React编译相关参数。这里以vite@8和@vitejs/plugin-react@6为例来说明。首先安装依赖@emotion/react。然后修改vite.config.js配置文件：
+
+```js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react({
+      // 指定转换jsx语法的模块
+      jsxImportSource: '@emotion/react',
+    })],
+})
+```
+
+然后就可以使用了。如果需要TypeScript类型正确提示，则需要修改tsconfig.json：
+
+```json
+{
+  "compilerOptions": {
+    // types在原有基础上新增"@emotion/react/types/css-prop"
+    "types": ["...", "@emotion/react/types/css-prop"],
+    "jsxImportSource": "@emotion/react",
+  },
+}
+```
+
+然后我们修改App.jsx，内容如下：
+
+```jsx
+export default function App() {
+  return (
+    <>
+      <div
+        css={{
+          color: "red",
+          "&:hover": {
+            background: "green",
+          },
+        }}
+      >
+        你好 jzplp
+      </div>
+    </>
+  );
+}
+```
+
+可以看到，我们直接以对象的形式对组建的CSS属性赋值，而且还包含hover伪类，最后在开发模式和生产模式都可以正常生效。
+
+​![](/2026/css-in-js-17.png)
+
+
+
 
 ## @emotion/css
 
@@ -641,3 +695,6 @@ vue有自己的方案，基本不需要CSS in JS。
   https://github.com/chakra-ui/panda
 - 模板字符串 带标签的模板 MDN\
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals#%E5%B8%A6%E6%A0%87%E7%AD%BE%E7%9A%84%E6%A8%A1%E6%9D%BF
+- Vite 文档\
+  https://cn.vitejs.dev/
+
