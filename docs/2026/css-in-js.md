@@ -511,9 +511,81 @@ export default function App() {
 
 ​![](/2026/css-in-js-14.png)
 
-### 
+### CSS片段
+不仅接入方式，@emotion/styled的大部分特性都和styled-components一样，包括继承，嵌套选择器等。但CSS片段有些不一样：
 
+```jsx
+import styled from "@emotion/styled";
+import { css } from '@emotion/react';
 
+// 错误方式
+const commonStyle1 = css`
+  font-size: 20px;
+  background: ${(props) => props.bg};
+`;
+
+const commonStyle2 = (props) => css`
+  font-size: 20px;
+  background: ${props.bg};
+`;
+
+const Div1 = styled.div`
+  color: red;
+  ${commonStyle1}
+`;
+
+const Div2 = styled.div`
+  color: green;
+  ${commonStyle2}
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div1 bg="yellow">你好，jzplp1</Div1>
+      <Div2 bg="yellow">你好，jzplp2</Div2>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-15.png)
+
+首先CSS片段的函数是在另一个包@emotion/react中引入的。commonStyle1是用styled-components模式引入的，将函数直接放到CSS片段中，是不生效的。必须要将片段本身放到一个大函数内部才行，如commonStyle2的形式。
+
+### 函数入参
+@emotion/styled中的组件也支持函数作为入参，而非模板字符串。函数可以返回style对象，也能返回拼好的字符串。
+
+```jsx
+import styled from "@emotion/styled";
+
+const Div1 = styled.div((props) => {
+  return {
+    color: "red",
+    background: props.bg,
+  };
+});
+
+const Div2 = styled.div((props) => {
+  return `
+    color: pink;
+    background: ${props.bg};
+  `;
+});
+
+export default function App() {
+  return (
+    <div>
+      <Div1 bg="yellow">你好，jzplp1</Div1>
+      <Div1 bg="green">你好，jzplp2</Div1>
+      <Div2 bg="yellow">你好，jzplp3</Div2>
+      <Div2 bg="green">你好，jzplp4</Div2>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-16.png)
 
 ## @emotion/react
 
