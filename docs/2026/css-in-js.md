@@ -588,7 +588,7 @@ export default function App() {
 ​![](/2026/css-in-js-16.png)
 
 ## @emotion/react
-### 接入css Prop
+### 接入css属性
 Emotion除了styled组件使用方式之外，也可以使用组件css属性（css Prop）的使用方式。这种方式是在React中JSX的组件上增加一个css属性。因此这种方式需要修改React编译相关参数。这里以vite@8和@vitejs/plugin-react@6为例来说明。首先安装依赖@emotion/react。然后修改vite.config.js配置文件：
 
 ```js
@@ -636,11 +636,76 @@ export default function App() {
 }
 ```
 
-可以看到，我们直接以对象的形式对组建的CSS属性赋值，而且还包含hover伪类，最后在开发模式和生产模式都可以正常生效。
+可以看到，我们直接以对象的形式对组件JSX的css属性赋值，而且还包含hover伪类，最后在开发模式和生产模式都可以正常生效。
 
 ​![](/2026/css-in-js-17.png)
 
+除了对象形式之外，css属性还支持CSS片段的形式：
 
+```jsx
+import {css} from "@emotion/react";
+export default function App() {
+  return (
+    <>
+      <div
+        css={css`
+          color: red;
+          &:hover {
+            background: green;
+          }
+        `}
+      >
+        你好 jzplp
+      </div>
+    </>
+  );
+}
+```
+
+### css属性继承
+从前面的接入例子中我们看到，css属性还是通过class名的形式生效的。因此它的优先级低于style属性，即内联样式。如果父组件提供了css属性想让子组件生效，则需要传入className参数。那么如果父子组件都有css属性，他们的优先级如何呢？这里举个例子：
+
+```jsx
+function Comp1({ className }) {
+  return (
+    <div
+      css={{
+        background: 'yellow',
+        color: "red",
+      }}
+      className={className}
+    >
+      你好 jzplp
+    </div>
+  );
+}
+
+function Comp2() {
+  return (
+    <Comp1
+      css={{
+        fontSize: "20px",
+        color: "blue",
+      }}
+    >
+      你好 jzplp
+    </Comp1>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <Comp1 />
+      <Comp2 />
+    </>
+  );
+}
+```
+
+这里创建了两个组件，Comp1是自组件，Comp2是父组件。子组件和父组件中的CSS属性不冲突的可以同时生效，冲突属性以父组件的为准，例如这里的color。
+
+​![](/2026/css-in-js-18.png)
 
 
 ## @emotion/css
