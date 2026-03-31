@@ -707,6 +707,82 @@ export default function App() {
 
 ​![](/2026/css-in-js-18.png)
 
+### 样式对象
+前面我们演示过，不管是styled组件，css属性还是CSS片段，都可以接收对象类型的样式数据。关于对象类型还有其它特性，这里我们一起描述一下。首先是数组类型，这里列举了两个例子：
+
+```jsx
+import styled from "@emotion/styled";
+
+const styleList = [
+  {
+    color: "red",
+  },
+  {
+    fontSize: "20px",
+  },
+];
+
+const Comp1 = styled.div(styleList);
+
+function Comp2() {
+  return <div css={styleList}>你好 jzplp2</div>;
+}
+
+export default function App() {
+  return (
+    <>
+      <Comp1>你好 jzplp1</Comp1>
+      <Comp2 />
+    </>
+  );
+}
+```
+
+styled组件也同时支持多个入参：
+
+```jsx
+import styled from "@emotion/styled";
+
+const Comp1 = styled.div(
+  {
+    color: "red",
+  },
+  (props) => {
+    return {
+      fontSize: `${props.size}px`,
+    };
+  },
+);
+
+export default function App() {
+  return <Comp1 size={20}>你好 jzplp1</Comp1>;
+}
+```
+
+样式对象还支持回退值（默认值）。通过对属性值传入一个数组，最后面的值优先级最高，如果不存在则取前面的值：
+
+```jsx
+function Div1({ color, children }) {
+  return (
+    <div
+      css={{
+        color: ["red", color],
+      }}
+    >{children}</div>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <Div1>你好 jzplp1</Div1>
+      <Div1 color="blue">你好 jzplp2</Div1>
+    </>
+  );
+}
+```
+
+​![](/2026/css-in-js-19.png)
 
 ## @emotion/css
 
