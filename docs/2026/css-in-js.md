@@ -784,6 +784,44 @@ export default function App() {
 
 ​![](/2026/css-in-js-19.png)
 
+### 全局样式
+@emotion/react支持创建全局样式，也是使用组件的形式。当组件被渲染时，全局样式生效，组件不被渲染时则不生效。
+
+```jsx
+import { useState } from "react";
+import { Global } from "@emotion/react";
+
+export default function App() {
+  const [state, setState] = useState(0);
+  return (
+    <>
+      <Global
+        styles={{
+          ".class1": {
+            color: "red",
+          },
+        }}
+      />
+      {!!(state % 2) && (
+        <Global
+          styles={{
+            ".class2": {
+              background: "yellow",
+            },
+          }}
+        />
+      )}
+      <div className="class1 class2">你好 jzplp</div>
+      <div onClick={() => setState(state + 1)}>按下变换</div>
+    </>
+  );
+}
+```
+
+​![](/2026/css-in-js-20.png)
+
+使用全局样式时，我们只要使用普通类名即可生效。当我们切换state的状态时，黄色的背景颜色也在变化。对应Global组件不渲染时，插入的CSS代码会被移除，渲染时会被引入。
+
 ## @emotion/css
 
 ## 非运行时CSS in JS
