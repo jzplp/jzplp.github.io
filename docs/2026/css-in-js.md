@@ -486,7 +486,7 @@ export default function App() {
 ## @emotion/styled
 下面来介绍一下Emotion这个库。这个库有好几种使用方式，首先我们从类似styled-components，即styled组件的使用方式开始介绍，主要使用@emotion/styled这个包。
 
-### 接入@emotion/styled
+### 接入方式
 首先安装@emotion/styled依赖，然后修改src/App.jsx：
 
 ```jsx
@@ -823,6 +823,76 @@ export default function App() {
 使用全局样式时，我们只要使用普通类名即可生效。当我们切换state的状态时，黄色的背景颜色也在变化。对应Global组件不渲染时，插入的CSS代码会被移除，渲染时会被引入。
 
 ## @emotion/css
+前面我们描述Emotion相关包，都是使用在React框架之内的。在React之外，还提供了@emotion/css包，用法和前面类似。
+
+### 接入方式
+首先我们创建一个工程接入@emotion/css。这里选用Vite。首先执行命令行：
+
+```sh
+npm init -y
+npm add -D vite
+npm add @emotion/css
+```
+
+然后在package.json的scripts中增加三个命令，分别是开发模式运行，打包和预览打包后的成果。
+
+```json
+{
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+}
+```
+
+然后创建index.html，为浏览器入口文件，其中引入了index.js。
+
+```html
+<html>
+  <meta charset="UTF-8">
+  <head>
+    <title>jzplp的@emotion/css实验</title>
+  </head>
+  <body>
+    <script src="./index.js" type="module"></script>
+  </body>
+</html>
+```
+
+然后是index.js的实现，引入了@emotion/css：
+
+```js
+import { css } from '@emotion/css'
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+const styles1 = css`
+  color: red;
+`;
+const styles2 = css({
+  color: 'blue',
+});
+
+console.log(styles1, styles2);
+genEle('test1', styles1);
+genEle('test2', styles2);
+
+/* 输出结果
+css-qm6gfa css-14ksm7b
+*/
+```
+
+最后执行npm run dev命令，在浏览器查看结果。可以看到，我们和在React中使用一样，还是用模板字符串或者样式对象创建，但是创建后得到的结果是类名，我们直接放到DOM元素上即可。
+
+​![](/2026/css-in-js-21.png)
+
+### 
+
+
 
 ## 非运行时CSS in JS
 
