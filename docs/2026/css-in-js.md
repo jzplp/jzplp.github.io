@@ -890,9 +890,95 @@ css-qm6gfa css-14ksm7b
 
 ​![](/2026/css-in-js-21.png)
 
-### 
+### 样式数据
+除了上面的模板字符串和样式对象之外，@emotion/css也支持数组类型以及嵌套选择器等属性，这里举例看一下。
 
+```js
+import { css } from "@emotion/css";
 
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+const styles1 = css`
+  color: red;
+  &:hover {
+    background: yellow;
+  }
+`;
+const styles2 = css([
+  {
+    color: "blue",
+  },
+  {
+    "&:hover": {
+      background: "yellow",
+    },
+  },
+]);
+
+console.log(styles1, styles2);
+genEle("test1", styles1);
+genEle("test2", styles2);
+```
+
+### 全局样式
+@emotion/css也支持全局样式，但是引入方式不一样：
+
+```js
+import { injectGlobal  } from "@emotion/css";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+injectGlobal`
+  .class1 {
+    color: red;
+    &:hover {
+      background: yellow;
+    } 
+  }
+`;
+
+genEle("test1", 'class1');
+```
+
+### cx优先级处理
+@emotion/css提供了一个cx方法，它的作用和知名的classnames包一样，都是合并class类名的。但是这个cx提供了优先级功能，即后面的类中的样式优先级比前面的高：
+
+```js
+import { cx, css } from "@emotion/css";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+const cls1 = css`
+  font-size: 20px;
+  background: green;
+`;
+const cls2 = css`
+  font-size: 20px;
+  background: blue;
+`;
+
+genEle("test1", cx(cls1, cls2));
+genEle("test2", cx(cls2, cls1));
+```
+
+这里我们创建了两个样式，其中背景颜色是冲突的。然后我创建了两个div，使用cx方法合并类名，但是连接各个div合并的顺序相反。在浏览器查看效果发现，实际展示的背景色也不一样，以后面的类名为准。
+
+​![](/2026/css-in-js-22.png)
 
 ## 非运行时CSS in JS
 
