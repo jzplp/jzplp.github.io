@@ -980,6 +980,105 @@ genEle("test2", cx(cls2, cls1));
 
 ​![](/2026/css-in-js-22.png)
 
+## linaria与React
+前面介绍的styled-components和@emotion，都是运行时CSS，即对应的生成样式的代码执行到的时候，这段CSS才会生成。因此这种库需要在打包后的代码中保留注入CSS的逻辑。还有另一类CSS in JS的库是零运行时的，即编译时生成CSS文件，在生产代码中直接引入即可，无需额外注入。这里先介绍linaria，它就是一个零运行时的库。
+
+### 接入方式
+我们依然以vite为例接入。linaria的背后依赖WyW-in-JS，它是一个零运行时CSS库的辅助工具包。首先执行命令行：
+
+```sh
+npm create vite@latest
+npm add @linaria/core @linaria/react @wyw-in-js/vite
+```
+
+修改vite.config.ts，增加wyw配置：
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import wyw from '@wyw-in-js/vite';
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), wyw()],
+})
+```
+
+然后修改App.tsx，接入linaria：
+
+```tsx
+import { styled } from "@linaria/react";
+
+const Div1 = styled.div`
+  color: red;
+`;
+
+const Div2 = styled.div`
+  color: blue;
+  &:hover {
+    background: yellow;
+  }
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div1>jzplp1</Div1>
+      <Div2>jzplp2</Div2>
+    </div>
+  );
+}
+```
+
+
+可以看到，这个使用方式就是styled组件的使用方式，和前面的库基本一致。以开发模式在浏览器中运行效果如下：
+
+​![](/2026/css-in-js-23.png)
+
+### 零运行时特性
+在前面的接入方式中，我们并没有看到它与其它CSS in JS库的不同点。这一节我们专门看一下零运行时和前面的库究竟有什么不一样。首先修改App.tsx：
+
+```tsx
+import { useState } from "react";
+import { styled } from "@linaria/react";
+
+const Div1 = styled.div`
+  color: red;
+`;
+
+const Div2 = styled.div`
+  color: blue;
+  &:hover {
+    background: yellow;
+  }
+`;
+
+export default function App() {
+  const [state, setState] = useState(0);
+
+  return (
+    <div>
+      <Div1>jzplp1</Div1>
+      {state % 2 === 1 && <Div2>jzplp2</Div2>}
+      <div onClick={() => setState(state + 1)}>按下切换</div>
+      <div>当前state {state}</div>
+    </div>
+  );
+}
+```
+
+在代码中我们设置了变化的state状态，一开始为0时不展示Div2，当按下切换时，Div2才被执行和创建。注意当一开始Div2没被执行的时候，运行时的CSS in JS库是不会创建Div2对应的CSS代码的（因为代码都没执行到那里）。但linaria却会将CSS代码全都创建和引入，即使这些代码没有被使用。我们看下初始化时，linaria的效果：
+
+​![](/2026/css-in-js-24.png)
+
+注意看浏览器网络请求中有一个CSS请求，它的内容为当前引入的CSS代码，包括没由被创建的元素的CSS代码：
+
+​![](/2026/css-in-js-25.png)
+
+然后我们将代码打包（npm run build）后，查看一下打包文件。可以看到我们在JavaScript中写的CSS代码，已经被编译成一个独立的CSS文件被引入到HTML中了，变成了普通CSS的形式。
+
+​![](/2026/css-in-js-26.png)
+
 ## 非运行时CSS in JS
 
 Panda CSS ?
@@ -1032,4 +1131,13 @@ vue有自己的方案，基本不需要CSS in JS。
   https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Template_literals#%E5%B8%A6%E6%A0%87%E7%AD%BE%E7%9A%84%E6%A8%A1%E6%9D%BF
 - Vite 文档\
   https://cn.vitejs.dev/
-
+- linaria 网站\
+  https://linaria.dev/
+- linaria GitHub\
+  https://github.com/callstack/linaria
+- Vanilla-extract 文档\
+  https://vanilla-extract.style/
+- Vanilla-extract GitHub\
+  https://github.com/vanilla-extract-css/vanilla-extract
+- WyW-in-JS 文档\
+  https://wyw-in-js.dev/
