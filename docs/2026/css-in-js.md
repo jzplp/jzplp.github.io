@@ -1108,11 +1108,77 @@ export default function App() {
 ​![](/2026/css-in-js-28.png)
 
 ### CSS变量参数的限制
-CSS变量虽然有效，但它的逻辑并不是字符串匹配，因此使用方式还是和运行时库有区别。
+CSS变量虽然有效，但它的逻辑并不是字符串匹配，因此使用方式还是和运行时库有区别。我们先举一个普通的CSS代码作为例子，尝试了三种变量组合的场景。
 
+```css
+.class1 {
+  --classVar1: 21px;
+  font-size:var(--classVar1);
+}
+.class2 {
+  --classVar1: 21;
+  font-size:var(--classVar1)px;
+}
+.class3 {
+  --classVar1: 1px;
+  font-size: 2var(--classVar1);
+}
+```
 
+然后是对应的React代码：
 
+```jsx
+import "./App.css";
 
+export default function App() {
+  return (
+    <div>
+      <div className="class1">jzplp1</div>
+      <div className="class2">jzplp2</div>
+      <div className="class3">jzplp3</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-29.png)
+
+看可以看到只有第一个例子生效了，是21px整个作为CSS变量值。将这个值拆开是不能生效的，更不能像字符串那样随意拼合。那利用CSS变量作为参数方案的linaria呢？我们试一下：
+
+```jsx
+import { styled } from "@linaria/react";
+
+const Div1 = styled.div`
+  font-size: ${(props) => props.size + "px"};
+`;
+
+const Div2 = styled.div`
+  font-size: ${(props) => props.size}px;
+`;
+
+const Div3 = styled.div`
+  font-size: ${(props) => props.size}1px;
+`;
+
+const Div4 = styled.div`
+  font-size: 2${(props) => props.size}px;
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div1 size={21}>jzplp1</Div1>
+      <Div2 size={21}>jzplp2</Div2>
+      <Div3 size={2}>jzplp3</Div3>
+      <Div4 size={1}>jzplp4</Div4>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-30.png)
+
+通过例子可以看到，21px整个作为参数与21作为参数都是可以的，2或者1单独作为参数就不行了，会造成CSS代码解析错误。这里21生效应该是linaria特殊处理过，把后面的px拼接上了。
 
 ### CSS块作为参数
 
