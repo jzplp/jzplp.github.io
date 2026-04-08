@@ -1079,6 +1079,45 @@ export default function App() {
 
 ​![](/2026/css-in-js-26.png)
 
+### 零运行时中的参数
+前面我们说过零运行时的库，会把CSS提前编译好放到文件中。对于固定的CSS代码来说非常容易，但当CSS中出现变量参数时，即CSS代码不确定时，应该怎么实现呢？这里我们举个例子看一下：
+
+```jsx
+import { styled } from "@linaria/react";
+
+const Div1 = styled.div`
+  color: ${(props) => props.color || "yellow"};
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div1>jzplp1</Div1>
+      <Div1 color="red">jzplp1</Div1>
+      <Div1 color="blue">jzplp1</Div1>
+    </div>
+  );
+}
+```
+通过代码可以看到，传参方式和其它库基本一致。但是查看生成的代码，却发现不一致之处。运行时的库会直接生成完整的CSS代码提供，并且有一个自己专属的类名。但零运行时的库却将参数作为一个CSS变量引用。同时在对应组件的style属性中提供对应的CSS属性值，以此代码的零运行时特性。
+
+​![](/2026/css-in-js-27.png)
+
+打包后查看生成代码，也可以看到生成的带变量的CSS规则代码，以及我们根据处理props属性生成CSS变量的函数。这个函数只能在运行时处理。
+
+​![](/2026/css-in-js-28.png)
+
+### CSS变量参数的限制
+CSS变量虽然有效，但它的逻辑并不是字符串匹配，因此使用方式还是和运行时库有区别。
+
+
+
+
+
+### CSS块作为参数
+
+
+
 ## 非运行时CSS in JS
 
 Panda CSS ?
