@@ -1180,8 +1180,84 @@ export default function App() {
 
 通过例子可以看到，21px整个作为参数与21作为参数都是可以的，2或者1单独作为参数就不行了，会造成CSS代码解析错误。这里21生效应该是linaria特殊处理过，把后面的px拼接上了。
 
-### CSS块作为参数
+### CSS声明块作为参数
+linaria也可以接收CSS生命块作为模板参数：
 
+```jsx
+import { styled } from "@linaria/react";
+
+const cssObj = {
+  color: "red",
+  fontSize: "20px",
+}
+const cssStr = `
+  color: red;
+  font-size: 20px;
+`;
+
+const Div1 = styled.div`
+  background: yellow;
+  ${cssObj}
+`;
+const Div2 = styled.div`
+  background: yellow;
+  ${cssStr}
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div1>jzplp1</Div1>
+      <Div2>jzplp2</Div2>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-31.png)
+
+可以看到，不管是字符串模板还是对象形式都是支持的。但整个块对象不能是由函数返回的，即只能在编译时处理完成，不能有运行时特性。这还是由于前面CSS变量作为实现方案的原因，导致无法生效。这里举个例子：
+
+```jsx
+import { styled } from "@linaria/react";
+
+const cssObj = {
+  color: "red",
+  fontSize: "20px",
+}
+const cssStr = `
+  color: red;
+  font-size: 20px;
+`;
+
+const Div1 = styled.div`
+  background: yellow;
+  ${() => cssObj}
+`;
+const Div2 = styled.div`
+  background: yellow;
+  ${() => cssStr}
+`;
+
+export default function App() {
+  return (
+    <div>
+      <Div1>jzplp1</Div1>
+      <Div2>jzplp2</Div2>
+    </div>
+  );
+}
+```
+
+​![](/2026/css-in-js-32.png)
+
+通过结果看到，用函数包裹起来（假设它是接收props之后运行时计算的CSS代码）并未生效。这里为了方便查看效果，我们打个包看一下构建成果：
+
+​![](/2026/css-in-js-33.png)
+
+通过生产代码可以看到，这个函数逻辑以及返回值被原封不动的保留下来返回了，但是linaria却无法识别整个CSS声明，因此不能生效。
+
+## linaria中的css片段
 
 
 ## 非运行时CSS in JS
