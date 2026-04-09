@@ -998,7 +998,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import wyw from '@wyw-in-js/vite';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), wyw()],
 })
@@ -1258,7 +1257,88 @@ export default function App() {
 通过生产代码可以看到，这个函数逻辑以及返回值被原封不动的保留下来返回了，但是linaria却无法识别整个CSS声明，因此不能生效。
 
 ## linaria中的css片段
+linaria中也有css方法，使用方式与其它库类似，而且支持不在React框架中使用。
 
+### 纯JavaScript接入方式
+这里我们抛弃React，使用纯JavaScript的方式接入linaria。使用linaria必须要编译，这里依然选用Vite。首先执行命令行：
+
+```sh
+npm init -y
+npm add -D vite @wyw-in-js/vite 
+npm add @linaria/core
+```
+
+然后在package.json的scripts中增加三个命令，分别是开发模式运行，打包和预览打包后的成果。
+
+```json
+{
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+}
+```
+
+然后创建index.html，为浏览器入口文件，其中引入了index.js。
+
+```html
+<html>
+  <meta charset="UTF-8">
+  <head>
+    <title>jzplp的linaria实验</title>
+  </head>
+  <body>
+    <script src="./index.js" type="module"></script>
+  </body>
+</html>
+```
+
+然后是index.js的实现：
+
+```js
+import { css } from '@linaria/core';
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+const cssData = css`
+  color: red;
+  font-size: 20px;
+`;
+
+console.log(data);
+genEle('jzplp', cssData);
+
+/* 输出结果
+cf71da1
+*/
+```
+
+可以看到，css函数也是使用模板字符串来写CSS规则，返回值是一个类名，可以直接用在元素上。使用linaria还要修改打包配置，创建vite.config.js：
+
+```js
+import { defineConfig } from "vite";
+import wyw from "@wyw-in-js/vite";
+
+export default defineConfig({
+  plugins: [wyw()],
+});
+```
+
+然后执行npm run dev，开发模式下正常生效：
+
+​![](/2026/css-in-js-34.png)
+
+然后我们执行npm run build，查看打包后的生成代码：
+
+​![](/2026/css-in-js-35.png)
+
+可以看到，我们用css函数生成的CSS代码，已经被放到独立的CSS文件中，css函数使用的位置，已经直接变成了class类名。这也是零运行时库的效果，在编译时就将CSS代码生成完毕。
+
+### ？
 
 ## 非运行时CSS in JS
 
