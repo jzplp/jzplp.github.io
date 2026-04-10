@@ -1338,7 +1338,46 @@ export default defineConfig({
 
 可以看到，我们用css函数生成的CSS代码，已经被放到独立的CSS文件中，css函数使用的位置，已经直接变成了class类名。这也是零运行时库的效果，在编译时就将CSS代码生成完毕。
 
-### ？
+### 全局样式
+linaria也支持创建全局样式，这里我们试一下。
+
+```js
+import { css } from "@linaria/core";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+css`
+  :global() {
+    div {
+      color: red;
+    }
+    .class1 {
+      background: yellow;
+    }
+  }
+`;
+
+const cssData = css`
+  font-size: 20px;
+`;
+
+console.log(cssData);
+genEle("jzplp1", "class1");
+genEle("jzplp2", cssData);
+```
+
+​![](/2026/css-in-js-36.png)
+
+将全局特性包裹在:global()中，即可生效。这段CSS甚至都不需要被哪个标签引用。我们再看看打包后的结果：
+
+​![](/2026/css-in-js-37.png)
+
+可以看到，对应的这段css函数代码没有了，全局特性转移到了CSS文件中。
 
 ## 非运行时CSS in JS
 
