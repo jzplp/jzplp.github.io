@@ -1379,6 +1379,88 @@ genEle("jzplp2", cssData);
 
 可以看到，对应的这段css函数代码没有了，全局特性转移到了CSS文件中。
 
+
+## vanilla-extract
+vanilla-extract是另一个CSS in JS库，正如它的名字，vanilla表示不使用框架的纯JavaScript。vanilla-extract这个库是框架无关的，同样他也是一个零运行时库。
+
+### 接入方式
+我们还是使用Vite接入，但这次试一下Vite提供的vanilla模板。执行命令行：
+
+```sh
+npm create vite@latest
+# 选择 Vanilla + TypeScript模板
+npm add @vanilla-extract/css @vanilla-extract/vite-plugin
+```
+
+创建vite.config.js文件，内容如下：
+
+```js
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
+
+export default {
+  plugins: [vanillaExtractPlugin()]
+};
+```
+
+创建src/styles.css.ts文件，内容为创建样式，并导出。
+
+```ts
+import { style } from '@vanilla-extract/css';
+
+export const cls1 = style({
+  color: 'red'
+});
+```
+
+然后删除无用的文件，修改src/main.js的内容为引入创建的样式，并作为类名放到HTML标签上。
+
+```js
+import { cls1 } from "./styles.css.ts";
+
+function genEle(test: string, className: string) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+genEle("jzplp", cls1);
+```
+
+​![](/2026/css-in-js-38.png)
+
+在开发模式运行，通过浏览器可以看到，也是在head中插入了style标签提供样式。我们再打包看看生成文件：
+
+​![](/2026/css-in-js-39.png)
+
+通过生成文件可以看到，vanilla-extract也是在编译时就生成独立的样式文件引入，不需要运行时处理。
+
+### 独立.css.ts文件
+vanilla-extract与其它CSS in JS方案不同点在于，虽然它确实是用JavaScript写CSS代码，但却要求独立的文件类型“.css.ts”。如果在其它文件中写入会造成错误。这里我们试一试，修改前面的src/main.js：
+
+```ts
+import { style } from '@vanilla-extract/css';
+
+const cls1 = style({
+  color: 'red'
+});
+
+function genEle(test: string, className: string) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+genEle("jzplp", cls1);
+```
+
+这时候开发模式打开浏览器，会看到报错，元素也没有正常展示：
+
+​![](/2026/css-in-js-40.png)
+
+回想起使用CSS in JS方案的重要原因就是希望CSS代码与组件的联系更紧密。这样强制的独立.css.ts文件，看起来没有增加紧密感。
+
 ## 非运行时CSS in JS
 
 Panda CSS ?
