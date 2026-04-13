@@ -1461,6 +1461,130 @@ genEle("jzplp", cls1);
 
 回想起使用CSS in JS方案的重要原因就是希望CSS代码与组件的联系更紧密。这样强制的独立.css.ts文件，看起来没有增加紧密感。
 
+### 生成style
+vanilla-extract使用style创建样式，返回对应的类名。style方法接收对象形式的CSS规则，但是与常规CSS写法有点不同，这里介绍部分不同点。
+
+#### px单位
+首先是如果属性值的单位是px，可以省略，写成数字形式。这里举个例子：
+
+```js
+export const cls1 = style({
+  fontSize: 10,
+  margin: 20,
+  padding: "10px",
+  flex: 1,
+});
+
+/* 生成结果
+.r9osg00 {
+  flex: 1;
+  margin: 20px;
+  padding: 10px;
+  font-size: 10px;
+}
+*/
+```
+
+我们直接对代码打包，观察生成的CSS文件。可以看到vanilla-extract并不是所有数字都会转换，而是跑来除了那些没有单位的CSS属性。
+
+#### 浏览器引擎前缀写法
+在对象中写CSS属性需要以camelCase驼峰命名法，但对于浏览器引擎前缀这种最前面带中划线的形式，vanilla-extract要求使用PascalCase帕斯卡命名法，即最前面大写。
+
+```js
+export const cls1 = style({
+  WebkitTapHighlightColor: "rgba(0, 0, 0, 0)",
+});
+
+/* 生成结果
+.r9osg00 {
+  -webkit-tap-highlight-color: #0000;
+}
+*/
+```
+
+
+#### 媒体查询/容器查询/@layer等
+它们的写法多了一层嵌套：
+
+```js
+import { style } from "@vanilla-extract/css";
+
+export const cls1 = style({
+  "@container": {
+    "(min-width: 768px)": {
+      padding: 10,
+    },
+  },
+  "@media": {
+    "screen and (min-width: 768px)": {
+      padding: 10,
+    },
+    "(prefers-reduced-motion)": {
+      transitionProperty: "color",
+    },
+  },
+  "@layer": {
+    typography: {
+      fontSize: "1rem",
+    },
+  },
+  "@supports": {
+    "(display: grid)": {
+      display: "grid",
+    },
+  },
+});
+
+/* 生成结果
+@layer typography {
+  .r9osg00 {
+    font-size: 1rem;
+  }
+}
+@media screen and (width>=768px) {
+  .r9osg00 {
+    padding: 10px;
+  }
+}
+@media (prefers-reduced-motion) {
+  .r9osg00 {
+    transition-property: color;
+  }
+}
+@supports (display: grid) {
+  .r9osg00 {
+    display: grid;
+  }
+}
+@container (width>=768px) {
+  .r9osg00 {
+    padding: 10px;
+  }
+}
+*/
+```
+
+#### 后备值
+在之前讲[PostCSS中postcss-custom-properties插件](https://jzplp.github.io/2025/postcss-intro.html#postcss-custom-properties)的时候，我们提到过当浏览器读取到一个不支持的CSS属性值时，如果这个属性前面已经有一个后备值了，那就使用那个后备值，不会应用不支持的属性值。
+
+但以对象的形式写CSS属性，key同一个的情况下，没办法写两个值。这里vanilla-extract接收一个值数组，实现后备值功能：
+
+```js
+export const cls1 = style({
+  overflow: ['auto', 'overlay']
+});
+
+/* 生成结果
+.r9osg00 {
+  overflow: auto;
+  overflow: overlay;
+}
+*/
+```
+
+### CSS变量
+
+
 ## 非运行时CSS in JS
 
 Panda CSS ?
@@ -1523,3 +1647,5 @@ vue有自己的方案，基本不需要CSS in JS。
   https://github.com/vanilla-extract-css/vanilla-extract
 - WyW-in-JS 文档\
   https://wyw-in-js.dev/
+- PostCSS完全指南：功能/配置/插件/SourceMap/AST/插件开发/自定义语法
+  https://jzplp.github.io/2025/postcss-intro.html
