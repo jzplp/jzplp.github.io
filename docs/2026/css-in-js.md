@@ -1502,7 +1502,6 @@ export const cls1 = style({
 */
 ```
 
-
 #### 媒体查询/容器查询/@layer等
 它们的写法多了一层嵌套：
 
@@ -1583,7 +1582,73 @@ export const cls1 = style({
 ```
 
 ### CSS变量
+vanilla-extract支持使用CSS变量，需要在vars属性内部。创建后的CSS变量可以在任意位置使用，但需要满足选择器的条件。
 
+```js
+import { style } from "@vanilla-extract/css";
+
+export const cls1 = style({
+  vars: {
+    "--jzplp1": "red",
+  },
+  color: "var(--jzplp1)",
+});
+
+export const cls2 = style({
+  color: "var(--jzplp1)",
+  fontSize: 20,
+});
+
+/* 生成结果
+.r9osg00 {
+  --jzplp1: red;
+  color: var(--jzplp1);
+}
+.r9osg01 {
+  color: var(--jzplp1);
+  font-size: 20px;
+}
+*/
+```
+
+还可以通过createVar方法创建带有哈希的模块化CSS变量，在使用的位置引用即可。
+
+```js
+import { style, createVar } from "@vanilla-extract/css";
+
+const cssVar = createVar();
+
+export const cls1 = style({
+  vars: {
+    [cssVar]: "red",
+  },
+  color: cssVar,
+});
+
+export const cls2 = style({
+  color: cssVar,
+  fontSize: 20,
+});
+
+/* 生成结果
+.r9osg01 {
+  --r9osg00: red;
+  color: var(--r9osg00);
+}
+.r9osg02 {
+  color: var(--r9osg00);
+  font-size: 20px;
+}
+*/
+```
+
+### 嵌套选择器
+
+#### 常规嵌套
+
+#### 传入类名
+
+#### 禁止场景
 
 ## 非运行时CSS in JS
 
