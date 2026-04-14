@@ -1733,7 +1733,7 @@ export const cls1 = style({
 ```
 
 #### 禁止场景
-选择器也不是随便写都行的，vanilla-extract要求选择器必须作用于当前类。，如果作用域其它类，那么编译时也会报错：
+选择器也不是随便写都行的，vanilla-extract要求选择器必须作用于当前类。如果作用于其它类，那么编译时也会报错：
 
 ```js
 import { style } from "@vanilla-extract/css";
@@ -1760,8 +1760,96 @@ Style selectors must target the '&' character (along with any modifiers), e.g. `
 它会实际分析CSS规则，并不是把&写在什么位置就能避开的。
 
 #### 传入类名
+嵌套选择器也支持传入其它style函数生成的类名，同样需要遵守选择器必须作用于当前类。
+
+```js
+import { style } from "@vanilla-extract/css";
+
+const cls = style({
+  color: 'red',
+})
+
+export const cls1 = style({
+  selectors: {
+    [`.${cls} &`]: {
+      background: "yellow",
+    },
+    [`&:not(.${cls})`]: {
+      fontSize: 20
+    },
+  },
+});
+
+/* 生成结果
+.r9osg00 {
+  color: red;
+}
+.r9osg00 .r9osg01 {
+  background: #ff0;
+}
+.r9osg01:not(.r9osg00) {
+  font-size: 20px;
+}
+*/
+```
 
 ### 全局样式
+vanilla-extract可通过globalStyle函数创建全局样式，第一个参数是选择器，第二是样式对象。
+
+```js
+import { globalStyle } from "@vanilla-extract/css";
+
+globalStyle("body", {
+  vars: {
+    "--jzplp": "10px",
+  },
+  margin: 0,
+});
+
+globalStyle(".abc .bcd:hover", {
+  color: "red",
+});
+
+/* 生成结果
+body {
+  --jzplp: 10px;
+  margin: 0;
+}
+.abc .bcd:hover {
+  color: red;
+}
+*/
+```
+
+全局样式中也能包含使用style函数生成的模块化类名，这时候就没有选择器作用限制了：
+
+```js
+import { globalStyle, style } from "@vanilla-extract/css";
+
+const cls = style({
+  color: "red",
+});
+
+globalStyle(`body .${cls}`, {
+  margin: 0,
+});
+
+globalStyle(`.${cls} :not(div)`, {
+  fontSize: 10,
+});
+
+/* 生成结果
+.r9osg00 {
+  color: red;
+}
+body .r9osg00 {
+  margin: 0;
+}
+.r9osg00 :not(div) {
+  font-size: 10px;
+}
+*/
+```
 
 ### 主题
 
