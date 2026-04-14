@@ -1643,12 +1643,127 @@ export const cls2 = style({
 ```
 
 ### 嵌套选择器
+vanilla-extract支持使用嵌套选择器，但是有一些特殊的规则。
 
-#### 常规嵌套
+#### 顶层使用
+对于简单的无参数的伪类或者伪元素选择器，可以与其它CSS属性放在一起顶层使用。
+
+```js
+import { style } from "@vanilla-extract/css";
+
+export const cls1 = style({
+  color: "red",
+  ":hover": {
+    background: "yellow",
+  },
+  "::before": {
+    content: "jzplp",
+  },
+});
+
+/* 生成结果
+.r9osg00 {
+  color: red;
+}
+.r9osg00:hover {
+  background: #ff0;
+}
+.r9osg00:before {
+  content: "jzplp";
+}
+*/
+```
+
+可以看到，与属性一同使用时可以省略&符号。但是这里不能添加带参数或者复杂的组合选择器，否则会编译报错：
+
+```js
+import { style } from "@vanilla-extract/css";
+
+export const cls1 = style({
+  color: "red",
+  "&:hover": {
+    background: "yellow",
+  },
+  ":not(.cls)": {
+    content: "jzplp",
+  },
+});
+
+/* 分别报错
+error TS2353: Object literal may only specify known properties, and '"&:hover"' does not exist in type 'ComplexStyleRule'.
+error TS2353: Object literal may only specify known properties, and '":not(.cls)"' does not exist in type 'ComplexStyleRule'.
+*/
+```
+
+#### selectors中使用
+在selectors属性中可以编写复杂的选择器，但要自己写&符号。
+
+```js
+import { style } from "@vanilla-extract/css";
+
+export const cls1 = style({
+  color: "red",
+  selectors: {
+    "&:hover": {
+      background: "yellow",
+    },
+    "&:not(.cls)": {
+      content: "jzplp",
+    },
+    ".abc &": {
+      fontSize: 20
+    },
+  },
+});
+
+/* 生成结果
+.r9osg00 {
+  color: red;
+}
+.r9osg00:hover {
+  background: #ff0;
+}
+.r9osg00:not(.cls) {
+  content: "jzplp";
+}
+.abc .r9osg00 {
+  font-size: 20px;
+}
+*/
+```
+
+#### 禁止场景
+选择器也不是随便写都行的，vanilla-extract要求选择器必须作用于当前类。，如果作用域其它类，那么编译时也会报错：
+
+```js
+import { style } from "@vanilla-extract/css";
+
+export const cls1 = style({
+  color: "red",
+  selectors: {
+    ":hover": {
+      background: "yellow",
+    },
+    "& .abc": {
+      fontSize: 20
+    },
+  },
+});
+
+/* 分别报错
+Error: Invalid selector: :hover
+Error: Invalid selector: & .abc
+Style selectors must target the '&' character (along with any modifiers), e.g. `${parent} &` or `${parent} &:hover`.
+*/
+```
+
+它会实际分析CSS规则，并不是把&写在什么位置就能避开的。
 
 #### 传入类名
 
-#### 禁止场景
+### 全局样式
+
+### 主题
 
 ## 非运行时CSS in JS
 
