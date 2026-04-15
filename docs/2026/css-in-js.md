@@ -1852,6 +1852,179 @@ body .r9osg00 {
 ```
 
 ### 主题
+#### 创建主题
+vanilla-extract支持使用createTheme方法创建主题，主题实际上就是一组预设CSS变量。首先我们创建主题并直接打包，看下输出结果：
+
+```js
+import { createTheme } from "@vanilla-extract/css";
+
+const [theme1, vars] = createTheme({
+  color: {
+    banner: "red",
+    font: "blue",
+  },
+  size: {
+    margin: "20px",
+  },
+});
+
+console.log(theme1);
+console.log(vars);
+
+/* 打包命令行输出
+r9osg00
+{
+  color: { banner: 'var(--r9osg01)', font: 'var(--r9osg02)' },
+  size: { margin: 'var(--r9osg03)' }
+}
+*/
+
+/* 打包后CSS文件内容
+.r9osg00 {
+  --r9osg01: red;
+  --r9osg02: blue;
+  --r9osg03: 20px;
+}
+*/
+```
+
+上面创建了一个主题。其中vars表示这个主题模式的对象，其中包含变量的引用。theme1是类名，使用这个类即可对这些CSS变量提供值。
+
+#### 使用主题
+下面我们再来看使用方式。首先是styles.css.ts，除了创建主题之外还创建了样式，其中引用了vars中的变量。
+
+```js
+import { createTheme, style } from "@vanilla-extract/css";
+
+const [theme1, vars] = createTheme({
+  color: {
+    banner: "red",
+    font: "blue",
+  },
+  size: {
+    margin: "20px",
+  },
+});
+
+const cls1 = style({
+  color: vars.color.font,
+});
+
+export { theme1, cls1 };
+
+/* 生成结果
+.r9osg00 {
+  --r9osg01: red;
+  --r9osg02: blue;
+  --r9osg03: 20px;
+}
+.r9osg04 {
+  color: var(--r9osg02);
+}
+*/
+```
+
+然后是main.js，将主题类放到body中，再将应用主题的类放到div上。这样div会使用body上的变量，使主题生效。
+
+```js
+import { theme1, cls1 } from './styles.css';
+
+document.body.className = theme1;
+
+function genEle(test: string, className: string) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+genEle("jzplp", cls1);
+```
+
+​![](/2026/css-in-js-41.png)
+
+#### 复用主题
+既然是主题，那么应该不会只有一个，主题应该是同变量但是值不同的一组结构，这时候可以复用vars继续创建主题。
+
+```js
+import { createTheme } from "@vanilla-extract/css";
+
+const [theme1, vars] = createTheme({
+  color: {
+    banner: "red",
+    font: "blue",
+  },
+  size: {
+    margin: "20px",
+  },
+});
+
+const theme2 = createTheme(vars, {
+  color: {
+    banner: "yrllow",
+    font: "pink",
+  },
+  size: {
+    margin: "30px",
+  },
+});
+
+export { theme1, theme2 };
+
+/* 生成结果
+.r9osg00 {
+  --r9osg01: red;
+  --r9osg02: blue;
+  --r9osg03: 20px;
+}
+.r9osg04 {
+  --r9osg01: yellow;
+  --r9osg02: pink;
+  --r9osg03: 30px;
+}
+*/
+```
+
+可以看到，创建的theme2应该遵守同样的结构，但是值不同。theme2仅生成类名，在对应的标签上赋值即可实现主题切换。
+
+#### 仅创建vars
+通过上面的例子可以看到，vars表示主题的结构和引用，生成的类名表示实际的主题值。但是现在创建主题结构和创建主题值合二为一了，如果希望分开生成，vanilla-extract提供了createThemeContract方法。可以将上面的代码改下如下，效果不变。
+
+```js
+import { createTheme, createThemeContract } from "@vanilla-extract/css";
+
+const vars = createThemeContract({
+  color: {
+    banner: "",
+    font: "",
+  },
+  size: {
+    margin: "",
+  },
+});
+
+const theme1 = createTheme(vars, {
+  color: {
+    banner: "red",
+    font: "blue",
+  },
+  size: {
+    margin: "20px",
+  },
+});
+
+const theme2 = createTheme(vars, {
+  color: {
+    banner: "yellow",
+    font: "pink",
+  },
+  size: {
+    margin: "30px",
+  },
+});
+
+export { theme1, theme2 };
+```
 
 ## 非运行时CSS in JS
 
