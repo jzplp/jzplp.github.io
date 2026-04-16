@@ -2041,11 +2041,24 @@ export { theme1, theme2 };
 | Radium | 否 | 不支持 | 支持 | 已停止维护 |
 | JSS | 插件支持 | 支持 | 支持 | 已停止维护 |
 
-### 各类方案比较
-虽然有社区中有非常多的的
+### 特点总结
+根据本文介绍的几个CSS in JS库以及网络上相关分析，这里我们总结一下CSS in JS的特点，其中有优点，也有缺点：
 
-
-vue有自己的方案，基本不需要CSS in JS。
+* 使用方式和API各有特色，但也有很多相似之处
+  * 可以看到很多API设计都是类似的，例如styled组件、css的props、模板字符串、对象作为CSS规则表示，这些API在很多库中都以类似的方式出现
+  * 但很多库的设计都有自己的特点和使用方式，并没有千篇一律
+* 虽然CSS in JS的设计各有特色，但还是可以大致分成 运行时库和零运行时库两类
+  * 运行时库对于CSS传参的灵活性高，但是运行时生成CSS，有额外的性能损失
+  * 零运行时库在编译时生成CSS文件，没有运行时性能损失，但有对于CSS参数等灵活性低。
+* CSS in JS库对于类型检查和提示更友好，支持TypeScript更完善
+* 由于CSS是在JavaScript中撰写的，因此控制和切换CSS要更方便。
+* CSS in JS的类名时根据hash生成的，自带模块化类名，省去了起名的烦恼，也防止了CSS污染
+* 类名是自动生成的，因此有些开发者认为比较难看，不方便查找元素等。相比较CSS Modules可以配置原类名+hash，可以轻松识别类名
+* 在JavaScript中写CSS，更方便组织代码，例如将CSS与HTML和JS放在一起，以组件化的形式组织
+* 对于运行时CSS，CSS代码只有在需要的时候才加载，对于部分页面场景，具有更小的首屏文件体积和其它优势
+* 使用独立的CSS文件我们不清楚哪些样式是真正使用的，哪些样式没有被用到。而CSS in JS的CSS规则引用关系明显，我们可以轻松找到未被使用的样式，也可以利用tree-shark等技术编译时去掉不需要的样式
+* 有些人很喜欢CSS in JS来组织CSS代码，但是有些人却觉得多此一举。萝卜青菜，各有所爱
+* CSS in JS在React框架使用居多，Vue框架有自己的方案（组件作用域CSS，我们之前介绍过），基本不需要CSS in JS
 
 ## 参考
 
@@ -2105,3 +2118,6 @@ vue有自己的方案，基本不需要CSS in JS。
   https://compiledcssinjs.com/
 - Radium GitHub\
   https://github.com/FormidableLabs/radium
+- CSS Modules完全指南：CSS模块化的特性，生态工具和实践\
+  https://jzplp.github.io/2026/css-modules.html
+  
