@@ -2027,16 +2027,22 @@ export { theme1, theme2 };
 ```
 
 ## 总结
+### 库列表
+前面我们介绍了四个CSS in JS的库，但这仅仅是九牛一毛。社区中CSS in JS的库非常非常多，这里用表格列举一些知名度较高的:
 
-### 其它库
-前面我们介绍了四个CSS in JS的库，这只是名气比较大的一些库，事实上社区中CSS in JS的库非常多，这里再用表格列举一些:
+| 库名称 | 零运行时 | 纯JS | 适配React框架 | 备注 |
+| - | - | - | - | - |
+| styled-components | 否 | 不支持 | 支持 | 本文已介绍 |
+| Emotion | 否 | 支持 | 支持 | 本文已介绍 |
+| linaria | 是 | 支持 | 支持 | 本文已介绍 |
+| vanilla-extract | 是 | 支持 | 不支持 | 本文已介绍 |
+| Panda CSS | 是 | 支持 | 支持 | - |
+| Compiled | 是 | 不支持 | 支持 | - |
+| Radium | 否 | 不支持 | 支持 | 已停止维护 |
+| JSS | 插件支持 | 支持 | 支持 | 已停止维护 |
 
-| 库名称 | 零运行时 | 纯JS | React框架 |
-| - | - | - | - |
-| Panda CSS | 是 | 支持 | 支持 |
-| - | - | - | - |
-
-## 各类方案比较
+### 各类方案比较
+虽然有社区中有非常多的的
 
 
 vue有自己的方案，基本不需要CSS in JS。
@@ -2095,3 +2101,7 @@ vue有自己的方案，基本不需要CSS in JS。
   https://wyw-in-js.dev/
 - PostCSS完全指南：功能/配置/插件/SourceMap/AST/插件开发/自定义语法
   https://jzplp.github.io/2025/postcss-intro.html
+- Compiled 文档\
+  https://compiledcssinjs.com/
+- Radium GitHub\
+  https://github.com/FormidableLabs/radium
