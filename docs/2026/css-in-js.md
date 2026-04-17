@@ -1,6 +1,6 @@
 # css-in-js（未完成）
 
-CSS作为前端代码中的重要组成部分，在工程中一般是以独立CSS文件的形式存在的。而CSS in JS，顾名思义，是在JavcaScvript中写CSS代码。尤其是React框架的流行，JavaScript和HTML模板都在JavaScript文件中描述了，只有CSS代码的组织还比较疏离。因此出现了很多CSS in JS的开源库，帮助我们将CSS放到JavcaScvript代码中，实现React组件代码的耦合性。
+CSS作为前端代码中的重要组成部分，在工程中一般是以独立CSS文件的形式存在的。而CSS in JS，顾名思义，是在JavaScript中写CSS代码。尤其是React框架的流行，JavaScript和HTML模板都在JavaScript文件中描述了，只有CSS代码的组织还比较疏离。因此出现了很多CSS in JS的开源库，帮助我们将CSS放到JavaScript代码中，实现React组件代码的耦合性。
 
 ## React工程示例
 
@@ -214,7 +214,7 @@ export default function App() {
 前面我们引入了styled-components，简单介绍了实现方式和传参。这里再介绍一下更多特性。
 
 ### 组件继承
-类似于面对对象，使用styled-components生成的组件也有继承特性，子组件可以继承父组件的样式。我们举个例子：
+类似于面向对象，使用styled-components生成的组件也有继承特性，子组件可以继承父组件的样式。我们举个例子：
 
 ```jsx
 import styled from "styled-components";
@@ -705,7 +705,7 @@ export default function App() {
 }
 ```
 
-这里创建了两个组件，Comp1是自组件，Comp2是父组件。子组件和父组件中的CSS属性不冲突的可以同时生效，冲突属性以父组件的为准，例如这里的color。
+这里创建了两个组件，Comp1是子组件，Comp2是父组件。子组件和父组件中的CSS属性不冲突的可以同时生效，冲突属性以父组件的为准，例如这里的color。
 
 ​![](/2026/css-in-js-18.png)
 
@@ -1963,7 +1963,7 @@ const [theme1, vars] = createTheme({
 
 const theme2 = createTheme(vars, {
   color: {
-    banner: "yrllow",
+    banner: "yellow",
     font: "pink",
   },
   size: {
@@ -2058,7 +2058,7 @@ export { theme1, theme2 };
 * 类名是自动生成的，因此有些开发者认为比较难看，不方便查找元素等。相比较CSS Modules可以配置原类名+hash，可以轻松识别类名
 * 在JavaScript中写CSS，更方便组织代码，例如将CSS与HTML和JS放在一起，以组件化的形式组织
 * 对于运行时CSS，CSS代码只有在需要的时候才加载，对于部分页面场景，具有更小的首屏文件体积和其它优势
-* 使用独立的CSS文件我们不清楚哪些样式是真正使用的，哪些样式没有被用到。而CSS in JS的CSS规则引用关系明显，我们可以轻松找到未被使用的样式，也可以利用tree-shark等技术编译时去掉不需要的样式
+* 使用独立的CSS文件我们不清楚哪些样式是真正使用的，哪些样式没有被用到。而CSS in JS的CSS规则引用关系明显，我们可以轻松找到未被使用的样式，也可以利用tree-shaking等技术编译时去掉不需要的样式
 * 有些人很喜欢CSS in JS来组织CSS代码，但是有些人却觉得多此一举。萝卜青菜，各有所爱
 * CSS in JS在React框架使用居多，Vue框架有自己的方案（组件作用域CSS，我们之前介绍过），基本不需要CSS in JS
 
