@@ -30,10 +30,20 @@ todo 今年开始对于学习的技术更详细的统计
   * Babel与core-js，根据浏览器兼容性和代码使用注入Polyfill
   * core-js/configurator, core-js-compat, core-js-builder
 * CSS组件化方案
-  * CSS命名规范：BEM, 
+  * CSS命名规范：BEM、OOCSS、SMACSS、ITCSS、AMCSS、SUITCSS
+  * CSS模块化：
+    * CSS Modules的特点和接入方式
+    * 在Vue/React等框架中的使用方式
+    * postcss-modules和相关的辅助插件
+  * CSS in JS技术
+    * styled-components的接入和特性
+    * Emotion相关库：@emotion/styled, @emotion/react, @emotion/css
+    * 在React和纯JS中使用linaria、
+    * vanilla-extract的接入和使用
 * 多语言技术相关
   * ICU信息语法，intl-messageformat渲染多语言
   * react-intl, react-intl-universal等React多语言工具
+  * 了解阿拉伯字母相关的多语言处理
 * Chrome浏览器插件简单开发
 
 ### 算法题
@@ -42,18 +52,14 @@ todo 今年开始对于学习的技术更详细的统计
 
 ### 生孩子
 
-### 抚养孩子
+### 抚养孩子 todo
 
 学习知识：
 
 * 抱孩子：横抱，竖抱
-* 换尿布，哄睡
+* 换尿布，哄睡（孩子认人了以后我不能哄睡了）
 * 洗澡 todo
-
-实践：
-
-* 抱孩子：横抱
-
+* 了解和购买婴儿用品：纸尿裤/拉拉裤，棉柔巾，隔尿垫，防溢乳垫，酒精湿巾
 
 ## 个人成长
 
@@ -72,10 +78,13 @@ todo 今年开始对于学习的技术更详细的统计
 * 临港大学城区域
 * 102住宅和生活区域
 * 临港大部分商场，超市，小商圈等
-* 临港海岸线，包括南汇嘴公园，东海大桥附近，风车湾，芦潮港码头等 没完 还有上面的泥滩
+* 临港海岸线，包括南汇嘴公园，东海大桥附近，风车湾，芦潮港码头等
 
 
-## 学习AI
+## 学习AI应用
+* 试用市场上的大模型chat模式来辅助解答问题，制作PPT，生成图片等
+* 试用市场上的AI Agent辅助编程工具（进行中）
+
 
 ## 放弃的爱好
 

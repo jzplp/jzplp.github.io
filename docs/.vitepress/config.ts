@@ -14,7 +14,11 @@ const sidebarLists = [
         text: "CSS组件化方案概述：BEM/CSS-Modules/CSS-in-js/原子化CSS等",
         link: "/2026/css-component",
       },
-            {
+      {
+        text: "原子化CSS",
+        link: "/2026/atomic-css",
+      },
+      {
         text: "运行时vs编译时：CSS in JS四种主流方案介绍和对比",
         link: "/2026/css-in-js",
       },
