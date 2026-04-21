@@ -64,7 +64,7 @@ export default function App() {
 
 虽然框架不同，但不同的类名作用效果一模一样。
 
-### 构建特性
+### 零运行时构建特性
 以开发模式运行前面的工程，在浏览器中可以看到head里面有一个style标签，里面是Tailwind CSS‌注入的CSS代码。代码比较长，是CSS Reset重置初始样式的代码。除此之外，还包含我们写入的类名所引入的CSS代码：
 
 ​![](/2026/atomic-css-3.png)
@@ -73,7 +73,65 @@ Tailwind CSS中预设的原子类名非常多，这里的style标签没有全部
 
 ​![](/2026/atomic-css-4.png)
 
-todo  看看没有用到的和变量的特性
+类名就是一个字符串，而且可能是通过变量动态赋值的。Tailwind CSS能识别放在变量中的类名么？我们举一个例子，一开始元素中没有类名，点击后通过React的state赋值类名。
+
+```jsx
+import { useState } from "react";
+
+const cls = "text-orange-500";
+
+export default function App() {
+  const [clsState, setState] = useState("");
+  return (
+    <div>
+      <div className={clsState}>jzplp1</div>
+      <div onClick={() => setState(cls)}>点击赋值类名</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-5.png)
+
+可以看到点击后是正常生效的。观察点击前，发现这个类名仅仅作为一个字符串常量，没有真正被提供给元素时，就已经被Tailwind CSS识别到，添加对应的CSS规则了。这里我们再试一个例子，将这个字符串常量拆开：
+
+```jsx
+import { useState } from "react";
+
+const cls1 = "text-oran";
+const cls2 = "ge-500";
+
+export default function App() {
+  const [clsState, setState] = useState("");
+  return (
+    <div>
+      <div className={clsState}>jzplp1</div>
+      <div onClick={() => setState(cls1 + cls2)}>点击赋值类名</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-6.png)
+
+这时候，点击前在CSS中搜不到类名，点击后样式也没有正常生效。这说明，Tailwind CSS识别的方式是在代码中搜索符合预置类名的字符串，如果搜到了就添加对应的CSS规则，搜不到就不添加。我们将一个字符串拆开成两个，因此Tailwind CSS就找不到了。为了证实我们的想法，再举个例子，这此只创建字符串，但不引用到元素中：
+
+```jsx
+const cls = "text-orange-500";
+console.log(cls);
+
+export default function App() {
+  return (
+    <div>
+      <div>jzplp1</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-7.png)
+
+通过结果可以看到，我们创建的普通字符串并没有作为类名，但是因为这个字符串值符合Tailwind CSS的预置类名，因此对应的CSS规则也就被添加了。因此Tailwind CSS识别类名的方式是代码静态分析，搜到哪个字符串就添加，而并不会实际执行代码看真正应用到元素中的是哪些类。而我们打包后，对应的CSS规则便预置在代码中，生产模式运行时并不需要Tailwind CSS的参与。从这个角度看，Tailwind CSS是“零运行时”的CSS库。
 
 ## Windi CSS
 
