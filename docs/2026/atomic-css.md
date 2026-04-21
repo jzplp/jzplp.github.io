@@ -133,6 +133,15 @@ export default function App() {
 
 通过结果可以看到，我们创建的普通字符串并没有作为类名，但是因为这个字符串值符合Tailwind CSS的预置类名，因此对应的CSS规则也就被添加了。因此Tailwind CSS识别类名的方式是代码静态分析，搜到哪个字符串就添加，而并不会实际执行代码看真正应用到元素中的是哪些类。而我们打包后，对应的CSS规则便预置在代码中，生产模式运行时并不需要Tailwind CSS的参与。从这个角度看，Tailwind CSS是“零运行时”的CSS库。
 
+### VSCode插件
+Tailwind CSS有非常非常多的预设类命名，在文档网站中可以查到，类名虽然有规律，但对于刚接触的使用者来说还是有点困难，需要经常对照查找。因此Tailwind CSS提供了相关的编辑器插件，例如在VSCode中是Tailwind CSS IntelliSense。
+
+​![](/2026/atomic-css-8.png)
+
+安装上之后，写类名时会有补全提示。鼠标放到类名上时，可以看到类名对应的CSS规则。
+
+​![](/2026/atomic-css-9.png)
+
 ## Windi CSS
 
 ## UnoCSS
