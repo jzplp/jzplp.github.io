@@ -5,7 +5,7 @@
 有没有一种工具，可以预置基础的CSS基类，元素只需要引用，不用再思考类名和写大量CSS代码呢？ 原子化CSS（Atomic CSS）就能做到。它将CSS规则简化为一个个简短的原子化类名，通过拼合这些原子化类名，实现我们想要的CSS效果，同时以另一个角度看，它也基本实现了CSS in JS的效果。
 
 ## Tailwind CSS‌接入和构建特性
-Tailwind CSS‌是最知名的原子化CSS工具，我们首先介绍下它的接入和使用方式。
+Tailwind CSS‌是最知名的原子化CSS工具，我们首先介绍下它的接入和使用方式。这里使用的是Tailwind CSS V4。
 
 ### 接入方式
 使用Tailwind CSS并不限定框架，甚至不使用框架的Vanilla JS代码可以使用，而且接入方式一样。Tailwind CSS需要编译，这里我们选用Vite创建工程。
@@ -162,7 +162,7 @@ export default function App() {
 
 ​![](/2026/atomic-css-10.png)
 
-对于带参数的前缀，可以使用XXX-。这里举几个例子，就不再截图浏览器效果了：
+对于带参数的前缀，可以使用XXX-。例如has-xxx相当于:has(xxx)。这里举几个例子，就不再截图浏览器效果了：
 
 ```CSS
 /* 
@@ -185,6 +185,38 @@ export default function App() {
   }
 }
 ```
+
+前面的伪类和伪元素可以任意组合使用，效果同时生效。例如：
+
+```CSS
+/* 
+类名：focus:active:font-medium
+对应CSS规则示意： 
+*/
+.focus\:active\:font-medium {
+  &:focus {
+    &:active {
+      font-weight: var(--font-weight-medium);
+    }
+  }
+}
+
+/* 
+类名：hover:not-[a]:border-red-500
+对应CSS规则示意： 
+*/
+.hover\:not-\[a\]\:border-red-500 {
+  &:hover {
+    @media (hover: hover) {
+      &:not(*:is(a)) {
+        border-color: var(--color-red-500);
+      }
+    }
+  }
+}
+```
+
+
 
 todo 媒体查询
 
