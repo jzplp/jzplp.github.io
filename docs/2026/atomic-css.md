@@ -241,6 +241,69 @@ export default function App() {
 * @max-md 表示 @container (width < 28rem)
 * @max-[...] 表示 @container (width < ...)
 
+### 主题变量
+从前面的很多例子中我们可以看到，Tailwind CSS‌使用了很多CSS变量来设置属性。像是前面的text-orange-500的颜色值并不是我们想要的，sm和xl值和我们希望的宽度也不一致。使用主题变量功能，即可在不修改类名的情况下，切换内部的CSS值。
+
+我们修改index.css文件，增加@theme，这是Tailwind CSS的自定义指令，我们在内部设置CSS变量即可：
+
+```css
+@theme {
+  --color-orange-500: red;
+}
+```
+
+我们将橘色500设置为红色，然后分别设置了文字颜色，背景色，边框色都为orange-500，可以看到引用的变量还是color-orange-500，但实际都变为红色了。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-orange-500">jzplp1</div>
+      <div className="bg-orange-500">jzplp2</div>
+      <div className="border-orange-500 border-2">jzplp3</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-11.png)
+
+不仅颜色可以改，其它的很多单位都可以改，例如字号大小，间距，宽高等等。这里再举一个前面媒体查询的例子，默认的sm表示的40rem，这里改成了30rem。
+
+```css
+/* 设置主题变量 */
+@theme {
+  --breakpoint-sm: 30rem;
+}
+
+/* 对应结果 */
+/* 类名：sm:text-center */
+.sm\:text-center {
+  @media (width >= 30rem) {
+    text-align: center;
+  }
+}
+
+/* 类名：max-sm:text-center */
+.max-sm\:text-center {
+  @media (width < 30rem) {
+    text-align: center;
+  }
+}
+```
+
+可以看到，对应媒体查询相关的sm条件都一起改掉了。注意这里的查询条件并不是以CSS变量形式实现的，而是读取主题变量后，经过编译处理的。因此虽然主题变量看起来很像CSS，但确实要包裹在@theme中经过编译处理，而不是直接作为真正的CSS变量。
+
+当然部分属性也是可以通过CSS变量修改覆盖的，例如前面的颜色，我们直接在根组件上覆盖CSS变量值，可以看到浏览器上结果是生效的。
+
+```css
+:root {
+  --color-orange-500: red;
+}
+```
+
+​![](/2026/atomic-css-12.png)
+
 ## Windi CSS
 
 ## UnoCSS
