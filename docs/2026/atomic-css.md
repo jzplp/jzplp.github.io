@@ -304,6 +304,80 @@ export default function App() {
 
 ​![](/2026/atomic-css-12.png)
 
+### 颜色变量
+对于已有的颜色变量，可以设置透明度，首先介绍一种设置方式：
+
+```CSS
+/* 类名：bg-sky-500/60 */
+.bg-sky-500\/60 {
+  background-color: color-mix(in oklab, var(--color-sky-500) 60%, transparent);
+}
+```
+
+透明度百分比在/符号后设置，这里设置了60%。在浏览器执行后，可以看到计算过程和结果：
+
+​![](/2026/atomic-css-13.png)
+
+上面的方式只支持百分比整数。还有几种方式，可以接收任意值或者CSS变量，这里举例一下：
+
+```CSS
+/* 类名：bg-sky-500/[66.6%] */
+.bg-sky-500\/\[66\.6\%\] {
+  background-color: color-mix(in oklab, var(--color-sky-500) 66.6%, transparent);
+}
+
+/* 预置CSS变量 */
+:root {
+  --abc-value: 88.8%;
+}
+/* 类名：bg-sky-500/(--abc-value) */
+.bg-sky-500\/\(--abc-value\) {
+  background-color: color-mix(in oklab, var(--color-sky-500) var(--abc-value), transparent);
+}
+```
+
+前面了解到Tailwind CSS‌预设了很多颜色值，这些值也可以在普通用CSS中被使用。例如--color-sky-500是预设的颜色之一，我们在CSS代码中直接使用。
+
+```CSS
+.cls1 {
+  color: var(--color-sky-500);
+}
+```
+
+Tailwind CSS在编译时也会读取并识别这个CSS变量，并把对应的变量值提供出来。我们直接使用这个类名放到元素标签上，实测可以生效：
+
+```jsx
+export default function App() {
+  return <div className="cls1">jzplp1</div>;
+}
+```
+
+​![](/2026/atomic-css-14.png)
+
+除了使用已有预设颜色之外，我们还可以定义自己的颜色值，并且拥有对应颜色值的各种类名：
+
+```CSS
+@theme {
+  --color-jzplp: blue;
+}
+```
+
+首先预设一个颜色值，以--color-开头，后面是自定义名字jzplp。然后我们可以在各种类名模板中使用这个新名字，通过浏览器查看都可以生效。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-jzplp">jzplp1</div>
+      <div className="bg-jzplp">jzplp2</div>
+      <div className="border-jzplp border-1">jzplp3</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-15.png)
+
 ## Windi CSS
 
 ## UnoCSS
