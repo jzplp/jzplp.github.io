@@ -378,6 +378,68 @@ export default function App() {
 
 ​![](/2026/atomic-css-15.png)
 
+### 使用任意值
+有些时候我们需要一些任意值，例如长度宽度位置等，有时候因为不通用，所以没有定义变量的必要。这时候Tailwind CSS提供了自定义值的相关语法，在[]中写入值即可。
+
+```CSS
+/* 类名：bg-[red] */
+.bg-\[red\] {
+  background-color: red;
+}
+
+/* 类名：bg-[#123456] */
+.bg-\[\#123456\] {
+  background-color: #123456;
+}
+
+/* 类名：w-[10.5px] */
+.w-\[10\.5px\] {
+  width: 10.5px;
+}
+```
+
+也可以接收CSS变量，包裹在()里面。
+
+```CSS
+/* 类名：h-(--jzplp-height) */
+.bg-\[red\] {
+  background-color: red;
+}
+
+/* 类名：bg-(--jzplp-color) */
+.bg-\(--jzplp-color\) {
+  background-color: var(--jzplp-color);
+}
+```
+
+我注意到，有些不同含义的类名模板是相同的，例如 text-。它可以可以接收数字，也可以接收颜色值等，在接收不同的值时它作用的属性不同，Tailwind CSS‌内部会处理这些：
+
+```CSS
+/* 类名：text-[10px] */
+.text-\[10px\] {
+  font-size: 10px;
+}
+
+/* 类名：text-[red] */
+.text-\[red\] {
+  color: red;
+}
+```
+
+但如果接收的是CSS变量，值是不确定的，这时候Tailwind CSS就无法处理了，需要我们指定数据类型：
+
+```CSS
+/* 类名：text-(length:--jzplp-value) */
+.text-\(length\:--jzplp-value\) {
+  font-size: var(--jzplp-value);
+}
+
+/* 类名：text-(color:--jzplp-value) */
+.text-\(color\:--jzplp-value\) {
+  color: var(--jzplp-value);
+}
+```
+
 ## Windi CSS
 
 ## UnoCSS
