@@ -440,6 +440,81 @@ export default function App() {
 }
 ```
 
+最后再列举一个after伪元素的示例：
+
+```jsx
+export default function App() {
+  return <div className="after:content-['hello']">jzplp1 </div>;
+}
+
+/* 类名：after:content-['hello']
+.after\:content-\[\'hello\'\] {
+  &::after {
+    --tw-content: 'hello';
+    content: var(--tw-content);
+  }
+}
+*/
+```
+
+​![](/2026/atomic-css-16.png)
+
+### 自定义utility
+utility像是一个加强版的类名，可以用作类使用，也可以创建类模板。首先我们先列举一个简单的例子。
+
+```css
+@utility abc {
+  color: blue;
+  .bcd {
+    color: red;
+  }
+}
+```
+
+首先我们创建了一个utility名叫abc，它就像一个正常的CSS规则，可以写CSS属性，嵌套CSS规则，使用时就是正常的类名。
+
+```jsx
+export default function App() {
+  return (
+    <div className="abc">
+      jzplp1 <div className="bcd">jzplp2</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-17.png)
+
+utility不仅能作为普通类名，还可以和前面介绍的内容组合，例如伪类。普通类名就无法组合。
+
+```CSS
+/* 类名：hover:abc */
+.hover\:abc {
+  &:hover {
+    @media (hover: hover) {
+      color: blue;
+      .bcd {
+        color: red;
+      }
+    }
+  }
+}
+```
+
+utility名称中还可以接收*号，此时它就变为“类名模板”，可以根据名称动态生成CSS样式。
+
+```css
+@utility abc-* {
+  flex-grow: --value(number);
+}
+```
+
+这里创建了一个
+
+
+
+
+
 ## Windi CSS
 
 ## UnoCSS
