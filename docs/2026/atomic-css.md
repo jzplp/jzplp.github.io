@@ -573,6 +573,49 @@ utility名称中还可以接收*号，此时它就变为“类名模板”，可
 
 通过utility功能，我们可以更灵活的定制自己工程的类名，满足各种组合需求。
 
+### 自定义custom-variant
+custom-variant可以自定义包裹类的一段CSS规则，实际上就是前面类名中冒号的用法。这里我们举个例子。创建一个custom-variant。
+
+```CSS
+@custom-variant abc {
+  &:hover:active {
+    @slot;
+  }
+}
+```
+
+其中的slot表示使用时，冒号后面的CSS规则会被填充进这里。我们使用试一下：
+
+```jsx
+export default function App() {
+  return <div className="abc:text-blue-500">jzplp2</div>;
+}
+```
+
+​![](/2026/atomic-css-18.png)
+
+custom-variant可以接收任意条件组合。这里再举一个例子，不仅用了媒体查询，还增加了元素样式。
+
+```CSS
+@custom-variant abc {
+  @media screen and (max-width: 600px) {
+    @slot;
+    & {
+      background: red;
+    }
+  }
+}
+
+/* 类名：abc:text-blue-500 */
+.abc\:text-blue-500 {
+  @media screen and (max-width: 600px) {
+    color: var(--color-blue-500);
+    background: red;
+  }
+}
+```
+
+
 ## Windi CSS
 
 ## UnoCSS
