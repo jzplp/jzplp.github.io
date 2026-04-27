@@ -615,12 +615,71 @@ custom-variant可以接收任意条件组合。这里再举一个例子，不仅
 }
 ```
 
-
-## Windi CSS
-
 ## UnoCSS
+UnoCSS是一个原子CSS引擎，它本身不包含类名模板，而是通过各种各样的规则和预设实现各种风格的原子化CSS样式。当然其中也包含Tailwind CSS的样式。
+
+### 接入方式
+这里还是使用Vite，尝试在React中接入。首先执行命令行：
+
+```sh
+# 创建工程
+npm create vite@latest
+# 安装UnoCSS相关包
+npm add -D unocss @unocss/preset-wind4
+```
+
+修改vite.config.js，接入UnoCSS。
+
+```ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import UnoCSS from "unocss/vite";
+
+export default defineConfig({
+  plugins: [UnoCSS(), react()],
+});
+```
+
+创建文件uno.config.ts，这是UnoCSS的配置文件。我们引入presetWind4这个预设，它恰恰就是我们前面介绍的Tailwind CSS V4的样式。
+
+```ts
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  presets: [presetWind4()],
+});
+```
+
+然后在入口文件main.tsx中引入这一句，这样接入就完成了。
+
+```js
+import 'virtual:uno.css'
+```
+
+我们在App.tsx中尝试几个Tailwind CSS的类名，通过浏览器可以看到成功应用到元素中了。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="bg-amber-500">jzplp1</div>
+      <div className="hover:text-sky-500">jzplp2</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-19.png)
+
+虽然应用成功，但可以看到具体CSS规则的实现方式是不一样的。head元素中也发现了一个style标签，里面有重置初始样式的代码，以及我们写入的类名所引入的CSS代码。
+
+### 待定
+
 
 ## 总结
+
+Windi CSS已经逐渐停止维护，这里不再介绍了，UnoCSS是Windi CSS的精神继承者。
+
 
 
 ## 参考
@@ -633,6 +692,8 @@ custom-variant可以接收任意条件组合。这里再举一个例子，不仅
   https://windicss.org/
 - Windi CSS GitHub\
   https://github.com/windicss/windicss
+- Windi CSS is Sunsetting\
+  https://windicss.org/posts/sunsetting.html
 - UnoCSS 文档\
   https://unocss.dev/
 - UnoCSS GitHub\
