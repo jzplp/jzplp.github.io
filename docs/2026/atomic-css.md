@@ -673,7 +673,39 @@ export default function App() {
 
 虽然应用成功，但可以看到具体CSS规则的实现方式是不一样的。head元素中也发现了一个style标签，里面有重置初始样式的代码，以及我们写入的类名所引入的CSS代码。
 
-### 待定
+### Tailwind的特性UnoCSS能用么
+在前面接入方式中，我们引入了@unocss/preset-wind4预设，使得UnoCSS的类名和表现接近于Tailwind CSS V4。那么到底有多接近呢？Tailwind CSS的特性在UnoCSS中可以使用么？这里我们来尝试一下。
+
+| 特性类别 | 类名举例 | 是否支持 |
+| - | - | - |
+| 伪类 | focus:bg-amber-500 | 支持 |
+| 伪元素 | placeholder:text-amber-500 | 支持 |
+| 带参数的伪类 | not-focus:bg-amber-500 | 支持 |
+| 大括号参数的伪类 | `has-[div]:text-left` | 支持 |
+| 组合伪类 | `hover:not-[a]:border-red-500` | 支持 |
+| 媒体查询 | `min-[100px]:bg-blue-400` | 支持 |
+| 媒体查询 | `pointer-fine:italic` | 不支持 |
+| 颜色透明度 | bg-sky-500/60 | 支持 |
+| 颜色透明度 | `bg-sky-500/[66.6%]` | 支持 |
+| 使用任意值 | `w-[10.5px]` | 支持 |
+| 使用CSS变量 | bg-(--jzplp-color) | 不支持 |
+| after伪元素 | `after:content-['hello']` | 支持 |
+
+可以看到，绝大部分直接使用的类名是支持的。只有少部分特殊类名，以及自定义CSS变量相关的不支持。这里再列举一下其它非预设类名相关特性的支持情况：
+
+| 特性类别 | 举例 | 是否支持 |
+| - | - | - |
+| CSS文件中使用预设变量 | `color: var(--color-sky-500)` | 不支持 |
+| 修改预设CSS变量 | `--colors-sky-500: red` | 支持 |
+| @theme | - | 不支持 |
+| @utility | - | 不支持 |
+| @custom-variant | - | 不支持 |
+
+可以看到，对于非预设的类名，尤其是通过各种Tailwind CSS中CSS指令实现的特性，UnoCSS都不支持。我们咋一看@unocss/preset-wind4和Tailwind CSS很像，但深入使用会发现，两者的区别很大。那是否说明UnoCSS的灵活性不高，不能自定义使用方式呢？
+
+不是的。UnoCSS的名称叫做“原子化CSS引擎”，那么它必然有很强的扩展能力，只不过扩展和自定义方式与Tailwind CSS不一样。在后面的部分中我们会逐一介绍UnoCSS的扩展能力。
+
+### 零运行时构建特性
 
 
 ## 总结
