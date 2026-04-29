@@ -706,6 +706,62 @@ export default function App() {
 不是的。UnoCSS的名称叫做“原子化CSS引擎”，那么它必然有很强的扩展能力，只不过扩展和自定义方式与Tailwind CSS不一样。在后面的部分中我们会逐一介绍UnoCSS的扩展能力。
 
 ### 零运行时构建特性
+在描述构建特性之前，我们先把重置初始样式的CSS代码删除，不然影响我们后面查看效果。设置uno.config.ts：
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  presets: [
+    presetWind4({
+      preflights: { reset: false, },
+    }),
+  ],
+});
+```
+
+然后进行构建。对应的React组件源码和生成的CSS代码如图所示。确实基本只剩下了我们引入的类相关的CSS规则了。从这个CSS代码也可以看到，UnoCSS生成的代码体积比Tailwind CSS‌更大。
+
+​![](/2026/atomic-css-20.png)
+
+与Tailwind CSS‌一致，UnoCSS也是零运行时的，在构建时扫描源码文件内容，寻找能匹配上的类名，然后注入CSS规则。这里我们依然试一下只引入字符串，不作为类名：
+
+```jsx
+const data = "text-orange-500";
+console.log(data);
+export default function App() {
+  return <div className="text-sky-500">jzplp1</div>;
+}
+```
+通过结果可以看到，虽然text-orange-500没有作为类名使用，但生成代码中还是包含对应的CSS规则。
+
+​![](/2026/atomic-css-21.png)
+
+UnoCSS并非扫描所有文件，在默认情况下他会扫描.jsx, .tsx, .vue, .md, .html等文件。这不包含.ts和.js文件。如果希望将这两种文件包含进来，可以修改uno.config.ts：
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  content: {
+    pipeline: {
+      include: [
+        // 默认扫描文件类型
+        /\.(vue|svelte|[jt]sx|vine.ts|mdx?|astro|elm|php|phtml|marko|html)($|\?)/,
+        // 新增的文件类型
+        'src/**/*.{js,ts}',
+      ],
+    },
+  },
+  presets: [
+    presetWind4({
+      preflights: { reset: false, },
+    }),
+  ],
+});
+```
+
+注意，这里的include配置是完全覆盖的，如果我们没设置默认的扫描类型，它将不会扫描这些默认类型对应的文件。除了
 
 
 ## 总结
