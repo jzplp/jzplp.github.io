@@ -615,7 +615,7 @@ custom-variant可以接收任意条件组合。这里再举一个例子，不仅
 }
 ```
 
-## UnoCSS
+## UnoCSS‌接入和构建特性
 UnoCSS是一个原子CSS引擎，它本身不包含类名模板，而是通过各种各样的规则和预设实现各种风格的原子化CSS样式。当然其中也包含Tailwind CSS的样式。
 
 ### 接入方式
@@ -761,7 +761,73 @@ export default defineConfig({
 });
 ```
 
-注意，这里的include配置是完全覆盖的，如果我们没设置默认的扫描类型，它将不会扫描这些默认类型对应的文件。除了
+注意，这里的include配置是完全覆盖的，如果我们没设置默认的扫描类型，它将不会扫描这些默认类型对应的文件。那么是不是这里可以增加任意类型文件呢？我们创建一个src/abc.txt文件，内容为text-orange-500，同时在默认扫描文件类型中增加txt。再次构建，发现成果中并没有text-orange-500相关的CSS规则，这说明没有被扫描到。这是因为pipeline配置仅仅扫描从构建工具流水线中获取到的文件内容，txt文件构建工具根本不会读取，因此更不会扫描了。如果希望扫描，需要增加filesystem配置，将txt文件纳入到构建工具处理中。
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  content: {
+    pipeline: {
+      include: [
+        // 默认扫描文件类型
+        /\.(vue|svelte|[jt]sx|vine.ts|mdx?|astro|txt|elm|php|phtml|marko|html)($|\?)/,
+        // 新增的文件类型
+        "src/**/*.{js,ts}",
+      ],
+    },
+    filesystem: ["src/**/*.txt"],
+  },
+  presets: [
+    presetWind4({
+      preflights: { reset: false },
+    }),
+  ],
+});
+```
+
+对于txt这种构建工具默认没有处理的文件类型，需要同时设置pipeline和filesystem才可以生效。通过查看构建结果，发现text-orange-500相关的CSS规则已经生效，这里就不提供图片了。UnoCSS还提供了其他方式可以增加扫描内容，内联文本时以其中一种方式，它可以支持直接字符串，或者函数返回形式，函数可以是异步的：
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  content: {
+    inline: [
+      // 文本字符串
+      'text-sky-500',
+      // 函数形式
+      () => {
+        return 'text-orange-500'
+      }
+    ]
+  },
+  presets: [
+    presetWind4({
+      preflights: { reset: false },
+    }),
+  ],
+});
+```
+
+另外，UnoCSS还支持白名单safelist，可以传入字符串数字，数组内的类名会加入编译生成CSS规则。我认为它和inline内联文本的形式非常像，而且inline的形式更灵活：
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  safelist: ["text-sky-500", "text-orange-500"],
+  presets: [
+    presetWind4({
+      preflights: { reset: false },
+    }),
+  ],
+});
+```
+
+## UnoCSS的自定义相关 todo
+
+
 
 
 ## 总结
