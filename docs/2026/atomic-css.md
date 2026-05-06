@@ -615,7 +615,7 @@ custom-variant可以接收任意条件组合。这里再举一个例子，不仅
 }
 ```
 
-## UnoCSS‌接入和构建特性
+## UnoCSS‌接入和使用
 UnoCSS是一个原子CSS引擎，它本身不包含类名模板，而是通过各种各样的规则和预设实现各种风格的原子化CSS样式。当然其中也包含Tailwind CSS的样式。
 
 ### 接入方式
@@ -823,6 +823,94 @@ export default defineConfig({
     }),
   ],
 });
+```
+
+### 属性模式
+前面我们描述的类名，都是作为class属性的一部分设置的，当类名太多时。阅读和维护就变得困难。UnoCSS支持属性模式，可以利用单独的HTML属性来拆分。首先需要修改uno.config.ts，增加新的预设。注意presetAttributify仅仅是给其它预设支持属性模式使用的，如果不引入其它预设，那么是没有预置类名和样式的。
+
+```js
+import { defineConfig, presetWind4, presetAttributify } from "unocss";
+
+export default defineConfig({
+  presets: [
+    presetAttributify(),
+    presetWind4({
+      preflights: {
+        reset: false,
+      },
+    }),
+  ],
+});
+```
+
+presetAttributify可以将类名前缀作为一个属性名，这里举了三个例子。第一个是前面介绍的类名形式，后面分别用text和text-sky作为属性名，属性值为类名的后缀部分。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-sky-500">jzplp1</div>
+      <div text="sky-500">jzplp1</div>
+      <div text-sky="500">jzplp1</div>
+    </div>
+  );
+}
+```
+
+通过结果可以看到，三个例子都生效了。注意UnoCSS并没有把属性名和值编译成类名，而是修改了CSS选择器，从之前的类名选择器变为了属性选择器。我尝试了生产模式下编译的dist中，也是属性选择器的模式。
+
+​![](/2026/atomic-css-22.png)
+
+当多个同前缀的类名出现时，可以将其写在一个属性中，这样可以起到将类名分类，阅读清晰的作用。这里列举了text和border前缀，前一个使用className列出类名形式，后一个使用对应属性形式表示，两者是相同的。注意如果前缀本身就代表类名本身，值可以使用~符号表示。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-sky-500 text-left text-5">jzplp1</div>
+      <div text="sky-500 left 5">jzplp1</div>
+      <div className="border border-red border-solid">jzplp1</div>
+      <div border="~ red solid">jzplp1</div>
+    </div>
+  );
+}
+```
+
+UnoCSS还支持纯属性名，无属性值的形式。但在JSX中使用时，无值属性会被转换成值为true的属性，造成无法生效。因此还要修改uno.config.ts，增加transformerAttributifyJsx：
+
+```js
+import {
+  defineConfig,
+  presetWind4,
+  presetAttributify,
+  transformerAttributifyJsx,
+} from "unocss";
+
+export default defineConfig({
+  presets: [
+    presetAttributify(),
+    presetWind4({
+      preflights: {
+        reset: false,
+      },
+    }),
+  ],
+  transformers: [transformerAttributifyJsx()],
+});
+```
+
+然后使用无值属性名的形式提供CSS。这里第一个例子还是类名形式，第二个例子表示值为空字符串，这个例子不接入transformerAttributifyJsx也可以生效。第三个例子是真正的无值属性名形式，当接入transformerAttributifyJsx后，内部会被编译为第二个例子的形式。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-sky-500">jzplp1</div>
+      <div text-sky-500="">jzplp1</div>
+      <div text-sky-500>jzplp1</div>
+    </div>
+  );
+}
 ```
 
 ## UnoCSS的自定义相关 todo
