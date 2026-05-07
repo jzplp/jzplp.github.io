@@ -913,10 +913,108 @@ export default function App() {
 }
 ```
 
-## UnoCSS的自定义相关 todo
+## UnoCSS自定义配置
+这一部分我们描述如何使用UnoCSS自定义配置，实现自己的预置类名。
 
+### 规则配置
+即使我们没有引入预设，UnoCSS也会提供默认预设，因此为了避免后续混淆，我们先禁用默认预设。修改uno.config.ts，将presets设置为空数组。这样即使匹配上类名，也不会引入CSS规则。
 
+```ts
+import { defineConfig } from "unocss";
+export default defineConfig({
+  presets: [],
+});
+```
 
+类名的规则定义很简单，静态规则只需要在rules配置中定义名称和对应的CSS规则即可：
+
+```js
+import { defineConfig } from "unocss";
+
+export default defineConfig({
+  presets: [],
+  rules: [
+    ["m-1", { margin: "1px" }],
+    ["text-red", { color: "red" }],
+  ],
+});
+```
+
+由于UnoCSS是按需引入的，因此只创建规则并不会生成代码。我们在React中使用这些类名，在浏览器中可以看到成功生成了对应的样式。
+
+```jsx
+export default function App() {
+  return <div className="m-1 text-red">jzplp1</div>;
+}
+```
+
+​![](/2026/atomic-css-23.png)
+
+只是静态类名并不能满足需求，类名应该是可以接收任意值动态生成的。UnoCSS提供了正则的能力可以帮我们动态匹配类名规则：
+
+```jsx
+import { defineConfig } from "unocss";
+
+export default defineConfig({
+  presets: [],
+  rules: [
+    [
+      /^m-(\d+)$/,
+      (matchData) => {
+        return { margin: `${matchData[1]}px` };
+      },
+    ],
+  ],
+});
+```
+
+类名处接收一个正则，规则处接受一个函数，入参是正则匹配的数据，即`str.match(reg)`的结果。函数返回对应的CSS规则即可。定义后，我们就可以使用任意值了。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="m-1">jzplp1</div>
+      <div className="m-5">jzplp2</div>
+      <div className="m-10">jzplp3</div>
+    </div>
+  );
+}
+```
+
+在浏览器中可以看到，对应的值的类名只有出现了，才生成对应的CSS规则。
+
+​![](/2026/atomic-css-24.png)
+
+rules中对应的CSS规则可以是对象，也可以是字符串。尤其是在对象不方便表示的场景，例如媒体查询。
+
+```js
+import { defineConfig } from "unocss";
+
+export default defineConfig({
+  presets: [],
+  rules: [
+    [
+      /^abc-(\d+)$/,
+      (matchData) => {
+        return `@media screen and (max-width: ${matchData[1]}px) {
+          div { color: red; }
+        }`;
+      },
+    ],
+  ],
+});
+```
+
+在React代码中使用，浏览器打开后，可以正常生效：
+
+```jsx
+export default function App() {
+  return <div className="abc-1000">jzplp1</div>;
+}
+```
+
+​![](/2026/atomic-css-25.png)
 
 ## 总结
 
