@@ -916,7 +916,7 @@ export default function App() {
 ## UnoCSS自定义配置
 这一部分我们描述如何使用UnoCSS自定义配置，实现自己的预置类名。
 
-### 规则配置
+### 规则
 即使我们没有引入预设，UnoCSS也会提供默认预设，因此为了避免后续混淆，我们先禁用默认预设。修改uno.config.ts，将presets设置为空数组。这样即使匹配上类名，也不会引入CSS规则。
 
 ```ts
@@ -1015,6 +1015,92 @@ export default function App() {
 ```
 
 ​![](/2026/atomic-css-25.png)
+
+### 变体
+通过变体，可以实现hover:, active:等类名前缀的效果。这里首先配置hover试一下：
+
+```js
+import { defineConfig } from "unocss";
+
+export default defineConfig({
+  presets: [],
+  rules: [
+    [
+      /^m-(\d+)$/,
+      (matchData) => {
+        return { margin: `${matchData[1]}px` };
+      },
+    ],
+  ],
+  variants: [
+    (str) => {
+      if (!str.startsWith("hover:")) return str;
+      return {
+        matcher: str.slice(6),
+        selector: (s) => `${s}:hover`,
+      };
+    },
+  ],
+});
+```
+
+在variants中设置变体函数数组，一个变体函数接受一个字符串。如果不符合这个变体的条件，则原样返回字符串。如果符合条件，则返回一个对象，里面matcher为去掉变体对应前缀后的字符串，selector为选择器变更函数。我们实际试一下，在浏览器中可以生效。
+
+```jsx
+export default function App() {
+  return <div className="hover:m-5">jzplp1</div>;
+}
+```
+
+​![](/2026/atomic-css-26.png)
+
+经过变体处理后，可以再次经过变体处理，直至所有变体都不满足要求为止。我们把前面的变体函数改造一下，设置multiPass支持同一个变体递归处理类名：
+
+```js
+import { defineConfig } from "unocss";
+
+export default defineConfig({
+  presets: [],
+  rules: [
+    [
+      /^m-(\d+)$/,
+      (matchData) => {
+        return { margin: `${matchData[1]}px` };
+      },
+    ],
+  ],
+  variants: [
+    {
+      match: (str) => {
+        const matchData = str.match(/^([a-z]+):.*$/);
+        if (!matchData?.length) return str;
+        return {
+          matcher: str.slice(matchData[1].length + 1),
+          selector: (s) => `${s}:${matchData[1]}`,
+        };
+      },
+      multiPass: true,
+    },
+  ],
+});
+```
+
+这样这个变体就可以同时处理多个附加的伪类了，我们举例试一下：
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="hover:m-1">jzplp1</div>
+      <div className="active:m-5">jzplp1</div>
+      <div className="hover:active:m-10">jzplp1</div>
+      <div className="active:hover:m-20">jzplp1</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-27.png)
 
 ## 总结
 
