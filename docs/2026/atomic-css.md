@@ -1102,6 +1102,73 @@ export default function App() {
 
 ​![](/2026/atomic-css-27.png)
 
+### 别名
+在页面开发中，实际的场景经常是很复杂的，需要多种类名组合成一种样式。但这种类名组合重复出现时，写这么多预设类名就有些繁琐和维护困难。UnoCSS提供了shortcuts配置，可以帮我们创建类名组合的别名（快捷方式）。
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  presets: [presetWind4()],
+  shortcuts: {
+    'abc': 'm-2 text-sky-600 bg-red-600 hover:font-600'
+  }
+});
+```
+
+此时我们给几个类名者起了个别名abc，在React中可以看到，写所有类名与直接写别名的效果一致。
+
+```js
+export default function App() {
+  return (
+    <div>
+      <div className="m-2 text-sky-600 bg-red-600 hover:font-600">jzplp1</div>
+      <div className="abc">jzplp2</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-28.png)
+
+类似于规则，别名也支持正则匹配的形式，同样也是接收match方法的结果：
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  presets: [presetWind4()],
+  shortcuts: [
+    {
+      abc: "m-2 text-sky-600 bg-red-600 hover:font-600",
+    },
+    [
+      /^abc-(.*)$/,
+      (matchData) => {
+        return `m-2 text-sky-${matchData[1]} bg-red-${matchData[1]} hover:font-${matchData[1]}`;
+      },
+    ],
+  ],
+});
+```
+
+这里配置了abx-xxx作为模板，我们使用不同的数字，就可以得到不同的样式：
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="abc">jzplp1</div>
+      <div className="abc-300">jzplp2</div>
+      <div className="abc-500">jzplp3</div>
+      <div className="abc-700">jzplp3</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-29.png)
+
 ## 总结
 
 Windi CSS已经逐渐停止维护，这里不再介绍了，UnoCSS是Windi CSS的精神继承者。
