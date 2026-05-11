@@ -38,13 +38,19 @@ todo 今年开始对于学习的技术更详细的统计
   * CSS in JS技术
     * styled-components的接入和特性
     * Emotion相关库：@emotion/styled, @emotion/react, @emotion/css
-    * 在React和纯JS中使用linaria、
+    * 在React和纯JS中使用linaria
     * vanilla-extract的接入和使用
+  * 原子化CSS
+    * Tailwind CSS‌的接入和特性
+    * UnoCSS‌接入和配置
 * 多语言技术相关
   * ICU信息语法，intl-messageformat渲染多语言
   * react-intl, react-intl-universal等React多语言工具
   * 了解阿拉伯字母相关的多语言处理
 * Chrome浏览器插件简单开发
+* React组件库相关
+  * React组件库简单开发
+  * 使用dumi2开发带预览的组件库文档网站
 
 ### 算法题
 
@@ -56,10 +62,9 @@ todo 今年开始对于学习的技术更详细的统计
 
 学习知识：
 
-* 抱孩子：横抱，竖抱
-* 换尿布，哄睡（孩子认人了以后我不能哄睡了）
-* 洗澡 todo
-* 了解和购买婴儿用品：纸尿裤/拉拉裤，棉柔巾，隔尿垫，防溢乳垫，酒精湿巾
+* 婴儿的：横抱，竖抱，换尿布，哄睡，厌奶期，疫苗相关，
+* 产妇的：产后恢复，盆底肌，腹直肌，堵奶，回奶相关，
+* 了解和购买婴儿用品：纸尿裤/拉拉裤，棉柔巾，隔尿垫，防溢乳垫，酒精湿巾，婴儿爬爬垫，婴儿围栏
 
 ## 个人成长
 
