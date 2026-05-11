@@ -673,7 +673,7 @@ export default function App() {
 
 虽然应用成功，但可以看到具体CSS规则的实现方式是不一样的。head元素中也发现了一个style标签，里面有重置初始样式的代码，以及我们写入的类名所引入的CSS代码。
 
-### Tailwind的特性UnoCSS能用么
+### Tailwind的特性
 在前面接入方式中，我们引入了@unocss/preset-wind4预设，使得UnoCSS的类名和表现接近于Tailwind CSS V4。那么到底有多接近呢？Tailwind CSS的特性在UnoCSS中可以使用么？这里我们来尝试一下。
 
 | 特性类别 | 类名举例 | 是否支持 |
@@ -1168,6 +1168,131 @@ export default function App() {
 ```
 
 ​![](/2026/atomic-css-29.png)
+
+### 主题
+UnoCSS还支持配置主题，实际上就是CSS变量以及对应的类名。它支持修改已有的主题，以及创建新的主题。首先我们引入presetWind4，尝试修改已有的主题变量。
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  presets: [presetWind4()],
+  theme: {
+    colors: {
+      sky: {
+        500: "red",
+        600: "blue",
+      },
+      "red-500": "green",
+    },
+  },
+});
+```
+
+通过结果可以看到，不仅变量被修改，变量相关联的多种类名对应的CSS规则效果也一起改动了。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-sky-400">jzplp1</div>
+      <div className="text-sky-500">jzplp2</div>
+      <div className="text-sky-600">jzplp3</div>
+      <div className="bg-sky-600">jzplp4</div>
+      <div className="bg-red-500">jzplp5</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-30.png)
+
+然后我们再试一下新增CSS颜色变量。
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  presets: [presetWind4()],
+  theme: {
+    colors: {
+      abc: 'red',
+      "bcd-def": "blue",
+    },
+  },
+});
+```
+
+通过结果可以看到，我们新建的变量也是可以适配各种现有的CSS规则的。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-abc">jzplp1</div>
+      <div className="bg-abc">jzplp2</div>
+      <div className="text-bcd-def">jzplp4</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-31.png)
+
+这是如何实现的？事实上我们前面介绍的规则/变体/别名等都是支持根据动态变量名生成的，这里据一下例子。
+
+```js
+import { defineConfig, presetWind4 } from "unocss";
+
+export default defineConfig({
+  presets: [],
+  theme: {
+    colors: {
+      abc: "red",
+      bcd: "blue",
+    },
+  },
+  rules: [
+    [
+      /^text-(.*)$/,
+      (matchData, { theme }) => {
+        if (theme.colors[matchData[1]])
+          return { color: theme.colors[matchData[1]] };
+      },
+    ],
+    [
+      /^border-(.*)$/,
+      (matchData, { theme }) => {
+        if (theme.colors[matchData[1]])
+          return { border: `1px solid ${theme.colors[matchData[1]]}` };
+      },
+    ],
+  ],
+  shortcuts: [
+    [/^custom-(.*)$/, (matchData, { theme }) => {
+        if (theme.colors[matchData[1]])
+          return `text-${matchData[1]} border-${matchData[1]}`;
+      }]
+  ]
+});
+```
+
+上面创建了两个规则，一个别名，都是接受变量名，然后输出对应颜色的CSS规则。这样我们就可以创建变量，对应的类名也自动适配了。
+
+```jsx
+export default function App() {
+  return (
+    <div>
+      <div className="text-abc">jzplp1</div>
+      <div className="border-bcd">jzplp2</div>
+      <div className="custom-abc">jzplp4</div>
+      <div className="custom-bcd">jzplp4</div>
+    </div>
+  );
+}
+```
+
+​![](/2026/atomic-css-32.png)
 
 ## 总结
 
