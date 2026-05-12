@@ -1294,6 +1294,61 @@ export default function App() {
 
 ​![](/2026/atomic-css-32.png)
 
+### 创建预设
+预设的创建很简单，将前面创建的各种配置放在一起，就成了一个预设。我们举个例子，首先创建jzplpPreset.ts，里面是预设内容，实际就是我们前面创建的各种配置。
+
+```js
+import { definePreset } from "unocss";
+
+export default definePreset(() => {
+  return {
+    name: "jzplpPreset",
+    theme: {
+      colors: {
+        abc: "red",
+        bcd: "blue",
+      },
+    },
+    rules: [
+      [
+        /^text-(.*)$/,
+        (matchData, { theme }) => {
+          if (theme.colors[matchData[1]])
+            return { color: theme.colors[matchData[1]] };
+        },
+      ],
+      [
+        /^border-(.*)$/,
+        (matchData, { theme }) => {
+          if (theme.colors[matchData[1]])
+            return { border: `1px solid ${theme.colors[matchData[1]]}` };
+        },
+      ],
+    ],
+    shortcuts: [
+      [
+        /^custom-(.*)$/,
+        (matchData, { theme }) => {
+          if (theme.colors[matchData[1]])
+            return `text-${matchData[1]} border-${matchData[1]}`;
+        },
+      ],
+    ],
+  };
+});
+```
+
+然后在uno.config.ts中引入配置即可，然后运行工程，效果和前面一致。
+
+```js
+import { defineConfig } from "unocss";
+import jzplpPreset from "./jzplpPreset";
+
+export default defineConfig({
+  presets: [jzplpPreset()],
+});
+```
+
 ## 总结
 
 Windi CSS已经逐渐停止维护，这里不再介绍了，UnoCSS是Windi CSS的精神继承者。
