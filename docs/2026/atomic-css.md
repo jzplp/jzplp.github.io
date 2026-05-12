@@ -1350,10 +1350,13 @@ export default defineConfig({
 ```
 
 ## 总结
+这篇文章描述了Tailwind CSS‌和UnoCSS‌的接入和使用方式。Tailwind CSS是原子化CSS的引领者，而UnoCSS提供了原子CSS引擎与各种模板，扩展了原子化CSS的能力。还有Windi CSS已经逐渐停止维护，这里不再介绍了。
 
-Windi CSS已经逐渐停止维护，这里不再介绍了，UnoCSS是Windi CSS的精神继承者。
+原子化CSS虽然不是CSS in JS，但事实上也起到了原子化CSS的效果，大部分CSS代码并不需要我们写，而是使用预设的类名。CSS in JS是在编译时收集类名生成CSS代码，比较起来有点像零运行时的CSS in JS。
 
+很多人说原子化CSS的类名学习成本不高，但比较下来我觉得，它的学习成本是比CSS in JS要大的，毕竟CSS只是引用方式变了，CSS写法没有变。而原子化CSS对于每个CSS属性，都要了解一种新的写法，对于没有接触过的人还是有一些心智负担的。相比于看一堆类名，我还是觉得直接看CSS更简单。
 
+我对于原子化CSS的观点也和CSS in JS差不多，即确实有自己的特色，在部分场景也很好用，但缺点也很明显。
 
 ## 参考
 
