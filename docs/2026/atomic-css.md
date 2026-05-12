@@ -1,6 +1,6 @@
 # 原子化CSS(未完成)
 
-在普通前端项目中，大部分你开发者会使用class名来作为CSS规则，但是这需要定义很多类名，起名字成了困难的事情。虽然类名可以复用，但是大部分类实际上是独一无二的，没有复用机会。CSS in JS可以解决部分问题，但是依然需要在项目中写大量的CSS代码。
+在普通前端项目中，大部分开发者会使用class名来作为CSS规则，但是这需要定义很多类名，起名字成了困难的事情。虽然类名可以复用，但是大部分类实际上是独一无二的，没有复用机会。CSS in JS可以解决部分问题，但是依然需要在项目中写大量的CSS代码。
 
 有没有一种工具，可以预置基础的CSS基类，元素只需要引用，不用再思考类名和写大量CSS代码呢？ 原子化CSS（Atomic CSS）就能做到。它将CSS规则简化为一个个简短的原子化类名，通过拼合这些原子化类名，实现我们想要的CSS效果，同时以另一个角度看，它也基本实现了CSS in JS的效果。
 
@@ -114,7 +114,7 @@ export default function App() {
 
 ​![](/2026/atomic-css-6.png)
 
-这时候，点击前在CSS中搜不到类名，点击后样式也没有正常生效。这说明，Tailwind CSS识别的方式是在代码中搜索符合预置类名的字符串，如果搜到了就添加对应的CSS规则，搜不到就不添加。我们将一个字符串拆开成两个，因此Tailwind CSS就找不到了。为了证实我们的想法，再举个例子，这此只创建字符串，但不引用到元素中：
+这时候，点击前在CSS中搜不到类名，点击后样式也没有正常生效。这说明，Tailwind CSS识别的方式是在代码中搜索符合预置类名的字符串，如果搜到了就添加对应的CSS规则，搜不到就不添加。我们将一个字符串拆开成两个，因此Tailwind CSS就找不到了。为了证实我们的想法，再举个例子，这次只创建字符串，但不引用到元素中：
 
 ```jsx
 const cls = "text-orange-500";
@@ -133,7 +133,7 @@ export default function App() {
 
 通过结果可以看到，我们创建的普通字符串并没有作为类名，但是因为这个字符串值符合Tailwind CSS的预置类名，因此对应的CSS规则也就被添加了。因此Tailwind CSS识别类名的方式是代码静态分析，搜到哪个字符串就添加，而并不会实际执行代码看真正应用到元素中的是哪些类。而我们打包后，对应的CSS规则便预置在代码中，生产模式运行时并不需要Tailwind CSS的参与。从这个角度看，Tailwind CSS是“零运行时”的CSS库。
 
-这里说“预置类名”是为了方便理解，实际上Tailwind CSS是在编译时匹配类名模式，然后实际生成对应的CSSS规则。后面还会看到Tailwind CSS中组合生成的规则，以及根据类名模式生成任意值的规则。
+这里说“预置类名”是为了方便理解，实际上Tailwind CSS是在编译时匹配类名模式，然后实际生成对应的CSS规则。后面还会看到Tailwind CSS中组合生成的规则，以及根据类名模式生成任意值的规则。
 
 ### VSCode插件
 Tailwind CSS有非常非常多的预设类命名，在文档网站中可以查到，类名虽然有规律，但对于刚接触的使用者来说还是有点困难，需要经常对照查找。因此Tailwind CSS提供了相关的编辑器插件，例如在VSCode中是Tailwind CSS IntelliSense。
@@ -204,7 +204,7 @@ export default function App() {
 }
 ```
 
-再来看下媒体查询相关的类名，这里Tailwind CSS‌根据查询内容的不同有不同的类名模板。这里具几个例子：
+再来看下媒体查询相关的类名，这里Tailwind CSS‌根据查询内容的不同有不同的类名模板。这里举几个例子：
 
 * sm 表示	@media (width >= 40rem)
 * xl 表示	@media (width >= 80rem)
@@ -402,8 +402,8 @@ export default function App() {
 
 ```CSS
 /* 类名：h-(--jzplp-height) */
-.bg-\[red\] {
-  background-color: red;
+.h-\(--jzplp-height\) {
+  height: var(--jzplp-height);
 }
 
 /* 类名：bg-(--jzplp-color) */
@@ -412,7 +412,7 @@ export default function App() {
 }
 ```
 
-我注意到，有些不同含义的类名模板是相同的，例如 text-。它可以可以接收数字，也可以接收颜色值等，在接收不同的值时它作用的属性不同，Tailwind CSS‌内部会处理这些：
+我注意到，有些不同含义的类名模板是相同的，例如 text-。它可以接收数字，也可以接收颜色值等，在接收不同的值时它作用的属性不同，Tailwind CSS‌内部会处理这些：
 
 ```CSS
 /* 类名：text-[10px] */
@@ -701,7 +701,7 @@ export default function App() {
 | @utility | - | 不支持 |
 | @custom-variant | - | 不支持 |
 
-可以看到，对于非预设的类名，尤其是通过各种Tailwind CSS中CSS指令实现的特性，UnoCSS都不支持。我们咋一看@unocss/preset-wind4和Tailwind CSS很像，但深入使用会发现，两者的区别很大。那是否说明UnoCSS的灵活性不高，不能自定义使用方式呢？
+可以看到，对于非预设的类名，尤其是通过各种Tailwind CSS中CSS指令实现的特性，UnoCSS都不支持。我们乍一看@unocss/preset-wind4和Tailwind CSS很像，但深入使用会发现，两者的区别很大。那是否说明UnoCSS的灵活性不高，不能自定义使用方式呢？
 
 不是的。UnoCSS的名称叫做“原子化CSS引擎”，那么它必然有很强的扩展能力，只不过扩展和自定义方式与Tailwind CSS不一样。在后面的部分中我们会逐一介绍UnoCSS的扩展能力。
 
@@ -1116,7 +1116,7 @@ export default defineConfig({
 });
 ```
 
-此时我们给几个类名者起了个别名abc，在React中可以看到，写所有类名与直接写别名的效果一致。
+此时我们给几个类名起了个别名abc，在React中可以看到，写所有类名与直接写别名的效果一致。
 
 ```js
 export default function App() {
@@ -1152,7 +1152,7 @@ export default defineConfig({
 });
 ```
 
-这里配置了abx-xxx作为模板，我们使用不同的数字，就可以得到不同的样式：
+这里配置了abc-xxx作为模板，我们使用不同的数字，就可以得到不同的样式：
 
 ```jsx
 export default function App() {
@@ -1239,7 +1239,7 @@ export default function App() {
 
 ​![](/2026/atomic-css-31.png)
 
-这是如何实现的？事实上我们前面介绍的规则/变体/别名等都是支持根据动态变量名生成的，这里据一下例子。
+这是如何实现的？事实上我们前面介绍的规则/变体/别名等都是支持根据动态变量名生成的，这里举一个例子。
 
 ```js
 import { defineConfig, presetWind4 } from "unocss";
