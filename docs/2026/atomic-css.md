@@ -1,4 +1,4 @@
-# 原子化CSS(未完成)
+# 从Tailwind到UnoCSS：原子化CSS框架接入、特性与配置
 
 在普通前端项目中，大部分开发者会使用class名来作为CSS规则，但是这需要定义很多类名，起名字成了困难的事情。虽然类名可以复用，但是大部分类实际上是独一无二的，没有复用机会。CSS in JS可以解决部分问题，但是依然需要在项目中写大量的CSS代码。
 
@@ -49,7 +49,7 @@ function genEle(test, className) {
 genEle("jzplp1", "text-xl font-bold text-orange-500");
 ```
 
-​![](/2026/atomic-css-1.png)
+![](/2026/atomic-css-1.png)
 
 Tailwind CSS预设了很多原子化的CSS类名，通过它的文档可以查到。通过浏览器效果可以看到，这些类名附加的样式一作用在元素上生效了。我们再试一下React框架：
 
@@ -786,7 +786,7 @@ export default defineConfig({
 });
 ```
 
-对于txt这种构建工具默认没有处理的文件类型，需要同时设置pipeline和filesystem才可以生效。通过查看构建结果，发现text-orange-500相关的CSS规则已经生效，这里就不提供图片了。UnoCSS还提供了其他方式可以增加扫描内容，内联文本时以其中一种方式，它可以支持直接字符串，或者函数返回形式，函数可以是异步的：
+对于txt这种构建工具默认没有处理的文件类型，需要同时设置pipeline和filesystem才可以生效。通过查看构建结果，发现text-orange-500相关的CSS规则已经生效，这里就不提供图片了。UnoCSS还提供了其他方式可以增加扫描内容，内联文本是其中一种方式，它可以支持直接字符串，或者函数返回形式，函数可以是异步的：
 
 ```js
 import { defineConfig, presetWind4 } from "unocss";
@@ -1116,7 +1116,7 @@ export default defineConfig({
 });
 ```
 
-此时我们给几个类名起了个别名abc，在React中可以看到，写所有类名与直接写别名的效果一致。
+此时我们给一组类名起了个别名abc，在React中使用该别名，其效果与直接编写所有类名一致。
 
 ```js
 export default function App() {

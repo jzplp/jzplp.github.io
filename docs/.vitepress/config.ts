@@ -15,7 +15,7 @@ const sidebarLists = [
         link: "/2026/css-component",
       },
       {
-        text: "原子化CSS",
+        text: "从Tailwind到UnoCSS：原子化CSS框架接入、特性与配置",
         link: "/2026/atomic-css",
       },
       {
