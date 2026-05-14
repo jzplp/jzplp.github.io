@@ -122,8 +122,41 @@ block__element--modifier 区块+元素
 * **SUITCSS**：组件化的样式工具，不仅包含CSS命名规范，也提供CSS预设包。有公共样式和组件样式等。
 
 ### CSS Modules
+CSS Modules中文叫做CSS模块。它通过自动的方式，完全避免组件内的类名与其它组件重复。默认情况下，我们定义的CSS类名标识符是全局的。使用CSS Modules之后，每个类名将变为唯一的全局名称，包含不会重复的哈希值。这里首先创建一个CSS文件，名称为App.module.css。
+
+```css
+.class1 {
+  color: red;
+}
+.class2 {
+  color: blue;
+}
+:global(.class3) {
+  border: 1px solid yellow;
+}
+```
+
+引入CSS文件时，我们可以拿到CSS文件导出的类名到全局名称的对应关系，从而在HTML中提供相应的类名。
+
+```jsx
+import styles from './App.module.css';
+import cn from 'classnames';
+
+export default function App() {
+  return (
+    <div>
+      <div className={styles.class1}>test1</div>
+      <div className='class3'>test2</div>
+      <div className={cn(styles.class2, 'class3')}>test3</div>
+    </div>
+  )
+}
+```
 
 ### CSS in JS
+CSS in JS可以让我们在JavaScript中描述代码，抛弃CSS文件。
+
+
 
 ### 原子化CSS
 
