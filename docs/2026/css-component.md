@@ -100,6 +100,26 @@ React中的CSS可以直接作为内联style属性的数据，在JavaScript中控
 这四种方案分别是CSS命名规范/CSS Modules/CSS in JS/原子化CSS，它们都尝试着解决组件化开发中 CSS 的问题，我们在这里再简单描述一下。
 
 ### CSS命名规范
+CSS命名规范有非常多，最知名的是是BEM命名规范。BEM的全称为Block Element Modifier，翻译成和中文就是块，元素和修饰符。BEM使用这三种层级来规范CSS的命名：
+
+* Block 区块 表示页面中一个独立可复用的模块或者组件
+* Element 元素 表示区块中的一个组成元素
+* Modifier 修饰符 修饰元素的状态或者行为
+
+元素不能独立存在，必须依附于区块内。修饰符则必须跟在元素或者区块后面。因此可以这样组合命名：因此可以这样组合命名：
+
+block 单区块
+block__element 区块+元素
+block--modifier 区块+修饰符
+block__element--modifier 区块+元素
+
+再列举一下其他的CSS命名规范：
+
+* **OOCSS**: 面对对象的CSS，将CSS类封装为基类和子类等，例如分离结构和皮肤，分离容器和内容等
+* **SMACSS**: 可扩展和模块化的CSS结构，主要将CSS规则分为五种类型：基础样式/布局样式/模块样式/状态样式主题样式
+* **ITCSS**: 把CSS规则分成了七层：Settings/Tools/Generic/Elements/Objects/Components/Trumps，并在不同的位置放置
+* **AMCSS**: 使用HTML的属性key和值用来组织CSS选择器，有三种类型：Modules模块/Variations变体/Traits特征
+* **SUITCSS**：组件化的样式工具，不仅包含CSS命名规范，也提供CSS预设包。有公共样式和组件样式等。
 
 ### CSS Modules
 
