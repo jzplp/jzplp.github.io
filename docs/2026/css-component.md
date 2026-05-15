@@ -154,8 +154,62 @@ export default function App() {
 ```
 
 ### CSS in JS
-CSS in JS可以让我们在JavaScript中描述代码，抛弃CSS文件。
+CSS in JS可以让我们在JavaScript中描述代码，抛弃CSS文件。它的背后依然是通过JavaScript中写的CSS规则生成哈希类名，放到HTML元素的class上。
 
+CSS in JS的工具非常多，主要分为两种类型：运行时和编译时。运行时可以在前端代码在用户访问时，动态生成CSS规则，优点是灵活，缺点是工具需要打包进代码，造成体积增大，且执行效率低一点。编译时是在打包时将所有CSS规则编译为类名，不允许执行时动态生成。
+
+CSS in JS有许多使用方式，有模板字符串，style对象，css属性等。这里我们以Emotion为例，简单给出使用Demo：
+
+```jsx
+// 模板字符串组件使用方式
+import styled from "@emotion/styled";
+
+const Div = styled.div`
+  color: red;
+  background: ${(props) => props.bg};
+`;
+
+function App() {
+  return (
+    <div>
+      <Div bg="blue">你好，jzplp</Div>
+      <Div bg="yellow">你好，jzplp</Div>
+    </div>
+  );
+}
+
+// style对象使用方式
+import styled from "@emotion/styled";
+
+const Div1 = styled.div((props) => {
+  return {
+    color: "red",
+    background: props.bg,
+  };
+});
+
+function App() {
+  return (
+    <div>
+      <Div1 bg="yellow">你好，jzplp1</Div1>
+      <Div1 bg="green">你好，jzplp2</Div1>
+    </div>
+  );
+}
+
+// style对象使用方式
+function App() {
+  return (
+    <div
+      css={{ color: "red",
+        "&:hover": { background: "green" },
+      }}
+    >
+      你好 jzplp
+    </div>
+  );
+}
+```
 
 
 ### 原子化CSS
