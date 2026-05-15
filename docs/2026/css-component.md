@@ -1,5 +1,4 @@
-# CSS组件化方案对比总结：CSS命名规范、CSS模块化、CSS Modules、原子化CSS
-todo 标题后面看一下如何优化
+# 总结CSS组件化演进之路：命名规范/CSS Modules/CSS in JS/原子化CSS
 
 ## 关注点分离
 众所周知，前端开发代码有三大部分：
@@ -12,7 +11,7 @@ todo 标题后面看一下如何优化
 
 ```html
 <!-- 三种代码合并 -->
-<div style= "color: red" onclick="console.log('click')"> 你好 </div>
+<div style="color: red" onclick="console.log('click')"> 你好 </div>
 
 <!-- 三种代码分离 -->
 <div class="texts" onclick="handleClick()"> 你好 </div>
@@ -30,12 +29,12 @@ function handleClick() {
 </script>
 ```
 
-关注点分离的代码结构清晰，每种代码的耦合性少，因此在早期受到推崇。但这种方式在代码组织上有很大的问题，即虽然三种技术互相独立，但在逻辑上确是相互关联的：
+关注点分离的代码结构清晰，每种代码的耦合性少，因此在早期受到推崇。但这种方式在代码组织上有很大的问题，即虽然三种技术互相独立，但在逻辑上却是相互关联的：
 
 * CSS样式是和HTML标签关联的，标签绑定样式才能发挥效果
 * JavaScript对数据和交互的处理会造成HTML元素的展示和CSS样式变化
 
-尤其是前端交互逻辑和数据处理越来越重，将三类代码分离对开发有很多不便之处。试想如果要调整一个模块的逻辑和展示，需要三个甚至更多文件同时查看对比才能搞清楚，这会造成造开发效率太低，逻辑不清晰，代码维护性差等很多问题。
+尤其是前端交互逻辑和数据处理越来越重，将三类代码分离对开发有很多不便之处。试想如果要调整一个模块的逻辑和展示，需要三个甚至更多文件同时查看对比才能搞清楚，这会造成开发效率太低，逻辑不清晰，代码维护性差等很多问题。
 
 ## 组件化框架
 后来出现了组件化的思想，将同一个模块的HTML, JavaScript, CSS代码放在一起，组成一个组件。组件本身可以自由组合和复用，组件内部的代码和外部隔离。开源社区中涌现了很多组件化的前端工具和框架，例如知名的React和Vue。现在这种组件化的模式，已经成为了前端开发的主流。
@@ -72,7 +71,7 @@ function Comp() {
     console.log('click');
   };
   const styles = { fontSize: '14px' };
-  return <div className="texts" style={styles} onclick={handleClick}> 你好 </div>;
+  return <div className="texts" style={styles} onClick={handleClick}> 你好 </div>;
 }
 ```
 
@@ -100,23 +99,23 @@ React中的CSS可以直接作为内联style属性的数据，在JavaScript中控
 这四种方案分别是CSS命名规范/CSS Modules/CSS in JS/原子化CSS，它们都尝试着解决组件化开发中 CSS 的问题，我们在这里再简单描述一下。
 
 ### CSS命名规范
-CSS命名规范有非常多，最知名的是是BEM命名规范。BEM的全称为Block Element Modifier，翻译成和中文就是块，元素和修饰符。BEM使用这三种层级来规范CSS的命名：
+CSS命名规范有非常多，最知名的是BEM命名规范。BEM的全称为Block Element Modifier，翻译成中文就是块，元素和修饰符。BEM使用这三种层级来规范CSS的命名：
 
 * Block 区块 表示页面中一个独立可复用的模块或者组件
 * Element 元素 表示区块中的一个组成元素
 * Modifier 修饰符 修饰元素的状态或者行为
 
-元素不能独立存在，必须依附于区块内。修饰符则必须跟在元素或者区块后面。因此可以这样组合命名：因此可以这样组合命名：
+元素不能独立存在，必须依附于区块内。修饰符则必须跟在元素或者区块后面。因此可以这样组合命名：
 
 block 单区块
 block__element 区块+元素
 block--modifier 区块+修饰符
-block__element--modifier 区块+元素
+block__element--modifier 区块+元素+修饰符
 
 再列举一下其他的CSS命名规范：
 
-* **OOCSS**: 面对对象的CSS，将CSS类封装为基类和子类等，例如分离结构和皮肤，分离容器和内容等
-* **SMACSS**: 可扩展和模块化的CSS结构，主要将CSS规则分为五种类型：基础样式/布局样式/模块样式/状态样式主题样式
+* **OOCSS**: 面向对象的CSS，将CSS类封装为基类和子类等，例如分离结构和皮肤，分离容器和内容等
+* **SMACSS**: 可扩展和模块化的CSS结构，主要将CSS规则分为五种类型：基础样式/布局样式/模块样式/状态样式/主题样式
 * **ITCSS**: 把CSS规则分成了七层：Settings/Tools/Generic/Elements/Objects/Components/Trumps，并在不同的位置放置
 * **AMCSS**: 使用HTML的属性key和值用来组织CSS选择器，有三种类型：Modules模块/Variations变体/Traits特征
 * **SUITCSS**：组件化的样式工具，不仅包含CSS命名规范，也提供CSS预设包。有公共样式和组件样式等。
@@ -154,7 +153,7 @@ export default function App() {
 ```
 
 ### CSS in JS
-CSS in JS可以让我们在JavaScript中描述代码，抛弃CSS文件。它的背后依然是通过JavaScript中写的CSS规则生成哈希类名，放到HTML元素的class上。
+CSS in JS可以让我们在JavaScript中编写CSS代码，抛弃CSS文件。它的背后依然是通过JavaScript中写的CSS规则生成哈希类名，放到HTML元素的class上。
 
 CSS in JS的工具非常多，主要分为两种类型：运行时和编译时。运行时可以在前端代码在用户访问时，动态生成CSS规则，优点是灵活，缺点是工具需要打包进代码，造成体积增大，且执行效率低一点。编译时是在打包时将所有CSS规则编译为类名，不允许执行时动态生成。
 
@@ -197,7 +196,7 @@ function App() {
   );
 }
 
-// style对象使用方式
+// css属性使用方式
 function App() {
   return (
     <div
@@ -212,7 +211,7 @@ function App() {
 ```
 
 ### 原子化CSS
-原子化CSS有点像一种编译时的CSS in JS：它是在编译时查找，生成对应的CSS规则，同时避免直接写CSS文件。但与CSS in JS不同的是，它不需要写CSS语句，而是将一个一个CSS属性封装为预设的类名。我们代码中直接写类名即可。同时原子化CSS还支持扩展，例如主题，规则，变体等等。Tailwind CSS‌是最知名的原子化CSS工具，这里我们距离一下使用方法：
+原子化CSS有点像一种编译时的CSS in JS：它是在编译时查找，生成对应的CSS规则，避免了直接写CSS文件。但与CSS in JS不同的是，它不需要写CSS语句，而是将一个一个CSS属性封装为预设的类名。我们代码中直接写类名即可。同时原子化CSS还支持扩展，例如主题，规则，变体等等。Tailwind CSS是最知名的原子化CSS工具，这里我们举例一下使用方法：
 
 ```js
 // 直接使用预设类名
@@ -256,8 +255,8 @@ function App() {
   * CSS in JS成功将CSS代码与组件写在一起，但是代码繁琐（例如styled组件式写法）而且有性能损失
   * 原子化CSS不需要写CSS代码，也实现了组件化，但不能运行时生成CSS规则，元素上太多类名时看起来也不直观
 * 后面的新技术会吸取旧技术的优点
-  * CSS命名规范时由人手动约定类名避免重复，但CSS Modules直接由代码生成哈希类名，无重复的可能
-  * CSS in JS利用了CSS Modules种生成哈希类名的方式避免重复
+  * CSS命名规范是由人手动约定类名避免重复，但CSS Modules直接由代码生成哈希类名，无重复的可能
+  * CSS in JS利用了CSS Modules中生成哈希类名的方式避免重复
   * 原子化CSS则参考了编译时CSS in JS技术，在编译时生成CSS规则
 
 虽然技术在不断的演进，但可以看到依然没有一种技术可以解决所有问题，每种技术的优缺点都很明显。这就造成了喜欢这些优点的开发者愿意用这些技术，而讨厌这些缺点的开发者就不愿意用这些技术。萝卜青菜，各有所爱。具体用哪种技术，还是要看具体项目的要求和约定形式。

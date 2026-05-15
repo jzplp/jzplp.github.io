@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "CSS组件化方案概述：BEM/CSS-Modules/CSS-in-js/原子化CSS等",
+        text: "总结CSS组件化演进之路：命名规范/CSS Modules/CSS in JS/原子化CSS",
         link: "/2026/css-component",
       },
       {

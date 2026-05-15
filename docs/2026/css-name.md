@@ -17,7 +17,7 @@ BEM是最知名的CSS命名规范，由Yandex团队开发。BEM的全称为Block
 * block 单区块
 * block__element 区块+元素
 * block--modifier 区块+修饰符
-* block__element--modifier 区块+元素
+* block__element--modifier 区块+元素+修饰符
 
 ```html
 <div class="container">
