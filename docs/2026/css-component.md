@@ -211,10 +211,42 @@ function App() {
 }
 ```
 
-
 ### 原子化CSS
+原子化CSS有点像一种编译时的CSS in JS：它是在编译时查找，生成对应的CSS规则，同时避免直接写CSS文件。但与CSS in JS不同的是，它不需要写CSS语句，而是将一个一个CSS属性封装为预设的类名。我们代码中直接写类名即可。同时原子化CSS还支持扩展，例如主题，规则，变体等等。Tailwind CSS‌是最知名的原子化CSS工具，这里我们距离一下使用方法：
+
+```js
+// 直接使用预设类名
+function App() {
+  return <div className='text-xl font-bold text-orange-500'>jzplp1</div>;
+}
+```
+
+不同的类名编译后效果不同，这里列举一些组合类名和编译后的CSS规则：
+
+```css
+/* 类名：not-focus:bg-amber-500 */
+.not-focus\:bg-amber-500 {
+  &:not(*:focus) {
+    background-color: var(--color-amber-500) /* oklch(76.9% 0.188 70.08) */;
+  }
+}
+
+/* 类名：sm:text-center */
+.sm\:text-center {
+  @media (width >= 40rem) {
+    text-align: center;
+  }
+}
+
+/* 类名：bg-[red] */
+.bg-\[red\] {
+  background-color: red;
+}
+```
 
 ## 比较和总结
+
+
 
 
 ## 参考
