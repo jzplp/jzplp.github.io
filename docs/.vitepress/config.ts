@@ -11,6 +11,10 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
+        text: "Webpack中的loader",
+        link: "/2026/webpack-loader",
+      },
+      {
         text: "总结CSS组件化演进之路：命名规范/CSS Modules/CSS in JS/原子化CSS",
         link: "/2026/css-component",
       },
