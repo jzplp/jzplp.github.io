@@ -83,11 +83,44 @@ genEle("jzplp1", "abc");
 
 ​![](/2026/loader-2.png)
 
+与CSS相关的最常用loader有两个，顺序为 css-loader -> style-loader。
 
+* css-loader 负责解析CSS代码，使其作为一个模块
+* style-loader 创建style样式，将CSS代码插入到HTML中
+
+如果只引入css-loader，打包后可以看到JS文件中有CSS代码，但是却没有生效。这里我们引入两个试试：
+
+```js
+const path = require("path");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          "style-loader",
+          "css-loader",
+        ],
+      },
+    ],
+  },
+};
+```
+
+注意看在配置中有个test，我们传入了正则，表示.css后缀的文件名会匹配到这个规则。匹配到这个规则的文件，就使用这两个loader处理。然后再打包，发现成果中有引入CSS代码，而且浏览器中可以看到效果：
+
+​![](/2026/loader-3.png)
 
 ## Webpack的loader配置
 
-## 新建loader
+## 自定义loader
 
 
 ## 参考
