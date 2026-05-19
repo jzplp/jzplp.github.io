@@ -118,6 +118,116 @@ module.exports = {
 
 ​![](/2026/loader-3.png)
 
+### xml-loader
+对于引入的XML文件，如果不使用xml-loader，也会像前面CSS文件一样提示模块解析报错。这里我们修改配置，匹配到xml后缀名的文件。
+
+```js
+const path = require("path");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.xml$/,
+        use: "xml-loader",
+      },
+    ],
+  },
+};
+```
+
+然后我们创建src/index.xml文件，内容如下：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<note>
+  <to>jzplp1</to>
+  <from>jzplp2</from>
+</note>
+```
+
+然后在src/index.js中引入文件，并输出结果：
+
+```js
+import "./index.css";
+import dataXml from './index.xml';
+
+console.log(dataXml);
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+genEle("jzplp1", "abc");
+```
+
+然后进行构建，查看生成文件和浏览器的Console效果。可以看到，xml文件被解析为数据直接放到生成代码中了，；浏览器可以正常输出结果。
+
+​![](/2026/loader-4.png)
+
+### babel-loader
+Babel是一个知名的代码编译工具，它的主要作用是将新版本的ECMAScript代码转换为兼容的旧版本JavaScript代码，以便新代码可以正常运行在旧浏览器环境中。要将Babel引入到Webpack打包流程中，同样需要babel-loader的帮助。首先需要安装依赖babel-loader和@babel/core，以及@babel/preset-env。然后修改配置：
+
+```js
+const path = require("path");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"],
+          },
+        },
+      },
+    ],
+  },
+};
+```
+
+在配置中我们识别了以js作为后缀名的文件，排除了node_modules中的代码，并且设置了loader选项，提供了Babel预设。注意js文件即使我们不引入babel-loader，Webpack也是可以解析的。在使用babel-loader后，Webpack打包js文件前，需要先经过Babel处理。w我们对比是否使用babel-loader打包后的文件内容：
+
+```js
+// 不使用 babel-loader
+!(function () {
+  const e = document.createElement("div");
+  ((e.className = "abc"),
+    (e.textContent = "jzplp1"),
+    document.body.appendChild(e));
+})();
+// 使用 babel-loader
+(() => {
+  var e;
+  (((e = document.createElement("div")).className = "abc"),
+    (e.textContent = "jzplp1"),
+    document.body.appendChild(e));
+})();
+```
+
+通过对比可以看到，使用babel-loader后，代码被Babel编译了，明显区别在于const这个ES6语法不存在了，转为了var这个兼容语法。
+
 ## Webpack的loader配置
 
 ## 自定义loader
@@ -130,3 +240,7 @@ module.exports = {
   https://webpack.js.org/
 - Webpack 中文文档\
   https://webpack.docschina.org/
+- 解锁Babel核心功能：从转义语法到插件开发\
+  https://jzplp.github.io/2025/babel-intro.html
+- Babel 文档\
+  https://babeljs.io/
