@@ -228,6 +228,83 @@ module.exports = {
 
 通过对比可以看到，使用babel-loader后，代码被Babel编译了，明显区别在于const这个ES6语法不存在了，转为了var这个兼容语法。
 
+### thread-loader
+thread-loader并不是用来引入某种类型文件的，而是利用多进程同时执行的技术，优化其它loader的执行时间的。thread-loader只需要放置在其它loader之前，它会的创建多个进程，将后续的loader执行代码放到独立的进程中执行，从而优化时间性能。它适合T用在比较耗时的操作中，例如babel-loader。我们修改配置：
+
+```js
+const path = require("path");
+
+module.exports = {
+  mode: "production",
+  entry: "./src/index.js",
+  output: {
+    filename: "main.js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: ["thread-loader", "babel-loader"],
+      },
+    ],
+  },
+};
+```
+
+多进程是否有效，直接打包是看不出来的，因此我们增加一个Babel插件，在执行时打印PID和文件名。创建babel.config.js：
+
+```js
+module.exports = {
+  presets: ["@babel/preset-env"],
+  plugins: [
+    function plugin1(babel) {
+      return {
+        visitor: {
+          Program(path, state) {
+            const line = `PID=${process.pid}  ${state.file.opts.filename}\n`;
+            console.log(line);
+          },
+        },
+      };
+    },
+  ],
+};
+```
+
+然后再创建两个JavaScript文件，在入口文件src/index.js中都引入：
+
+```js
+import './index2';
+import './index3';
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+genEle("jzplp1", "abc");
+```
+
+然后在使用和不使用thread-loader时分别打包，打包时观察console输出，可以发现在不使用时，三个文件的PID都一样，说明是在一个进程中执行的。而使用了thread-loader之后，PID出现不一致的情况，说明babel编译不同文件被分散到了不同进程处理。
+
+```
+// 不使用thread-loader
+PID=15988  E:\testProj\webpack-loader\use-loader\src\index.js
+PID=15988  E:\testProj\webpack-loader\use-loader\src\index2.js
+PID=15988  E:\testProj\webpack-loader\use-loader\src\index3.js
+
+// 使用thread-loader
+PID=25820  E:\testProj\webpack-loader\use-loader\src\index.js
+PID=25820  E:\testProj\webpack-loader\use-loader\src\index2.js
+PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
+```
+
+
+
+
 ## Webpack的loader配置
 
 ## 自定义loader
