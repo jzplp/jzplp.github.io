@@ -1,11 +1,11 @@
 # Webpack中的loader(未完成)
-Webpack是前端历史上具有统治地位的打包工具，应用非常广泛。虽然现在逐渐被性能更强的工具替代，但是依然有很多工程使用。loader是Webpack中的一种重要的外部插入配置工具，负责对源代码进行转换。使用各种loader，Webpack才有了将各种格式的资源和代码识别和引入的能力。
+Webpack是前端历史上具有统治地位的打包工具，应用非常广泛。虽然现在逐渐被性能更强的工具替代，但是依然有很多工程使用。loader是Webpack中的一种重要的外部插入配置工具，负责对源代码进行转换。Webpack本身只能识理解JavaScript和JSON文件，其它类型的文件不能处理。正是使用各种loader，Webpack才有了将各种格式的资源和代码识别和引入的能力。当然，loader的能力也并不仅限于此。
 
 ## loader示例
 为了了解loader的作用和使用方式，我们举例一些现有的知名loader。
 
 ### 创建Webpack工程
-为了后续演示，首先需要新创建一个使用Webpack构建的最简单工程。执行命令行：
+方便后续演示，首先需要新创建一个使用Webpack构建的最简单工程。执行命令行：
 
 ```sh
 npm init -y
@@ -302,10 +302,25 @@ PID=25820  E:\testProj\webpack-loader\use-loader\src\index2.js
 PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
 ```
 
+## loader配置方式
+通过前面对于几个loader的介绍，我们对与loader的作用已经有了简单的了解。这里我们再描述一下，loader在Webpack中是如何配置的。
+
+### 配置方式
 
 
 
-## Webpack的loader配置
+### 配置优先级
+
+Rule.enforce
+
+### 嵌套rules ？
+
+### 内联方式
+
+
+
+
+
 
 ## 自定义loader
 
@@ -321,3 +336,16 @@ PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
   https://jzplp.github.io/2025/babel-intro.html
 - Babel 文档\
   https://babeljs.io/
+- css-loader Webpack中文文档\
+  https://webpack.docschina.org/loaders/css-loader/
+- style-loader Webpack中文文档\
+  https://webpack.docschina.org/loaders/style-loader/
+- thread-loader Webpack中文文档\
+  https://webpack.docschina.org/loaders/thread-loader/
+- babel-loader Webpack中文文档\
+  https://webpack.docschina.org/loaders/babel-loader/
+- 概念-loader Webpack中文文档\
+  https://webpack.docschina.org/concepts/loaders/
+- module.rules Webpack中文文档\
+  https://webpack.docschina.org/configuration/module/#modulerules
+
