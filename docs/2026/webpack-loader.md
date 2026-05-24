@@ -309,15 +309,98 @@ PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
 loader主要的配置方式是通过module.rules进行配置。但这个配置项并不是专供loader使用的，而是负责Webapck模块的规则配置。parser和generator（解析器和生成器）也是用rules等选项进行配置。这里我们主要介绍和loader相关的配置项，这一节会提到这些配置：
 
 * Rule.test 匹配模块规则
-* Rule.use 应用于模块的loader配置数组
+* Rule.use 应用于模块的loader配置
 * Rule.loader 应用模块的单个loader配置
 * Rule.include 引入符合条件的模块
 * Rule.exclude 排除符合条件的模块
 * Rule.issuer 匹配模块请求者的路径
 
+这里列举几个简单的配置实例，部分示例是前面提到过的：
 
+```js
+module.exports = {
+  module: {
+    rules: [
+      // 单个loader写法，使用use
+      {
+        test: /\.xml$/,
+        use: "xml-loader",
+      },
+      // 单个loader写法
+      {
+        test: /\.xml$/,
+        loader: "xml-loader",
+      },
+      // 多个loader写法
+      {
+        test: /\.css$/,
+        use: [ "style-loader", "css-loader" ],
+      },
+      // 排除模块
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: "babel-loader",
+      },
+    ],
+  },
+};
+```
 
+注意如果配置为loader数组时，时从后往前执行的。例如如果希望处理scss文件，则需要引入三个loader，他们的执行顺序如下：
 
+1. sass-loader 将SCSS编译为CSS -> 传给下一级
+2. css-loader 解析CSS代码，作为一个JS模块 传给下一级
+3. style-loader 创建style样式，将CSS代码插入到HTML中
+
+可以看到，每个loader实际上只做一件事情。loader还可以接受参数，此时需要修改为对象写法。
+
+```js
+module.exports = {
+  module: {
+    rules: [
+      // 处理scss文件
+      {
+        test: /\.scss$/i,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+      // loader接受参数
+      {
+        test: /\.css$/i,
+        use: [
+          "style-loader",
+          { loader: "css-loader", options: { modules: true } },
+        ],
+      },
+      // 单个loader时的简化写法
+      {
+        test: /\.css$/i,
+        loader: 'css-loader',
+        options: {
+          modules: true,
+        },
+      },
+    ],
+  },
+};
+```
+
+上面几个路径相关的匹配参数test, include, exclude等，匹配的都是我们要引入的被loader处理的模块路径。例如我们在src/index.js中引入src/index.xml，那么匹配的路径就是src/index.xml。而issuer这个参数，匹配的却是引入者的路径，例如src/index.js。这里举个配置的例子：
+
+```js
+// 生效，成功编译
+{
+  test: /\.xml$/,
+  issuer: /index\.js/,
+  loader: "xml-loader",
+},
+// 失效，编译失败
+{
+  test: /\.xml$/,
+  issuer: /123\.js/,
+  loader: "xml-loader",
+},
+```
 
 ### 配置优先级
 
