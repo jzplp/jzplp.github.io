@@ -306,6 +306,16 @@ PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
 通过前面对于几个loader的介绍，我们对与loader的作用已经有了简单的了解。这里我们再描述一下，loader在Webpack中是如何配置的。
 
 ### 配置方式
+loader主要的配置方式是通过module.rules进行配置。但这个配置项并不是专供loader使用的，而是负责Webapck模块的规则配置。parser和generator（解析器和生成器）也是用rules等选项进行配置。这里我们主要介绍和loader相关的配置项，这一节会提到这些配置：
+
+* Rule.test 匹配模块规则
+* Rule.use 应用于模块的loader配置数组
+* Rule.loader 应用模块的单个loader配置
+* Rule.include 引入符合条件的模块
+* Rule.exclude 排除符合条件的模块
+* Rule.issuer 匹配模块请求者的路径
+
+
 
 
 
@@ -313,12 +323,16 @@ PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
 
 Rule.enforce
 
-### 嵌套rules ？
+### 函数形式
+
+### 嵌套rules ?
 
 ### 内联方式
 
+### Rule.resource ?
 
-
+### 链式API写法
+webpack-chain
 
 
 
