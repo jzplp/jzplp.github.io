@@ -346,24 +346,12 @@ module.exports = {
   },
 };
 ```
-
-注意如果配置为loader数组时，时从后往前执行的。例如如果希望处理scss文件，则需要引入三个loader，他们的执行顺序如下：
-
-1. sass-loader 将SCSS编译为CSS -> 传给下一级
-2. css-loader 解析CSS代码，作为一个JS模块 传给下一级
-3. style-loader 创建style样式，将CSS代码插入到HTML中
-
-可以看到，每个loader实际上只做一件事情。loader还可以接受参数，此时需要修改为对象写法。
+loader还可以接受参数，此时需要修改为对象写法。
 
 ```js
 module.exports = {
   module: {
     rules: [
-      // 处理scss文件
-      {
-        test: /\.scss$/i,
-        use: ["style-loader", "css-loader", "sass-loader"],
-      },
       // loader接受参数
       {
         test: /\.css$/i,
@@ -402,9 +390,35 @@ module.exports = {
 },
 ```
 
-### 配置优先级
+### 顺序和优先级
+前面的配置中我们看到，同一个模块可以接收多个loader，这些loader依次对模块代码进行处理。最常见的是loader配置为数组，这时候是从后往前执行。例如我们希望编译SCSS文件，则配置和执行顺序如下：
 
-Rule.enforce
+```js
+{
+  test: /\.scss$/i,
+  use: ["style-loader", "css-loader", "sass-loader"],
+},
+```
+
+1. sass-loader 将SCSS编译为CSS -> 传给下一级
+2. css-loader 解析CSS代码，作为一个JS模块 传给下一级
+3. style-loader 创建style样式，将CSS代码插入到HTML中
+
+可以看到，每个loader实际上只做一件事情。除了顺序之外，使用Rule.enforce还可以配置优先级，pre表示高优先级，未设置表示普通优先级，post表示低优先级。优先级越高的越早执行。例如我们希望共享编译CSS和SCSS的配置，可以利用优先级这样写：
+
+```js
+{
+  test: /\.scss$/i,
+  enforce: "pre",
+  use: ["sass-loader"],
+},
+{
+  test: /\.(scss|css)$/i,
+  use: ["style-loader", "css-loader"],
+},
+```
+
+这样，对于CSS文件，仅仅执行css-loader, style-loader两个。对于SCSS文件，在前面多执行了一个sass-loader。这样两种文件都能得到妥善处理。
 
 ### 函数形式
 
