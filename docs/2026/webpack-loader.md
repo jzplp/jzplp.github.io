@@ -1,7 +1,7 @@
 # Webpack中的loader(未完成)
 Webpack是前端历史上具有统治地位的打包工具，应用非常广泛。虽然现在逐渐被性能更强的工具替代，但是依然有很多工程使用。loader是Webpack中的一种重要的外部插入配置工具，负责对源代码进行转换。Webpack本身只能识理解JavaScript和JSON文件，其它类型的文件不能处理。正是使用各种loader，Webpack才有了将各种格式的资源和代码识别和引入的能力。当然，loader的能力也并不仅限于此。
 
-## loader示例
+## loader使用示例
 为了了解loader的作用和使用方式，我们举例一些现有的知名loader。
 
 ### 创建Webpack工程
@@ -421,6 +421,39 @@ module.exports = {
 这样，对于CSS文件，仅仅执行css-loader, style-loader两个。对于SCSS文件，在前面多执行了一个sass-loader。这样两种文件都能得到妥善处理。
 
 ### 函数形式
+use属性支持函数形式，可以自定义启用loader的逻辑：
+
+```js
+{
+  test: /\.xml$/,
+  use: (info) => {
+    console.log(info);
+    return ["xml-loader"];
+  },
+},
+/*
+{
+  resource: 'E:\\testProj\\webpack-loader\\use-loader\\src\\index.xml',
+  realResource: 'E:\\testProj\\webpack-loader\\use-loader\\src\\index.xml',
+  phase: 'evaluation',
+  dependency: 'esm',
+  descriptionData: {
+    name: 'webpack-loader',
+    scripts: { build: 'webpack' },
+    devDependencies: { ... },
+    ...
+  },
+  issuer: 'E:\\testProj\\webpack-loader\\use-loader\\src\\index.js',
+  ...
+}
+*/
+```
+
+返回值与直接配置use参数一致。info参数可以拿到部分项目和模块信息，这里列举部分属性的含义：
+
+* resource 被加载的模块路径
+* issuer 引入者的路径
+* descriptionData package.json中的信息
 
 ### 嵌套rules ?
 
