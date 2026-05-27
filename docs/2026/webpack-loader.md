@@ -455,7 +455,53 @@ use属性支持函数形式，可以自定义启用loader的逻辑：
 * issuer 引入者的路径
 * descriptionData package.json中的信息
 
-### 嵌套rules ?
+### oneOf和嵌套rules
+使用oneOf和rules属性，可以实现嵌套rule。首先使用OneOf可以配置多个规则，只有第一个匹配到的规则生效：
+
+```js
+{
+  test: /\.(scss|css)$/i,
+  oneOf: [
+    {
+      test: /\.scss$/i,
+      use: ["style-loader", "css-loader", "sass-loader"],
+    },
+    {
+      test: /\.css$/i,
+      use: ["style-loader", "css-loader"],
+    },
+  ],
+}
+```
+
+上面的父规则同时匹配SCSS和CSS文件，但是子规则却区分了两条，不同的文件匹配不同的规则。下面再来举例一个嵌套rule的例子：
+
+```js
+{
+  test: /\.scss$/i,
+  rules: [
+    {
+      test: /\.m\.scss$/i,
+      use: [
+        "style-loader",
+        {
+          loader: "css-loader",
+          options: {
+            modules: true,
+          },
+        },
+        "sass-loader",
+      ],
+    },
+    {
+      test: /\.c\.css$/i,
+      use: ["style-loader", "css-loader", "sass-loader"],
+    },
+  ],
+},
+```
+
+上面的例子中，父rule识别了SCSS文件，子rule又根据不同文件名采取不同的处理方式。通过oneOf和嵌套rules的能力，可以更好的组织Rule配置。
 
 ### 内联方式
 
