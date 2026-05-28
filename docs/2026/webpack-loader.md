@@ -530,17 +530,9 @@ import data from '!!xml-loader!./index.xml';
 import data from '-!xml-loader!./index.xml';
 ```
 
-### Rule.resource ?
-
-### 链式API写法
-webpack-chain
-
-
-## 插入配置
-
-
-
 ## 自定义loader
+
+
 
 
 ## 参考
