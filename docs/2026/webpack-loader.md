@@ -305,7 +305,7 @@ PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
 ## loader配置方式
 通过前面对于几个loader的介绍，我们对与loader的作用已经有了简单的了解。这里我们再描述一下，loader在Webpack中是如何配置的。
 
-### 配置方式
+### 基础配置
 loader主要的配置方式是通过module.rules进行配置。但这个配置项并不是专供loader使用的，而是负责Webapck模块的规则配置。parser和generator（解析器和生成器）也是用rules等选项进行配置。这里我们主要介绍和loader相关的配置项，这一节会提到这些配置：
 
 * Rule.test 匹配模块规则
@@ -504,11 +504,39 @@ use属性支持函数形式，可以自定义启用loader的逻辑：
 上面的例子中，父rule识别了SCSS文件，子rule又根据不同文件名采取不同的处理方式。通过oneOf和嵌套rules的能力，可以更好的组织Rule配置。
 
 ### 内联方式
+除了Wbepack配置文件中配置外，loader还可以配置在引入模块的路径处，这样可以对部分特性模块使用特殊配置。我们先删除webpack.config.js中module相关的所有内容，然后修改引入模块的路径：
+
+```js
+// 单个loader
+import data from 'xml-loader!./index.xml';
+// 多个loader
+import 'style-loader!css-loader!./index.css';
+// loader配置
+import { abc } from "style-loader!css-loader?modules=local!sass-loader!./index.scss";
+// 另一种loader配置
+import { abc } from 'style-loader!css-loader?{"modules": true}!sass-loader!./index.scss';
+```
+
+可以看到，将loader写在路径前面，通过感叹号分隔，即可以内联方式使用loader。多个loader时执行顺序依然是从后到前，和rules中一致。同时内联方式也支持配置，可以使用类似url查询参数的格式，例如?a=xx&b=xx。又或者是一个JSON数据，例如?{"modules": true}。
+
+当同时配置了Webpack配置文件和内联方式时，他们两个必定会冲突。内联模式也提供了一些配置可以禁用配置文件，在最前面增加符号即可：
+
+```js
+// !  禁用普通loader
+import data from '!xml-loader!./index.xml';
+// !! 禁用所有loader
+import data from '!!xml-loader!./index.xml';
+// -! 禁用pre和普通loader
+import data from '-!xml-loader!./index.xml';
+```
 
 ### Rule.resource ?
 
 ### 链式API写法
 webpack-chain
+
+
+## 插入配置
 
 
 
