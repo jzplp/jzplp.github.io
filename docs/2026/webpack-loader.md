@@ -531,6 +531,100 @@ import data from '-!xml-loader!./index.xml';
 ```
 
 ## 自定义loader
+### 新建loader
+loader实际上就是一个处理代码的函数。首先我们新建一个最简单的loader，接收js后缀名的文件，但是只输出，不处理。新建loader/abc.js，内容就是loader的本体：
+
+```js
+module.exports = function abcLoader(src) {
+  console.log(src);
+  return src;
+}
+```
+
+然后在webpack.config.js中配置这个loader：
+
+```js
+module: {
+  rules: [
+    {
+      test: /\.js$/,
+      use: path.resolve('loader/abc.js'),
+    },
+  ],
+},
+```
+
+然后Console和打包后输出的结果如下。可以看到，loader函数接受的src实际上就是代码字符串本身。
+
+```js
+// Console输出
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+genEle("jzplp1", abc);
+
+// 打包后文件内容
+!(function (e, t) {
+  const n = document.createElement("div");
+  ((n.className = t), (n.textContent = "jzplp1"), document.body.appendChild(n));
+})(0, abc);
+```
+
+如果我们不返回src本身，而是使用对src进行修改，或者返回其它内容，这时候webpack处理的代码也会变化。
+
+```js
+module.exports = function abcLoader(src) {
+  return 'const str = "hello, jzplp!"; console.log(str)';
+}
+```
+
+使用上面的loader，无论我们js文件中的代码是什么，输出都是一致的。例如用前面一样的js源码进行尝试，输出如下：
+
+```js
+console.log("hello, jzplp!");
+```
+
+了解了这些，我们可以试着做一个处理xml的loader。首先需要安装fast-xml-parser用来处理xml文件。
+
+```js
+const { XMLParser } = require("fast-xml-parser");
+
+module.exports = function abcLoader(src) {
+  const parser = new XMLParser();
+  const data = parser.parse(src);
+  return `export default ${JSON.stringify(data)}`;
+};
+```
+
+通过loader代码可以看到，我们接收xml字符串，然后处理成JSON数据，再返回一个JavcaScript模块，导出JSON数据，这样就完成了xml的接入。再修改webpack.config.js配置：
+
+```js
+module: {
+  rules: [
+    {
+      test: /\.xml$/,
+      use: path.resolve('loader/abc.js'),
+    },
+  ],
+},
+```
+
+然后使用前面的xml数据，修改index.js内容。通过打包后输出代码可以看到，xml中的数据内容已经被合并进了输出JavcaScript中。
+
+```js
+// index.js
+import data from './index.xml'; 
+console.log(data);
+
+// 打包后输出代码
+(() => {
+  "use strict";
+  console.log({ "?xml": "", note: { to: "jzplp1", from: "jzplp2" } });
+})();
+```
 
 
 
@@ -558,4 +652,7 @@ import data from '-!xml-loader!./index.xml';
   https://webpack.docschina.org/concepts/loaders/
 - module.rules Webpack中文文档\
   https://webpack.docschina.org/configuration/module/#modulerules
-
+- 编写loader Webpack中文文档\
+  https://webpack.docschina.org/contribute/writing-a-loader/
+- Loader Interface API Webpack中文文档\
+  https://webpack.docschina.org/api/loaders/
