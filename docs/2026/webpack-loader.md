@@ -626,6 +626,75 @@ console.log(data);
 })();
 ```
 
+### 参数和异步loader
+Webpack提供了很多loader相关的API，在loader函数内部以ths.xxx的方式执行。从本节开始，我们逐步介绍一些。首先是loader可以接受参数，使用this.options读取。
+
+```js
+const { XMLParser } = require("fast-xml-parser");
+
+module.exports = function abcLoader(src) {
+  const params = this.getOptions();
+  console.log(params);
+  const parser = new XMLParser();
+  const data = parser.parse(src);
+  return `export default ${JSON.stringify(data)}`;
+};
+```
+
+然后修改Webpack配置，传入loader配置，最后输出结果如下：
+
+```js
+{
+  test: /\.xml$/,
+  use: {
+    loader: path.resolve("loader/abc.js"),
+    options: {
+      abc: "qwe",
+      qaz: 123,
+    },
+  },
+},
+
+/* 输出结果 
+{ abc: 'qwe', qaz: 123 }
+*/
+```
+
+除了return返回处理后的数据之外，还可以使用this.callback返回结果，它可以接收更多的参数。
+
+```js
+const { XMLParser } = require("fast-xml-parser");
+
+module.exports = function abcLoader(src, map, meta) {
+  const parser = new XMLParser();
+  const data = parser.parse(src);
+  this.callback(null, `export default ${JSON.stringify(data)}`, map, meta)
+};
+
+// 参数说明
+this.callback(
+  err: Error | null, // Error表示抛出异常，停止编译
+  content: string | Buffer, // 返回的代码
+  sourceMap?: SourceMap, // SourceMap数据
+  meta?: any // loader间可以传递的额外数据，Webpack本身并不使用
+);
+```
+
+loader也可以异步返回结果，这时候就必须使用callback了，而且还需要从this.async中获取，执行下面loader，Webapck会异步暂停10秒。
+
+```js
+const { XMLParser } = require("fast-xml-parser");
+
+module.exports = function abcLoader(src, map, meta) {
+  const callback = this.async();
+  setTimeout(() => {
+    const parser = new XMLParser();
+    const data = parser.parse(src);
+    callback(null, `export default ${JSON.stringify(data)}`, map, meta);
+  }, 10000);
+};
+```
+
 
 
 
