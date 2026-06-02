@@ -766,7 +766,220 @@ genEle(png);
 ```
 
 ### 执行顺序
+前面我们介绍过loader的执行顺序，是从右往左依次执行，左边的loader获取的是右边loader的执行结果。这里我们将前面处理图片的loader拆成两个，实践一下执行顺序。
 
+```js
+// loader/base64.js
+const { fileTypeFromBuffer } = require("file-type");
+async function handleBuffer(buffer) {、
+  const type = await fileTypeFromBuffer(buffer);
+  return {
+    data: buffer.toString("base64"),
+    mime: type.mime,
+  };
+}
+module.exports = function base64Loader(buffer) {
+  console.log('base64Loader');
+  const callback = this.async();
+  handleBuffer(buffer).then((data, err) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, data.data, null, { mime: data.mime });
+  });
+};
+module.exports.raw = true;
+
+// loader/imgurl.js
+module.exports = function imgUrlLoader(data, map, meta) {
+  console.log('imgUrlLoader');
+  return `export default 'data:${meta?.mime};base64,${data}'`;
+};
+```
+
+可以看到，第一个base64Loader将Buffer数据转为base64数据，第二个imgUrlLoader接收base64格式的字符串数据，返回Base64的Data URI形式的链接。中间还使用了meta作为loader之间数据传输的手段。然后修改Webpack配置，观察打包结果。
+
+```js
+{
+  test: /\.(jpg|png|gif)$/,
+  use: [
+    path.resolve("loader/imgurl.js"),
+    path.resolve("loader/base64.js"),
+  ],
+},
+
+/* Console输出结果
+base64Loader
+imgUrlLoader
+base64Loader
+imgUrlLoader
+*/
+```
+
+可以看到，loader的执行顺序确实是从右向左，且因为有两个图片，所以每个loader被调用过两次。loader的函数还可以设置一个pitch方法，这个方法是在本次所有loader执行前被调用，而且是从左向右调用，与正式loader函数的调用顺序相反。
+
+```js
+// loader/base64.js
+const { fileTypeFromBuffer } = require("file-type");
+async function handleBuffer(buffer) {
+  const type = await fileTypeFromBuffer(buffer);
+  return {
+    data: buffer.toString("base64"),
+    mime: type.mime,
+  };
+}
+module.exports = function base64Loader(buffer) {
+  console.log("base64Loader");
+  const callback = this.async();
+  handleBuffer(buffer).then((data, err) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, data.data, null, { mime: data.mime });
+  });
+};
+module.exports.raw = true;
+module.exports.pitch = function pitch(
+  remainingRequest,
+  precedingRequest,
+  data,
+) {
+  console.log("pitch base64Loader");
+  console.log(remainingRequest, "|", precedingRequest, "|", data);
+};
+
+
+// loader/imgurl.js
+module.exports = function imgUrlLoader(data, map, meta) {
+  console.log("imgUrlLoader");
+  return `export default 'data:${meta?.mime};base64,${data}'`;
+};
+module.exports.pitch = function pitch(
+  remainingRequest,
+  precedingRequest,
+  data,
+) {
+  console.log("pitch imgUrlLoader");
+  console.log(remainingRequest, "|", precedingRequest, "|", data);
+};
+
+/* Console输出结果
+pitch imgUrlLoader
+E:\testProj\webpack-loader\use-loader\loader\base64.js!E:\testProj\webpack-loader\use-loader\src\1.jpg |  | {}
+pitch base64Loader
+E:\testProj\webpack-loader\use-loader\src\1.jpg | E:\testProj\webpack-loader\use-loader\loader\imgurl.js | {}
+pitch imgUrlLoader
+E:\testProj\webpack-loader\use-loader\loader\base64.js!E:\testProj\webpack-loader\use-loader\src\2.png |  | {}
+pitch base64Loader
+E:\testProj\webpack-loader\use-loader\src\2.png | E:\testProj\webpack-loader\use-loader\loader\imgurl.js | {}
+base64Loader
+imgUrlLoader
+base64Loader
+imgUrlLoader
+*/
+```
+
+可以看到，pitch方法调用更早，且顺序与正式loader函数的调用顺序相反。上面还输出了pitch函数拿到的参数，这里列举下：
+
+* remainingRequest 表示调用完这个loader之后，还需要调用的loader，以!作为分隔符，包含引入文件本身路径
+* precedingRequest 表示调用这个loader之前调用的loader，以!作为分隔符，包含引入文件本身路径
+* data 在pitch函数和loader函数中传递数据，下面举个例子：
+
+```js
+module.exports = function imgUrlLoader(data, map, meta) {
+  console.log(this.data);
+  // 其它代码
+};
+
+module.exports.pitch = function pitch() {
+  data.value = 'hello, jzplp';
+};
+
+/* Console输出结果
+{ value: 'hello, jzplp' }
+*/
+```
+
+如果在pitch中返回数据，则可以中断loader的执行流程，这个数据直接作为loader输出的代码，且后面的loader不会被执行，但注意它“之前”的loader还是会被执行的。这里我们先修改后执行的imgUrlLoader试一下：
+
+```js
+module.exports = function imgUrlLoader(data, map, meta) {
+  console.log("imgUrlLoader");
+  return `export default 'data:${meta?.mime};base64,${data}'`;
+};
+module.exports.pitch = function pitch() {
+  console.log("pitch imgUrlLoader");
+  return 'export default "hello, jzplp"';
+};
+
+/* Console输出结果
+pitch imgUrlLoader
+pitch imgUrlLoader
+*/
+
+// 生成代码
+(() => {
+  "use strict";
+  function e(e) {
+    const l = document.createElement("img");
+    ((l.src = e), document.body.appendChild(l));
+  }
+  (e("hello, jzplp"), e("hello, jzplp"));
+})();
+```
+
+可以看到，这里仅执行了imgUrlLoader的picth方法，任何一个loader函数都没被执行到。我们再换成base64Loader试一下：
+
+```js
+const { fileTypeFromBuffer } = require("file-type");
+async function handleBuffer(buffer) {
+  const type = await fileTypeFromBuffer(buffer);
+  return {
+    data: buffer.toString("base64"),
+    mime: type.mime,
+  };
+}
+module.exports = function base64Loader(buffer) {
+  console.log("base64Loader");
+  const callback = this.async();
+  handleBuffer(buffer).then((data, err) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, data.data, null, { mime: data.mime });
+  });
+};
+module.exports.raw = true;
+module.exports.pitch = function pitch() {
+  console.log("pitch base64Loader");
+  return 'export default "hello, jzplp"';
+};
+
+/* Console输出结果
+pitch imgUrlLoader
+pitch base64Loader
+imgUrlLoader
+pitch imgUrlLoader
+pitch base64Loader
+imgUrlLoader
+*/
+
+// 生成代码
+(() => {
+  "use strict";
+  function e(e) {
+    const t = document.createElement("img");
+    ((t.src = e), document.body.appendChild(t));
+  }
+  (e('data:undefined;base64,export default "hello, jzplp"'),
+    e('data:undefined;base64,export default "hello, jzplp"'));
+})();
+```
+
+通过执行顺序和生成代码可以明显看到，base64Loader在后面，所以它在pitch返回之后，依然执行了前面的imgUrlLoader，且pitch返回的数据直接作为了前面loader的输入数据被处理。
 
 
 ## 参考
