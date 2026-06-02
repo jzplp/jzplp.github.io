@@ -695,6 +695,77 @@ module.exports = function abcLoader(src, map, meta) {
 };
 ```
 
+### 处理raw数据
+设置loader函数的raw属性为true，则接受的是Buffer形式的源码，方便我们处理二进制数据。这里我们尝试写一个将各种类型图片转为Base64的Data URI形式的链接的loader。
+
+```js
+const { fileTypeFromBuffer } = require("file-type");
+
+async function handleImg(buffer) {
+  // 从buffer中找到图片类型
+  const type = await fileTypeFromBuffer(buffer);
+  // 拼合图片数据
+  return `data:${type.mime};base64,${buffer.toString("base64")}`;
+}
+
+module.exports = function imgLoader(buffer) {
+  const callback = this.async();
+  handleImg(buffer).then((data, err) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+    callback(null, `export default '${data}'`);
+  });
+};
+
+module.exports.raw = true;
+```
+
+我们创建的loader可以接收多种图片格式，这里再Webpack中进行配置：
+
+```js
+{
+  test: /\.(jpg|png|gif)$/,
+  use: path.resolve("loader/img.js"),
+},
+```
+
+然后在源码中引入图片，并将其插入到浏览器中，这里尝试了jpg和png类型的图片：
+
+```js
+import jpg from './1.jpg';
+import png from './2.png';
+
+function genEle(test) {
+  const img = document.createElement("img");
+  img.src = test;
+  document.body.appendChild(img);
+}
+genEle(jpg);
+genEle(png);
+```
+
+打包后查看生成代码，发现图片已经被转成了Base64的Data URI形式，在浏览器中打开，图片可以正常展示。
+
+```js
+// 生成代码
+(() => {
+  "use strict";
+  function A(A) {
+    const Q = document.createElement("img");
+    ((Q.src = A), document.body.appendChild(Q));
+  }
+  (A(
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgA...", // 太长省略
+  ),
+    A(
+      "data:image/png;base64,iVBORw0KGgoAAAA....", // 太长省略
+    ));
+})();
+```
+
+### 执行顺序
 
 
 
