@@ -1,5 +1,5 @@
-# Webpack中的loader(未完成)
-Webpack是前端历史上具有统治地位的打包工具，应用非常广泛。虽然现在逐渐被性能更强的工具替代，但是依然有很多工程使用。loader是Webpack中的一种重要的外部插入配置工具，负责对源代码进行转换。Webpack本身只能识理解JavaScript和JSON文件，其它类型的文件不能处理。正是使用各种loader，Webpack才有了将各种格式的资源和代码识别和引入的能力。当然，loader的能力也并不仅限于此。
+# Webpack如何实现万物皆可import？loader的使用/配置/手写实践
+Webpack是前端历史上具有统治地位的打包工具，应用非常广泛。虽然现在逐渐被性能更强的工具替代，但是依然有很多工程使用。loader是Webpack中的一种重要的外部插入配置工具，负责对源代码进行转换。Webpack本身只能理解JavaScript和JSON文件，其它类型的文件不能处理。正是使用各种loader，Webpack才有了将各种格式的资源和代码识别和引入的能力。当然，loader的能力也并不仅限于此。
 
 ## loader使用示例
 为了了解loader的作用和使用方式，我们举例一些现有的知名loader。
@@ -114,7 +114,7 @@ module.exports = {
 };
 ```
 
-注意看在配置中有个test，我们传入了正则，表示.css后缀的文件名会匹配到这个规则。匹配到这个规则的文件，就使用这两个loader处理。然后再打包，发现成果中有引入CSS代码，而且浏览器中可以看到效果：
+注意看在配置中有个test，我们传入了正则，表示.css后缀的文件名会匹配到这个规则。匹配到这个规则的文件，就使用这两个loader处理。然后再打包，发现生成文件中有引入CSS代码，而且浏览器中可以看到效果：
 
 ​![](/2026/loader-3.png)
 
@@ -173,7 +173,7 @@ function genEle(test, className) {
 genEle("jzplp1", "abc");
 ```
 
-然后进行构建，查看生成文件和浏览器的Console效果。可以看到，xml文件被解析为数据直接放到生成代码中了，；浏览器可以正常输出结果。
+然后进行构建，查看生成文件和浏览器的Console效果。可以看到xml文件被解析为数据直接放到生成代码中了，浏览器可以正常输出结果。
 
 ​![](/2026/loader-4.png)
 
@@ -207,7 +207,7 @@ module.exports = {
 };
 ```
 
-在配置中我们识别了以js作为后缀名的文件，排除了node_modules中的代码，并且设置了loader选项，提供了Babel预设。注意js文件即使我们不引入babel-loader，Webpack也是可以解析的。在使用babel-loader后，Webpack打包js文件前，需要先经过Babel处理。w我们对比是否使用babel-loader打包后的文件内容：
+在配置中我们识别了以js作为后缀名的文件，排除了node_modules中的代码，并且设置了loader选项，提供了Babel预设。注意js文件即使我们不引入babel-loader，Webpack也是可以解析的。在使用babel-loader后，Webpack打包js文件前，需要先经过Babel处理。下面对比一下使用和不使用babel-loader时，打包后的文件内容：
 
 ```js
 // 不使用 babel-loader
@@ -229,7 +229,7 @@ module.exports = {
 通过对比可以看到，使用babel-loader后，代码被Babel编译了，明显区别在于const这个ES6语法不存在了，转为了var这个兼容语法。
 
 ### thread-loader
-thread-loader并不是用来引入某种类型文件的，而是利用多进程同时执行的技术，优化其它loader的执行时间的。thread-loader只需要放置在其它loader之前，它会的创建多个进程，将后续的loader执行代码放到独立的进程中执行，从而优化时间性能。它适合T用在比较耗时的操作中，例如babel-loader。我们修改配置：
+thread-loader并不是用来引入某种类型文件的，而是利用多进程同时执行的技术，优化其它loader的执行时间的。thread-loader只需要放置在其它loader之前，它会创建多个进程，将后续的loader执行代码放到独立的进程中执行，从而优化时间性能。它适合用在比较耗时的操作中，例如babel-loader。我们修改配置：
 
 ```js
 const path = require("path");
@@ -303,10 +303,10 @@ PID=7808  E:\testProj\webpack-loader\use-loader\src\index3.js
 ```
 
 ## loader配置方式
-通过前面对于几个loader的介绍，我们对与loader的作用已经有了简单的了解。这里我们再描述一下，loader在Webpack中是如何配置的。
+通过前面对于几个loader的介绍，我们对loader的作用已经有了简单的了解。这里我们再描述一下，loader在Webpack中是如何配置的。
 
 ### 基础配置
-loader主要的配置方式是通过module.rules进行配置。但这个配置项并不是专供loader使用的，而是负责Webapck模块的规则配置。parser和generator（解析器和生成器）也是用rules等选项进行配置。这里我们主要介绍和loader相关的配置项，这一节会提到这些配置：
+loader主要的配置方式是通过module.rules进行配置。但这个配置项并不是专供loader使用的，而是负责Webpack模块的规则配置。parser和generator（解析器和生成器）也是用rules等选项进行配置。这里我们主要介绍和loader相关的配置项，这一节会提到这些配置：
 
 * Rule.test 匹配模块规则
 * Rule.use 应用于模块的loader配置
@@ -504,7 +504,7 @@ use属性支持函数形式，可以自定义启用loader的逻辑：
 上面的例子中，父rule识别了SCSS文件，子rule又根据不同文件名采取不同的处理方式。通过oneOf和嵌套rules的能力，可以更好的组织Rule配置。
 
 ### 内联方式
-除了Wbepack配置文件中配置外，loader还可以配置在引入模块的路径处，这样可以对部分特性模块使用特殊配置。我们先删除webpack.config.js中module相关的所有内容，然后修改引入模块的路径：
+除了Webpack配置文件中配置外，loader还可以配置在引入模块的路径处，这样可以对部分特性模块使用特殊配置。我们先删除webpack.config.js中module相关的所有内容，然后修改引入模块的路径：
 
 ```js
 // 单个loader
@@ -519,7 +519,7 @@ import { abc } from 'style-loader!css-loader?{"modules": true}!sass-loader!./ind
 
 可以看到，将loader写在路径前面，通过感叹号分隔，即可以内联方式使用loader。多个loader时执行顺序依然是从后到前，和rules中一致。同时内联方式也支持配置，可以使用类似url查询参数的格式，例如?a=xx&b=xx。又或者是一个JSON数据，例如?{"modules": true}。
 
-当同时配置了Webpack配置文件和内联方式时，他们两个必定会冲突。内联模式也提供了一些配置可以禁用配置文件，在最前面增加符号即可：
+当同时配置了Webpack配置文件和内联方式时，它们两个必定会冲突。内联模式也提供了一些配置可以禁用配置文件，在最前面增加符号即可：
 
 ```js
 // !  禁用普通loader
@@ -564,16 +564,16 @@ function genEle(test, className) {
   div.textContent = test;
   document.body.appendChild(div);
 }
-genEle("jzplp1", abc);
+genEle("jzplp1", "abc");
 
 // 打包后文件内容
 !(function (e, t) {
   const n = document.createElement("div");
   ((n.className = t), (n.textContent = "jzplp1"), document.body.appendChild(n));
-})(0, abc);
+})(0, "abc");
 ```
 
-如果我们不返回src本身，而是使用对src进行修改，或者返回其它内容，这时候webpack处理的代码也会变化。
+如果我们不返回src本身，而是对src进行修改，或者返回其它内容，这时候webpack处理的代码也会变化。
 
 ```js
 module.exports = function abcLoader(src) {
@@ -599,7 +599,7 @@ module.exports = function abcLoader(src) {
 };
 ```
 
-通过loader代码可以看到，我们接收xml字符串，然后处理成JSON数据，再返回一个JavcaScript模块，导出JSON数据，这样就完成了xml的接入。再修改webpack.config.js配置：
+通过loader代码可以看到，我们接收xml字符串，然后处理成JSON数据，再返回一个JavaScript模块，导出JSON数据，这样就完成了xml的接入。再修改webpack.config.js配置：
 
 ```js
 module: {
@@ -612,7 +612,7 @@ module: {
 },
 ```
 
-然后使用前面的xml数据，修改index.js内容。通过打包后输出代码可以看到，xml中的数据内容已经被合并进了输出JavcaScript中。
+然后使用前面的xml数据，修改index.js内容。通过打包后输出代码可以看到，xml中的数据内容已经被合并进了输出JavaScript中。
 
 ```js
 // index.js
@@ -627,7 +627,7 @@ console.log(data);
 ```
 
 ### 参数和异步loader
-Webpack提供了很多loader相关的API，在loader函数内部以ths.xxx的方式执行。从本节开始，我们逐步介绍一些。首先是loader可以接受参数，使用this.options读取。
+Webpack提供了很多loader相关的API，在loader函数内部以this.xxx的方式执行。从本节开始，我们逐步介绍一些。首先是loader可以接受参数，使用this.getOptions读取。
 
 ```js
 const { XMLParser } = require("fast-xml-parser");
@@ -680,7 +680,7 @@ this.callback(
 );
 ```
 
-loader也可以异步返回结果，这时候就必须使用callback了，而且还需要从this.async中获取，执行下面loader，Webapck会异步暂停10秒。
+loader也可以异步返回结果，这时候就必须使用callback了，而且还需要从this.async中获取，执行下面loader，Webpack会异步暂停10秒。
 
 ```js
 const { XMLParser } = require("fast-xml-parser");
@@ -722,7 +722,7 @@ module.exports = function imgLoader(buffer) {
 module.exports.raw = true;
 ```
 
-我们创建的loader可以接收多种图片格式，这里再Webpack中进行配置：
+我们创建的loader可以接收多种图片格式，这里在Webpack中进行配置：
 
 ```js
 {
@@ -771,7 +771,7 @@ genEle(png);
 ```js
 // loader/base64.js
 const { fileTypeFromBuffer } = require("file-type");
-async function handleBuffer(buffer) {、
+async function handleBuffer(buffer) {
   const type = await fileTypeFromBuffer(buffer);
   return {
     data: buffer.toString("base64"),
@@ -930,7 +930,7 @@ pitch imgUrlLoader
 })();
 ```
 
-可以看到，这里仅执行了imgUrlLoader的picth方法，任何一个loader函数都没被执行到。我们再换成base64Loader试一下：
+可以看到，这里仅执行了imgUrlLoader的pitch方法，任何一个loader函数都没被执行到。我们再换成base64Loader试一下：
 
 ```js
 const { fileTypeFromBuffer } = require("file-type");
@@ -980,7 +980,6 @@ imgUrlLoader
 ```
 
 通过执行顺序和生成代码可以明显看到，base64Loader在后面，所以它在pitch返回之后，依然执行了前面的imgUrlLoader，且pitch返回的数据直接作为了前面loader的输入数据被处理。
-
 
 ## 参考
 - Webpack GitHub\

@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "Webpack中的loader",
+        text: "Webpack如何实现万物皆可import？loader的使用/配置/手写实践",
         link: "/2026/webpack-loader",
       },
       {
