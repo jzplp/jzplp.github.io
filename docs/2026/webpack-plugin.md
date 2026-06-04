@@ -4,9 +4,103 @@
 插件可以深入到Webpack中的打包和编译过程，在Webpack打包的不同阶段时，触发相应的钩子函数，从而实现对构建过程的定制与扩展。
 
 ## Plugin使用示例
+为了了解Plugin的作用和使用方式，我们举例一些现有的知名Plugin。
 
 ### HtmlWebpackPlugin
+在Webapack中，入口文件和生成文件都是JavaScript，但作为一个前端工程，入口文件应该是HTML。我们可以自己手写一个HTML入口文件，但如果是多入口，或者文件名根据内容变化等场景，我们手写HTML入口文件就会变的非常麻烦。HtmlWebpackPlugin插件可以自动生成HTML入口文件，帮我们免去烦恼。首先我们创建两个JavaScript入口文件：
 
+```js
+// src/index.js
+import "./index.css";
+import { abc } from "./index.module.scss";
+import data from "./index.xml";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+genEle("jzplp1", "qaz");
+genEle("jzplp2", abc);
+console.log(data);
+
+// src/another.js
+console.log("another");
+```
+
+入口文件中引入了两种CSS文件，分别为普通CSS文件和SCSS的CSS Modules，这里分别列出：
+
+```css
+/* src/index.css */
+.qaz {
+  color: blue;
+}
+
+/* src/index.module.scss */
+.abc {
+  color: red;
+}
+```
+
+然后是index.xml的内容：
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<note>
+  <to>jzplp1</to>
+  <from>jzplp2</from>
+</note>
+```
+
+最后是Webpack配置，这里我们使用了多个JavaScript入口，以及hash文件名，这时候手动生成HTML入口文件确实不方便，因此引入了HtmlWebpackPlugin插件。
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+module.exports = {
+  mode: "production",
+  // 多个入口
+  entry: {
+    index: "./src/index.js",
+    another: "./src/another.js",
+  },
+  output: {
+    clean: true,
+    // 根据入口文件名和内容hash生成文件名
+    filename: "[name]_[contenthash].js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.xml$/,
+        use: "xml-loader",
+      },
+      {
+        test: /\.scss$/,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "jzplp-test",
+    }),
+  ],
+};
+```
+
+我们看一下打包生成文件和浏览器效果，可以看到入口文件确实都被自动引入到了HTML中，且在浏览器上正常展示。
+
+​![](/2026/plugin-1.png)
+
+### 下一个
 
 
 ## 自定义plugin
