@@ -100,8 +100,61 @@ module.exports = {
 
 ​![](/2026/plugin-1.png)
 
-### 下一个
+### TerserWebpackPlugin
+TerserWebpackPlugin是一个压缩JS代码的Webpack插件。它已经被内置在Webpack中作为压缩代码工具默认启用，但如果希望修改配置，依然要手动引入插件。因为已经内置+生成代码优化相关功能统一配置，因此这个插件不在plugins中配置。下面我们举个例子：
 
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const TerserWebpackPlugin = require("terser-webpack-plugin");
+
+module.exports = {
+  mode: "production",
+  // 多个入口
+  entry: {
+    index: "./src/index.js",
+    another: "./src/another.js",
+  },
+  output: {
+    clean: true,
+    filename: "[name]_[contenthash].js",
+    path: path.resolve(__dirname, "dist"),
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "jzplp-test",
+    }),
+  ],
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserWebpackPlugin({
+        exclude: /index/,
+    })],
+  },
+};
+```
+
+TerserWebpackPlugin是在optimization.minimizer中配置，由于默认是开启的，因此我们测试下开启和关闭（exclude）的大包生成代码区别。可以看到，一个被压缩了，一个没有被压缩。
+
+```js
+// 开启效果
+!(function (e, t) {
+  const n = document.createElement("div");
+  ((n.className = t), (n.textContent = e), document.body.appendChild(n));
+})("jzplp1", "");
+
+// 关闭效果
+/******/ (() => { // webpackBootstrap
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+genEle("jzplp1", "");
+/******/ })()
+;
+```
 
 ## 自定义plugin
 
@@ -126,3 +179,6 @@ module.exports = {
   https://github.com/jantimon/html-webpack-plugin
 - tapable GitHub\
   https://github.com/webpack/tapable
+- Webpack TerserWebpackPlugin\
+  https://webpack.docschina.org/plugins/terser-webpack-plugin/
+
