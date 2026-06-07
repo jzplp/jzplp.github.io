@@ -156,6 +156,41 @@ genEle("jzplp1", "");
 ;
 ```
 
+### ProgressPlugin
+ProgressPlugin是一个报告编译进度的插件，接收一个函数，当编译进度更新时就会触发回调函数。
+
+```js
+const webpack = require("webpack");
+module.exports = {
+  // ...其它配置
+  plugins: [
+    new webpack.ProgressPlugin((percentage, message, ...args) => {
+      console.log("---", percentage, message, args);
+    }),
+  ],
+};
+```
+
+ProgressPlugin是一个webpack，因此我们不需要引入别的包就可以使用。回调参数中percentage是一个0-1之间的数字，表示进度。message是当前执行内容的简要描述。执行打包，输出如下：
+
+```js
+--- 0  []
+--- 0.01 setup [ 'before run' ]
+--- 0.01 setup [ 'before run', 'NodeEnvironmentPlugin' ]
+--- 0.01 setup [ 'before run' ]
+--- 0.02 setup [ 'run' ]
+// 省略大部分输出
+--- 0.99 cache [ 'shutdown' ]
+--- 0.99 cache [ 'shutdown' ]
+--- 1  []
+```
+
+### ?
+
+
+
+
+
 ## 自定义plugin
 
 ## 参考
