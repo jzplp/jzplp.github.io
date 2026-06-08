@@ -272,6 +272,121 @@ console.log("another");
 ```
 
 ## 自定义plugin
+### 新建插件
+插件是一个JavaAscript类，这个类需要有一个apply方法，Webpack在注入插件的时候会调用。如果需要接收插件参数，则需要从构造函数中接收。
+
+```js
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  options = {};
+  constructor(options) {
+    console.log('constructor')
+    // 获取插件参数并保存
+    this.options = options;
+  }
+
+  apply(compiler) {
+    console.log("apply", this.options);
+    // 钩子
+    compiler.hooks.compile.tap(pluginName, () => {
+      console.log("hook compile");
+    });
+  }
+};
+```
+
+apply方法接收一个compiler参数，在它上面可有很多hooks钩子，我们可以编写触发相应钩子的回调函数。这里再看下Webpack配置和执行结果。
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const JzplpPlugin = require("./plugin/jzplpPlugin");
+
+module.exports = {
+  /// 其它Webpack配置
+  plugins: [
+    new JzplpPlugin({ abc: 123 }),
+    // 其它Webpack插件
+  ]
+};
+
+/* 打包时命令行输出
+constructor
+apply { abc: 1234 }
+hook compile
+*/
+```
+
+Webpack提供了非常多的钩子，我们在后面会介绍。有些钩子只能同步方式回调，有些可以异步方式，对应三种tap方法，这里以代码形式举例说明：
+
+```js
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  apply(compiler) {
+    // tap 同步回调
+    compiler.hooks.compile.tap(pluginName, () => {
+      console.log("hooks tap");
+    });
+
+    // tapAsync 异步回调
+    compiler.hooks.run.tapAsync(pluginName, (data, callback) => {
+      setTimeout(() => {
+        console.log("hooks tapAsync");
+        callback();
+      }, 1000);
+    });
+
+    // tapPromise 异步回调
+    compiler.hooks.make.tapPromise(pluginName, () => {
+      return new Promise((resolve) =>
+        setTimeout(() => {
+          console.log("hooks tapPromise Promise");
+          resolve();
+        }, 1000),
+      );
+    });
+
+    // tapPromise 异步回调 async
+    compiler.hooks.emit.tapPromise(pluginName, async () => {
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          resolve();
+        }, 1000),
+      );
+      console.log("hooks tapPromise async");
+    });
+  }
+};
+
+/* 打包时命令行输出
+hooks tapAsync
+hooks tap
+hooks tapPromise Promise
+hooks tapPromise async
+*/
+```
+
+### 钩子列表?
+
+### 编译过程钩子
+compiler时编译器钩子，只会触发一次
+compilation时编译过程，生产模式一般只触发一次，watch模式（一般开发模式下使用）会触发多次。
+
+## 做一点简单的插件？
+
+
+
+## 自定义hooks
+
+### tapable简介
+
+### 怎么自定义？
+
+
 
 ## 参考
 - Webpack如何实现万物皆可import？loader的使用/配置/手写实践\
