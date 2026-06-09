@@ -370,7 +370,57 @@ hooks tapPromise async
 */
 ```
 
-### 钩子列表?
+### 钩子列表
+Webpack提供了很多插件钩子，这些钩子实际上对应Webpack打包过程中的声明周期过程。这里我们简述一下插件钩子和生命周期关系。
+
+**1.初始化阶段**
+| 钩子名称 | 含义和触发时机 |
+| - | - |
+| environment | 初始化环境配置 |
+| afterEnvironment | 环境准备完成后触发 |
+| entryOption | webpack配置的entry处理之后 |
+| afterPlugins | 所有插件初始化之后 |
+| afterResolvers | 所有模块解析器（Resolver）初始化之后 |
+
+**2.启动阶段**
+| 钩子名称 | 含义和触发时机 |
+| - | - |
+| initialize | 当编译器对象被初始化时触发 |
+| beforeRun | 开始构建之前触发 |
+| run | 构建正式开始 |
+| watchRun | 监听模式下，每次重新构建之前触发 |
+
+**3.编译阶段**
+| 钩子名称 | 含义和触发时机 |
+| - | - |
+| beforeCompile | 创建Compilation实例前，可修改参数	 |
+| compile | 创建Compilation实例前，不可修改参数 |
+| thisCompilation | 初始化Compilation时 |
+| compilation | 初始化Compilation之后 |
+| make | Compilation创建完毕，生命周期开始前 |
+| afterCompile | Compilation编译过程结束后 |
+
+**4.输出阶段**
+| 钩子名称 | 含义和触发时机 |
+| - | - |
+| shouldEmit | 在输出产物之前调用，返回true/false决定是否输出 |
+| emit | 在输出全部产物到文件目录之前 |
+| assetEmitted | 每一个文件输出后触发 |
+| afterEmit | 在输出全部产物到文件目录之后 |
+
+**4.结束阶段**
+| 钩子名称 | 含义和触发时机 |
+| - | - |
+| done | 编译完成之后 |
+| failed | 编译失败之后 |
+| invalid | 监听模式下，一次编译失效后（可能来源于文件变更导致的失效，不是编译失败） |
+| watchClose | 监听模式关闭 |
+| shutdown | 编译器关闭 |
+
+这些钩子虽然很多，而且非常细致，进行一个步骤的前前后后有多个钩子顺序触发。这些钩子可能是同步的，可能是异步的，会有不同的参数和返回值，这里就不一一描述了，可以查看Webpack文档。编译阶段实际上并没有做编译工作，而是创建Compilation，由它来完成编译。我们会在后面介绍Compilation相关使用和钩子。
+
+
+
 
 ### 编译过程钩子
 compiler时编译器钩子，只会触发一次
