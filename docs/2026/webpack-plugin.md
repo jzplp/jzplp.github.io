@@ -422,19 +422,59 @@ Webpack提供了很多插件钩子，这些钩子实际上对应Webpack打包过
 ### 编译过程钩子
 在前面的钩子列表介绍中，我们介绍了compiler编译器钩子。但它实际上并不负责真正的编译任务，而是创建compilation编译过程，由它来负责真正的编译工作。在生产模式打包过程中，compiler只会触发一次，compilation一般也只触发一次。但在监听模式下，compilation会触发多次。下面我们介绍一下compilation编译过程的相关钩子和生命周期关系。
 
-**1.xxx阶段**
+**1.构建阶段**
 | 钩子名称 | 含义和触发时机 |
 | - | - |
+| buildModule | 单个模块构建开始之前触发 |
+| succeedModule | 单个模块构建成功触发 |
+| failedModule | 单个模块构建失败触发 |
+| finishModules | 所有模块都完成构建且没有错误时触发 |
+
+**2.优化阶段**
+| 钩子名称 | 含义和触发时机 |
 | - | - |
+| seal | 停止接收新的模块，开始优化阶段 |
+| optimizeDependencies | 依赖优化开始时触发 |
+| afterOptimizeDependencies | 依赖优化之后触发 |
+| optimize | 优化阶段开始时触发 |
+| optimizeModules | 模块优化阶段开始时触发 |
+| afterOptimizeModules | 模块优化完成之后触发 |
+| optimizeChunks | chunk优化开始时触发 |
+| afterOptimizeChunks | chunk优化完成之后触发 |
+| optimizeTree | 优化依赖树之前触发 |
+| afterOptimizeTree | 优化依赖树之后触发 |
+| optimizeChunkModules | 优化Chunk内的模块开始时触发 |
+| afterOptimizeChunkModules | 优化Chunk内的模块完成之后触发 |
+
+**3.Record阶段**
+| 钩子名称 | 含义和触发时机 |
 | - | - |
+| shouldRecord | 返回值决定是否存储record |
+| reviveModules | 从record中恢复模块信息 |
+| beforeModuleIds | 为每个模块分配id之前 |
+| moduleIds | 为每个模块分配一个id |
+| optimizeModuleIds | 在模块id优化开始时调用 |
+| afterOptimizeModuleIds | 在模块 id 优化完成时调用 |
+| reviveChunks | 从record中恢复chunk信息 |
+| beforeChunkIds | 在为每个chunk分配id之前 |
+| chunkIds | 为每个chunk分配id时 |
+| optimizeChunkIds | chunk id优化阶段开始时 |
+| afterOptimizeChunkIds | chunk id优化结束之后 |
+| recordModules | 将模块信息存储到record中 |
+| recordChunks | 将chunk存储到record中 |
+| beforeModuleHash | 在创建模块哈希之前 |
+| afterModuleHash | 在创建模块哈希之后 |
+| beforeHash | 在compilation添加哈希之前 |
+| afterHash | 在compilation添加哈希之后 |
+| recordHash | record的信息存储到records中 |
+| record | 将compilation相关信息存储到record中 |
+
+**4.资源生成阶段**
+| 钩子名称 | 含义和触发时机 |
 | - | - |
 
-**2.xxx阶段**
-| 钩子名称 | 含义和触发时机 |
-| - | - |
-| - | - |
-| - | - |
-| - | - |
+编译过程钩子怎么使用
+
 
 
 
