@@ -271,8 +271,8 @@ console.log("another");
 </html>
 ```
 
-## 自定义plugin初步
-### 新建插件
+## 钩子和生命周期
+### 新建插件和钩子用法
 插件是一个JavaAscript类，这个类需要有一个apply方法，Webpack在注入插件的时候会调用。如果需要接收插件参数，则需要从构造函数中接收。
 
 ```js
@@ -419,7 +419,7 @@ Webpack提供了很多插件钩子，这些钩子实际上对应Webpack打包过
 
 这些钩子虽然很多，而且非常细致，进行一个步骤的前前后后有多个钩子顺序触发。这些钩子可能是同步的，可能是异步的，会有不同的参数和返回值，这里就不一一描述了，可以查看Webpack文档。编译阶段实际上并没有做编译工作，而是创建Compilation，由它来完成编译。我们会在后面介绍Compilation相关使用和钩子。
 
-### 编译过程钩子
+### compilation编译过程钩子
 在前面的钩子列表介绍中，我们介绍了compiler编译器钩子。但它实际上并不负责真正的编译任务，而是创建compilation编译过程，由它来负责真正的编译工作。在生产模式打包过程中，compiler只会触发一次，compilation一般也只触发一次。但在监听模式下，compilation会触发多次。下面我们介绍一下compilation编译过程的相关钩子和生命周期关系。
 
 **1.构建阶段**
@@ -469,9 +469,29 @@ Webpack提供了很多插件钩子，这些钩子实际上对应Webpack打包过
 | recordHash | record的信息存储到records中 |
 | record | 将compilation相关信息存储到record中 |
 
-**4.资源生成阶段**
+**4.资源生成和优化阶段**
 | 钩子名称 | 含义和触发时机 |
 | - | - |
+| beforeModuleAssets | 在创建模块asset之前 |
+| shouldGenerateChunkAssets | 是否生成chunk asset，返回false不生成 |
+| beforeChunkAssets | 在创建 chunk asset 之前 |
+| additionalAssets | 创建额外asset |
+| optimizeAssets | 优化存储在compilation.assets中的所有asset |
+| afterOptimizeAssets | asset优化之后 |
+| processAssets | 处理和修改asset，其中包含多个步骤 |
+| afterProcessAssets | processAssets完成后 |
+
+**4.资源密封和后处理阶段**
+| 钩子名称 | 含义和触发时机 |
+| needAdditionalSeal | compilation是否需要解除seal以引入其他文件 |
+| afterSeal | 在needAdditionalSeal之后 |
+| - | - |
+| - | - |
+| - | - |
+
+
+
+### 使用编译过程钩子
 
 编译过程钩子怎么使用
 
