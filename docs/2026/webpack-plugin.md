@@ -481,15 +481,19 @@ Webpack提供了很多插件钩子，这些钩子实际上对应Webpack打包过
 | processAssets | 处理和修改asset，其中包含多个步骤 |
 | afterProcessAssets | processAssets完成后 |
 
-**4.资源密封和后处理阶段**
+**5.资源密封和后处理阶段**
 | 钩子名称 | 含义和触发时机 |
+| - | - |
 | needAdditionalSeal | compilation是否需要解除seal以引入其他文件 |
 | afterSeal | 在needAdditionalSeal之后 |
-| - | - |
-| - | - |
-| - | - |
+| chunkHash | 为每个chunk生成hash |
+| moduleAsset | 单个模块生成单个asset，被添加到compilation时 |
+| chunkAsset | 单个chunk生成单个asset，被添加到compilation时 |
+| assetPath | 决定asset的路径 |
+| needAdditionalPass | 决定asset在输出后是否需要进一步处理 |
+| childCompiler | 子compiler设置之后 |
 
-
+通过上面的钩子可以看到，构建，优化，缓存，生成module，chunk和assets等，都是在compilation编译过程中运行的。
 
 ### 使用编译过程钩子
 
