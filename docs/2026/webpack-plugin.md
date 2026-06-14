@@ -525,7 +525,15 @@ compilation optimize
 
 获取compilation对象最常用的compiler钩子是thisCompilation和compilation，这两个在compilation对象创建时触发。其中thisCompilation时间更早。其它compiler钩子也能拿到compilation对象，但是由于它们触发时间较晚，晚于一些compilation钩子的时间，即使我们监听了，也不会被触发。例如make, afterCompile, emit等钩子。但是这些钩子拿到compilation对象后，可以访问对象中挂载的数据，因此还是有意义的。
 
-## 做一点简单的插件？
+## 插件开发
+### Node.js中使用Webpack
+在真正开始插件开发之前，我们先来看一下如何在Node.js中使用Webpack。为什么要先了解这个？因为Node.js中使用Webpack，用的正是我们前面介绍的compiler对象。
+
+
+
+
+## 后面
+
 
 
 
