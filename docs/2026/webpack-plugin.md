@@ -493,14 +493,37 @@ Webpack提供了很多插件钩子，这些钩子实际上对应Webpack打包过
 | needAdditionalPass | 决定asset在输出后是否需要进一步处理 |
 | childCompiler | 子compiler设置之后 |
 
-通过上面的钩子可以看到，构建，优化，缓存，生成module，chunk和assets等，都是在compilation编译过程中运行的。
+通过上面的钩子可以看到，构建，优化，缓存，生成module，chunk和assets等，都是在compilation编译过程中运行的。compiler和compilation钩子的含义和触发时机涉及到Webpack整个声明周期和构建优化流程，要想理解需要深入Webpack各种知识和源码，是一个较大的主题，因此这里就不详细介绍了。
 
 ### 使用编译过程钩子
+插件在执行apply方法时，compilation对象还没有创建，因此无法监听钩子。可以通过监听compiler钩子，在回调中拿到compilation对象，然后再监听compilation钩子。
 
-编译过程钩子怎么使用
+```js
+const pluginName = "JzplpPlugin";
 
+module.exports = class JzplpPlugin {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      console.log("compiler thisCompilation");
 
+      compilation.hooks.finishModules.tap(pluginName, () => {
+        console.log("compilation finishModules");
+      });
+      compilation.hooks.optimize.tap(pluginName, () => {
+        console.log("compilation optimize");
+      });
+    });
+  }
+};
 
+/* 打包时命令行输出
+compiler thisCompilation
+compilation finishModules
+compilation optimize
+*/
+```
+
+获取compilation对象最常用的compiler钩子是thisCompilation和compilation，这两个在compilation对象创建时触发。其中thisCompilation时间更早。其它compiler钩子也能拿到compilation对象，但是由于它们触发时间较晚，晚于一些compilation钩子的时间，即使我们监听了，也不会被触发。例如make, afterCompile, emit等钩子。但是这些钩子拿到compilation对象后，可以访问对象中挂载的数据，因此还是有意义的。
 
 ## 做一点简单的插件？
 
