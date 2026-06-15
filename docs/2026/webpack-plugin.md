@@ -595,10 +595,66 @@ stats error [
 ```
 
 ### 使用compiler对象
+如果不对webpack对象传入回调函数，webpack对象会返回一个Compiler的实例。这个实例实际上就是插件中的那个Compiler对象。对这个对象调用run方法，参数和效果与前面编译脚本一致。
 
-### 使用compilation对象
+```js
+const webpack = require("webpack");
+const config = require("../webpack.config.js");
+
+const compiler = webpack(config);
+compiler.run((err, stats) => {
+  console.log("打包成功！");
+});
+```
+
+除了run方法之外，compiler对象中还有一些方法，例如watch监听模式，close关闭编译器，保存缓存等。这里拿到的compiler对象，和在插件里一样可以使用各种钩子，也可以使用compilation钩子。
+
+```js
+const webpack = require("webpack");
+const config = require("../webpack.config.js");
+
+const pluginName = "JzplpPlugin";
+const compiler = webpack(config);
+
+compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+  console.log("compiler thisCompilation");
+
+  compilation.hooks.finishModules.tap(pluginName, () => {
+    console.log("compilation finishModules");
+  });
+  compilation.hooks.optimize.tap(pluginName, () => {
+    console.log("compilation optimize");
+  });
+});
+
+compiler.run((err, stats) => {
+  console.log("打包成功！");
+});
+
+/* 打包时命令行输出
+compiler thisCompilation
+compilation finishModules
+compilation optimize
+打包成功！
+*/
+```
+
+### stats对象
+
+补充 stats 对象的属性和示例代码
+
+参考这里面
+https://webpack.docschina.org/api/stats/
+
+stats对象保存一些代码编译过程中的信息，其中stats.toJson方法是以JSON对象形式返回编译信息。它可以接收参数，是关于信息输出展示相关的。包含字符串参数预设（Stats Presets）和参数对象等形式，可以查看Webapck文档中Stats对象。
 
 
+而run函数的回调触发时，除了拿到输出信息，还可以拿到compilation对象。但回调触发时已经是打包结束的状态了，因此不能
+
+补充这里拿到的 compilation对象的属性和示例代码，最后提一句其它方法没用（因为编译完了，但是后面自定义插件中是有用的）
+
+## 写插件试试
+写好几个，从最简单的开始
 
 
 ## 自定义hooks
@@ -638,4 +694,8 @@ stats error [
   https://webpack.docschina.org/api/node/
 - Webpack Compilation对象\
   https://webpack.docschina.org/api/compilation-object/
+- Webpack Stats对象\
+  https://webpack.docschina.org/configuration/stats
+- Webpack Stats Data\
+  https://webpack.docschina.org/api/stats/
 
