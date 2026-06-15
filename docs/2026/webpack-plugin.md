@@ -525,14 +525,78 @@ compilation optimize
 
 获取compilation对象最常用的compiler钩子是thisCompilation和compilation，这两个在compilation对象创建时触发。其中thisCompilation时间更早。其它compiler钩子也能拿到compilation对象，但是由于它们触发时间较晚，晚于一些compilation钩子的时间，即使我们监听了，也不会被触发。例如make, afterCompile, emit等钩子。但是这些钩子拿到compilation对象后，可以访问对象中挂载的数据，因此还是有意义的。
 
-## 插件开发
-### Node.js中使用Webpack
-在真正开始插件开发之前，我们先来看一下如何在Node.js中使用Webpack。为什么要先了解这个？因为Node.js中使用Webpack，用的正是我们前面介绍的compiler对象。
+## Node.js中使用Webpack
+在真正开始插件开发之前，我们先来看一下如何在Node.js中使用Webpack。为什么要先了解这个？因为Node.js中使用Webpack，用的正是我们前面介绍的compiler对象。了解如何使用Webpack，对后面的插件开发也有帮助。
 
+### 编译脚本
+首先创建文件script/a.js，里面放置使用Webapck编译的脚本。引入webpack后，当作一个函数调用，第一个参数为打包配置，注意这里
 
+```js
+const webpack = require('webpack');
+const config = require("../webpack.config.js");
 
+webpack(config, (err, stats) => {
+  console.log("打包成功！");
+});
+```
 
-## 后面
+引入webpack后，当作一个函数调用，第一个参数为打包配置，注意这里Webpack不会自动读入webpack.config.js文件，需要我们手动引入并传给Webpack。第二个参数是一个回调函数，无论打包成功还是失败都会触发回调。命令行执行node script/a.js之后，可以看到一致的打包结果。
+
+打包失败可以分为两种类型。第一种是编译失败，这种错误不会在err中展示，而是放到stats中。第二种是非编译错误，例如Webapck内部错误，我们传的配置不对，或者Webpack插件引发报错等，这种错误会中断打包流程，在err中展示。
+
+```js
+const webpack = require("webpack");
+const config = require("../webpack.config.js");
+
+webpack(config, (err, stats) => {
+  if (err) {
+    console.error(err.stack || err);
+    return;
+  }
+  const info = stats.toJson();
+
+  if (stats.hasErrors()) {
+    console.log("stats error", info.errors);
+    return;
+  }
+
+  if (stats.hasWarnings()) {
+    console.log("stats warn", info.warnings);
+  }
+  console.log("打包成功！");
+});
+```
+
+这里输出了几种错误类型。我们故意引发错误试一下：
+
+```js
+// 传入错误配置： webpack('', (err, stats) => {
+PS E:\testProj\webpack-plugin\use-plugin> node script/a.js
+ValidationError: Invalid configuration object. Webpack has been initialized using a configuration object that does not match the API schema.
+ - configuration should be an object:
+...省略
+
+// 自定义插件引发异常 apply(compiler) { throw new Error(); }
+PS E:\testProj\webpack-plugin\use-plugin> node script/a.js
+Error
+    at JzplpPlugin.apply (E:\testProj\webpack-plugin\use-plugin\plugin\jzplpPlugin.js:5:11)
+    at createCompiler (E:\testProj\webpack-plugin\use-plugin\node_modules\webpack\lib\webpack.js:102:12)
+...省略
+
+// 编译错误，代码中的文件名不对 import { abc } from "./index.module.scss1";
+PS E:\testProj\webpack-plugin\use-plugin> node script/a.js
+stats error [
+  {
+    moduleIdentifier: 'E:\\testProj\\webpack-plugin\\use-plugin\\src\\index.js',
+    moduleName: './src/index.js',
+    loc: '2:0-43',
+    message: "Module not found: Error: Can't resolve './index.module.scss1' in 'E:\\testProj\\webpack-plugin\\use-plugin\\src'",
+...省略
+```
+
+### 使用compiler对象
+
+### 使用compilation对象
 
 
 
@@ -570,4 +634,8 @@ compilation optimize
   https://webpack.docschina.org/plugins/terser-webpack-plugin/
 - Webpack MiniCssExtractPlugin\
   https://webpack.docschina.org/plugins/mini-css-extract-plugin/
+- Webpack Node接口\
+  https://webpack.docschina.org/api/node/
+- Webpack Compilation对象\
+  https://webpack.docschina.org/api/compilation-object/
 
