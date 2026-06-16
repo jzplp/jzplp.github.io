@@ -664,43 +664,133 @@ compiler.run((err, stats) => {
 
 ```json
 {
-  "hash": "317735e3c5acfb30d4b5",
-  "version": "5.107.2",
-  "time": 742,
-  "builtAt": 1781607761628,
-  "publicPath": "auto",
-  "outputPath": "E:\\testProj\\webpack-plugin\\use-plugin\\dist",
-  "assetsByChunkName": {
+  "hash": "317735e3c5acfb30d4b5", // 一次编译的哈希值
+  "version": "5.107.2", // webpack版本
+  "time": 742, // 编译时间（毫秒）
+  "builtAt": 1781607761628, // 构建时间戳
+  "outputPath": "E:\\testProj\\webpack-plugin\\use-plugin\\dist", // 输出目录路径
+  "assetsByChunkName": { // 输出资源对应的Chunk名称
     "index": ["index.css", "index.js"],
     "another": ["another.js"]
   },
-  "assets": [/* ... */],
-  "chunks": [/* ... */],
-  "modules": [/* ... */],
-  "entrypoints": [/* ... */],
+  "assets": [/* ... */], // asset列表
+  "chunks": [/* ... */], // chunk列表
+  "modules": [/* ... */], // module列表
+  "entrypoints": {/* ... */}, // entry列表
   "namedChunkGroups": [/* ... */],
-  "errors": [],
-  "errorsCount": 0,
-  "warnings": [],
-  "warningsCount": 0,
-  "children": [/* ... */]
+  "errors": [], // error列表
+  "errorsCount": 0, // 错误个数
+  "warnings": [], // warning列表
+  "warningsCount": 0, // warning个数
+  "children": [/* ... */] // 子编译器列表
 }
 ```
 
+其中children中每个元素是一个上述的结构，例如在本次打包中HtmlWebpackPlugin插件就创建了一个子编译器，用来生成HTML文件。stats内还有几个列表，我们分别介绍其中的属性：
+
+```json
+// asset属性
+{
+  "type": "asset",
+  "name": "index.js", // 输出文件名
+  "size": 631, // 文件大小（字节为单位）
+  "emitted": true, // 资源文件是否要生成到output目录中
+  "comparedForEmit": false, // 指定是否对该资源文件和输出文件系统上相同文件进行比较
+  "cached": false, // 是否已缓存
+  "info": {"javascriptModule": false, "minimized": true, "size": 631 },
+  "chunkNames": ["index"], // 该资源文件包含的 chunks
+  "related": [], //	关联文件信息
+  "chunks": [57], // 该资源文件包含的 chunk ID
+}
+
+// chunk属性
+{
+  "rendered": true, // chunk是否输出到最终构建结果
+  "initial": true, // chunk是在页面初始化时加载还是按需加载
+  "entry": true, // 当前chunk是否包含了webpack运行时
+  "recorded": false, // chunk是否已被记录到Webpack的持久化缓存中
+  "size": 1131, // 整个chunk的总体积（字节）
+  "sizes": { "javascript": 413, "css/mini-extract": 55, "runtime": 663 }, // 按资源类型细分的体积明细
+  "names": ["index"], // 当前chunk的别名
+  "runtime": ["index"], // 当前chunk所属的运行时环境名称
+  "files": ["index.css", "index.js"], // chunk包含的文件名数组
+  "hash": "25da9b3c7be8858ab78c", // 基于chunk内容生成的唯一哈希值
+  "id": 57, // chunk对应的ID
+  "siblings": [], // 与当前chunk同级生成的其他chunk
+  "parents": [], // 生成当前chunk的父级chunk
+  "children": [], // 当前chunk进一步分割出的子级chunk
+  "modules": [/* ... */], // chunk包含的module列表 
+  "origins": [/* ... */] // chunk的来源
+},
+
+// module属性
+{
+  "type": "module",
+  "moduleType": "javascript/auto",
+  "layer": null,
+  "size": 352,
+  "sizes": { "javascript": 352 },
+  "built": true,
+  "codeGenerated": true,
+  "buildTimeExecuted": false,
+  "cached": false,
+  "identifier": "E:\\testProj\\webpack-plugin\\use-plugin\\src\\index.js",
+  "name": "./src/index.js",
+  "nameForCondition": "E:\\testProj\\webpack-plugin\\use-plugin\\src\\index.js",
+  "index": 0,
+  "preOrderIndex": 0,
+  "index2": 3,
+  "postOrderIndex": 3,
+  "cacheable": true,
+  "optional": false,
+  "orphan": false,
+  "issuer": null,
+  "issuerName": null,
+  "issuerPath": null,
+  "failed": false,
+  "errors": 0,
+  "warnings": 0,
+  "id": 44,
+  "issuerId": null,
+  "chunks": [57],
+  "assets": [],
+  "reasons": [/* ... */],
+  "usedExports": [],
+  "providedExports": [],
+  "optimizationBailout": [/* ... */],
+  "depth": 0
+},
+
+// entry属性
+"index": {
+  "name": "index",
+  "chunks": [57],
+  "assets": [
+    { "name": "index.css", "size": 57 },
+    { "name": "index.js", "size": 631 }
+  ],
+  "filteredAssets": 0,
+  "assetsSize": 688,
+  "auxiliaryAssets": [],
+  "filteredAuxiliaryAssets": 0,
+  "auxiliaryAssetsSize": 0,
+  "children": {},
+  "childAssets": {},
+  "isOverSizeLimit": false
+},
+```
 
 
-保存了一些代码编译过程中的信息，我们可以
+### stats中的compilation对象
 
-补充 stats 对象的属性和示例代码
-
-参考这里面
-https://webpack.docschina.org/api/stats/
 
 
 
 而run函数的回调触发时，除了拿到输出信息，还可以拿到compilation对象。但回调触发时已经是打包结束的状态了，因此不能
 
 补充这里拿到的 compilation对象的属性和示例代码，最后提一句其它方法没用（因为编译完了，但是后面自定义插件中是有用的）
+
+
 
 ## 写插件试试
 写好几个，从最简单的开始
