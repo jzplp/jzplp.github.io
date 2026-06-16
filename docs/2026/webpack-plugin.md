@@ -640,13 +640,62 @@ compilation optimize
 ```
 
 ### stats对象
+编译时回调函数入参的stats对象，我们前面构建脚本中使用它来判断构建过程是否有错误，事实上它有很多属性和方法，首先我们列举一下主要方法。
+
+* stats.hasErrors() 返回编译过程是否有错误
+* stats.hasWarnings() 返回编译过程是否有警告
+* stats.toJson(options) 以JSON对象形式返回编译信息
+* stats.toString(options) 以字符串形式返回编译信息
+
+其中toJson和toString的参数一致，包含字符串参数预设（Stats Presets）和参数对象等形式，可以查看Webapck文档中Stats对象参数部分，这里就不描述了。stats保存了大量代码编译过程中的信息，这里我们使用toJson方法输出对象，看一下都包含了哪些信息：
+
+```js
+const webpack = require("webpack");
+const config = require("../webpack.config.js");
+
+const compiler = webpack(config);
+compiler.run((err, stats) => {
+  const info = stats.toJson();
+  console.log(JSON.stringify(info));
+});
+```
+
+然后是输出结果。由于输出结果很长，因此这里只截取了部分输出信息。
+
+```json
+{
+  "hash": "317735e3c5acfb30d4b5",
+  "version": "5.107.2",
+  "time": 742,
+  "builtAt": 1781607761628,
+  "publicPath": "auto",
+  "outputPath": "E:\\testProj\\webpack-plugin\\use-plugin\\dist",
+  "assetsByChunkName": {
+    "index": ["index.css", "index.js"],
+    "another": ["another.js"]
+  },
+  "assets": [/* ... */],
+  "chunks": [/* ... */],
+  "modules": [/* ... */],
+  "entrypoints": [/* ... */],
+  "namedChunkGroups": [/* ... */],
+  "errors": [],
+  "errorsCount": 0,
+  "warnings": [],
+  "warningsCount": 0,
+  "children": [/* ... */]
+}
+```
+
+
+
+保存了一些代码编译过程中的信息，我们可以
 
 补充 stats 对象的属性和示例代码
 
 参考这里面
 https://webpack.docschina.org/api/stats/
 
-stats对象保存一些代码编译过程中的信息，其中stats.toJson方法是以JSON对象形式返回编译信息。它可以接收参数，是关于信息输出展示相关的。包含字符串参数预设（Stats Presets）和参数对象等形式，可以查看Webapck文档中Stats对象。
 
 
 而run函数的回调触发时，除了拿到输出信息，还可以拿到compilation对象。但回调触发时已经是打包结束的状态了，因此不能
@@ -694,7 +743,7 @@ stats对象保存一些代码编译过程中的信息，其中stats.toJson方法
   https://webpack.docschina.org/api/node/
 - Webpack Compilation对象\
   https://webpack.docschina.org/api/compilation-object/
-- Webpack Stats对象\
+- Webpack Stats对象参数\
   https://webpack.docschina.org/configuration/stats
 - Webpack Stats Data\
   https://webpack.docschina.org/api/stats/
