@@ -770,9 +770,21 @@ compiler.run((err, stats) => {
 },
 ```
 
-### Webpack中的对象关系
+### 重要对象关系
+前面我们介绍stats对象中的属性，提到了asset属性，chunk属性，module属性，entry属性。这每一个对象都是Webpack中的一类重要数据。下面我们介绍一下它们的含义和对应关系。
 
+* entry 打包入口，即我们Webpack配置中的entry属性，是打包构建的起点。一次打包中可能出现多个属性。
+* module Webpack中一个源代码文件一般表示一个模块，像vue文件可以划分为3个子模块（模板/js/css）。
+* chunk Webpack内部的处理概念，表示一个代码片段集合。一个entry是一个chunk，动态导入或分隔也产生单独的chunk。
+* asset 一个asset代表一个要输出的文件
 
+他们之间的关系如下：
+
+* Webpack打包是从entry开始，根据import关系生成依赖图，其中每个元素都是一个模块。一个entry中可以包含多个模块，不同的entry可以共享模块。
+* Webpack构建时会将多个的module合并成一个chunk。合并规则为一个entry生成一个chunk，动态导入，分隔/复用代码等会生成单独的chunk。
+* 一个chunk至少生成一个asset，像是sourcemap等场景，一个chunk会生成多个asset。一个asset不能合并多个chunk输出。
+
+因此，实际上Webpack构建是分割，合并，再分割的过程。首先将entry入口分割成一个一个的模块；然后将模块合并成chunk；最后分割成asset文件输出。
 
 ### stats中的compilation对象
 
