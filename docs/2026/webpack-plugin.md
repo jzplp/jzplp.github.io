@@ -686,7 +686,7 @@ compiler.run((err, stats) => {
 }
 ```
 
-其中children中每个元素是一个上述的结构，例如在本次打包中HtmlWebpackPlugin插件就创建了一个子编译器，用来生成HTML文件。stats内还有几个列表，我们分别介绍其中的属性：
+其中children中每个元素是一个上述的结构，例如在本次打包中HtmlWebpackPlugin插件就创建了一个子编译器，用来生成HTML文件。stats内还有几个列表，我们分别介绍其中的属性。注意Webpack中文文档中的部分属性描述可能是错的。
 
 ```json
 // asset属性
@@ -726,59 +726,52 @@ compiler.run((err, stats) => {
 // module属性
 {
   "type": "module",
-  "moduleType": "javascript/auto",
-  "layer": null,
-  "size": 352,
-  "sizes": { "javascript": 352 },
-  "built": true,
-  "codeGenerated": true,
-  "buildTimeExecuted": false,
-  "cached": false,
-  "identifier": "E:\\testProj\\webpack-plugin\\use-plugin\\src\\index.js",
-  "name": "./src/index.js",
-  "nameForCondition": "E:\\testProj\\webpack-plugin\\use-plugin\\src\\index.js",
-  "index": 0,
-  "preOrderIndex": 0,
-  "index2": 3,
-  "postOrderIndex": 3,
-  "cacheable": true,
-  "optional": false,
-  "orphan": false,
-  "issuer": null,
-  "issuerName": null,
-  "issuerPath": null,
-  "failed": false,
-  "errors": 0,
-  "warnings": 0,
-  "id": 44,
-  "issuerId": null,
-  "chunks": [57],
-  "assets": [],
-  "reasons": [/* ... */],
-  "usedExports": [],
-  "providedExports": [],
-  "optimizationBailout": [/* ... */],
-  "depth": 0
+  "moduleType": "javascript/auto", // 模块类型
+  "layer": null, // 构建层
+  "size": 352, // 模块大小，单位为字节
+  "sizes": { "javascript": 352 }, // 按具体资源类型细化该模块的体积组成
+  "built": true, // 该模块是否实际执行了构建流程
+  "codeGenerated": true, // 该模块是否生成了运行时代码
+  "buildTimeExecuted": false, // 该模块是否在构建阶段就被执行了
+  "cached": false, // 是否是持久化缓存
+  "identifier": "E:\\testProj\\webpack-plugin\\use-plugin\\src\\index.js", // 模块标识符
+  "name": "./src/index.js", // 实际文件的路径
+  "nameForCondition": "E:\\testProj\\webpack-plugin\\use-plugin\\src\\index.js", // 用于条件匹配（Rule.issuer 或 Rule.resource）时使用的路径
+  "index": 0, // 模块在所有模块列表中的全局排序索引
+  "cacheable": true, // 是否允许被Webpack缓存
+  "optional": false, // 其他模块在请求当前模块时，是否把这次请求标记为可选的
+  "issuer": null, // 表示当前模块的父模块
+  "issuerName": null, // 父模块路径
+  "issuerPath": null, // 从入口模块到当前模块的完整路径
+  "failed": false,  // 当前模块编译是否失败
+  "errors": 0, // 处理模块时的错误个数
+  "warnings": 0, // 处理模块时的警告个数
+  "id": 44, // 模块ID
+  "issuerId": null, // 父模块ID
+  "chunks": [57], // 包含（引用了）当前模块的所有Chunk的ID列表
+  "reasons": [/* ... */], // 其他模块请求当前模块的具体信息
+  "usedExports": [], // 被其他模块实际使用到的导出名称
+  "providedExports": [], // 该模块自己对外提供了哪些导出名称
+  "depth": 0 // 该模块在依赖树中的嵌套深度
 },
 
 // entry属性
 "index": {
-  "name": "index",
-  "chunks": [57],
-  "assets": [
+  "name": "index", // 入口点的名称
+  "chunks": [57], // 该入口点包含的所有 Chunk 的 ID 列表
+  "assets": [ // 该入口点首屏加载时需要下载的主要资源列表
     { "name": "index.css", "size": 57 },
     { "name": "index.js", "size": 631 }
   ],
-  "filteredAssets": 0,
-  "assetsSize": 688,
-  "auxiliaryAssets": [],
-  "filteredAuxiliaryAssets": 0,
-  "auxiliaryAssetsSize": 0,
-  "children": {},
-  "childAssets": {},
-  "isOverSizeLimit": false
+  "assetsSize": 688, // assets数组中所有资源的总体积（字节）
+  "auxiliaryAssets": [], // 辅助资源列表
+  "auxiliaryAssetsSize": 0, // auxiliaryAssets 数组中所有资源的总体积（字节）
+  "children": {}, // 子编译器生成的入口点映射
 },
 ```
+
+### Webpack中的对象关系
+
 
 
 ### stats中的compilation对象
