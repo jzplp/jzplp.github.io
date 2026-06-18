@@ -786,7 +786,7 @@ compiler.run((err, stats) => {
 
 因此，实际上Webpack构建是分割，合并，再分割的过程。首先将entry入口分割成一个一个的模块；然后将模块合并成chunk；最后分割成asset文件输出。
 
-### stats中的compilation对象
+### compilation对象属性和方法
 stats对象中，还能拿到compilation对象，以stats.compilation访问。事实上stats对象输出的部分打包数据就是从compilation对象中整理获取的。compilation对象中的数据大致有：
 
 * modules 编译中所有处理过的模块
