@@ -787,15 +787,42 @@ compiler.run((err, stats) => {
 因此，实际上Webpack构建是分割，合并，再分割的过程。首先将entry入口分割成一个一个的模块；然后将模块合并成chunk；最后分割成asset文件输出。
 
 ### stats中的compilation对象
+stats对象中，还能拿到compilation对象，以stats.compilation访问。事实上stats对象输出的部分打包数据就是从compilation对象中整理获取的。compilation对象中的数据大致有：
+
+* modules 编译中所有处理过的模块
+* chunks 编译中所有生成的Chunk
+* assets 编译中所有生成的asset
+* entrypoints 所有的入口点
+* errors 编译错误信息
+* warnings 编译警告信息
+* hash 本次编译的唯一标识哈希值
+* name 当前编译的名称
+* compiler 指向当前compiler对象的引用
 
 
+可以看到，和stats输出的数据非常像，但内部结构和格式不一样。compilation对象上还有很多方法，但stats对象存在的回调函数触发时，已经是打包结束的状态了，因此不能操作这些方法。不过在插件开发中，还是可能用到的。这里列举一下compilation对象的部分方法：
 
-
-而run函数的回调触发时，除了拿到输出信息，还可以拿到compilation对象。但回调触发时已经是打包结束的状态了，因此不能
-
-补充这里拿到的 compilation对象的属性和示例代码，最后提一句其它方法没用（因为编译完了，但是后面自定义插件中是有用的）
-
-
+* getStats 返回当前编译的stats对象
+* addModule 添加一个模块
+* getModule 通过标识符获取模块
+* findModule 尝试通过标识符搜索模块
+* buildModule 构建给定的模块
+* processModuleDependencies 处理给定模块依赖
+* addEntry 添加入口
+* rebuildModule 触发模块重建
+* finish 完成编译回调
+* seal 封闭编译
+* unseal 解除封闭编译
+* reportDependencyErrorsAndWarnings 将给定模块的错误和警告添加到编译的错误和警告中
+* addChunkInGroup 将模块添加到现有chunk组或创建一个新的组
+* addChunk 创建或添加一个新的chun
+* createChildCompiler 允许在webpack中运行另一个webpack实例
+* emitAsset 产出一个新的Asset
+* updateAsset 更新一个Asset
+* deleteAsset 删除一个Asset
+* getAssets 返回当前编译的所有Asset
+* getAsset 获取单个Asset
+* createHash 为本次构建生成唯一标识
 
 ## 写插件试试
 写好几个，从最简单的开始
