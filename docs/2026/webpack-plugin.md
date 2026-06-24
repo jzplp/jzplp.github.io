@@ -840,7 +840,60 @@ compiler对象除了前面介绍的方法之外，还有一些属性，这些属
 其中options对象也就是我们配置的webapck.config.js的内容。但即使我们的配置项很少，这个选项也非常大，因为它合并了Webapck的默认配置项。
 
 ## 写插件试试
-写好几个，从最简单的开始
+
+### 读取和新增asset（看要不要带修改）
+首先我们来尝试写一个简单的插件，实现读取和新增asset。
+
+```js
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  option = {};
+  constructor(options) {
+    // 获取插件参数
+    this.options = options;
+  }
+  apply(compiler) {
+    // 从compiler中获取webpack对象
+    const { webpack } = compiler;
+    // Compilation 中放着processAssets钩子的stage常量
+    const { Compilation, sources } = webpack;
+
+    compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: pluginName,
+          // 此时所有asset已被添加到compilation中
+          stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+        },
+        // assets为 { filePath: fileContent, ... } 的对象
+        (assets) => {
+          // 新文件内容为asset的路径列表
+          const fileContent =
+            "# File List\n" +
+            Object.keys(assets)
+              .map((key) => "* " + key)
+              .join("\n");
+          // 创建新的源码对象
+          const source = new sources.RawSource(fileContent);
+          // 生成一个新的asset，放到compilation中
+          compilation.emitAsset(this.options?.filaName || "fileList.md", source);
+        },
+      );
+    });
+  }
+};
+
+/* 文件输出结果
+# File List
+* index.css
+* index.js
+* another.js
+* index.html
+*/
+```
+
+在这个例子中，我们尝试了在asset全部生成后读取所有asset路径，然后写入一个新的asset内，最后输出成文件，放到dist/fileList.md中。
 
 
 ## 自定义hooks
