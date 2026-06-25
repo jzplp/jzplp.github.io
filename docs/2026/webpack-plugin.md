@@ -839,10 +839,9 @@ compiler对象除了前面介绍的方法之外，还有一些属性，这些属
 
 其中options对象也就是我们配置的webapck.config.js的内容。但即使我们的配置项很少，这个选项也非常大，因为它合并了Webapck的默认配置项。
 
-## 写插件试试
-
-### 读取和新增asset（看要不要带修改）
-首先我们来尝试写一个简单的插件，实现读取和新增asset。
+## 自定义插件开发
+### 读取和新增asset
+首先我们来尝试写一些简单的插件，读取和新增asset，实现对输出文件的直接控制。
 
 ```js
 const pluginName = "JzplpPlugin";
@@ -893,8 +892,83 @@ module.exports = class JzplpPlugin {
 */
 ```
 
-在这个例子中，我们尝试了在asset全部生成后读取所有asset路径，然后写入一个新的asset内，最后输出成文件，放到dist/fileList.md中。
+在这个例子中，我们尝试了在asset全部生成后读取所有asset路径，然后写入一个新的asset内，最后输出成文件，放到dist/fileList.md中。然后我们再试一下，修改已有的asset。在下面的插件中，我们尝试合并source，将每个asset顶部新增一句注释。
 
+```js
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  apply(compiler) {
+    const { webpack } = compiler;
+    const { Compilation, sources } = webpack;
+    compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: pluginName,
+          stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+        },
+        (assets) => {
+          Object.keys(assets).map((key) => {
+            const content = `/* fileName: ${key} */\n`;
+            const source = new sources.RawSource(content);
+            // 合并两个source
+            const newSource = new sources.ConcatSource(source, assets[key]);
+            // 更新现有的asset
+            compilation.updateAsset(key, newSource);
+          });
+        },
+      );
+    });
+  }
+};
+
+// 输出文件顶部示例
+/* fileName: index.js */
+```
+
+这里我们再尝试修改已有的asset内容，使用ReplaceSource来替换。
+
+```js
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  apply(compiler) {
+    const { webpack } = compiler;
+    const { Compilation, sources } = webpack;
+    compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: pluginName,
+          stage: Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+        },
+        (assets) => {
+          Object.keys(assets).map((key) => {
+            // 获取当前的asset代码
+            const src = assets[key].source().toString();
+            // 找到要修改的位置
+            const index = src.indexOf("jzplp");
+            if (index != -1) {
+              const reSource = new sources.ReplaceSource(assets[key], key);
+              // 区间是前闭后闭，长度为字符串长度-1，第三个参数为替换内容
+              reSource.replace(index, index + 4, "jzplpHello");
+              compilation.updateAsset(key, reSource);
+            }
+          });
+        },
+      );
+    });
+  }
+};
+
+/*
+使用插件前生成代码
+e.exports = { note: { to: ["jzplp1"], from: ["jzplp2"] } };
+使用插件后生成代码
+e.exports = { note: { to: ["jzplpHello1"], from: ["jzplp2"] } };
+*/
+```
+
+这里将每个文件中第一次出现的jzplp替换为jzplpHello，replace函数不要求替换前后字符串长度一致。
 
 ## 自定义hooks
 
