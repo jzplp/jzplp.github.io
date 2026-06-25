@@ -840,8 +840,8 @@ compiler对象除了前面介绍的方法之外，还有一些属性，这些属
 其中options对象也就是我们配置的webapck.config.js的内容。但即使我们的配置项很少，这个选项也非常大，因为它合并了Webapck的默认配置项。
 
 ## 自定义插件开发
-### 读取和新增asset
-首先我们来尝试写一些简单的插件，读取和新增asset，实现对输出文件的直接控制。
+### 新增和修改asset
+首先我们来尝试写一些简单的插件，新增和修改asset，实现对输出文件的直接控制。
 
 ```js
 const pluginName = "JzplpPlugin";
@@ -969,6 +969,13 @@ e.exports = { note: { to: ["jzplpHello1"], from: ["jzplp2"] } };
 ```
 
 这里将每个文件中第一次出现的jzplp替换为jzplpHello，replace函数不要求替换前后字符串长度一致。
+
+### 新增和修改module
+修改asset是对于输出文件进行控制，修改module则是控制输入文件。修改后的文件可以直接被Webpack通过打包流程处理。
+
+
+### 想想什么别的插件
+
 
 ## 自定义hooks
 
