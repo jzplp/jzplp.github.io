@@ -970,8 +970,25 @@ e.exports = { note: { to: ["jzplpHello1"], from: ["jzplp2"] } };
 
 这里将每个文件中第一次出现的jzplp替换为jzplpHello，replace函数不要求替换前后字符串长度一致。
 
-### 新增和修改module
-修改asset是对于输出文件进行控制，修改module则是控制输入文件。修改后的文件可以直接被Webpack通过打包流程处理。
+### 各种Source
+前面操作asset的代码中，我们从webpack.sources中取出了很多以Source结尾的类，并使用这些类创建了对象。Source类是Webpack中操作源码的重要类，负责源代码的读取，转换合并等。因此这里列举一下Source的类型和对应作用。
+
+* RawSource 没有关联Source Map的源码
+* OriginalSource 源码，包含自动生成的Source Map
+* SourceMapSource 源码，包含传入的Source Map
+* ConcatSource 将多个Source拼接成一个
+* ReplaceSource 可以对Source中的源码进行替换操作
+* CachedSource 缓存其它Source的计算结果
+* SizeOnlySource 仅提供资源大小的Source
+* PrefixSource 为源码为一行提供前缀
+* CompatSource 将非标准Source对象转换为符合标准的Source
+
+### 重写module路径
+在Webpack相关开发中，修改module内容一般放到loader中实现。但我们可以在loader引入之前，修改引入的module路径，从而实现替换文件的效果。
+
+```js
+
+```
 
 
 ### 想想什么别的插件
