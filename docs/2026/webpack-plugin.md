@@ -987,9 +987,47 @@ e.exports = { note: { to: ["jzplpHello1"], from: ["jzplp2"] } };
 在Webpack相关开发中，修改module内容一般放到loader中实现。但我们可以在loader引入之前，修改引入的module路径，从而实现替换文件的效果。
 
 ```js
+const pluginName = "JzplpPlugin";
 
+module.exports = class JzplpPlugin {
+  apply(compiler) {
+    compiler.hooks.normalModuleFactory.tap(
+      pluginName,
+      (normalModuleFactory) => {
+        // 当引入每个新模块时触发，此时模块路径还没有被解析
+        normalModuleFactory.hooks.beforeResolve.tap(
+          pluginName,
+          (resolveData) => {
+            // 原模块路径
+            const path = resolveData.request;
+            // 替换为另一个模块路径
+            if (path.endsWith("index1.css"))
+              resolveData.request = path.replace("index1.css", "index2.css");
+          },
+        );
+      },
+    );
+  }
+};
 ```
 
+在使用插件之前，代码引入的是index1.css代码，但是经过插件处理之后，引入的代码变为了index2.css的内容。这里引入了一种前面没介绍过的插件钩子对象类型normalModuleFactory。normalModuleFactory是一个处理模块的工厂，负责解析模块路径，确定应用的loader，对于每个模块生成一个NormalModule对象。但是它并不实际引入模块代码，引入还是在compilation中的build相关流程中实现，那里模块代码会先经过loader处理。
+
+所以这里我们在解析路径前替换了模块路径，Webpack会按照新的路径解析引入模块，最后生成代码中也是使用新路径的源码。normalModuleFactory中也有多个钩子，这里也简单介绍一下：
+
+* beforeResolve 遇到新的模块时触发
+* resolve 在初始化解析之前调用
+* resolveForScheme 在请求被解析之前调用
+* afterResolve 在解析带有URI Scheme的请求（如data:,http:）时触发
+* createModule 完成路径解析后触发
+* createModule 在创建NormalModule实例之前调用
+* module 在创建NormalModule实例后调用
+* createParser 在Parser实例创建之前调用
+* parser 在创建Parser实例后触发
+* createGenerator 在Generator实例创建之前调用
+* generator 在Generator实例创建之后调用
+
+注意这里仅仅是解析路径，创建Parser实例（解析AST使用），创建Generator实例（代码生成器）。但这里不引入代码，更不会解析AST和代码生成，仅仅是配置项和创建相关实例，实际操作都是在compilation中处理的。
 
 ### 想想什么别的插件
 
