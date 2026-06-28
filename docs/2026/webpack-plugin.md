@@ -840,8 +840,62 @@ compiler对象除了前面介绍的方法之外，还有一些属性，这些属
 其中options对象也就是我们配置的webapck.config.js的内容。但即使我们的配置项很少，这个选项也非常大，因为它合并了Webapck的默认配置项。
 
 ## 自定义插件开发
+### 触发脚本
+首先我们从最简单的插件开始，首先是在构建结束后，执行传入的脚本代码。首先是插件代码：
+
+```js
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  options = {};
+  constructor(options) {
+    console.log('constructor')
+    this.options = options;
+  }
+  apply(compiler) {
+    compiler.hooks.done.tap(pluginName, () => {
+      this.options?.func?.();
+    });
+  }
+};
+```
+
+然后调用插件时，func参数中传入一个函数，当构建完成时函数代码就会被执行。
+
+```js
+// 使用方式
+new JzplpPlugin({
+  func: () => {
+    console.log("jzplp func");
+  },
+}),
+
+/* 打包时输出结果
+jzplp func
+*/
+```
+
+然后我们尝试使用插件实现output.clean的功能，即生成构建结果前，先把旧输出目录中的文件删除。
+
+```js
+const fs = require("fs");
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  apply(compiler) {
+    // emit钩子，在asset输出到文件前调用
+    compiler.hooks.emit.tap(pluginName, () => {
+      // 获取webPack配置中的输出路径
+      const path = compiler.options.output.path;
+      // 删除目录下所有文件
+      fs.rmSync(path, { force: true, recursive: true });
+    });
+  }
+};
+```
+
 ### 新增和修改asset
-首先我们来尝试写一些简单的插件，新增和修改asset，实现对输出文件的直接控制。
+尝试新增和修改asset，实现对输出文件的直接控制。
 
 ```js
 const pluginName = "JzplpPlugin";
@@ -1029,12 +1083,80 @@ module.exports = class JzplpPlugin {
 
 注意这里仅仅是解析路径，创建Parser实例（解析AST使用），创建Generator实例（代码生成器）。但这里不引入代码，更不会解析AST和代码生成，仅仅是配置项和创建相关实例，实际操作都是在compilation中处理的。
 
-### 想想什么别的插件
+### 修改HTML中资源URL
+前面我们使用HtmlWebpackPlugin插件，生成了HTML入口文件，其中使用标签中引用URL的方式，引入了输出的asset资源文件。下面我们编写插件，实现修改这些标签中的URL。
 
+```js
+const fs = require("fs");
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const pluginName = "JzplpPlugin";
+
+module.exports = class JzplpPlugin {
+  apply(compiler) {
+    compiler.hooks.compilation.tap(pluginName, (compilation) => {
+      // 获取package.json路径
+      const pkgPath = path.resolve(compiler.options.context, "package.json");
+      // 读取package.json数据
+      const pkgData = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+
+      // 获取HtmlWebpackPlugin的钩子
+      const hooks = HtmlWebpackPlugin.getCompilationHooks(compilation);
+      // alterAssetTags钩子，标签生成后，写入前触发
+      hooks.alterAssetTags.tap(pluginName, (data) => {
+        // 处理script标签
+        data.assetTags.scripts.forEach((tag) => {
+          if (tag.tagName === "script" && tag?.attributes?.src)
+            tag.attributes.src = `${tag.attributes.src}?v=${pkgData.version}`;
+        });
+        // 处理link标签
+        data.assetTags.styles.forEach((tag) => {
+          if (tag.tagName === "link" && tag?.attributes?.href)
+            tag.attributes.href = `${tag.attributes.href}?v=${pkgData.version}`;
+        });
+      });
+    });
+  }
+};
+```
+
+在上面的插件中，首先读取了package.json文件内容，然后获取HtmlWebpackPlugin插件中的自定义钩子，然后对HtmlWebpackPlugin插件生成标签数据进行改动，其中script标签引入的是JavaScript文件，link标签引入的是CSS文件。通过对URL上增加版本号，可以使得不同版本的代码路径不一致，从而不同版本间浏览器缓存失效。是否使用插件的生成效果对比如下：
+
+```html
+<!-- 不使用插件 -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>jzplp-test</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script defer="defer" src="index.js"></script>
+    <script defer="defer" src="another.js"></script>
+    <link href="index.css" rel="stylesheet" />
+  </head>
+  <body></body>
+</html>
+
+<!-- 使用插件 -->
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>jzplp-test</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script defer="defer" src="index.js?v=1.0.0"></script>
+    <script defer="defer" src="another.js?v=1.0.0"></script>
+    <link href="index.css?v=1.0.0" rel="stylesheet" />
+  </head>
+  <body></body>
+</html>
+```
 
 ## 自定义hooks
+在前面自定义插件中，我们使用了HtmlWebpackPlugin插件中的自定义钩子，这些钩子代表着HtmlWebpackPlugin生成HTML的不同阶段。因此插件也是可以自定义钩子，并且被其它插件触发的。
 
 ### tapable简介
+
 
 ### 怎么自定义？
 
