@@ -1152,13 +1152,76 @@ module.exports = class JzplpPlugin {
 </html>
 ```
 
-## 自定义hooks
-在前面自定义插件中，我们使用了HtmlWebpackPlugin插件中的自定义钩子，这些钩子代表着HtmlWebpackPlugin生成HTML的不同阶段。因此插件也是可以自定义钩子，并且被其它插件触发的。
+## Tapable和自定义hooks
+在前面自定义插件中，我们使用了HtmlWebpackPlugin插件中的自定义钩子，这些钩子代表着HtmlWebpackPlugin生成HTML的不同阶段。因此插件也是可以自定义钩子，并且被其它插件触发的。Webpack中的钩子是使用Tapable实现事件监听和触发的，要想自定义钩子，首先需要了解Tapable。
 
-### tapable简介
+### Tapable初步
+首先让我们抛开Webapck，用几个例子来描述下Tapable的作用。
+
+```js
+const { SyncHook } = require("tapable");
+
+// 创建钩子
+const hook = new SyncHook(["arg1", "arg2"]);
+// 监听钩子
+hook.tap("jzplpTest1", (arg1, arg2) => {
+  console.log("jzplpTest1", arg1, arg2);
+});
+// 监听钩子
+hook.tap("jzplpTest2", (arg1, arg2) => {
+  console.log("jzplpTest2", arg1, arg2);
+});
+// 触发钩子
+hook.call("a1", "a2");
+
+/* 命令行输出
+jzplpTest1 a1 a2
+jzplpTest2 a1 a2
+*/
+```
+
+上面是一个同步钩子的示例，可以看到，创建钩子之后，可以对其进行监听回调，同时也可以触发事件。当事件触发时，所有监听的回调都能收到结果。然后我们再试一下异步钩子。
+
+```js
+const { AsyncParallelHook } = require("tapable");
+
+// 创建钩子
+const hook = new AsyncParallelHook(["arg1"]);
+
+// 监听钩子
+hook.tapAsync("jzplpTest", (data, callback) => {
+  setTimeout(() => {
+    console.log(data);
+    callback();
+  }, 1000);
+});
+
+// 触发钩子
+hook.callAsync("a1", () => {
+  console.log("a1 end");
+});
+
+// 触发钩子
+hook.promise("a2").then(() => {
+  console.log("a2 end");
+});
+
+/* 命令行输出
+a1
+a1 end
+a2
+a2 end
+*/
+```
+
+触发异步钩子也有回调函数和Promise两种方式。注意监听钩子的回调函数结束之后，对应触发钩子的回调函数才会执行。
+
+### Tapable种类
+
+### 优先级
 
 
-### 怎么自定义？
+### Webpack自定义钩子
 
 
 
@@ -1181,7 +1244,7 @@ module.exports = class JzplpPlugin {
   https://webpack.docschina.org/contribute/writing-a-plugin/
 - html-webpack-plugin GitHub\
   https://github.com/jantimon/html-webpack-plugin
-- tapable GitHub\
+- Tapable GitHub\
   https://github.com/webpack/tapable
 - Webpack TerserWebpackPlugin\
   https://webpack.docschina.org/plugins/terser-webpack-plugin/
