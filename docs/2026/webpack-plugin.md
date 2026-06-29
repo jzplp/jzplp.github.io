@@ -1216,7 +1216,44 @@ a2 end
 
 触发异步钩子也有回调函数和Promise两种方式。注意监听钩子的回调函数结束之后，对应触发钩子的回调函数才会执行。
 
-### Tapable种类
+### Tapable分类示例
+#### 类型列表
+Tapable中的钩子类型除了同步和异步之外，还有很多种钩子，其中有这些分类：
+
+* Sync 同步钩子
+* Async 异步钩子
+* Bail 熔断
+* Waterfall 瀑布
+* Loop 循环
+* Parallel 并行请求
+* AsyncSeries 串行请求
+
+将上面这些分类组合，可以得到Tapable中的所有钩子类型：
+
+* SyncHook 同步钩子
+* SyncBailHook 同步熔断钩子
+* SyncWaterfallHook 同步瀑布钩子
+* SyncLoopHook 同步循环钩子
+* AsyncParallelHook 异步并行请求钩子
+* AsyncParallelBailHook 异步并行请求熔断钩子
+* AsyncSeriesHook 异步串行请求钩子
+* AsyncSeriesBailHook 异步串行请求熔断钩子
+* AsyncSeriesLoopHook 异步串行请求循环钩子
+* AsyncSeriesWaterfallHook 异步串行请求瀑布钩子
+
+这些钩子类型不仅在自定义钩子中会用到，事实上Webapck内部也大量使用了这些不同类型的钩子。只看名称还是不懂这些钩子的使用和区别，下面我们按照钩子分类来介绍一下使用方式。
+
+#### Bail熔断
+
+
+#### Waterfall瀑布
+
+#### Loop循环
+
+#### Parallel并行请求
+
+#### AsyncSeries串行请求
+
 
 ### 优先级
 
