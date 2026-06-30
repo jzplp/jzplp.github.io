@@ -1267,7 +1267,6 @@ console.log("run call", data1);
 const data2 = hook.call("stop");
 console.log("stop call", data2);
 
-
 /* 命令行输出
 test1 run
 test2 run
@@ -1282,6 +1281,68 @@ stop call 1
 当第一个run触发执行时，所有回调都没有返回值，因此所有回调都被执行了。stop触发时，第二个钩子返回了1，因此后面的第三个钩子不再执行，且call调用拿到的值也是1。
 
 ### Waterfall瀑布
+Waterfall类型的钩子，会从头到尾串行执行所有的回调函数。但后一个回调函数收到的，是前一个回调函数返回的结果。call收到的值为最后一个回调函数返回的结果。
+
+```js
+const { SyncWaterfallHook } = require("tapable");
+
+const hook = new SyncWaterfallHook(["arg1"]);
+
+hook.tap("test1", (arg1) => {
+  console.log("test1", arg1);
+  return arg1 + 1;
+});
+hook.tap("test2", (arg1) => {
+  console.log("test2", arg1);
+  return arg1 * 3;
+});
+hook.tap("test3", (arg1) => {
+  console.log("test3", arg1);
+  return arg1 + 10;
+});
+
+const data1 = hook.call(1);
+console.log("run call", data1);
+
+/* 命令行输出
+test1 1
+test2 2
+test3 6
+run call 16
+*/
+```
+
+在上面的例子中，我们对一开始传入的值进行累计计算，返回给了call最后得计算结果。当某个回调返回返回undefined（无返回值）时，下一个回调收到的时上上一个回调的结果（相当于绕过一个回调函数的返回值）。了。另外如果钩子还存在多于一个的参数，那么除第一个参数外，其它参数不参与返回值计算，每个钩子收到的都是call函数提供的值。
+
+```js
+const { SyncWaterfallHook } = require("tapable");
+
+const hook = new SyncWaterfallHook(["arg1", "arg2"]);
+
+hook.tap("test1", (arg1, arg2) => {
+  console.log("test1", arg1, arg2);
+  return arg1 + 1;
+});
+hook.tap("test2", (arg1, arg2) => {
+  console.log("test2", arg1, arg2);
+});
+hook.tap("test3", (arg1, arg2) => {
+  console.log("test3", arg1, arg2);
+  return arg1 + 10;
+});
+
+const data1 = hook.call(1, "jzplp");
+console.log("run call", data1);
+
+/* 命令行输出
+test1 1 jzplp
+test2 2 jzplp
+test3 2 jzplp
+run call 12
+*/
+```
+
+从例子中可以看到，虽然中间的test2回调没有返回值，但后面的test3依然取到了由test1返回的值，并输出了最终结果。arg2虽然没有被返回和处理，但每个回调函数依然能收到相同的由call提供的值。
 
 ### Loop循环
 
