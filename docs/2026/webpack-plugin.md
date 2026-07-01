@@ -1345,6 +1345,41 @@ run call 12
 从例子中可以看到，虽然中间的test2回调没有返回值，但后面的test3依然取到了由test1返回的值，并输出了最终结果。arg2虽然没有被返回和处理，但每个回调函数依然能收到相同的由call提供的值。
 
 ### Loop循环
+Loop类型的钩子，也会从头到尾串行执行所有的回调函数。如果所有回调函数都返回undefined值，则正常结束。如果有一个函数返回非undefined值，则钩子会从第一个回调开始重新触发全部回调函数，直到回调函数都都返回undefined值。
+
+```js
+const { SyncLoopHook } = require("tapable");
+
+const hook = new SyncLoopHook(["arg1"]);
+let loopNum = 3;
+
+hook.tap("test1", (arg1) => {
+  console.log("test1", arg1);
+});
+hook.tap("test2", (arg1) => {
+  console.log("test2", arg1);
+  if (loopNum-- != 0) return 1;
+});
+hook.tap("test3", (arg1) => {
+  console.log("test3", arg1);
+});
+
+hook.call("jzplp");
+
+/*
+test1 jzplp
+test2 jzplp
+test1 jzplp
+test2 jzplp
+test1 jzplp
+test2 jzplp
+test1 jzplp
+test2 jzplp
+test3 jzplp
+*/
+```
+
+在例子中，前4次test2回调都返回1，导致从第一个回调函数重新开始执行，直到第五次返回undefined，全部回调函数才执行完毕并结束。注意最后的test3只有最后一次才被执行到。
 
 ### Parallel并行请求
 
