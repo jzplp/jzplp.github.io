@@ -1366,7 +1366,7 @@ hook.tap("test3", (arg1) => {
 
 hook.call("jzplp");
 
-/*
+/* 命令行输出
 test1 jzplp
 test2 jzplp
 test1 jzplp
@@ -1382,6 +1382,102 @@ test3 jzplp
 在例子中，前4次test2回调都返回1，导致从第一个回调函数重新开始执行，直到第五次返回undefined，全部回调函数才执行完毕并结束。注意最后的test3只有最后一次才被执行到。
 
 ### Parallel并行请求
+Parallel是仅适用于异步钩子的类型，指的是所有回调函数一起同时触发，并行执行。返回值会被忽略。
+
+```js
+const { AsyncParallelHook } = require("tapable");
+
+const hook = new AsyncParallelHook(["arg1"]);
+
+hook.tapAsync("test1", (arg1, cb) => {
+  console.log("test1 start", arg1);
+  setTimeout(() => {
+    console.log("test1 end", arg1);
+    cb();
+  }, 2000);
+});
+hook.tapAsync("test2", (arg1, cb) => {
+  console.log("test2 start", arg1);
+  setTimeout(() => {
+    console.log("test2 end", arg1);
+    cb();
+  }, 1000);
+});
+hook.tapAsync("test3", (arg1, cb) => {
+  console.log("test3 start", arg1);
+  setTimeout(() => {
+    console.log("test3 end", arg1);
+    cb();
+  }, 1500);
+});
+
+hook.callAsync("jzplp", () => {
+  console.log("callAsync end");
+});
+
+/* 命令行输出
+test1 start jzplp
+test2 start jzplp
+test3 start jzplp
+test2 end jzplp
+test3 end jzplp
+test1 end jzplp
+callAsync end
+*/
+```
+
+可以看到，虽然第一个test1最早开始（因为它注册最早），但由于定时时间最长，所以最晚结束。三个异步钩子实际上同时执行。
+
+### AsyncParallelBailHook钩子
+AsyncParallelBailHook是一种钩子类型，并不是分类，因为它的效果有点特色，所以拿出来单独描述。它有Parallel并行执行的特点，也具有Bail钩子返回第一个非undefined值的回调函数的特点。但这里不是按照钩子返回的异步事件顺序决定“第一个非undefined值的回调函数”，而是根据它们注册的顺序。
+
+```js
+const { AsyncParallelBailHook } = require("tapable");
+
+const hook = new AsyncParallelBailHook(["arg1"]);
+
+hook.tapAsync("test1", (arg1, cb) => {
+  console.log("test1 start", arg1);
+  setTimeout(() => {
+    console.log("test1 end", arg1);
+    cb();
+  }, 2000);
+});
+hook.tapAsync("test2", (arg1, cb) => {
+  console.log("test2 start", arg1);
+  setTimeout(() => {
+    console.log("test2 end", arg1);
+    cb(1);
+  }, 1000);
+});
+hook.tapAsync("test3", (arg1, cb) => {
+  console.log("test3 start", arg1);
+  setTimeout(() => {
+    console.log("test3 end", arg1);
+    cb(2);
+  }, 3000);
+});
+
+hook.callAsync("jzplp", (data) => {
+  console.log("callAsync end", data);
+});
+
+/* 命令行输出
+test1 start jzplp
+test2 start jzplp
+test3 start jzplp
+test2 end jzplp
+test1 end jzplp
+callAsync end 1
+test3 end jzplp
+*/
+```
+
+这里来理解一下这个例子的执行流程：
+1. 三个异步回调函数被同时触发，这意味着三个定时器都开始定时，最终输出end都会触发。
+2. 首先test2先结束，返回了1，但此时test1还没有结束，因此钩子在等待test1的结果。
+3. test1定时器结束，返回了undefined。于是钩子转而查看test2，看到返回值为1，于是直接触发callAsync的回调函数，拿到值为1。
+4. 最后test3定时器结束，但在此之前钩子就已经执行结束了。
 
 ### AsyncSeries串行请求
 
