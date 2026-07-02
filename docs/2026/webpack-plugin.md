@@ -1381,8 +1381,8 @@ test3 jzplp
 
 在例子中，前4次test2回调都返回1，导致从第一个回调函数重新开始执行，直到第五次返回undefined，全部回调函数才执行完毕并结束。注意最后的test3只有最后一次才被执行到。
 
-### Parallel并行请求
-Parallel是仅适用于异步钩子的类型，指的是所有回调函数一起同时触发，并行执行。返回值会被忽略。
+### AsyncParallel并行请求
+AsyncParallel是仅适用于异步钩子的类型，指的是所有回调函数一起同时触发，并行执行。返回值会被忽略。
 
 ```js
 const { AsyncParallelHook } = require("tapable");
@@ -1480,10 +1480,101 @@ test3 end jzplp
 4. 最后test3定时器结束，但在此之前钩子就已经执行结束了。
 
 ### AsyncSeries串行请求
+AsyncSeries类型的钩子是异步串行请求，即第一个异步回调完全执行完毕之后，再开始调用第二个回调函数。
 
+```js
+const { AsyncSeriesHook } = require("tapable");
 
-### 优先级
+const hook = new AsyncSeriesHook(["arg1"]);
 
+hook.tapAsync("test1", (arg1, cb) => {
+  console.log("test1 start", arg1);
+  setTimeout(() => {
+    console.log("test1 end", arg1);
+    cb();
+  }, 2000);
+});
+hook.tapAsync("test2", (arg1, cb) => {
+  console.log("test2 start", arg1);
+  setTimeout(() => {
+    console.log("test2 end", arg1);
+    cb();
+  }, 1000);
+});
+hook.tapAsync("test3", (arg1, cb) => {
+  console.log("test3 start", arg1);
+  setTimeout(() => {
+    console.log("test3 end", arg1);
+    cb();
+  }, 3000);
+});
+
+hook.callAsync("jzplp", () => {
+  console.log("callAsync end");
+});
+
+/* 命令行输出
+test1 start jzplp
+test1 end jzplp
+test2 start jzplp
+test2 end jzplp
+test3 start jzplp
+test3 end jzplp
+callAsync end
+*/
+```
+
+通过调用结果可以看到，钩子是一个一个顺序触发和结束的。AsyncSeries类型的钩子还包含一些组合场景，包括AsyncSeriesBailHook，AsyncSeriesLoopHook，AsyncSeriesWaterfallHook等，这些钩子符合对应类型的特性，比较好理解，这里就不再赘述了。
+
+### stage优先级
+前面我们尝试调用compilation中的processAssets钩子时，在参数中除了输入插件名称之外，还有一个stage参数。这个参数实际上指的是回调函数的优先级，它要求输入数字，数值越低，优先级越高，即越早被调用。默认是0，当stage值相同时，越早注册的钩子优先级越高。
+
+```js
+const { SyncHook } = require("tapable");
+
+const hook = new SyncHook(["arg1"]);
+
+hook.tap({ name: "test1", stage: 10 }, (arg1) => {
+  console.log("test1", arg1);
+});
+hook.tap("test2", (arg1) => {
+  console.log("test2", arg1);
+});
+hook.tap({ name: "test3", stage: -10 }, (arg1) => {
+  console.log("test3", arg1);
+});
+
+hook.call("run");
+
+/* 命令行输出
+test3 run
+test2 run
+test1 run
+*/
+```
+
+如果没有stage参数时，回调触发顺序是从前往后的test1, test2, test3。有了stage参数后，就按照stage的值从第到高顺序执行。钩子还有一个withOptions方法，可以将stage等参数包装起来，作为一个钩子调用时带有预设的stage。
+
+```js
+const { SyncHook } = require("tapable");
+
+const hook = new SyncHook(["arg1"]);
+const late = hook.withOptions({ stage: 10 });
+
+late.tap("test1", (arg1) => {
+  console.log("test1", arg1);
+});
+hook.tap("test2", (arg1) => {
+  console.log("test2", arg1);
+});
+
+hook.call("run");
+
+/* 命令行输出
+test2 run
+test1 run
+*/
+```
 
 ## Webpack自定义钩子
 
