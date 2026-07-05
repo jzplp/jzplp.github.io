@@ -1576,6 +1576,98 @@ test1 run
 */
 ```
 
+### 钩子操作记录和拦截器
+不管何种类型的钩子，都有一个intercept方法，会在钩子的一些运行步骤时触发对应回调函数，可以用来记录日志，或者拦截钩子操作。
+
+```js
+const { SyncHook } = require("tapable");
+
+const hook = new SyncHook(["arg1"]);
+hook.intercept({
+  name: "jzplpLog",
+  register: (tap) => {
+    console.log("--- register", tap);
+  },
+  call: (...args) => {
+    console.log("--- call", args);
+  },
+  tap: (tap) => {
+    console.log("--- tap", tap);
+  },
+  done: () => {
+    console.log("--- done");
+  },
+});
+
+hook.tap("test1", (arg1) => {
+  console.log("test1", arg1);
+});
+hook.tap("test2", (arg1) => {
+  console.log("test2", arg1);
+});
+hook.call("run");
+
+/* 命令行输出
+--- register { type: 'sync', fn: [Function (anonymous)], name: 'test1' }
+--- register { type: 'sync', fn: [Function (anonymous)], name: 'test2' }
+--- call [ 'run' ]
+--- tap { type: 'sync', fn: [Function (anonymous)], name: 'test1' }
+test1 run
+--- tap { type: 'sync', fn: [Function (anonymous)], name: 'test2' }
+test2 run
+--- done
+*/
+```
+
+在上面的代码中，我们使用intercept注册了很多回调函数，当对应的步骤触发时，使用回调函数打印日志。主要可以触发的方法有：
+
+* register tap相关钩子注册的时候触发
+* call call相关函数调用时触发
+* tap 每个tap相关钩子的回调函数触发时触发
+* loop 每次loop相关钩子开始循环时触发
+* error 回调函数抛出异常时触发
+* result Bail或者Waterfall类型的钩子返回一个值时触发
+* done 钩子执行全部成功时触发
+
+其中register方法可以用来拦截并修改钩子的回调函数。它接收一个Tap对象，返回修改后的Tap对象。其中主要有这些属性：
+
+* name 标识（插件名称）
+* type 执行方式 sync/async/promise，对应三种tap方法
+* stage 回调优先级
+* fn 回调函数
+
+```js
+const { SyncHook } = require("tapable");
+
+const hook = new SyncHook(["arg1"]);
+hook.intercept({
+  name: "jzplpLog",
+  register: (tap) => {
+    return {
+      ...tap,
+      fn: (arg1) => {
+        console.log("register", arg1);
+      },
+    };
+  },
+});
+
+hook.tap("test1", (arg1) => {
+  console.log("test1", arg1);
+});
+hook.tap("test2", (arg1) => {
+  console.log("test2", arg1);
+});
+hook.call("run");
+
+/* 命令行输出
+register run
+register run
+*/
+```
+
+通过这段代码可以看到，我们使用register替换了回调函数本身，触发钩子后，执行的是替换后的回调函数。
+
 ## Webpack自定义钩子
 
 
