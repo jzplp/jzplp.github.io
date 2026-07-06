@@ -1668,6 +1668,56 @@ register run
 
 通过这段代码可以看到，我们使用register替换了回调函数本身，触发钩子后，执行的是替换后的回调函数。
 
+### context共享数据
+钩子上可以挂在一个context对象，在不同回调函数中共享数据。
+
+```js
+const { SyncHook } = require("tapable");
+const hook = new SyncHook(["arg1"]);
+
+hook.tap({ name: "test1", context: true }, (context, arg1) => {
+  console.log("test1", context, arg1);
+  context.abc = "jzplp";
+});
+hook.tap({ name: "test2", context: true }, (context, arg1) => {
+  console.log("test2", context, arg1);
+});
+hook.tap("test3", (arg1) => {
+  console.log("test3", arg1);
+});
+hook.call("run");
+
+/* 命令行输出
+test1 {} run
+test2 { abc: 'jzplp' } run
+test3 run
+*/
+```
+
+要想使用context，需要设置对应属性为true。然后回调函数中第一个参数就变为了context。可以对它进行读取或者赋修改，后面的回调函数会收到更新后的数据。使用intercept，同样可以修改context。
+
+```js
+const { SyncHook } = require("tapable");
+
+const hook = new SyncHook(["arg1"]);
+hook.intercept({
+  name: "jzplpLog",
+  context: true,
+  tap: (context, tap) => {
+    context.abc = "jzplp";
+  },
+});
+
+hook.tap({ name: "test2", context: true }, (context, arg1) => {
+  console.log("test2", context, arg1);
+});
+hook.call("run");
+
+/* 命令行输出
+test2 { abc: 'jzplp' } run
+*/
+```
+
 ## Webpack自定义钩子
 
 
