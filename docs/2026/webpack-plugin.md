@@ -1719,8 +1719,73 @@ test2 { abc: 'jzplp' } run
 ```
 
 ## Webpack自定义钩子
+前面了解了Tapable的用法后，我们就可以创建自定义钩子了，创建后其它插件也可以监听这个钩子。下面的例子中有两个插件：CreatePlugin用来创建钩子并触发；UsePlugin监听和使用钩子。
 
+```js
+// plugin/create.js
+const { SyncHook } = require("tapable");
+const pluginName = "CreatePlugin";
+// 创建WeakMap，用来关联hook和compilation
+const compilationHooks = new WeakMap();
 
+module.exports = class CreatePlugin {
+  static getCompilationHooks(compilation) {
+    let hooks = compilationHooks.get(compilation);
+    // 如果这个compilation没关联过hook，就创建新的并关联
+    if (hooks === undefined) {
+      hooks = {
+        abc: new SyncHook(["arg1"]),
+      };
+      compilationHooks.set(compilation, hooks);
+    }
+    return hooks;
+  }
+
+  apply(compiler) {
+    compiler.hooks.compilation.tap(pluginName, (compilation) => {
+      compilation.hooks.optimize.tap(pluginName, () => {
+        const hooks = CreatePlugin.getCompilationHooks(compilation);
+        // 触发对应钩子
+        hooks.abc.call("jzplp");
+      });
+    });
+  }
+};
+
+// plugin/use.js
+const { SyncHook } = require("tapable");
+const CreatePlugin = require("./create");
+const pluginName = "UsePlugin";
+
+module.exports = class UsePlugin {
+  apply(compiler) {
+    compiler.hooks.compilation.tap(pluginName, (compilation) => {
+      const hooks = CreatePlugin.getCompilationHooks(compilation);
+      // 监听对应钩子
+      hooks.abc.tap(pluginName, (arg1) => {
+        console.log(pluginName, 'tap', arg1)
+      })
+    });
+  }
+};
+
+// webpack.config.js 中引入
+  plugins: [
+    new CreatePlugin({}),
+    new UsePlugin({}),
+    // ...
+  ],
+
+/* 命令行输出
+UsePlugin tap jzplp
+*/
+```
+
+这里我们以compilation的关联钩为例进行创建，像compiler等对象的钩子创建方法也类似。由于compilation对象可能有多个，因此使用WeakMap作为对象和钩子的关联关系，不同的compilation对象的钩子是独立的。因此使用了类的静态函数getCompilationHooks，用于获取对应对象的钩子。创建完之后还需要根据需求在适当的时机触发他。
+
+使用方直接引入插件类，也使用getCompilationHooks方法获取对应钩子，进行监听即可。注意引入插件时，创建方和触发方并没有引入顺序要求。
+
+## 总结
 
 ## 参考
 - Webpack如何实现万物皆可import？loader的使用/配置/手写实践\
