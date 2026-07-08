@@ -11,6 +11,10 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
+        text: "Webpack中的观察模式，开发服务与HMR等",
+        link: "/2026/webpack-dev",
+      },
+      {
         text: "理解Webpack插件机制：从插件使用、各类编译对象、Tapable到自定义插件与钩子开发",
         link: "/2026/webpack-plugin",
       },
