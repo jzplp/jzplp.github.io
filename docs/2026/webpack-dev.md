@@ -144,19 +144,167 @@ r("jzplp1", "qaz1"),
 
 不只修改js文件，修改CSS，XML等文件，效果也是一样的，刷新后页面内容就发生变化了。原因在于开启了watch模式后，Webpack会先打包一次，然后并不会结束退出，而是监听每个源文件的变化，如果源文件有改动，就重新编译，更新dist目录中的文件。
 
+### 进一步尝试
+Webapck支持自定义输出文件名的模板，我们将输出文件名改成根据文件内容变化的hash，看看watch模式下的效果。修改webpack.config.js中的output相关配置：
 
-分析 filename: "[name]-[contenthash].js",
+```js
+module.exports = {
+  output: {
+    // clean: true,
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name]-[contenthash].js",
+  },
+  // 其它配置
+};
+```
 
-看看watch选项
+首先我们关闭每次打包后删除旧文件的功能，然后指定了文件名中包含contenthash，即文件内容的hash，这样当文件内容变化时，打包出的文件名也随之变化。然后我们再次尝试watch模式，并修改文件。首先是第一次构建的结果：
 
-看看命令行输出
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>jzplp-test</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script defer="defer" src="index-e4066e9a2ff77c7c0d24.js"></script>
+    <script defer="defer" src="another-0c91733d77fe188bca5a.js"></script>
+    <link href="index.css" rel="stylesheet" />
+  </head>
+  <body></body>
+</html>
 
+<!-- 对应文件目录
+index.html
+index-e4066e9a2ff77c7c0d24.js
+another-0c91733d77fe188bca5a.js
+index.css
+-->
+```
 
+然后我们尝试修改src/index.js，将"qaz"变为"qaz1"。再看下构建结果：
 
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>jzplp-test</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script defer="defer" src="index-3f4853076a5c12fef72c.js"></script>
+    <script defer="defer" src="another-0c91733d77fe188bca5a.js"></script>
+    <link href="index.css" rel="stylesheet" />
+  </head>
+  <body></body>
+</html>
 
+<!-- 对应文件目录
+index.html
+index-e4066e9a2ff77c7c0d24.js
+another-0c91733d77fe188bca5a.js
+index.css
+index-3f4853076a5c12fef72c.js  新增
+-->
+```
 
+然后再修改src/another.js，将jzplp3改为jzplp4。再看下构建结果：
 
+```html
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>jzplp-test</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script defer="defer" src="index-3f4853076a5c12fef72c.js"></script>
+    <script defer="defer" src="another-32277c21d626f15ea07f.js"></script>
+    <link href="index.css" rel="stylesheet" />
+  </head>
+  <body></body>
+</html>
 
+<!-- 对应文件目录
+index.html
+index-e4066e9a2ff77c7c0d24.js
+another-0c91733d77fe188bca5a.js
+index.css
+index-3f4853076a5c12fef72c.js
+another-32277c21d626f15ea07f.js  新增
+-->
+```
+
+通过这个例子可以看到，watch每次都会重新编译，如果文件有改动，就会生成新的文件，同时html引入的文件名也会变化。如果我们一直在watch模式编辑，那么旧文件会越来越多。因此平时使用时，还是要设置clean: true，自动删除旧的生成文件。
+
+每次重新触发编译时，命令行也会有对应的提示，告诉我们哪些重新编译，生成了哪些文件：
+
+```sh
+> watch@1.0.0 watch
+> webpack --watch
+
+# 第一次编译
+assets by status 988 bytes [cached] 2 assets
+assets by path . 408 bytes
+  asset index.html 344 bytes [compared for emit]
+  asset index.css 64 bytes [compared for emit] (name: index)
+Entrypoint index 929 bytes = index.css 64 bytes index-e4066e9a2ff77c7c0d24.js 865 bytes
+Entrypoint another 123 bytes = another-0c91733d77fe188bca5a.js
+orphan modules 3.39 KiB (javascript) 2.67 KiB (runtime) [orphan] 14 modules
+runtime modules 1.1 KiB 3 modules
+cacheable modules 686 bytes (javascript) 62 bytes (css/mini-extract)
+  javascript modules 686 bytes
+    ./src/index.js + 1 modules 430 bytes [built] [code generated]
+    ./src/another.js 195 bytes [built] [code generated]
+    ./src/index.xml 61 bytes [built] [code generated]
+  modules by path ./src/*.css 62 bytes
+    css ./node_modules/css-loader/dist/cjs.js!./src/index.css 23 bytes [built] [code generated]
+    css ./node_modules/css-loader/dist/cjs.js!./src/index.module.css 39 bytes [built] [code generated]
+webpack 5.108.4 compiled successfully in 222 ms
+# 第二次编译
+assets by status 123 bytes [cached] 1 asset
+assets by chunk 930 bytes (name: index)
+  asset index-3f4853076a5c12fef72c.js 866 bytes [emitted] [immutable] [minimized] (name: index)
+  asset index.css 64 bytes [emitted] (name: index)
+asset index.html 344 bytes [emitted]
+Entrypoint index 930 bytes = index.css 64 bytes index-3f4853076a5c12fef72c.js 866 bytes
+Entrypoint another 123 bytes = another-0c91733d77fe188bca5a.js
+orphan modules 3.39 KiB (javascript) 2.67 KiB (runtime) [orphan] 14 modules
+runtime modules 1.1 KiB 3 modules
+cacheable modules 687 bytes (javascript) 62 bytes (css/mini-extract)
+  javascript modules 687 bytes
+    ./src/index.js + 1 modules 431 bytes [built] [code generated]
+    ./src/another.js 195 bytes [built] [code generated]
+    ./src/index.xml 61 bytes [built] [code generated]
+  modules by path ./src/*.css 62 bytes
+    css ./node_modules/css-loader/dist/cjs.js!./src/index.css 23 bytes [built] [code generated]
+    css ./node_modules/css-loader/dist/cjs.js!./src/index.module.css 39 bytes [built] [code generated]
+webpack 5.108.4 compiled successfully in 80 ms
+# 第三次编译
+assets by status 866 bytes [cached] 1 asset
+asset index.html 344 bytes [emitted]
+asset another-32277c21d626f15ea07f.js 123 bytes [emitted] [immutable] [minimized] (name: another)
+asset index.css 64 bytes [emitted] (name: index)
+Entrypoint index 930 bytes = index.css 64 bytes index-3f4853076a5c12fef72c.js 866 bytes
+Entrypoint another 123 bytes = another-32277c21d626f15ea07f.js
+orphan modules 3.39 KiB (javascript) 2.67 KiB (runtime) [orphan] 14 modules
+runtime modules 1.1 KiB 3 modules
+cacheable modules 687 bytes (javascript) 62 bytes (css/mini-extract)
+  javascript modules 687 bytes
+    ./src/index.js + 1 modules 431 bytes [built] [code generated]
+    ./src/another.js 195 bytes [built] [code generated]
+    ./src/index.xml 61 bytes [built] [code generated]
+  modules by path ./src/*.css 62 bytes
+    css ./node_modules/css-loader/dist/cjs.js!./src/index.css 23 bytes [built] [code generated]
+    css ./node_modules/css-loader/dist/cjs.js!./src/index.module.css 39 bytes [built] [code generated]
+webpack 5.108.4 compiled successfully in 74 ms
+```
+
+这里列举一下部分asset的表示，这样方便理解有哪些文件重新输出了。通过阅读标识和文件名变动，我们可以从命令行输出中找到哪些文件被改动了。
+
+* [compared for emit] 和已输出的文件内容一致
+* [emitted] 重新输出
+* [emitted] [immutable] [minimized] 重新输出+已压缩+不可变的（缓存标记）
+
+### watch选项
 
 ## webpack-dev-middleware
 
