@@ -305,6 +305,29 @@ webpack 5.108.4 compiled successfully in 74 ms
 * [emitted] [immutable] [minimized] 重新输出+已压缩+不可变的（缓存标记）
 
 ### watch选项
+watch模式还可以配置一些选项，在webpack.config.js的watchOptions中配置，示例如下：
+
+```js
+module.exports = {
+  watchOptions: {
+    aggregateTimeout: 200,
+    ignored: /node_modules/,
+  },
+  // ...其它配置
+};
+```
+
+* aggregateTimeout 文件更改后，重新构建前的延迟时间，单位ms。这个时间内的其它改动也会合并进这次构建中。类似于防抖。
+* ignored 忽略监听部分目录或文件，可接受正则，字符串，数组等。最常用的是忽略node_modules目录。
+* poll 指定毫秒为单位进行轮询。
+* followSymlinks 根据软链接查找文件。
+* stdin 当stdin流结束时停止监听。一般用在自动化脚本或者程序控制，对于本地打包无影响。
+
+### Node.js脚本
+
+
+### 插件钩子
+
 
 ## webpack-dev-middleware
 
