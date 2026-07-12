@@ -324,9 +324,48 @@ module.exports = {
 * stdin 当stdin流结束时停止监听。一般用在自动化脚本或者程序控制，对于本地打包无影响。
 
 ### Node.js脚本
+Webpack也提供了watch模式的Node.js API，我们试一下按脚本方式调用：
 
+```js
+const webpack = require("webpack");
+const config = require("../webpack.config.js");
 
-### 插件钩子
+const compiler = webpack(config);
+compiler.watch({ aggregateTimeout: 200 }, (err, stats) => {
+  console.log("一次打包成功！");
+});
+```
+
+使用watch方法，即可开启观察模式。第一个参数为watchOptions值，第二个参数是打包结束的回调函数，和compiler.run方法一致。但打包成功后不会停止，还是继续监听文件。如果文件有改动，那便会重新触发打包，打包完成后会重新触发一次打包结束的回调函数。还有两个watch相关的方法：
+
+```js
+const webpack = require("webpack");
+const config = require("../webpack.config.js");
+
+const compiler = webpack(config);
+const watchObj = compiler.watch({ aggregateTimeout: 200 }, (err, stats) => {
+  console.log("一次打包成功！");
+});
+
+setTimeout(() => {
+  watchObj.invalidate();
+}, 5000);
+setTimeout(() => {
+  watchObj.close((closeErr) => {
+    console.log("Watch模式结束");
+  });
+}, 10000);
+
+/* 命令行输出  （未改动文件）
+一次打包成功！  （刚执行打包时）
+一次打包成功！  （5秒后）
+Watch模式结束  （10秒后）
+*/
+```
+
+invalidate方法会重新触发一次打包。如果当前有正在打包中的流程，会被中断并重新开始打包。close方法则是主动关闭监听模式，结束打包。
+
+### watch相关钩子
 
 
 ## webpack-dev-middleware
@@ -363,6 +402,8 @@ module.exports = {
   https://github.com/webpack/webpack-dev-middleware
 - Webpack DevServer\
   https://webpack.docschina.org/configuration/dev-server/
+- Webpack Node接口\
+  https://webpack.docschina.org/api/node/
 
 
 
