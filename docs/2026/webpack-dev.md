@@ -440,6 +440,35 @@ watch模式输出结果
 正因为观察模式要重新打包，因此在观察模式的循环中，每次会重新创建compilation。也正是因为如此，compilation对象需要在钩子中获取，而不是像compiler一样固定一个对象。虽然重新打包，但实际上是增量构建，Webpack只会打包修改过的模块和相关部分。
 
 ## webpack-dev-middleware
+webpack-dev-middleware是一个适配express的中间件，用来适配Webpack的开发模式。express是Node.js的Web应用框架。这里我们一步一步介绍一下webpack-dev-middleware的使用方式和作用。
+
+### 中间件初步
+首先我们启动一个express服务，使用webpack-dev-middleware中间件。中间件的第一个入参为Webapck的compiler对象。
+
+```js
+const express = require("express");
+const webpack = require("webpack");
+const webpackDevMiddleware = require("webpack-dev-middleware");
+
+const config = require("../webpack.config.js");
+const compiler = webpack(config);
+const app = express();
+
+app.use(webpackDevMiddleware(compiler));
+app.listen(3000, () => {
+  console.log("Listening http://127.0.0.1:3000 \n");
+});
+```
+
+需要打开HtmlWebpackPlugin插件，和我们前面为了实验watch模式钩子写的自定义插件JzplpPlugin。然后执行上面的脚本，访问3000端口的服务。然后发现我们的页面被挂载了这个本地服务上。这是webpack-dev-middleware的第一个作用：本地启动开发服务器。
+
+监听模式
+
+编译到内存，返回内存文件 （没有生成dist）
+
+
+HMR（后面再说）
+
 
 ## webpack-dev-server
 
