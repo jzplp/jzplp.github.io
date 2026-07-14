@@ -462,18 +462,22 @@ app.listen(3000, () => {
 
 需要打开HtmlWebpackPlugin插件，和我们前面为了实验watch模式钩子写的自定义插件JzplpPlugin。然后执行上面的脚本，访问3000端口的服务。然后发现我们的页面被挂载了这个本地服务上。这是webpack-dev-middleware的第一个作用：本地启动开发服务器。
 
-监听模式
+其次我们看到命令行中输出了“hook watchRun”等观察模式才输出的字符串，且在编译完成后，程序并没有结束退出。我们修改src/index.js文件内容，发现会触发重新编译。这是webpack-dev-middleware的第二个作用：自动开启观察模式。
 
-编译到内存，返回内存文件 （没有生成dist）
+我们删除dist目录后再启动脚本，发现命令行中提示编译成功，浏览器上也可以访问编译完的结果，但是dist目录中依旧是空的。这是webpack-dev-middleware的第三个作用：编译结果放到内存中存储，并不写入真实磁盘文件。这样读取和写入结果的速度更快。
+
+### 中间件参数
 
 
-HMR（后面再说）
+### 中间件API？
+
 
 
 ## webpack-dev-server
 
 ## HMR
 
+webpack-dev-middleware有HMR功能？
 
 ## 参考
 - Webpack如何实现万物皆可import？loader的使用/配置/手写实践\
