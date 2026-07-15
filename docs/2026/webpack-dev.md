@@ -467,7 +467,77 @@ app.listen(3000, () => {
 我们删除dist目录后再启动脚本，发现命令行中提示编译成功，浏览器上也可以访问编译完的结果，但是dist目录中依旧是空的。这是webpack-dev-middleware的第三个作用：编译结果放到内存中存储，并不写入真实磁盘文件。这样读取和写入结果的速度更快。
 
 ### 中间件参数
+webpack-dev-middleware中间件的第二个参数可以接受一个对象，里面可以配置多种参数，这里我们先简单介绍一下：
 
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| methods | Array | [ 'GET', 'HEAD' ] | 中间件接受的HTTP请求方法 |
+| headers | Array\|Object\|Function | undefined | 允许为每个请求传递自定义HTTP头 |
+| index | boolean\|string | index.html | 若为false（非undefined），则根URL请求不响应 |
+| mimeTypes | Object | undefined | 允许注册自定义MIME类型或扩展映射 |
+| mimeTypeDefault | string | undefined | 无法确定内容类型时使用的默认MIME类型 |
+| etag | boolean\|"weak"\|"strong" | undefined | 启用或禁用ETag生成 |
+| lastModified | boolean | undefined | 启用或禁用Last-Modified头（使用文件系统修改时间） |
+| cacheControl | boolean\|number\|string\|Object | undefined | 启用或禁用Cache-Control响应头 |
+| cacheImmutable | boolean | undefined | 为不可变资源启用强缓存头（public, max-age=31536000, immutable） |
+| publicPath | string | undefined | 中间件绑定的公共路径 |
+| stats | boolean\|string\|Object | stats（来自配置） | 统计选项对象或预设名称 |
+| serverSideRender | boolean | undefined | 启用或禁用服务端渲染模式 |
+| writeToDisk | boolean\|Function | false | 是否将文件写入磁盘（按配置路径） |
+| outputFileSystem | Object | memfs | 设置Webpack输出文件的目标文件系统 |
+| modifyResponseData | Function | undefined | 允许设置回调以修改响应数据 |
+| forwardError | boolean | false | 是否将错误转发给下一个中间件 |
+
+上面大部分都是Header相关的，下面部分是文件相关的配置。这里我们实际尝试一下文件相关的配置。首先是publicPath，除了在中间件这里配置之外，更常见的是在webpack.config.js中的output.publicPath中配置。在不配置时，我们访问本地服务使用http://127.0.0.1:3000 即可。 publicPath配置为"/abc/"时，我们访问本地服务的地址就变为了 http://127.0.0.1:3000/abc/ 。
+
+前面我们尝试过，使用webpack-dev-middleware之后，watch模式打包的代码时，生成的代码是保存在内存中的，并不会真正写入磁盘。但如果我们确实希望同时输出真实文件，那么设置writeToDisk为true，每次watch模式重新打包后，就会同步生成一份最新的代码到dist目录中。不过不管writeToDisk是否设置，依旧会在内存中生成文件，且本地服务还是从内存中读取。
+
+webpack-dev-middleware是如何将生成文件放到内存中的？实际上是使用了memfs这个库，它的作用是在内存中模拟文件系统，实现了与Node.js原生fs模块一致的API接口。outputFileSystem配置的默认值就是memfs。作为配置举例，我们可以将outputFileSystem修改为fs模块，此时即使不用writeToDisk配置，在每次编译后，中间件会保存文件到dist中。此时内存中将不再保存文件，即使本地服务，也从磁盘文件中读取。可以尝试手动修改dist中的文件后，访问本地服务刷新浏览器可以看到变化。配置方式：
+
+```js
+app.use(
+  webpackDevMiddleware(compiler, {
+    outputFileSystem: require("fs"),
+  }),
+);
+```
+
+modifyResponseData配置接收一个函数，可以允许我们访问并修改本地服务输出的数据。注意这里修改的并不是生成文件（它并不是Webpack插件），用户给本地服务发送文件访问请求，中间件读取内存中的生成文件后，经过modifyResponseData函数处理在返回给用户。
+
+```js
+const express = require("express");
+const webpack = require("webpack");
+const webpackDevMiddleware = require("webpack-dev-middleware");
+const config = require("../webpack.config.js");
+const compiler = webpack(config);
+const app = express();
+const { PassThrough } = require("stream");
+
+app.use(
+  webpackDevMiddleware(compiler, {
+    modifyResponseData: (req, res, data, byteLength) => {
+      // 如果请求的是js文件
+      if (req.url.endsWith(".js")) {
+        // 创建一个双向流
+        const passThrough = new PassThrough();
+        // 首先写入注释
+        passThrough.write("/* hello jzplp */\n");
+        // 然后把data中的数据传入
+        data.pipe(passThrough);
+        // passThrough 作为可读流输出
+        return { data: passThrough, byteLength: byteLength + 18 };
+      }
+      return { data, byteLength };
+    },
+  }),
+);
+
+app.listen(3000, () => {
+  console.log("Listening http://127.0.0.1:3000 \n");
+});
+```
+
+由于modifyResponseData中的data实际上是可读流，因此全程使用流的方式处理。我们识别JavaScript文件，将每个文件第一行增加一句注释，然后再输出。可以验证浏览器上访问的.js后缀的文件，都带有了这句注释。
 
 ### 中间件API？
 
