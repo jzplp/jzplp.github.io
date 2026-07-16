@@ -470,7 +470,7 @@ app.listen(3000, () => {
 webpack-dev-middleware中间件的第二个参数可以接受一个对象，里面可以配置多种参数，这里我们先简单介绍一下：
 
 | 参数 | 类型 | 默认值 | 描述 |
-| --- | --- | --- | --- |
+| - | - | - | - |
 | methods | Array | [ 'GET', 'HEAD' ] | 中间件接受的HTTP请求方法 |
 | headers | Array\|Object\|Function | undefined | 允许为每个请求传递自定义HTTP头 |
 | index | boolean\|string | index.html | 若为false（非undefined），则根URL请求不响应 |
@@ -539,9 +539,39 @@ app.listen(3000, () => {
 
 由于modifyResponseData中的data实际上是可读流，因此全程使用流的方式处理。我们识别JavaScript文件，将每个文件第一行增加一句注释，然后再输出。可以验证浏览器上访问的.js后缀的文件，都带有了这句注释。
 
-### 中间件API？
+### 中间件API和插件模式
+webpack-dev-middleware中间件还提供了很多API方法，这里简单介绍下：
 
+* close(callback) 关闭监听源文件变化
+* invalidate(callback) 前置重新构建一次，内部调用watch.invalidate方法
+* waitUntilValid(callback) 当构建成功时，触发回调（只触发一次）
+* getFilenameFromUrl(url) 传入url路径，获取文件路径
+* koaWrapper, hapiWrapper, honoWrapper 适配其它Node.js的Web服务中间件
 
+其中close方法不关闭本地的Web服务，紧紧关闭Webpack的watch观察模式。即调用close之后，还是能够从内存中读取之前编译过的文件。但如果开启中间件后立即close，Webapck还没来及的打包完成就关闭了。这时候服务读不到文件，就会报错。
+
+webpack-dev-middleware还有一个插件模式，设置第三个属性为ture即可开启。说是插件模式，实际上就是去掉了开启watch模式的部分，需要我们自己开启，但还是需我们自己启动express服务。插件模式适合使用在一些特殊要求的场景。
+
+```js
+const express = require("express");
+const webpack = require("webpack");
+const webpackDevMiddleware = require("webpack-dev-middleware");
+const config = require("../webpack.config.js");
+const compiler = webpack(config);
+const app = express();
+
+// 打开插件模式
+app.use(webpackDevMiddleware(compiler, {}, true));
+
+// 自己开启Webpack观察模式
+compiler.watch({}, (err, stats) => {
+  console.log('打包完成');
+});
+
+app.listen(3000, () => {
+  console.log("Listening http://127.0.0.1:3000 \n");
+});
+```
 
 ## webpack-dev-server
 
