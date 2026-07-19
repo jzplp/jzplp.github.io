@@ -574,6 +574,30 @@ app.listen(3000, () => {
 ```
 
 ## webpack-dev-server
+### 服务初步
+webpack-dev-server提供了开发模式下的服务，内部实际上是webpack-dev-middleware的封装，并且扩展了一些功能。它与Webpack的集成度更高，且不需要我们自己编写开发服务代码。
+
+```sh
+# 安装依赖
+npm add -D webpack-dev-server
+# package.json的script中写入 
+"start": "webpack serve"
+# 执行命令
+npm run start
+```
+
+执行命令后，发现Webpack以观察模式启动，同时命令行中输出了访问例如，例如：http://localhost:8080/ ，在浏览器中访问即可看到打包结果。同时dist中也没有生成文件，说明生成文件还是在内存中。这里可以看到，webpack-dev-server提供了与webpack-dev-middleware一样的能力，但是使用更便捷，基本无需修改源码。HTTP服务除了提供文件访问之外，还有几个扩展能力：
+
+* http://localhost:8080/webpack-dev-server 展示打包生成的文件列表
+* http://localhost:8080/webpack-dev-server/invalidate 触发Webpack重新打包
+
+### 命令行参数
+
+### devServer参数
+
+### Node.js的API形式
+
+### 其它？
 
 ## HMR
 
@@ -612,3 +636,5 @@ webpack-dev-middleware有HMR功能？
   https://webpack.docschina.org/api/compiler-hooks/
 - Webpack compilation钩子\
   https://webpack.docschina.org/api/compilation-hooks/
+- Webpack webpack-dev-server API\
+  https://webpack.docschina.org/api/webpack-dev-server/
