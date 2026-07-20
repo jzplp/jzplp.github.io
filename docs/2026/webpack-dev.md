@@ -592,16 +592,95 @@ npm run start
 * http://localhost:8080/webpack-dev-server/invalidate 触发Webpack重新打包
 
 ### 命令行参数
+前面实际上是通过webpack-cli使用webpack-dev-server的，是一种命令行使用方式。通过webpack serve启动服务时，可以接受一些命令行参数。这里我们对命令行参数进行一些简单介绍，通过介绍也能让我们了解webpack-dev-server的功能。其中部分参数是webpack-cli本身的参数，并不是给webpack-dev-server使用的，这里就不介绍了。
+
+* --allowed-hosts value... 哪些主机可以访问开发服务器
+* --allowed-hosts-reset 重置允许访问的主机列表
+* --bonjour 允许在启动时通过ZeroConf网络广播开发服务器
+* --no-bonjour 禁止在启动时通过ZeroConf网络广播开发服务器
+* --no-client 禁用客户端脚本
+* --client-logging value 在浏览器中设置日志级别
+* --client-overlay 当有编译错误或警告时，在浏览器中启用全屏覆盖层
+* --no-client-overlay 当有编译错误或警告时，禁用浏览器全屏覆盖层
+* --client-overlay-errors 当有编译错误时，启用浏览器全屏覆盖层
+* --no-client-overlay-errors 当有编译错误时，禁用浏览器全屏覆盖层
+* --client-overlay-warnings 当有编译警告时，启用浏览器全屏覆盖层
+* --no-client-overlay-warnings 当有编译警告时，禁用浏览器全屏覆盖层
+* --client-overlay-runtime-errors 当有未捕获的运行时错误时，启用浏览器全屏覆盖层
+* --no-client-overlay-runtime-errors 当有未捕获的运行时错误时，禁用浏览器全屏覆盖层
+* --client-overlay-trusted-types-policy-name value 覆盖层使用的Trusted Types策略名称
+* --client-progress 在浏览器中以百分比显示编译进度
+* --no-client-progress 不在浏览器中以百分比显示编译进度
+* --client-reconnect value 告知开发服务器尝试重新连接客户端的次数
+* --no-client-reconnect 告知开发服务器不要尝试重新连接客户端
+* --client-web-socket-xxx (多种参数) WebSocket传输相关配置
+* --compress 为所有提供的内容启用gzip压缩
+* --no-compress 为所有提供的内容禁用gzip压缩
+* --history-api-fallback 允许通过指定的索引页（默认index.html）代理请求
+* --no-history-api-fallback 禁止通过指定的索引页代理请求
+* --host value 允许指定要使用的主机名
+* --hot value 启用热模块替换（HMR）
+* --no-hot 禁用热模块替换（HMR）
+* --ipc value 监听Unix套接字
+* --live-reload 当检测到文件更改时启用页面重新加载/刷新（默认启用）
+* --no-live-reload 当检测到文件更改时禁用页面重新加载/刷新
+* --open value... 允许配置开发服务器启动后自动打开浏览器和页面（设为 true 则打开默认浏览器）
+* --no-open 不打开默认浏览器
+* --open-target value... 在浏览器中打开指定页面
+* --open-app-name value... 打开指定的浏览器
+* --open-reset 重置 'open' 配置（清除所有项目）
+* --open-target-reset 重置 'open.target' 配置（清除所有项目）
+* --open-app-name-reset 重置 'open.app.name' 配置（清除所有项目）
+* --port value 允许指定要使用的端口
+* --server-type value 允许设置服务器和选项（默认为 'http'）
+* --server-options-xxx (多种参数) SSL证书等配置相关
+* --static value... 允许配置从目录（默认为 'public'）提供静态文件服务
+* --no-static 禁止配置从目录提供静态文件的选项
+* --static-directory value... 设置静态文件目录
+* --static-public-path value... 静态文件在浏览器中以此公共路径提供
+* --static-serve-index 告知开发服务器在启用时使用serveIndex中间件
+* --no-static-serve-index 不告知开发服务器使用serveIndex中间件
+* --static-watch 监视静态内容目录中的文件
+* --no-static-watch 不监视静态内容目录中的文件
+* --static-reset 重置static配置
+* --static-public-path-reset 重置static.publicPath配置
+* --watch-files value... 允许配置要监视文件更改的glob/目录/文件列表
+* --watch-files-reset 重置watchFiles配置
+* --no-web-socket-server 禁止设置WebSocket服务器及其选项
+* --web-socket-server-type value 指定WebSocket服务器类型
+
+通过上述配置，可以看到webpack-dev-serve相比于webpack-dev-middleware，扩展了非常多的功能和配置。其中open相关配置表示服务启动后，自动打开了浏览器，且跳转到项目首页。static相关配置可以设置额外于生成文件的静态文件访问目录。hot和live-reload相关配置可以在生成文件变动时自动更新浏览器展示效果。history-api-fallbacks适配单页应用的前端路由形式。webpack-dev-serve还会在生成文件中注入额外的JavaScript代码（使用--no-client禁用），这些代码有很多作用：例如在构建失败时展示全屏覆盖层提示错误；创建WebSocket服务，和本地服务配合监控打包文件变更，从而实现自动更新效果等。后面我们将介绍一部分功能。
 
 ### devServer参数
 
 ### Node.js的API形式
 
+### static静态目录
+--static-directory
+--static-public-path
+--static-serve-index
+
+### overlay相关
+* --client-overlay 当有编译错误或警告时，在浏览器中启用全屏覆盖层
+* --no-client-overlay 当有编译错误或警告时，禁用浏览器全屏覆盖层
+* --client-overlay-errors 当有编译错误时，启用浏览器全屏覆盖层
+* --no-client-overlay-errors 当有编译错误时，禁用浏览器全屏覆盖层
+* --client-overlay-warnings 当有编译警告时，启用浏览器全屏覆盖层
+* --no-client-overlay-warnings 当有编译警告时，禁用浏览器全屏覆盖层
+* --client-overlay-runtime-errors 当有未捕获的运行时错误时，启用浏览器全屏覆盖层
+* --no-client-overlay-runtime-errors 当有未捕获的运行时错误时，禁用浏览器全屏覆盖层
+
+### live-reload
+
+
+
 ### 其它？
 
 ## HMR
 
-webpack-dev-middleware有HMR功能？
+webpack-dev-server的HMR功能
+
+webpack-dev-middleware有HMR功能
 
 ## 参考
 - Webpack如何实现万物皆可import？loader的使用/配置/手写实践\
