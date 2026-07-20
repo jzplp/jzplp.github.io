@@ -600,15 +600,7 @@ npm run start
 * --no-bonjour 禁止在启动时通过ZeroConf网络广播开发服务器
 * --no-client 禁用客户端脚本
 * --client-logging value 在浏览器中设置日志级别
-* --client-overlay 当有编译错误或警告时，在浏览器中启用全屏覆盖层
-* --no-client-overlay 当有编译错误或警告时，禁用浏览器全屏覆盖层
-* --client-overlay-errors 当有编译错误时，启用浏览器全屏覆盖层
-* --no-client-overlay-errors 当有编译错误时，禁用浏览器全屏覆盖层
-* --client-overlay-warnings 当有编译警告时，启用浏览器全屏覆盖层
-* --no-client-overlay-warnings 当有编译警告时，禁用浏览器全屏覆盖层
-* --client-overlay-runtime-errors 当有未捕获的运行时错误时，启用浏览器全屏覆盖层
-* --no-client-overlay-runtime-errors 当有未捕获的运行时错误时，禁用浏览器全屏覆盖层
-* --client-overlay-trusted-types-policy-name value 覆盖层使用的Trusted Types策略名称
+* --client-overlay-xxx (多种参数) 当有编译错误或警告时，浏览器全屏覆盖层相关
 * --client-progress 在浏览器中以百分比显示编译进度
 * --no-client-progress 不在浏览器中以百分比显示编译进度
 * --client-reconnect value 告知开发服务器尝试重新连接客户端的次数
@@ -624,13 +616,7 @@ npm run start
 * --ipc value 监听Unix套接字
 * --live-reload 当检测到文件更改时启用页面重新加载/刷新（默认启用）
 * --no-live-reload 当检测到文件更改时禁用页面重新加载/刷新
-* --open value... 允许配置开发服务器启动后自动打开浏览器和页面（设为 true 则打开默认浏览器）
-* --no-open 不打开默认浏览器
-* --open-target value... 在浏览器中打开指定页面
-* --open-app-name value... 打开指定的浏览器
-* --open-reset 重置 'open' 配置（清除所有项目）
-* --open-target-reset 重置 'open.target' 配置（清除所有项目）
-* --open-app-name-reset 重置 'open.app.name' 配置（清除所有项目）
+* --open-xxx (多种参数) 允许配置开发服务器启动后自动打开浏览器和页面
 * --port value 允许指定要使用的端口
 * --server-type value 允许设置服务器和选项（默认为 'http'）
 * --server-options-xxx (多种参数) SSL证书等配置相关
