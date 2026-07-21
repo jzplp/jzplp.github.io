@@ -586,10 +586,10 @@ npm add -D webpack-dev-server
 npm run start
 ```
 
-执行命令后，发现Webpack以观察模式启动，同时命令行中输出了访问例如，例如：http://localhost:8080/ ，在浏览器中访问即可看到打包结果。同时dist中也没有生成文件，说明生成文件还是在内存中。这里可以看到，webpack-dev-server提供了与webpack-dev-middleware一样的能力，但是使用更便捷，基本无需修改源码。HTTP服务除了提供文件访问之外，还有几个扩展能力：
+执行命令后，发现Webpack以观察模式启动，同时命令行中输出了访问例如，例如：`http://localhost:8080/`，在浏览器中访问即可看到打包结果。同时dist中也没有生成文件，说明生成文件还是在内存中。这里可以看到，webpack-dev-server提供了与webpack-dev-middleware一样的能力，但是使用更便捷，基本无需修改源码。HTTP服务除了提供文件访问之外，还有几个扩展能力：
 
-* http://localhost:8080/webpack-dev-server 展示打包生成的文件列表
-* http://localhost:8080/webpack-dev-server/invalidate 触发Webpack重新打包
+* `http://localhost:8080/webpack-dev-server` 展示打包生成的文件列表
+* `http://localhost:8080/webpack-dev-server/invalidate` 触发Webpack重新打包
 
 ### 命令行参数
 前面实际上是通过webpack-cli使用webpack-dev-server的，是一种命令行使用方式。通过webpack serve启动服务时，可以接受一些命令行参数。这里我们对命令行参数进行一些简单介绍，通过介绍也能让我们了解webpack-dev-server的功能。其中部分参数是webpack-cli本身的参数，并不是给webpack-dev-server使用的，这里就不介绍了。
