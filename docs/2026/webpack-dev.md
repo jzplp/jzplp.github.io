@@ -638,6 +638,20 @@ npm run start
 通过上述配置，可以看到webpack-dev-serve相比于webpack-dev-middleware，扩展了非常多的功能和配置。其中open相关配置表示服务启动后，自动打开了浏览器，且跳转到项目首页。static相关配置可以设置额外于生成文件的静态文件访问目录。hot和live-reload相关配置可以在生成文件变动时自动更新浏览器展示效果。history-api-fallbacks适配单页应用的前端路由形式。webpack-dev-serve还会在生成文件中注入额外的JavaScript代码（使用--no-client禁用），这些代码有很多作用：例如在构建失败时展示全屏覆盖层提示错误；创建WebSocket服务，和本地服务配合监控打包文件变更，从而实现自动更新效果等。后面我们将介绍一部分功能。
 
 ### devServer参数
+除了命令行参数之外，还可以在webpack.config.js中直接配置webpack-dev-serve的功能。大部分配置内容和上面命令行配置是一致的，这里就不再重复描述了。我们列一下不能使用命令行参数配置的内容：
+
+```js
+module.exports = {
+  devServer: {
+    headers: {'X-Custom-Foo': 'bar'}, // 添加HTTP的相应header
+    onListening: (devServer) => {}, // 开始监听端口连接时执行自定义函数
+    proxy: {}, // 代理功能，实际由http-proxy-middleware提供
+    setupMiddlewares: (middlewares, devServer) => {} // 提供执行自定义函数和自定义中间件能力 
+  },
+};
+```
+
+proxy代理相关内容，我们之前在[谈一谈前端构建工具的本地代理配置(Webpack与Vite)](https://jzplp.github.io/2025/web-proxy.html)中描述过。其余的选项大多是使用命令行不方便配置的，例如函数，对象或者数组等。
 
 ### Node.js的API形式
 
@@ -659,8 +673,7 @@ npm run start
 ### live-reload
 
 
-
-### 其它？
+### websocket在做什么？
 
 ## HMR
 
@@ -703,3 +716,5 @@ webpack-dev-middleware有HMR功能
   https://webpack.docschina.org/api/compilation-hooks/
 - Webpack webpack-dev-server API\
   https://webpack.docschina.org/api/webpack-dev-server/
+- 谈一谈前端构建工具的本地代理配置(Webpack与Vite)\
+  https://jzplp.github.io/2025/web-proxy.html
