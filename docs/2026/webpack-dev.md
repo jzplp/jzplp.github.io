@@ -654,6 +654,53 @@ module.exports = {
 proxy代理相关内容，我们之前在[谈一谈前端构建工具的本地代理配置(Webpack与Vite)](https://jzplp.github.io/2025/web-proxy.html)中描述过。其余的选项大多是使用命令行不方便配置的，例如函数，对象或者数组等。
 
 ### Node.js的API形式
+webpack-dev-serve也支持Node.js的API形式使用。
+
+```js
+const Webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
+const webpackConfig = require('../webpack.config.js');
+
+const compiler = Webpack(webpackConfig);
+const server = new WebpackDevServer(webpackConfig.devServer || {}, compiler);
+
+const runServer = async () => {
+  await server.start();
+  console.log('服务已启动');
+};
+runServer();
+```
+
+使用这种形式，devServer参数必须手动传给WebpackDevServer，否则无效。start方法可以await，服务启动后resolve。webpack-dev-serve还有几种启动和结束方式：
+
+```js
+const Webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
+const webpackConfig = require('../webpack.config.js');
+
+const compiler = Webpack(webpackConfig);
+const server = new WebpackDevServer(webpackConfig.devServer || {}, compiler);
+
+// startCallback 启动后触发回调
+server.startCallback(() => {
+  console.log('服务已启动');
+});
+
+const stopServer = async () => {
+  // 结束服务
+  await server.stop();
+  console.log('服务已结束');
+};
+setTimeout(stopServer, 5000);
+
+const stopServer = () => {
+  // 回调方式结束服务
+  server.stopCallback(() => {
+    console.log('服务已结束');
+  });
+}
+setTimeout(stopServer, 5000);
+```
 
 ### static静态目录
 --static-directory
