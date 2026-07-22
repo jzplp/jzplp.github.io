@@ -712,7 +712,7 @@ img.src = "/1.png";
 document.body.appendChild(div);
 ```
 
-同过配置可以修改静态资源的目录：
+通过配置可以修改静态资源的目录：
 
 ```js
 // webpack.config.js 其它代码省略
@@ -759,15 +759,40 @@ module.exports = {
 
 例如上面将src设为了静态资源目录，挂在/src上面。当我们访问`http://localhost:8080/src/`时，如果不开启serveIndex，访问会404（是目录且找不到index.html）。如果打开serveIndex，则会发现浏览上展示了src目录中的文件，且点击文件后可以在浏览器上查看文件内容。这时候源代码被当作文本在浏览器中展示了。
 
-### overlay相关
-* --client-overlay 当有编译错误或警告时，在浏览器中启用全屏覆盖层
-* --no-client-overlay 当有编译错误或警告时，禁用浏览器全屏覆盖层
-* --client-overlay-errors 当有编译错误时，启用浏览器全屏覆盖层
-* --no-client-overlay-errors 当有编译错误时，禁用浏览器全屏覆盖层
-* --client-overlay-warnings 当有编译警告时，启用浏览器全屏覆盖层
-* --no-client-overlay-warnings 当有编译警告时，禁用浏览器全屏覆盖层
-* --client-overlay-runtime-errors 当有未捕获的运行时错误时，启用浏览器全屏覆盖层
-* --no-client-overlay-runtime-errors 当有未捕获的运行时错误时，禁用浏览器全屏覆盖层
+### overlayv错误提示遮罩
+当我们打包的代码有编译错误或者运行时错误时，webpack-dev-server会在浏览器上展示一个全屏遮罩，提示我们报错内容。例如这里我们主动引发一个编译错误：
+
+```js
+// src/index.js 其它代码省略
+a + 1 = 2;
+```
+
+​![](/2026/dev-1.png)
+
+遮罩右上角有关闭按钮，关闭后依然可以查看页面（可能是残缺不全的）。如果是运行时错误，上面的文字会变成“Uncaught runtime errors:”。但是由于Webpack本身的Bug，页面初始化时候的运行时错误遮罩可能会一闪而过，用户根本看不到。因此我们定时稍后展示，才能看到遮罩：
+
+```js
+// src/index.js 其它代码省略
+a + 1 // 引发运行时错误，但可能看不到 
+setTimeout(() => {a + 1}, 1000); // 一秒后引发运行时错误，可以看到
+```
+
+Webpack配置也可以修改遮罩的展示，甚至警告时也能产生遮罩。
+
+```js
+// webpack.config.js 其它代码省略
+module.exports = {
+  devServer: {
+    client: {
+      overlay: {
+        errors: true, // 编译错误遮罩
+        warnings: false, // 编译告警遮罩
+        runtimeErrors: true, // 运行时错误遮罩
+      },
+    },
+  },
+};
+```
 
 ### live-reload
 
