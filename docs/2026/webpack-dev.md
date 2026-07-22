@@ -703,9 +703,61 @@ setTimeout(stopServer, 5000);
 ```
 
 ### static静态目录
---static-directory
---static-public-path
---static-serve-index
+statc相关配置的作用是，在除了打包生成的文件之外，额外提供一个静态资源目录。webpack-dev-server会将这个目录挂到服务上，使得开发模式下可以访问到这些静态资源。默认目录是public。假设我们在里面放置一个图片 public/1.png，然在src/index.js中，以url的方式使用，我们启动开发服务，可以发现图片可以被正常请求和展示：
+
+```js
+// src/index.js 其它代码省略
+const img = document.createElement("img");
+img.src = "/1.png";
+document.body.appendChild(div);
+```
+
+同过配置可以修改静态资源的目录：
+
+```js
+// webpack.config.js 其它代码省略
+module.exports = {
+  devServer: {
+    static: { directory: path.join(__dirname, 'assets'), },
+  },
+};
+```
+
+不管使用public还是其它目录，这个目录本身都不用在url中体现，相当于直接挂在url的根目录上。但如果不希望挂在根目录，可以使用publicPath配置，是静态资源目录有一个固定前缀。
+
+```js
+// webpack.config.js 其它代码省略
+module.exports = {
+  devServer: {
+    static: {
+      publicPath: '/abc/123',
+    },
+  },
+};
+
+// src/index.js 其它代码省略
+const img = document.createElement("img");
+img.src = "/abc/123/1.png";
+document.body.appendChild(div);
+```
+
+static还有一个serveIndex参数，启动它之后，当静态资源该文件夹内不存在index.html文件时，使用url访问对应的目录，即可在浏览器中展示对应的文件列表。
+
+
+```js
+// webpack.config.js 其它代码省略
+module.exports = {
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'src'),
+      publicPath: '/src',
+      serveIndex: true,
+    },
+  },
+};
+```
+
+例如上面将src设为了静态资源目录，挂在/src上面。当我们访问`http://localhost:8080/src/`时，如果不开启serveIndex，访问会404（是目录且找不到index.html）。如果打开serveIndex，则会发现浏览上展示了src目录中的文件，且点击文件后可以在浏览器上查看文件内容。这时候源代码被当作文本在浏览器中展示了。
 
 ### overlay相关
 * --client-overlay 当有编译错误或警告时，在浏览器中启用全屏覆盖层
