@@ -759,7 +759,7 @@ module.exports = {
 
 例如上面将src设为了静态资源目录，挂在/src上面。当我们访问`http://localhost:8080/src/`时，如果不开启serveIndex，访问会404（是目录且找不到index.html）。如果打开serveIndex，则会发现浏览上展示了src目录中的文件，且点击文件后可以在浏览器上查看文件内容。这时候源代码被当作文本在浏览器中展示了。
 
-### overlayv错误提示遮罩
+### overlay错误提示遮罩
 当我们打包的代码有编译错误或者运行时错误时，webpack-dev-server会在浏览器上展示一个全屏遮罩，提示我们报错内容。例如这里我们主动引发一个编译错误：
 
 ```js
@@ -794,10 +794,28 @@ module.exports = {
 };
 ```
 
-### live-reload
+### liveReload和WebSocket
+之前我们使用观察模式watch时，虽然代码更新后会自动打包，但我们需要手动刷新浏览器，才能看到最新生成的文件效果。使用webpack-dev-server，我们就不需要手动刷新了，使用liveReload配置，可以在编译完成后自动刷新浏览器页面。liveReload是默认开启的，但可能被HMR功能阻碍，因此我们需要关闭hot配置：
 
+```js
+// webpack.config.js 其它代码省略
+module.exports = {
+  devServer: {
+    hot: false, // 关闭HMR
+    liveReload: true
+  },
+};
+```
 
-### websocket在做什么？
+然后首先启动服务。在浏览器上访问到页面后，在修改源文件。可以看到打包成功后，页面自动刷新。它是如何做到自动刷新的呢？要知道HTTP协议是一个单向的客户端->服务端协议，无法做到服务器推送客户端数据。webpack-dev-server在浏览器页面与本地服务之间额外创建了一个WebSocket通信，当打包内容更新时，会通知浏览器刷新页面重新请求。（这里打开浏览器Network配置中的Preserve Log, 让页面刷新时保留网络记录）
+
+​![](/2026/dev-2.png)
+
+可以看到前五条记录是浏览器新打开页面的初始化消息。后三条是本地服务告诉浏览器，已经重新打包并有有变更，请刷新页面。注意刷新页面后WebSocket会重新链接，因此可以看到左下角又有了新的ws通信。
+
+WebSocket在webpack-dev-server中的作用不止于此，像是HMR, live-reload, 编译错误/告警通知浏览器展示遮罩等，都是通过WebSocket实现的。
+
+还要注意到，WebSocket，遮罩等功能需要依赖浏览器端代码来实现，但是我们的源码中是肯定没有这些内容的。因此，webpack-dev-server会在我们的代码中注入一些JavaScript脚本，实现这些功能。可以观察一下`http://localhost:8080/index.js`等请求的返回，比我们自己源码代码多了很多内容。如果希望关闭注入的脚本，可以使用--no-client配置。
 
 ## HMR
 
