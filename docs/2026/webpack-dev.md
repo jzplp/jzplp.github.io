@@ -818,10 +818,25 @@ WebSocket在webpack-dev-server中的作用不止于此，像是HMR, live-reload,
 还要注意到，WebSocket，遮罩等功能需要依赖浏览器端代码来实现，但是我们的源码中是肯定没有这些内容的。因此，webpack-dev-server会在我们的代码中注入一些JavaScript脚本，实现这些功能。可以观察一下`http://localhost:8080/index.js`等请求的返回，比我们自己源码代码多了很多内容。如果希望关闭注入的脚本，可以使用--no-client配置。
 
 ## HMR
+HMR的全程叫做Hot Module Replacement，即模块热替换。利用这个技术，可以在页面运行时，只替换改动所在模块的代码，不需要刷新整个页面，就能看到更新后的效果。
+
+### HMR功能体验
+
+### 相关API
+
+### 模块级别操作
+
+### HMR流程简述
+
+### 部分流程讨论？
 
 webpack-dev-server的HMR功能
 
+## webpack-hot-middleware
+
 webpack-dev-middleware有HMR功能
+
+
 
 ## 参考
 - Webpack如何实现万物皆可import？loader的使用/配置/手写实践\
@@ -860,3 +875,5 @@ webpack-dev-middleware有HMR功能
   https://webpack.docschina.org/api/webpack-dev-server/
 - 谈一谈前端构建工具的本地代理配置(Webpack与Vite)\
   https://jzplp.github.io/2025/web-proxy.html
+- webpack-hot-middleware GitHub\
+  https://github.com/webpack/webpack-hot-middleware
