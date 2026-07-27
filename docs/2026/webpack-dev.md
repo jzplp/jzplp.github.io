@@ -871,9 +871,64 @@ module.exports = {
 * webpack-dev-server会注入到生成代码一些支持HMR的代码，这叫做HMR运行时(runtime)。
 * 多入口(entry)的工程，默认会在每个入口代码中都返回运行时，但这会产生成冲突导致HMR时报错。因此将HMR运行时放到单独的chunk内引入，这样浏览器中只有一份运行时代码
 
+​![](/2026/dev-3.png)
 
+这时候与逆行 npm run start，查看浏览器，发现有个单独的runtime.js请求，表示HMR运行时代码。WebSocket表示当前运行在hot模式，如上图。这时候我们修改src/index.js中的代码，却发现依然刷新了页面。如下图所示，WebSocket收到了更新页面的请求，也拿到了更新文件的hot-update相关文件，但是再往后可以看到依然重新请求了页面，重建了WebSocket链接。
 
+​![](/2026/dev-4.png)
 
+虽然我们开启了HMR模式，但是源码中并没有配套的HMR处理代码，因此webpack-dev-server还是回退到自动刷新页面的状态（即使liveReload被设置为false）。这里我们修改src/index.js，适配HMR处理代码：
+
+```js
+import "./index.css";
+import { abc } from "./index.module.css";
+import data from "./index.xml";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+}
+
+genEle("jzplp1111111", "qaz1");
+genEle("jzplp2", abc);
+
+module?.hot?.accept();
+```
+
+代码中执行了一个module.hot.accept方法，它的作用时当这个文件代码改动时，重新执行这个模块本身的代码。我们重启工程，访问浏览器。然后改动代码，看下效果：
+
+​![](/2026/dev-5.png)
+
+可以看到这时候页面没有刷新，仅凭hot-update相关请求，就实现了代码的更新和应用。但我们看浏览器上代码的执行效果，发现代码是被重新执行了，但代码变更前的执行效果没有消失，后面又叠加了src/index.js新的执行结果，这很显然不正确。因此我们执行新代码时，要清理掉之前代码的执行结果：
+
+```js
+import "./index.css";
+import { abc } from "./index.module.css";
+import data from "./index.xml";
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.prepend(div);
+  return div;
+}
+
+const div2 = genEle("jzplp2", abc);
+const div1 = genEle("jzplp1111111", "qaz1");
+
+module?.hot?.dispose(() => {
+  div1.remove();
+  div2.remove();
+});
+module?.hot?.accept();
+```
+
+这次增加了dispose方法，它的作用是在当前模块被替换时，可以执行一些清理的操作。这里我们把旧的两个div从body中删除掉。然后更新代码，重新生成div挂在body上。注意为了使得更新代码前后元素位置不变，这里改了两个div的生成顺序，以及appendChild改成了prepend方法。因此可以看到，清理操作有时候并不是一个简单的事情。修改后正确的浏览器效果如下，可以看到不仅没有刷新页面，且仅修改的文本内容变化，其余效果任何改动。
+
+​![](/2026/dev-6.png)
 
 ### 相关API
 
