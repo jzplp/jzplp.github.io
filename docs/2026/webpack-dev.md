@@ -820,7 +820,60 @@ WebSocket在webpack-dev-server中的作用不止于此，像是HMR, live-reload,
 ## HMR
 HMR的全程叫做Hot Module Replacement，即模块热替换。利用这个技术，可以在页面运行时，只替换改动所在模块的代码，不需要刷新整个页面，就能看到更新后的效果。
 
-### HMR功能体验
+### HMR初步
+虽然HMR默认在webpack-dev-server中开启，但为了演示功能和避免冲突，还是需要修改webpack.config.js:
+
+```js
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
+
+module.exports = {
+  mode: "development", // 开发模式
+  entry: {
+    index: "./src/index.js",
+    another: "./src/another.js",
+  },
+  output: {
+    clean: true,
+    path: path.resolve(__dirname, "dist"),
+  },
+  module: {
+    rules: [
+      {
+        test: /\.xml$/,
+        use: "xml-loader",
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"], // 换成style-loader
+      },
+    ],
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: "jzplp-test",
+    }),
+    // new MiniCssExtractPlugin(), // 此插件不支持HMR
+  ],
+  devServer: {
+    hot: true, // 开启HMR
+    liveReload: false,
+  },
+  optimization: {
+    runtimeChunk: "single", // HMR运行时单独chunk
+  },
+};
+```
+
+* 因为HMR是开发模式专用，且其它配置也有区别，因此专设开发模式下的配置
+* MiniCssExtractPlugin这个插件只能在生产模式使用，因此开发模式配置去掉，改用style-loader
+* webpack-dev-server会注入到生成代码一些支持HMR的代码，这叫做HMR运行时(runtime)。
+* 多入口(entry)的工程，默认会在每个入口代码中都返回运行时，但这会产生成冲突导致HMR时报错。因此将HMR运行时放到单独的chunk内引入，这样浏览器中只有一份运行时代码
+
+
+
+
 
 ### 相关API
 
