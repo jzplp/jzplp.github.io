@@ -930,9 +930,43 @@ module?.hot?.accept();
 
 ​![](/2026/dev-6.png)
 
-### 相关API
+### hot-update和模块操作
+首先为了后面多文件改动的例子可以正常演示，首先需要增加监听文件改动的延迟时间，这个多个文件的变化可以合并到一次打包中。
 
-### 模块级别操作
+```js
+// webpack.config.js 其它代码省略
+module.exports = {
+  watchOptions: {
+    aggregateTimeout: 4000,
+  },
+};
+```
+
+然后将src/another.js也改写成支持HMR的代码形式，但是忽略HTML元素展示的前后顺序问题。
+
+```js
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.appendChild(div);
+  return div;
+}
+const div1 = genEle("jzplp3", "qaz");
+
+module?.hot?.dispose(() => {
+  div1.remove();
+});
+module?.hot?.accept();
+```
+
+前面我们体验了HMR的能力，好奇HMR是如何更新代码的呢？答案就是使用hot-update相关文件。当本地服务通过WebSocket向浏览器发送更新请求后，浏览器会首先获取xxx.runtime.xxx.hot-update.json文件，一般一个项目只请求一次。这里面存放了有改动的chunk文件列表。我们在启动后修改src/another.js中的字符串，且将src/index.js中的`import "./index.css"`删除，对应的hot-update.json文件内容如下：
+
+​![](/2026/dev-7.png)
+
+
+
+### 相关API
 
 ### HMR流程简述
 
