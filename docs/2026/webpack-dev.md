@@ -930,7 +930,7 @@ module?.hot?.accept();
 
 ​![](/2026/dev-6.png)
 
-### hot-update和模块操作
+### hot-update请求和模块操作
 首先为了后面多文件改动的例子可以正常演示，首先需要增加监听文件改动的延迟时间，这个多个文件的变化可以合并到一次打包中。
 
 ```js
@@ -960,11 +960,30 @@ module?.hot?.dispose(() => {
 module?.hot?.accept();
 ```
 
-前面我们体验了HMR的能力，好奇HMR是如何更新代码的呢？答案就是使用hot-update相关文件。当本地服务通过WebSocket向浏览器发送更新请求后，浏览器会首先获取xxx.runtime.xxx.hot-update.json文件，一般一个项目只请求一次。这里面存放了有改动的chunk文件列表。我们在启动后修改src/another.js中的字符串，且将src/index.js中的`import "./index.css"`删除，对应的hot-update.json文件内容如下：
+前面我们体验了HMR的能力，好奇HMR是如何更新代码的呢？答案就是使用hot-update相关文件。当本地服务通过WebSocket向浏览器发送更新请求后，浏览器会首先获取xxx.runtime.xxx.hot-update.json文件，一般一个项目只请求一次。这里面存放了有改动的chunk文件列表。我们在启动后修改src/another.js中的字符串，且将src/index.js中的`import "./index.css"`删除，对应的hot-update.json文件内容如图，可以看到这json数据中一共有三个数组。
 
 ​![](/2026/dev-7.png)
 
+* c 发生变更的chunk列表
+* r 需要移除的chunk列表
+* m 需要移除的module列表
 
+c对应着应该重新请求的chunk数据，因此c中的每个元素对应后面的一个xxx.hot-update.js文件请求。r对应着需要在客户段删除的对应chunk文件代码。我们观察index.xxx.hot-update.js，发现里面就是我们变更的index.js打包后代码，以及一些Webpack运行时相关代码：
+
+​![](/2026/dev-8.png)
+
+但是注意，这里面仅有src/index.js这个模块的代码，并不是这个chunk的所有代码。像我们前面删除的src/index.css，它就没有。因此才需要m这个单独的module列表表示需要移除的模块。从这里可以看到，HMR是以模块作为单位来更新代码的。我们再举一个例子，这里同时修改src/index.js和src/index.xml两个模块，再观察现象。
+
+​![](/2026/dev-9.png)
+
+这里我们看index.xxx.hot-update.js，发现虽然是一个chunk中同时更新了两个文件，但这两个文件的更新却是分开的，运行时代码中明显的列出了源文件名称。从前面的删除例子和这里的更新例子可以总结如下：
+
+1. HMR获取更新数据的请求是以chunk维度获取的，一个chunk对应一个xxx.hot-update.js。
+2. 这个js文件中提供的并不是chunk的所有代码，而是chunk中有更新的module。没有变更的模块这里并不会包含。
+3. 被移除的module肯定也不会包含到这个js文件中（被移除了所以无法表示），因此需要一个独立的m列表来表示。
+4. HMR实际以module维度来更新代码。
+
+观察一下HTML本身请求的`http://localhost:8080/index.js`内容，发现代码本身就是以module维度分割组织的，因此HMR以模块维度更新代码也是顺理成章。但要注意这仅仅是开发模式，生产模式生成这种繁琐的代码既无用，也会拖累性能。
 
 ### 相关API
 
