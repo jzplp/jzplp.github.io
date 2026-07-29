@@ -818,7 +818,7 @@ WebSocket在webpack-dev-server中的作用不止于此，像是HMR, live-reload,
 还要注意到，WebSocket，遮罩等功能需要依赖浏览器端代码来实现，但是我们的源码中是肯定没有这些内容的。因此，webpack-dev-server会在我们的代码中注入一些JavaScript脚本，实现这些功能。可以观察一下`http://localhost:8080/index.js`等请求的返回，比我们自己源码代码多了很多内容。如果希望关闭注入的脚本，可以使用--no-client配置。
 
 ## HMR
-HMR的全程叫做Hot Module Replacement，即模块热替换。利用这个技术，可以在页面运行时，只替换改动所在模块的代码，不需要刷新整个页面，就能看到更新后的效果。
+HMR的全程叫做Hot Module Replacement，即模块热替换/热更新。利用这个技术，可以在页面运行时，只替换改动所在模块的代码，不需要刷新整个页面，就能看到更新后的效果。
 
 ### HMR初步
 虽然HMR默认在webpack-dev-server中开启，但为了演示功能和避免冲突，还是需要修改webpack.config.js:
@@ -985,7 +985,30 @@ c对应着应该重新请求的chunk数据，因此c中的每个元素对应后�
 
 观察一下HTML本身请求的`http://localhost:8080/index.js`内容，发现代码本身就是以module维度分割组织的，因此HMR以模块维度更新代码也是顺理成章。但要注意这仅仅是开发模式，生产模式生成这种繁琐的代码既无用，也会拖累性能。
 
-### 相关API
+### accept方法和模块冒泡
+在前面HMR的代码示例中，accept方法，阻止了更新页面刷新，成功的触发了页面HMR。accept方不仅能更新自身，还可以更新子模块，它使用一种叫做模块冒泡的机制处理，从子到父再到祖父模块向上冒泡，有点像DOM的事件处理机制：
+
+```ts
+// 处理本模块自身更新
+module.hot.accept(errorHandler: () => {})
+// 处理子模块更新 注意只能是直接子模块，不能是间接的
+module.hot.accept(dependencies: string | Array<string>, callback: () =>{}, errorHandler: () => {})
+/* 
+  dependencies 子模块名称，可以是列表
+  callback 模块更新后触发函数
+  errorHandler 模块更新后异常时触发
+*/
+```
+
+accept冒泡的逻辑是：当更新的模块存在accept函数时，就认为已经接收了更新并处理完成，模块更新就不会冒泡到父模块。如果子模块本身没有accept函数，那么就冒泡到父模块。父模块如果存在accept函数，可以是父模块处理自身更新，也可以是处理子模块更新，且匹配了这个子模块，这样父模块就将子模块的更新处理掉了。如果父模块没有处理掉，会再冒泡到祖父模块，就这样一直到根模块。也就时打包入口。下面我们构造一个例子来看一下，首先是模块树：
+
+* src/index.js 根模块 打包入口1
+  * src/
+* src/another.js 根模块 打包入口2
+
+
+
+### 模块API
 
 ### HMR流程简述
 
@@ -1014,11 +1037,11 @@ webpack-dev-middleware有HMR功能
   https://webpack.docschina.org/guides/development/
 - Webpack watch和watchOptions\
   https://webpack.docschina.org/configuration/watch/
-- Webpack 模块热替换\
+- Webpack 模块热替换 配置示例\
   https://webpack.docschina.org/guides/hot-module-replacement/
-- Webpack 模块热替换(hot module replacement)\
+- Webpack 模块热替换(hot module replacement) 概念\
   https://webpack.docschina.org/concepts/hot-module-replacement/
-- Webpack Hot Module Replacement\
+- Webpack Hot Module Replacement 模块 API\
   https://webpack.docschina.org/api/hot-module-replacement/
 - webpack-dev-server GitHub\
   https://github.com/webpack/webpack-dev-server
