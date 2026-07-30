@@ -1002,9 +1002,71 @@ module.hot.accept(dependencies: string | Array<string>, callback: () =>{}, error
 
 accept冒泡的逻辑是：当更新的模块存在accept函数时，就认为已经接收了更新并处理完成，模块更新就不会冒泡到父模块。如果子模块本身没有accept函数，那么就冒泡到父模块。父模块如果存在accept函数，可以是父模块处理自身更新，也可以是处理子模块更新，且匹配了这个子模块，这样父模块就将子模块的更新处理掉了。如果父模块没有处理掉，会再冒泡到祖父模块，就这样一直到根模块。也就时打包入口。下面我们构造一个例子来看一下，首先是模块树：
 
-* src/index.js 根模块 打包入口1
-  * src/
-* src/another.js 根模块 打包入口2
+```
+├── src/index.js          (根模块，打包入口1)
+│   ├── src/index.module.css
+│   ├── src/index.xml
+│   └── src/index2.js     (新增文件)
+└── src/another.js        (根模块，打包入口2)
+```
+
+其中新增文件和有改动的文件内容如下：
+
+```js
+// src/index.js
+import { abc } from "./index.module.css";
+import data from "./index.xml";
+import './index2';
+
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.prepend(div);
+  return div;
+}
+const div2 = genEle("jzplp 1", abc);
+const div1 = genEle("jzplp 2", "qaz1");
+
+console.log('index.js run');
+
+module?.hot?.dispose(() => {
+  div1.remove();
+  div2.remove();
+  console.log('index.js dispose');
+});
+
+// src/index2.js
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.prepend(div);
+  return div;
+}
+const div1 = genEle("jzplp 3", "");
+
+console.log('index2.js run');
+
+module?.hot?.dispose(() => {
+  div1.remove();
+  console.log('index2.js dispose');
+});
+```
+
+每个代码文件中都带有一句`console.log('xxx.js run')`，当文件重新执行时，就会触发输出。上面两个文件都没有accept方法，将在后续的例子中添加。首先将自身accept方法添加到父模块中。然后启动服务，尝试几个例子：
+
+```js
+// src/index.js 文件 其余内容省略
+module?.hot?.accept();
+
+/* 1. src/index.js本身改动
+
+
+*/
+
+```
+
 
 
 

@@ -11,6 +11,10 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
+        text: "<AI>大模型的部署和lora微调，以Qwenx:xxB为例",
+        link: "/2026/ai-lora",
+      },
+      {
         text: "Webpack中的观察模式，开发服务与HMR等",
         link: "/2026/webpack-dev",
       },
