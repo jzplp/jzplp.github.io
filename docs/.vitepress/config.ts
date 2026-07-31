@@ -11,7 +11,15 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "<AI>大模型的部署和lora微调，以Qwenx:xxB为例",
+        text: "【AI】大模型的蒸馏与后训练：以Qwen3:0.6B为例（未开始）",
+        link: "/2026/ai-post-train",
+      },
+      {
+        text: "【AI】大模型的部署和lora微调：以Qwen3:0.6B为例（未开始）",
+        link: "/2026/ai-lora",
+      },
+      {
+        text: "【AI】大模型的参数，结构和部署：以Qwen3:0.6B为例（未开始）",
         link: "/2026/ai-lora",
       },
       {
@@ -47,11 +55,11 @@ const sidebarLists = [
         link: "/2026/css-name",
       },
       {
-        text: "<非技术>工作、育儿、学习：程序员的时间管理难题",
+        text: "【生活】工作、育儿、学习：程序员的时间管理难题",
         link: "/2026/life-study",
       },
       {
-        text: "<非技术>怀孕37周生产：从产房到NICU的闯关实录",
+        text: "【生活】怀孕37周生产：从产房到NICU的闯关实录",
         link: "/2026/new-born",
       },
       {
@@ -64,7 +72,7 @@ const sidebarLists = [
     text: "2025",
     items: [
       {
-        text: "2025年度总结：前端编译/买房和怀孕",
+        text: "【2025年度总结】前端编译/买房和怀孕",
         link: "/2025/2025-summary",
         tags: ["ANNUAL_SUMMARY"],
       },
@@ -118,7 +126,7 @@ const sidebarLists = [
     text: "2024",
     items: [
       {
-        text: "2024年度总结：生活新起点",
+        text: "【2024年度总结】生活新起点",
         link: "/2024/2024-summary",
         tags: ["ANNUAL_SUMMARY"],
       },
