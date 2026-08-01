@@ -13,14 +13,17 @@ const sidebarLists = [
       {
         text: "【AI】大模型的蒸馏与后训练：以Qwen3:0.6B为例（未开始）",
         link: "/2026/ai-post-train",
+        tags: ["AI"],
       },
       {
-        text: "【AI】大模型的部署和lora微调：以Qwen3:0.6B为例（未开始）",
+        text: "【AI】大模型的xx和lora微调：以Qwen3:0.6B为例（未开始）",
         link: "/2026/ai-lora",
+        tags: ["AI"],
       },
       {
         text: "【AI】大模型的参数，结构和部署：以Qwen3:0.6B为例（未开始）",
-        link: "/2026/ai-lora",
+        link: "/2026/ai-stru",
+        tags: ["AI"],
       },
       {
         text: "Webpack中的观察模式，开发服务与HMR等",
@@ -74,7 +77,7 @@ const sidebarLists = [
       {
         text: "【2025年度总结】前端编译/买房和怀孕",
         link: "/2025/2025-summary",
-        tags: ["ANNUAL_SUMMARY"],
+        tags: ["SUMMARY"],
       },
       {
         text: "PostCSS完全指南：功能/配置/插件/SourceMap/AST/插件开发/自定义语法",
@@ -128,7 +131,7 @@ const sidebarLists = [
       {
         text: "【2024年度总结】生活新起点",
         link: "/2024/2024-summary",
-        tags: ["ANNUAL_SUMMARY"],
+        tags: ["SUMMARY"],
       },
       {
         text: "如何使用React，透传各类组件能力/属性？",
@@ -311,7 +314,7 @@ function handleConfig(list: Array<any>) {
 
     // 针对配置进行过滤
     year.items = year?.items?.filter((item) => {
-      if (!CONFIG.showAnnualSummary && item?.tags?.ANNUAL_SUMMARY) return false;
+      if (!CONFIG.showAnnualSummary && item?.tags?.SUMMARY) return false;
       return true;
     });
   });
