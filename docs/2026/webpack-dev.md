@@ -960,7 +960,7 @@ module?.hot?.dispose(() => {
 module?.hot?.accept();
 ```
 
-前面我们体验了HMR的能力，好奇HMR是如何更新代码的呢？答案就是使用hot-update相关文件。当本地服务通过WebSocket向浏览器发送更新请求后，浏览器会首先获取xxx.runtime.xxx.hot-update.json文件，一般一个项目只请求一次。这里面存放了有改动的chunk文件列表。我们在启动后修改src/another.js中的字符串，且将src/index.js中的`import "./index.css"`删除，对应的hot-update.json文件内容如图，可以看到这json数据中一共有三个数组。
+前面我们体验了HMR的能力，好奇HMR是如何更新代码的呢？答案就是使用hot-update相关文件。当本地服务通过WebSocket向浏览器发送更新请求后，浏览器会首先获取xxx.runtime.xxx.hot-update.json文件，一般一个项目只请求一次。这里面存放了有改动的chunk文件列表。我们在启动后修改src/another.js中的字符串，且将src/index.js中的`import "./index.css"`删除，对应的hot-update.json文件内容如图，可以看到JSON数据中一共有三个数组。这个JSON数据也被叫做更新清单manifest。
 
 ​![](/2026/dev-7.png)
 
@@ -1110,7 +1110,75 @@ accept
 
 在父模块中，可以接收子模块的更新，使用方式为accept方法的第一个参数为字符串或者数组。子模块只能是直接引用关系的子模块，子模块的写法和import的路径一致。当子模块触发更新时，子模块会被更新，accept第二个参数的回调函数被触发，但是父模块本身不受影响。同时父模块本身由于没有处理更新的方法，因此自身改动后就被刷新了。注意父模块accept子模块的更新，是有调函数可以触发的，但是处理自身更新时，就没有回调函数供触发。
 
-### 模块API
+### 状态和模块API
+HMR过程中有多个状态，这些状态表示当前模块更新的阶段。获取和监听方法以及状态表列举如下：
+
+```js
+// 获取当前状态
+module.hot.status()
+// 监听当前状态变化并输出
+module.hot.addStatusHandler((status) => {
+  console.log(status);
+});
+```
+
+| 状态名 | 当前阶段 | 备注 |
+| - | - | - |
+| idle | 空闲等待更新 | - |
+| check | 向服务发请求获取更新清单 | - |
+| prepare | 下载变更的模块代码 | - |
+| ready | 下载完成，但还没实际更新 | 可能被跳过 |
+| dispose | 触发dispose回调，清理旧代码资源 | - |
+| apply | 调用accept方法，正在执行更新 | - |
+| abort | 更新被中止或者放弃 | - |
+| fail | 更新失败 | - |
+
+然后再介绍一下HMR的API方法。前面主要接触过accept方法，它可以接受自己更新，或者接受子模块更新。HMR的API中的decline方法，也是类似的逻辑：
+
+```ts
+// 拒绝本模块自身更新
+module.hot.decline()
+// 拒绝子模块更新
+module.hot.decline(dependencies: string | Array<string>)
+```
+
+这里“拒绝更新”的意思时，如果模块更新冒泡到触发decline，则停止冒泡，直接导致页面整个刷新。如果父模块调用decline，但子模块本身已经触发accept，更新不会冒泡到父模块，不会导致页面刷新。
+
+然后再介绍dispose方法，这个方法前面提到过，是在当前模块更新前触发回调函数，可以清理就代码的资源。实际上它还可以提供数据，供新的模块调用。这里我们在src/index2.js中试一下：
+
+```js
+function genEle(test, className) {
+  const div = document.createElement("div");
+  div.className = className;
+  div.textContent = test;
+  document.body.prepend(div);
+  return div;
+}
+const div1 = genEle("jzplp 3", "");
+
+console.log("index2.js run");
+console.log("data", module?.hot?.data);
+
+module?.hot?.dispose((data) => {
+  console.log("index2.js dispose");
+  data.abc = 123;
+});
+module?.hot?.accept();
+
+/* 浏览器Console输出 修改代码前+修改代码后
+index2.js run
+data undefined
+[webpack-dev-server] App updated. Recompiling...
+[webpack-dev-server] App hot update...
+[HMR] Checking for updates on the server...
+index2.js dispose
+index2.js run
+data {abc: 123}
+*/
+```
+
+可以看到，当修改代码前，尝试获取module?.hot?.data为undefined。在dispose方法的入参中修改data，这个data的值可以在代码更新后被取到。通过这种方式可以做到前后代码的数据沟通，避免一些应该保留的状态被销毁。
+
 
 ### HMR流程简述
 
