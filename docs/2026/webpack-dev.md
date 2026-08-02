@@ -1054,21 +1054,61 @@ module?.hot?.dispose(() => {
 });
 ```
 
-每个代码文件中都带有一句`console.log('xxx.js run')`，当文件重新执行时，就会触发输出。上面两个文件都没有accept方法，将在后续的例子中添加。首先将自身accept方法添加到父模块中。然后启动服务，尝试几个例子：
+每个代码文件中都带有一句`console.log('xxx.js run')`，当文件重新执行时，就会触发输出。上面两个文件都没有accept方法，将在后续的例子中添加在不同的位置，触发不同的场景观察现象。后面都忽略服务启动时的输出。首先将自身accept方法添加到父模块中。然后启动服务，尝试几个例子。
 
 ```js
 // src/index.js 文件 其余内容省略
 module?.hot?.accept();
 
-/* 1. src/index.js本身改动
-
-
+/* 1. src/index.js改动后输出
+index.js dispose
+index.js run
 */
 
+/* 2. src/index2.js改动后输出
+index.js dispose
+index2.js dispose
+index2.js run
+index.js run
+*/
 ```
 
+当src/index.js（父模块）改动后，只有父模块本身被重新执行了，未改动的src/index2.js（子模块）没有被重新执行。这说明，父模块的重新执行不会传染给子模块。src/index2.js（子模块）改动后，因为子模块没有处理更新，所以向上冒泡到了src/index.js（父模块）。父模块有处理模块自身的更新，因此父模块+改动的子模块一起被重新执行了。再试试其它场景：
 
+```js
+// src/index2.js 文件 其余内容省略
+module?.hot?.accept();
 
+/* 1. src/index.js改动后输出
+页面被刷新
+*/
+
+/* 2. src/index2.js改动后输出
+index2.js dispose
+index2.js run
+*/
+```
+
+src/index.js本身就是入口文件，它自身没有accept处理模块更新，它上面也没有父模块了。在无法处理更新的情况下，页面被刷新。src/index2.js（子模块）改动后，它自身就有处理更新的accept调用，因此仅子模块本身更新，父模块没有触发任何操作。再试试其它场景：
+
+```js
+// src/index.js 文件 其余内容省略
+module?.hot?.accept('./index2.js', () => {
+  console.log('accept');
+});
+
+/* 1. src/index.js改动后输出
+页面被刷新
+*/
+
+/* 2. src/index2.js改动后输出
+index2.js dispose
+index2.js run
+accept
+*/
+```
+
+在父模块中，可以接收子模块的更新，使用方式为accept方法的第一个参数为字符串或者数组。子模块只能是直接引用关系的子模块，子模块的写法和import的路径一致。当子模块触发更新时，子模块会被更新，accept第二个参数的回调函数被触发，但是父模块本身不受影响。同时父模块本身由于没有处理更新的方法，因此自身改动后就被刷新了。注意父模块accept子模块的更新，是有调函数可以触发的，但是处理自身更新时，就没有回调函数供触发。
 
 ### 模块API
 

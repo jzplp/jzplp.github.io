@@ -11,18 +11,8 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "【AI】大模型的蒸馏与后训练：以Qwen3:0.6B为例（未开始）",
-        link: "/2026/ai-post-train",
-        tags: ["AI"],
-      },
-      {
-        text: "【AI】大模型的xx和lora微调：以Qwen3:0.6B为例（未开始）",
-        link: "/2026/ai-lora",
-        tags: ["AI"],
-      },
-      {
         text: "【AI】大模型的参数，结构和部署：以Qwen3:0.6B为例（未开始）",
-        link: "/2026/ai-stru",
+        link: "/2026/llm-stru",
         tags: ["AI"],
       },
       {
