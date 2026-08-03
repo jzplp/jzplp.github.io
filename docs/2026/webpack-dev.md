@@ -1179,6 +1179,54 @@ data {abc: 123}
 
 可以看到，当修改代码前，尝试获取module?.hot?.data为undefined。在dispose方法的入参中修改data，这个data的值可以在代码更新后被取到。通过这种方式可以做到前后代码的数据沟通，避免一些应该保留的状态被销毁。
 
+再介绍一下invalidate方法，它类似于Webpack的watch模式中的invalidate方法，会触发一次HMR更新，但他在不同的HMR状态下触发，表现并不一致：
+
+| 状态名 | 触发效果 |
+| - | - |
+| idle | 发起新的HMR更新 |
+| check | 检查更新，如果有则与invalidate合并为一次更新，如果没有则自己发起新的HMR更新 |
+| prepare, ready | 此时HMR已经在准备更新了， 因此invalidate合并为一次同更新 |
+| dispose, apply | 更新已经在进行中，无法合并，因此等更新完成后再出触发一次更新 |
+
+```js
+// src/index2.js 文件 其余内容省略
+module?.hot?.dispose((data) => {
+  console.log("index2.js dispose");
+  module.hot.invalidate();
+});
+module?.hot?.accept();
+
+/* src/index2.js改动后输出
+index2.js dispose
+index2.js run
+index2.js dispose
+index2.js run
+index2.js dispose
+index2.js run
+...无限输出
+*/ 
+```
+
+这里我们在dispose中触发invalidate，按照上面的说明，当我们修改后，会先触发一次正常更新，再触发一次invalidate更新。但实际上会触发无限更新，直到浏览器卡死。这是因为每次invalidate触发更新后，都会再触发一次dispose，这时候就会再触发一次invalidate，因此变成了无限更新。这时候就需要用到我们前面提到的data数据来控制。如下面例子，就只触发两次更新了。
+
+```js
+// src/index2.js 文件 其余内容省略
+module?.hot?.dispose((data) => {
+  console.log("index2.js dispose");
+  if (!module?.hot?.data?.hasInvalidate) module.hot.invalidate();
+  data.hasInvalidate = true;
+});
+module?.hot?.accept();
+
+/* src/index2.js改动后输出
+index2.js dispose
+index2.js run
+index2.js dispose
+index2.js run
+*/ 
+```
+
+
 
 ### HMR流程简述
 
