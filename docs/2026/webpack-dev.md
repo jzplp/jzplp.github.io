@@ -1236,15 +1236,32 @@ module.hot.removeDisposeHandler(callback) // 移除dispose 注册的回调函数
 ```
 
 ### HMR流程简述
+前面我们通过实验，观察接口请求，使用HMR模块API等了解了一些HMR的功能和使用方式。这里我们将前面的内容串起来，对HMR的流程做一个概述。这里的主要角色有浏览器端，本地服务，开发者三个。
 
-### 部分流程讨论？
+​![](/2026/dev-10.png)
 
-webpack-dev-server的HMR功能
+* 启动阶段
+  * 开发者以watch模式启动webpack-dev-server
+  * Webpack打包代码，启动本地服务
+  * 浏览器请求页面，本地服务返回页面内容+浏览器端的runtime代码
+  * 浏览器端和本地服务建立WebSocket连接
+* 修改阶段（每次改动重复这个流程）
+  * 开发者修改代码并保存
+  * 触发Webpack重新打包，生成新文件
+  * 本地服务使用WebSocket通知浏览器端有代码更新
+  * 浏览器端请求xxx.hot-update.json，本地服务返回更新清单
+  * 浏览器端批量请求新模块文件xxx.hot-update.js，本地服务返回对应内容
+  * 浏览器端使用模块冒泡方式更新代码
+  * 最终在浏览器上呈现更新后的效果
 
 ## webpack-hot-middleware
 
+
 webpack-dev-middleware有HMR功能
 
+## 总结
+
+HMR自己写适配比较麻烦，还会入侵正常的代码。但是各种前端框架都做了比较好的适配，使用框架写可以良好的使用HMR，且我们不需要写代码处理HMR。
 
 
 ## 参考
