@@ -1226,7 +1226,14 @@ index2.js run
 */ 
 ```
 
+还有一些模块相关的API，这里列举一下。其中check和apply方法一般是自己实现HMR更新策略时使用的：
 
+```js
+module.hot.check() // 向服务端发送hot-update请求，看是否有更新
+module.hot.apply() // 应用更新
+module.hot.removeStatusHandler(callback) // 移除addStatusHandler注册的回调函数
+module.hot.removeDisposeHandler(callback) // 移除dispose 注册的回调函数
+```
 
 ### HMR流程简述
 
