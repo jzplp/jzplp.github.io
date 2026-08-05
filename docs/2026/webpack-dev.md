@@ -1,4 +1,4 @@
-# Webpack中的观察模式，开发服务与HMR等（未完成）
+# Webpack开发环境：观察模式/webpack-dev-server/HMR热更新
 
 ## 创建基础Webpack工程
 在说明下面各种模式之前，首先创建一个基础的Webapck工程，方便后续扩展执行示例。首先执行命令行：
@@ -1254,15 +1254,12 @@ module.hot.removeDisposeHandler(callback) // 移除dispose 注册的回调函数
   * 浏览器端使用模块冒泡方式更新代码
   * 最终在浏览器上呈现更新后的效果
 
-## webpack-hot-middleware
-
-
-webpack-dev-middleware有HMR功能
-
 ## 总结
+本文介绍了Webpack开发模式下的一些工具和配置，从基础的观察模式开始，到使用webpack-dev-middleware启动开发服务。然后使用集成度更高的webpack-dev-server，其中不仅包含开发服务，还有错误遮罩，静态资源目录，代理等功能。这些功能虽然对于生产模式的打包没有帮助，但可以很大程度上提高我们开发时的体验和便利。
 
-HMR自己写适配比较麻烦，还会入侵正常的代码。但是各种前端框架都做了比较好的适配，使用框架写可以良好的使用HMR，且我们不需要写代码处理HMR。
+最后介绍了HMR的使用方式和流程，使用HMR技术，可以在不刷新页面的情况下，只更新改动模块的代码。但是通过前面的例子可以看到，自己写适配HMR更新的代码是比较麻烦的，需要考虑数据保留，UI顺序一致等。像Vue，React等前端框架，都有对应的工具直接处理HMR，不需要在我们自己的代码中去适配HMR，因此使用框架才是HMR更方便的场景。
 
+webpack-dev-server提供的很多功能都是由它的依赖实现的，例如开发服务使用的webpack-dev-middleware，HMR功能使用的webpack-hot-middleware，代理功能使用的http-proxy-middleware等。
 
 ## 参考
 - Webpack如何实现万物皆可import？loader的使用/配置/手写实践\

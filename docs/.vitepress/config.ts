@@ -16,7 +16,7 @@ const sidebarLists = [
         tags: ["AI"],
       },
       {
-        text: "Webpack中的观察模式，开发服务与HMR等",
+        text: "Webpack开发环境：观察模式/webpack-dev-server/HMR热更新",
         link: "/2026/webpack-dev",
       },
       {
