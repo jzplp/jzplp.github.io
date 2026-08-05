@@ -1,7 +1,7 @@
 # Webpack开发环境：观察模式/webpack-dev-server/HMR热更新
 
 ## 创建基础Webpack工程
-在说明下面各种模式之前，首先创建一个基础的Webapck工程，方便后续扩展执行示例。首先执行命令行：
+在说明下面各种模式之前，首先创建一个基础的Webpack工程，方便后续扩展执行示例。首先执行命令行：
 
 ```sh
 npm init -y
@@ -120,7 +120,7 @@ module.exports = {
 执行npm run build命令，可以将当前代码打包。这对于代码已经完成的生产模式来说是很简单的，但对于开发模式却并不好用。在开发模式下，代码内容会实时变化，我们希望自己写的代码可以尽快看到结果。尤其是前端页面开发，如果写的页面可以实时在浏览器中看到效果，那么对于开发和调试效率都有很大的提升。
 
 ### 观察模式初步
-如果每次写完一部分代码。还要手动执行命令，等待打包完成查看效果，那么等待时间会造成效率下降。有没有一种方式可以自动监听文件变化，自动打包最新成果呢？Webapck中的watch模式，就可以做到。
+如果每次写完一部分代码。还要手动执行命令，等待打包完成查看效果，那么等待时间会造成效率下降。有没有一种方式可以自动监听文件变化，自动打包最新成果呢？Webpack中的watch模式，就可以做到。
 
 开启观察模式非常简单，package.json的scripts中"watch": "webpack --watch"指令，执行后即可开启。或者webpack.config.js中设置watch: true。开启后，可以观察到dist目录中依然生成了代码。但是命令行执行并没有结束。我们此时打开dist/index.html，可以正常访问打包后的页面效果。
 
@@ -145,7 +145,7 @@ r("jzplp1", "qaz1"),
 不只修改js文件，修改CSS，XML等文件，效果也是一样的，刷新后页面内容就发生变化了。原因在于开启了watch模式后，Webpack会先打包一次，然后并不会结束退出，而是监听每个源文件的变化，如果源文件有改动，就重新编译，更新dist目录中的文件。
 
 ### 进一步尝试
-Webapck支持自定义输出文件名的模板，我们将输出文件名改成根据文件内容变化的hash，看看watch模式下的效果。修改webpack.config.js中的output相关配置：
+Webpack支持自定义输出文件名的模板，我们将输出文件名改成根据文件内容变化的hash，看看watch模式下的效果。修改webpack.config.js中的output相关配置：
 
 ```js
 module.exports = {
@@ -392,7 +392,7 @@ module.exports = class JzplpPlugin {
 };
 ```
 
-在这个插件中，我们批量监听了很多个钩子。将插件引入webapck.config.js中，然后在非观察模式和观察模式下查看输出结果：
+在这个插件中，我们批量监听了很多个钩子。将插件引入webpack.config.js中，然后在非观察模式和观察模式下查看输出结果：
 
 ```js
 const JzplpPlugin = require("./plugin/a");
@@ -435,7 +435,7 @@ watch模式输出结果
 
 通过对比可以看到，观察模式下没有触发beforeRun和run钩子，而是触发了watchRun，这是一个观察模式的专属钩子。然后在每次修改代码并保存后，会重新触发观察模式的专属钩子： invalid（compilation失效）和watchRun。然后是compilation相关钩子被触发。当命令行退出时，会触发一个专属钩子watchClose。
 
-还可以注意到，非观察模式的打包时线性的，打包完一次就结束。观察模式下从watchRun开始走进了一个循环，每次修改文件便会触发。注意到compilation和invalid钩子，分别是创建一个新的compilation和失效一个compilation。
+还可以注意到，非观察模式的打包是线性的，打包完一次就结束。观察模式下从watchRun开始走进了一个循环，每次修改文件便会触发。注意到compilation和invalid钩子，分别是创建一个新的compilation和失效一个compilation。
 
 正因为观察模式要重新打包，因此在观察模式的循环中，每次会重新创建compilation。也正是因为如此，compilation对象需要在钩子中获取，而不是像compiler一样固定一个对象。虽然重新打包，但实际上是增量构建，Webpack只会打包修改过的模块和相关部分。
 
@@ -443,7 +443,7 @@ watch模式输出结果
 webpack-dev-middleware是一个适配express的中间件，用来适配Webpack的开发模式。express是Node.js的Web应用框架。这里我们一步一步介绍一下webpack-dev-middleware的使用方式和作用。
 
 ### 中间件初步
-首先我们启动一个express服务，使用webpack-dev-middleware中间件。中间件的第一个入参为Webapck的compiler对象。
+首先我们启动一个express服务，使用webpack-dev-middleware中间件。中间件的第一个入参为Webpack的compiler对象。
 
 ```js
 const express = require("express");
@@ -502,7 +502,7 @@ app.use(
 );
 ```
 
-modifyResponseData配置接收一个函数，可以允许我们访问并修改本地服务输出的数据。注意这里修改的并不是生成文件（它并不是Webpack插件），用户给本地服务发送文件访问请求，中间件读取内存中的生成文件后，经过modifyResponseData函数处理在返回给用户。
+modifyResponseData配置接收一个函数，可以允许我们访问并修改本地服务输出的数据。注意这里修改的并不是生成文件（它并不是Webpack插件），用户给本地服务发送文件访问请求，中间件读取内存中的生成文件后，经过modifyResponseData函数处理再返回给用户。
 
 ```js
 const express = require("express");
@@ -548,9 +548,9 @@ webpack-dev-middleware中间件还提供了很多API方法，这里简单介绍�
 * getFilenameFromUrl(url) 传入url路径，获取文件路径
 * koaWrapper, hapiWrapper, honoWrapper 适配其它Node.js的Web服务中间件
 
-其中close方法不关闭本地的Web服务，紧紧关闭Webpack的watch观察模式。即调用close之后，还是能够从内存中读取之前编译过的文件。但如果开启中间件后立即close，Webapck还没来及的打包完成就关闭了。这时候服务读不到文件，就会报错。
+其中close方法不关闭本地的Web服务，仅关闭Webpack的watch观察模式。即调用close之后，还是能够从内存中读取之前编译过的文件。但如果开启中间件后立即close，Webpack还没来得及打包完成就关闭了。这时候服务读不到文件，就会报错。
 
-webpack-dev-middleware还有一个插件模式，设置第三个属性为ture即可开启。说是插件模式，实际上就是去掉了开启watch模式的部分，需要我们自己开启，但还是需我们自己启动express服务。插件模式适合使用在一些特殊要求的场景。
+webpack-dev-middleware还有一个插件模式，设置第三个属性为true即可开启。说是插件模式，实际上就是去掉了开启watch模式的部分，需要我们自己开启，但还是需我们自己启动express服务。插件模式适合使用在一些特殊要求的场景。
 
 ```js
 const express = require("express");
@@ -635,15 +635,15 @@ npm run start
 * --no-web-socket-server 禁止设置WebSocket服务器及其选项
 * --web-socket-server-type value 指定WebSocket服务器类型
 
-通过上述配置，可以看到webpack-dev-serve相比于webpack-dev-middleware，扩展了非常多的功能和配置。其中open相关配置表示服务启动后，自动打开了浏览器，且跳转到项目首页。static相关配置可以设置额外于生成文件的静态文件访问目录。hot和live-reload相关配置可以在生成文件变动时自动更新浏览器展示效果。history-api-fallbacks适配单页应用的前端路由形式。webpack-dev-serve还会在生成文件中注入额外的JavaScript代码（使用--no-client禁用），这些代码有很多作用：例如在构建失败时展示全屏覆盖层提示错误；创建WebSocket服务，和本地服务配合监控打包文件变更，从而实现自动更新效果等。后面我们将介绍一部分功能。
+通过上述配置，可以看到webpack-dev-server相比于webpack-dev-middleware，扩展了非常多的功能和配置。其中open相关配置表示服务启动后，自动打开了浏览器，且跳转到项目首页。static相关配置可以设置额外于生成文件的静态文件访问目录。hot和live-reload相关配置可以在生成文件变动时自动更新浏览器展示效果。history-api-fallbacks适配单页应用的前端路由形式。webpack-dev-server还会在生成文件中注入额外的JavaScript代码（使用--no-client禁用），这些代码有很多作用：例如在构建失败时展示全屏覆盖层提示错误；创建WebSocket服务，和本地服务配合监控打包文件变更，从而实现自动更新效果等。后面我们将介绍一部分功能。
 
 ### devServer参数
-除了命令行参数之外，还可以在webpack.config.js中直接配置webpack-dev-serve的功能。大部分配置内容和上面命令行配置是一致的，这里就不再重复描述了。我们列一下不能使用命令行参数配置的内容：
+除了命令行参数之外，还可以在webpack.config.js中直接配置webpack-dev-server的功能。大部分配置内容和上面命令行配置是一致的，这里就不再重复描述了。我们列一下不能使用命令行参数配置的内容：
 
 ```js
 module.exports = {
   devServer: {
-    headers: {'X-Custom-Foo': 'bar'}, // 添加HTTP的相应header
+    headers: {'X-Custom-Foo': 'bar'}, // 添加HTTP的响应header
     onListening: (devServer) => {}, // 开始监听端口连接时执行自定义函数
     proxy: {}, // 代理功能，实际由http-proxy-middleware提供
     setupMiddlewares: (middlewares, devServer) => {} // 提供执行自定义函数和自定义中间件能力 
@@ -654,7 +654,7 @@ module.exports = {
 proxy代理相关内容，我们之前在[谈一谈前端构建工具的本地代理配置(Webpack与Vite)](https://jzplp.github.io/2025/web-proxy.html)中描述过。其余的选项大多是使用命令行不方便配置的，例如函数，对象或者数组等。
 
 ### Node.js的API形式
-webpack-dev-serve也支持Node.js的API形式使用。
+webpack-dev-server也支持Node.js的API形式使用。
 
 ```js
 const Webpack = require('webpack');
@@ -671,7 +671,7 @@ const runServer = async () => {
 runServer();
 ```
 
-使用这种形式，devServer参数必须手动传给WebpackDevServer，否则无效。start方法可以await，服务启动后resolve。webpack-dev-serve还有几种启动和结束方式：
+使用这种形式，devServer参数必须手动传给WebpackDevServer，否则无效。start方法可以await，服务启动后resolve。webpack-dev-server还有几种启动和结束方式：
 
 ```js
 const Webpack = require('webpack');
@@ -703,7 +703,7 @@ setTimeout(stopServer, 5000);
 ```
 
 ### static静态目录
-statc相关配置的作用是，在除了打包生成的文件之外，额外提供一个静态资源目录。webpack-dev-server会将这个目录挂到服务上，使得开发模式下可以访问到这些静态资源。默认目录是public。假设我们在里面放置一个图片 public/1.png，然在src/index.js中，以url的方式使用，我们启动开发服务，可以发现图片可以被正常请求和展示：
+static相关配置的作用是，在除了打包生成的文件之外，额外提供一个静态资源目录。webpack-dev-server会将这个目录挂到服务上，使得开发模式下可以访问到这些静态资源。默认目录是public。假设我们在里面放置一个图片 public/1.png，然在src/index.js中，以url的方式使用，我们启动开发服务，可以发现图片可以被正常请求和展示：
 
 ```js
 // src/index.js 其它代码省略
@@ -723,7 +723,7 @@ module.exports = {
 };
 ```
 
-不管使用public还是其它目录，这个目录本身都不用在url中体现，相当于直接挂在url的根目录上。但如果不希望挂在根目录，可以使用publicPath配置，是静态资源目录有一个固定前缀。
+不管使用public还是其它目录，这个目录本身都不用在url中体现，相当于直接挂在url的根目录上。但如果不希望挂在根目录，可以使用publicPath配置，使静态资源目录有一个固定前缀。
 
 ```js
 // webpack.config.js 其它代码省略
@@ -807,7 +807,7 @@ module.exports = {
 };
 ```
 
-然后首先启动服务。在浏览器上访问到页面后，在修改源文件。可以看到打包成功后，页面自动刷新。它是如何做到自动刷新的呢？要知道HTTP协议是一个单向的客户端->服务端协议，无法做到服务器推送客户端数据。webpack-dev-server在浏览器页面与本地服务之间额外创建了一个WebSocket通信，当打包内容更新时，会通知浏览器刷新页面重新请求。（这里打开浏览器Network配置中的Preserve Log, 让页面刷新时保留网络记录）
+然后首先启动服务。在浏览器上访问到页面后，再修改源文件。可以看到打包成功后，页面自动刷新。它是如何做到自动刷新的呢？要知道HTTP协议是一个单向的客户端->服务端协议，无法做到服务器推送客户端数据。webpack-dev-server在浏览器页面与本地服务之间额外创建了一个WebSocket通信，当打包内容更新时，会通知浏览器刷新页面重新请求。（这里打开浏览器Network配置中的Preserve Log, 让页面刷新时保留网络记录）
 
 ​![](/2026/dev-2.png)
 
@@ -818,7 +818,7 @@ WebSocket在webpack-dev-server中的作用不止于此，像是HMR, live-reload,
 还要注意到，WebSocket，遮罩等功能需要依赖浏览器端代码来实现，但是我们的源码中是肯定没有这些内容的。因此，webpack-dev-server会在我们的代码中注入一些JavaScript脚本，实现这些功能。可以观察一下`http://localhost:8080/index.js`等请求的返回，比我们自己源码代码多了很多内容。如果希望关闭注入的脚本，可以使用--no-client配置。
 
 ## HMR
-HMR的全程叫做Hot Module Replacement，即模块热替换/热更新。利用这个技术，可以在页面运行时，只替换改动所在模块的代码，不需要刷新整个页面，就能看到更新后的效果。
+HMR的全称叫做Hot Module Replacement，即模块热替换/热更新。利用这个技术，可以在页面运行时，只替换改动所在模块的代码，不需要刷新整个页面，就能看到更新后的效果。
 
 ### HMR初步
 虽然HMR默认在webpack-dev-server中开启，但为了演示功能和避免冲突，还是需要修改webpack.config.js:
@@ -968,7 +968,7 @@ module?.hot?.accept();
 * r 需要移除的chunk列表
 * m 需要移除的module列表
 
-c对应着应该重新请求的chunk数据，因此c中的每个元素对应后面的一个xxx.hot-update.js文件请求。r对应着需要在客户段删除的对应chunk文件代码。我们观察index.xxx.hot-update.js，发现里面就是我们变更的index.js打包后代码，以及一些Webpack运行时相关代码：
+c对应着应该重新请求的chunk数据，因此c中的每个元素对应后面的一个xxx.hot-update.js文件请求。r对应着需要在客户端删除的对应chunk文件代码。我们观察index.xxx.hot-update.js，发现里面就是我们变更的index.js打包后代码，以及一些Webpack运行时相关代码：
 
 ​![](/2026/dev-8.png)
 
@@ -1000,7 +1000,7 @@ module.hot.accept(dependencies: string | Array<string>, callback: () =>{}, error
 */
 ```
 
-accept冒泡的逻辑是：当更新的模块存在accept函数时，就认为已经接收了更新并处理完成，模块更新就不会冒泡到父模块。如果子模块本身没有accept函数，那么就冒泡到父模块。父模块如果存在accept函数，可以是父模块处理自身更新，也可以是处理子模块更新，且匹配了这个子模块，这样父模块就将子模块的更新处理掉了。如果父模块没有处理掉，会再冒泡到祖父模块，就这样一直到根模块。也就时打包入口。下面我们构造一个例子来看一下，首先是模块树：
+accept冒泡的逻辑是：当更新的模块存在accept函数时，就认为已经接收了更新并处理完成，模块更新就不会冒泡到父模块。如果子模块本身没有accept函数，那么就冒泡到父模块。父模块如果存在accept函数，可以是父模块处理自身更新，也可以是处理子模块更新，且匹配了这个子模块，这样父模块就将子模块的更新处理掉了。如果父模块没有处理掉，会再冒泡到祖父模块，就这样一直到根模块。也就是打包入口。下面我们构造一个例子来看一下，首先是模块树：
 
 ```
 ├── src/index.js          (根模块，打包入口1)
