@@ -144,11 +144,11 @@ LLM本质是有一个词表，其中的每个词叫做token，用向量的形式
 如何判断大模型需要的GPU要求呢？这里我们根据大模型参数量，给出一个粗略的计算公式，注意这里仅适用于稠密模型。首先是计算能力需求。其中训练token数量采用Qwen3的预训练36T，后训练一般没有这么多。推理token数量采用每秒30个token。
 
 * 训练（预训练后训练类似） 6 * 模型参数量 * 训练token数量
-  * 以Qwen3-0.6B为例 6 * 0.6B * 36T ≈ 1.3 × 10^23 FLOP
-  * 以Qwen3-32B为例 6 * 32B * 36T ≈ 6.9 × 10^25 FLOP
+  * 以Qwen3-0.6B为例 6 * 0.6B * 36T ≈ 1.3 × 10^23 FLOP = 1.3 × 10^11 TFLOPS
+  * 以Qwen3-32B为例 6 * 32B * 36T ≈ 6.9 × 10^25 FLOP = 6.9 × 10^13 TFLOPS
 * 推理 2 * 模型参数量 * token数量
-  * 以Qwen3-0.6B为例 2 * 0.6B * 30 ≈ 3.6 × 10^10 FLOPs
-  * 以Qwen3-32B为例 2 * 32B * 30 ≈ 1.9 × 10^12 FLOPs
+  * 以Qwen3-0.6B为例 2 * 0.6B * 30 ≈ 3.6 × 10^10 FLOPs = 0.036 TFLOPS
+  * 以Qwen3-32B为例 2 * 32B * 30 ≈ 1.9 × 10^12 FLOPs = 1.9 TFLOPS
 
 可以看到，训练和推理对于计算性能的相差很大。然后再看下对于显存的要求。注意显存要求是和模型数值精度位数有直接关系的，例如16位相比8位，显存需求一般要大一倍。下面的公式中我们以BF16，即16位两字节来计算。
 
@@ -176,25 +176,33 @@ LLM本质是有一个词表，其中的每个词叫做token，用向量的形式
 
 | 国家 | 厂商 | 型号 | BF16算力峰值 | 显存大小 | 显存类型 | 显存带宽 | 发布时间 |
 | - | - | - | - | - | - | - | - |
-| 美国 | NVIDIA | H100 | 989 TFLOPS | 80GB | HBM3 | 3.35 TB/s | 2022 |
-| 美国 | NVIDIA | H200 | 989 TFLOPS | 141GB | HBM3e | 4.8 TB/s | 2024 |
+| 美国 | NVIDIA | H100 | 989 TFLOPS | 80GB | HBM3 | 3.4 TB/s | 2022 |
+| 美国 | NVIDIA | H200 | 989 TFLOPS | 141GB | HBM3e | 4.9 TB/s | 2024 |
 | 美国 | NVIDIA | B200 | 2250 TFLOPS | 192GB | HBM3e | 8 TB/s | 2024 |
 | 美国 | NVIDIA | B300 | 3750 TFLOPS | 288GB | HBM3e | 8 TB/s | 2024 |
 | 美国 | NVIDIA | H20 (中国特供) | 148 TFLOPS | 96GB | HBM3 | 4 TB/s | 2024 |
-| 美国 | - | - | - | - | - | - | - |
-| 美国 | - | - | - | - | - | - | - |
+| 美国 | AMD | MI300X | 1307 TFLOPS | 192 GB | HBM3 | 5.3 TB/s | 2023 |
+| 美国 | AMD | MI325X | 1307 TFLOPS | 256 GB | HBM3e | 6.1 TB/s | 2024 |
+| 美国 | AMD | MI350X | 2306 TFLOPS | 288 GB | HBM3e | 8.2 TB/s | 2025 |
+| 美国 | AMD | MI355X | 2516 TFLOPS | 288 GB | HBM3e | 8.2 TB/s | 2025 |
 
-NVIDIA还提供了整个机柜的全套方案，内部包含72颗GPU芯片，GPU和CPU集成在一起，即B200集成后为GB200，B300集成后为GB300。
+有些厂商还提供了整个机柜的全套方案，例如下面列出两个NVIDIA的方案，其中内部包含72颗GPU芯片，GPU和CPU集成在一起，即B200集成后为GB200，B300集成后为GB300。
 
 | 国家 | 厂商 | 型号 | BF16算力峰值 | 显存大小 |
 | - | - | - | - | - |
 | 美国 | NVIDIA | GB200 NVL72	| 360000 TFLOPS | 13.4TB |
 | 美国 | NVIDIA | GB300 NVL72	| 180000 TFLOPS | 20TB |
 
-然后是国内市场的GPU数据：
+除了NVIDIA和AMD之外，Google，Amazon等厂商也在推出GPU，但是市场份额较少。然后是国内市场的GPU数据：
 
-
-
+| 国家 | 厂商 | 型号 | BF16算力峰值 | 显存大小 | 显存类型 | 显存带宽 | 发布时间 |
+| 中国 | - | - | - | - | - | - | - |
+| 中国 | - | - | - | - | - | - | - |
+| 中国 | - | - | - | - | - | - | - |
+| 中国 | - | - | - | - | - | - | - |
+| 中国 | - | - | - | - | - | - | - |
+| 中国 | - | - | - | - | - | - | - |
+| 中国 | - | - | - | - | - | - | - |
 
 
 
@@ -225,6 +233,7 @@ NVIDIA还提供了整个机柜的全套方案，内部包含72颗GPU芯片，GPU
   https://www.cnblogs.com/xiaobaiysf/p/22352462
 - 2026 算力卡性能 TOP20 排名，FP16/FP8/INT8 算力实测汇总\
   https://www.iotdt.com/news/xingyezixun/2694.html
-
+- TechPowerUp GPU Specs Database\
+  https://www.techpowerup.com/gpu-specs/
 
 
