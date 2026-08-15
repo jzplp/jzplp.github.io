@@ -1,4 +1,4 @@
-# 【AI】大模型的参数，结构和部署（未完成）
+# 【AI】大模型简介：参数，结构等（未完成）
 
 ## 大模型介绍
 ### 简介
@@ -266,16 +266,6 @@ CyberGym是用于大规模评估模型在Agent中对于真实世界网络安全�
 
 * 项目网站 https://www.cybergym.io/
 * GitHub https://github.com/sunblaze-ucb
-
-## 使用ollama部署
-
-使用ollama部署Qwen3-0.6B。使用HTTP接入AGENT部署。（但是模型太小跑不起来）
-
-## 模型量化和格式
-
-## 直接用python运行
-
-## 自己做量化
 
 ## 参考
 - 魔搭社区\
