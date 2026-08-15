@@ -226,8 +226,8 @@ LLM本质是有一个词表，其中的每个词叫做token，用向量的形式
 ## 评测和排行
 现在基本上每个大模型发布之时，都会附带一些测试分数，还会与其它大模型比较分数高低。这些测试是什么，有什么作用？这里我们以DeepSeek-V4-Pro-0813报告中的部分测试为例，简单看一下这些评测内容。
 
-### HLE(Humanity's Last Exam)
-HLE翻译为中文叫作“人类最后的测试”。包含2,500个问题，涉及数十个学科，包括数学、人文学科和自然科学。它由全球各领域的专家编写，包含适合自动评分的选择题和简答题。题目和对应翻译举例如下：
+### HLE
+HLE(Humanity's Last Exam)翻译为中文叫作“人类最后的测试”。包含2,500个问题，涉及数十个学科，包括数学、人文学科和自然科学。它由全球各领域的专家编写，包含适合自动评分的选择题和简答题。题目和对应翻译举例如下：
 
 ​![](/2026/llm-stru-4.png)
 
@@ -296,7 +296,7 @@ CyberGym是用于大规模评估模型在Agent中对于真实世界网络安全�
   https://zhuanlan.zhihu.com/p/1981677289818314114
 - 摩尔线程技术文档 MTT S4000\
   https://docs.mthreads.com/s4000/s4000-doc-online/introduction/
-- 昇腾 / 寒武纪 / 沐曦 / 昆仑芯全系列国产算力卡算力排名对比\
+- 昇腾/寒武纪/沐曦/昆仑芯全系列国产算力卡算力排名对比\
   https://www.iotdt.com/news/xingyezixun/2693.html
 - 燧原硬件文档中心\
   https://support.enflame-tech.com/onlinedoc_hw/index.html
@@ -304,13 +304,21 @@ CyberGym是用于大规模评估模型在Agent中对于真实世界网络安全�
   https://tieba.baidu.com/p/10371217414
 - gitee AI文档 芯片集群与技术支持\
   https://ai.gitee.com/docs/compute/clusters_gpu/biren_gpu
-- 信创国测 AI 卡不同型号分析总结\
+- 信创国测AI卡不同型号分析总结\
   https://ai6s.net/6a6ffa7610ee7a33f29572c4.html
-- HLE项目网站\
+- HLE 项目网站\
   https://lastexam.ai/
-- HLE数据集查看\
+- HLE 数据集查看\
   https://www.modelscope.cn/datasets/cais/hle
-- Terminal Bench项目网站\
+- Terminal Bench 项目网站\
   https://www.tbench.ai/
+- GitHub NL2Repo\
+  https://github.com/multimodal-art-projection/NL2RepoBench
+- CyberGym 项目网站\
+  https://www.cybergym.io/
+- GitHub CyberGym\
+  https://github.com/sunblaze-ucb
+
+
 
 
