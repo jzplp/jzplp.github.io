@@ -235,11 +235,37 @@ HLE翻译为中文叫作“人类最后的测试”。包含2,500个问题，涉
 * 数据集查看 https://www.modelscope.cn/datasets/cais/hle
 
 ### Terminal Bench
-Terminal Bench是一个评估大模型在Agent中，使用命令行完成任务的测试。其中大部分是计算机编程相关任务，包含编译/调试/运行代码，配置服务，处理数据等。=它分为很多个测试版本，例如1.0, 2.0, 2.1, 3.0等。项目网站 https://www.tbench.ai/ 。例如下图有两个任务，左侧是从源码构建出Linux操作系统内核，右侧是使用git提交代码并启动本地HTTP服务。
+Terminal Bench是一个评估大模型在Agent中，使用命令行完成任务的测试。其中大部分是计算机编程相关任务，包含编译/调试/运行代码，配置服务，处理数据等。它分为很多个测试版本，例如1.0, 2.0, 2.1, 3.0等。例如下图有两个任务，左侧是从源码构建出Linux操作系统内核，右侧是使用git提交代码并启动本地HTTP服务。
 
 ​![](/2026/llm-stru-5.png)
 
-### 
+* 项目网站 https://www.tbench.ai/
+
+### NL2Repo
+NL2Repo是字节跳动提出的一个评估模型在编程Agent中进行长周期任务上性能的测试，这些任务要求从零开始生成一个完整可运行的代码库。测试包含104个不同的任务，每个任务都配有独立的测试环境。test_files目录中包含全部任务数据，每个任务中包含四个文件。
+
+* start.md 任务的需求描述文档
+* test_case_count.txt 该任务包含的测试用例总数，通常只是一个数字
+* test_commands.json 定义如何运行测试的具体命令行指令
+* test_files.json 测试所需的外部数据或文件清单
+
+题目的start.md部分内容和对应翻译举例如下：
+
+​![](/2026/llm-stru-6.png)
+
+* GitHub https://github.com/multimodal-art-projection/NL2RepoBench
+
+### CyberGym
+CyberGym是用于大规模评估模型在Agent中对于真实世界网络安全漏洞上实战能力的测试。它包含三种测试形式：
+
+| 测试名称 | 测试内容 | 测试例子数量 |
+| - | - | - |
+| CyberGym | 漏洞复现 | 1507个漏洞/188个项目 |
+| ExploitGym | 利用漏洞攻击 | 869个漏洞 |
+| CyberGym-E2E | 漏洞修复 | 920个漏洞/139个项目 |
+
+* 项目网站 https://www.cybergym.io/
+* GitHub https://github.com/sunblaze-ucb
 
 ## 使用ollama部署
 
@@ -280,3 +306,11 @@ Terminal Bench是一个评估大模型在Agent中，使用命令行完成任务�
   https://ai.gitee.com/docs/compute/clusters_gpu/biren_gpu
 - 信创国测 AI 卡不同型号分析总结\
   https://ai6s.net/6a6ffa7610ee7a33f29572c4.html
+- HLE项目网站\
+  https://lastexam.ai/
+- HLE数据集查看\
+  https://www.modelscope.cn/datasets/cais/hle
+- Terminal Bench项目网站\
+  https://www.tbench.ai/
+
+
