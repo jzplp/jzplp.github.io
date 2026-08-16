@@ -11,7 +11,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "AI】大模型简介：参数，结构等（未完成）",
+        text: "【AI】大模型简介：参数，结构等（未完成）",
         link: "/2026/llm-stru",
         tags: ["AI"],
       },

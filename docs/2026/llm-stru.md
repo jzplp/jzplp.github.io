@@ -223,7 +223,7 @@ LLM本质是有一个词表，其中的每个词叫做token，用向量的形式
 | 美国 | NVIDIA | RTX5090 | 419 TFLOPS | 32GB | GDDR7 | 1.8 TB/s | 2025 |
 | 美国 | Apple | M4 | 13 TFLOPS | 使用电脑统一内存 | LPDDR5X | 120 GB/s | 2024 |
 
-## 评测和排行
+## 评测
 现在基本上每个大模型发布之时，都会附带一些测试分数，还会与其它大模型比较分数高低。这些测试是什么，有什么作用？这里我们以DeepSeek-V4-Pro-0813报告中的部分测试为例，简单看一下这些评测内容。
 
 ### HLE
@@ -267,6 +267,23 @@ CyberGym是用于大规模评估模型在Agent中对于真实世界网络安全�
 * 项目网站 https://www.cybergym.io/
 * GitHub https://github.com/sunblaze-ucb
 
+## 排行
+在大模型发布时，除了前面的评测外，网络上还会有一些排行，表示大模型各种能力的高低，有些排行本身就是用数据评测出的，有些则是单纯的排行榜。
+
+### Artificial Analysis
+Artificial Analysis是一个大模型排行和分析平台，里面包含了各种各样的排行榜，包括AI智能排行，速度排行，成本排行，图像/视频排行等。它最主要的智能指数（Artificial Analysis Intelligence Index）是由很多种评测得分加权形成的，其中包含外部评测（例如SciCode, GPQA Diamond, 还有前面介绍过的HLE, Terminal-Bench等），也包含一些平台自己的评测。截至文章撰写时排行如下：
+
+​![](/2026/llm-stru-7.png)
+
+### Arena
+Arena是一个大模型排行平台，里面也包含很多榜单，包括对话榜，Agent榜，前端开发榜等等。这些榜单并不是通过数据评测得分排行，而是通过用户真实的体验感受得出。用户使用AI时，Arena会同时提供两个匿名模型的结果，用户投票选出更好的一方。然后通过Elo评分系统最终得出排名。Elo评分系统是广泛使用的评分机制，像是篮球、乒乓球、围棋、游戏等，都采用这个评分机制对运动员进行排名。例如下面是这个平台的前端代码能力排行：
+
+​![](/2026/llm-stru-8.png)
+
+## 抱抱脸
+
+
+
 ## 参考
 - 魔搭社区\
   https://www.modelscope.cn/
@@ -308,7 +325,10 @@ CyberGym是用于大规模评估模型在Agent中对于真实世界网络安全�
   https://www.cybergym.io/
 - GitHub CyberGym\
   https://github.com/sunblaze-ucb
-
-
-
+- Artificial Analysis\
+  https://artificialanalysis.ai/
+- Arena\
+  https://arena.ai/
+- Arena镜像\
+  https://arena.atease.dev/
 
