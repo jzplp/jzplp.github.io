@@ -280,9 +280,21 @@ Arena是一个大模型排行平台，里面也包含很多榜单，包括对话
 
 ​![](/2026/llm-stru-8.png)
 
-## 抱抱脸
+## 其它站点
+### Hugging Face‌
+Hugging Face‌的中文名叫做抱抱脸，是一个人工智能社区平台。它主要由两部分组成，这两部分的使用者都非常广泛：
 
+* 大模型和数据集的上传/下载/分享平台。目前有超过200万个模型和50万个数据集
+* 以Transformers为主的大模型的开源训练推理工具库，可通过少量代码快速实现功能
 
+Hugging Face‌在国内无法访问，但是有对应的国内镜像站。国内还有一个类似的网站叫做魔搭社区，是阿里创办的大模型平台。
+
+### OpenRouter
+OpenRouter是一个大模型API聚合平台。在不用OpenRouter时，我们使用哪个大模型，就要去对应厂商的网站中充钱，获取一个单独的API地址和key。如果想体验不同的模型，就比较麻烦。OpenRouter和这些大模型厂商都谈好了合作，我们只需要接入OpenRouter的API，在这里面充值一次，就可以一键切换使用不同的模型。OpenRouter
+
+OpenRouter会公布不同模型在平台的调用数据，因为OpenRouter的访问量比较大，因此这个数据经常被作为模型受欢迎程度的比较，例如这是文章撰写时最近一周的模型调用量排名：
+
+​![](/2026/llm-stru-9.png)
 
 ## 参考
 - 魔搭社区\
@@ -329,6 +341,11 @@ Arena是一个大模型排行平台，里面也包含很多榜单，包括对话
   https://artificialanalysis.ai/
 - Arena\
   https://arena.ai/
-- Arena镜像\
+- Arena 中文镜像\
   https://arena.atease.dev/
-
+- Hugging Face\
+  https://huggingface.co/
+- Hugging Face 中文镜像\
+  https://hf-mirror.com/
+- OpenRouter\
+  https://openrouter.ai/
