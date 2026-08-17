@@ -11,6 +11,11 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
+        text: "【AI】大模型的部署和量化",
+        link: "/2026/llm-deploy",
+        tags: ["AI"],
+      },
+      {
         text: "【AI】一文读懂大模型生态：分类/参数/结构/训练/GPU/评测/排行/社区",
         link: "/2026/llm-stru",
         tags: ["AI"],
