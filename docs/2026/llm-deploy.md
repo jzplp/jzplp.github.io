@@ -39,15 +39,44 @@ ollama run qwen3:0.6b
 
 ​![](/2026/llm-deploy-1.png)
 
+### HTTP接口形式
+使用前面的run命令，或者直接使用serve命令，可以开启本地的HTTP服务，通过接口可以调用模型。
+
+```sh
+# 开启本地模型HTTP服务
+ollama serve
+# 测试HTTP服务，发送请求
+Invoke-RestMethod -Uri "http://localhost:11434/api/chat" -Method Post -Body '{"model":"qwen3:0.6b","messages":[{"role":"user","content":"你好"}],"stream":false}' -ContentType "application/json"
+# 输出结果
+  # model                : qwen3:0.6b
+  # created_at           : 2026-08-18T16:30:26.4658699Z
+  # message              : @{role=assistant; content=好的，我理解您的需求。如果您有其他问题或需要帮助，请随时告诉我，我会尽力解答。如果需要帮助，请告诉我您想询问的内容。; thinking=Okay, the user is asking in Chinese, but the original message is in English. ...省略 }
+  # done                 : True
+  # done_reason          : stop
+  # total_duration       : 29896113900
+  # load_duration        : 296963600
+  # prompt_eval_count    : 17
+  # prompt_eval_duration : 37064000
+  # eval_count           : 834
+  # eval_duration        : 29539272000
+```
+
+Ollama默认在11434端口提供服务。通过结果可以看到，模型成功的给通过HTTP接口给出了回复。但/api/chat接口的协议是Ollama自己的，Ollama也有提供其它更通用的协议，例如OpenAI的，这样可以方便接入其它Agent。这里我们尝试将其接入OpenCode，模型API接入配置填写如下：
+
+```sh
+base_url='http://localhost:11434/v1/',
+api_key='ollama'
+model='qwen3:0.6b'
+```
+
+然后就可以在Agent中使用这个模型了。但是由于模型太小，只有0.6B，基本无法理解Agent注入的提示词，因此基本无法完成功能。而且如果本地电脑配置不高（例如没有显卡的Windows电脑），那么回复会非常慢。例如下图左侧是Qwen3:0.6b的回复，右侧是DeepSeek V4 Flash的回复，左侧都直接把工具提示词回答了出来，右侧则准确的完成了任务，列出了项目中的文件。
+
+​![](/2026/llm-deploy-2.png)
+
+## 使用Python运行
+人工智能开发的主要语言是Python，上面Pytorch等丰富的人工智能工具和库，因此如果了解大模型，那么还是要使用Python尝试运行。
 
 
-
-
-### 提供API
-
-使用HTTP接入AGENT部署。（但是模型太小跑不起来）
-
-## 直接用python运行
 
 ## 模型量化和格式
 
@@ -55,9 +84,15 @@ ollama run qwen3:0.6b
 
 
 ## 参考
-- 魔搭社区\
-  https://www.modelscope.cn/、
 - Ollama\
   https://ollama.com/
 - Ollama qwen3:0.6b\
   https://ollama.com/library/qwen3:0.6b
+- Ollama文档 api/chat\
+  https://docs.ollama.com/api/chat
+- Ollama文档 OpenAI compatibility\
+  https://docs.ollama.com/api/openai-compatibility
+- 【AI】一文读懂大模型生态：分类/参数/结构/训练/GPU/评测/排行/社区\
+  https://jzplp.github.io/2026/llm-stru.html
+- 魔搭社区\
+  https://www.modelscope.cn/
