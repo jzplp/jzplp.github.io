@@ -76,6 +76,56 @@ model='qwen3:0.6b'
 ## 使用Python运行
 人工智能开发的主要语言是Python，上面Pytorch等丰富的人工智能工具和库，因此如果了解大模型，那么还是要使用Python尝试运行。
 
+### 下载模型和工具包
+这里我们使用国内的魔搭下载，模型地址：https://www.modelscope.cn/models/Qwen/Qwen3-0.6B 。这里下载的并不是模型经过量化后的版本，而是原始发布的模型本身，可以看到是Safetensors格式的，编码精度为BF16。
+
+```sh
+# 安装魔搭
+pip install modelscope
+# 下载模型到指定目录
+modelscope download --model Qwen/Qwen3-0.6B --local_dir ./Qwen3-0.6B
+```
+
+下载之后在模型中可以看到多个文件，其中model.safetensors表示模型权重文件，所有的参数都在这个文件中。由于是BF16格式，一个参数用两个字节表示，因此文件大小约为1.4GB。模型中还有一些配置文件，词表文件和分词规则等等，这里先不介绍了。
+
+```sh
+# torch为PyTorch，是最流行的深度学习框架库
+pip install torch
+# transformers是Hugging Face的大模型工具库
+pip install transformers
+# transformers的可选依赖，用于自动适配不同硬件
+pip install accelerate 
+```
+
+### 加载模型
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# 模型目录
+MODEL_DIR = "./Qwen3-0.6B"
+
+# 加载分词器
+tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+
+# 加载模型：Auto 根据 config.json 自动识别架构（Qwen3ForCausalLM）
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_DIR,
+    torch_dtype="auto",  # 按模型配置自动选择精度（此处为 bfloat16）
+    device_map="auto",   # 自动分配到可用设备（GPU，无则 CPU）
+)
+
+print(tokenizer)
+print(model)
+```
+
+可以看到，通过简单的两句代码即可加载模型。其中transformers内置了很多开源大模型的适配工具，他会识别模型配置文件，自动选择合适的模型处理方式。输出结果如下：
+
+​![](/2026/llm-deploy-3.png)
+
+其中第一句话为模型加载的进度条，如果电脑性能较差，可能要花费一段时间才能加载完成。Qwen2Tokenizer是加载的分词器，叫做Qwen2是因为Qwen3和2使用了相同的分词方案，中间列出了一些参数和特殊用途的token表。Qwen3ForCausalLM是Qwen3的模型结构，其中输出了词嵌入层，28层解码器等模型的大致结构。Qwen2Tokenizer和Qwen3ForCausalLM都是transformers内置的，通过识别模型配置文件自动应用。
+
+### 多轮对话
 
 
 ## 模型量化和格式
