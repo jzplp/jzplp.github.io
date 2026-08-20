@@ -127,6 +127,121 @@ print(model)
 
 ### 多轮对话
 
+```python
+# 对话历史列表
+messages = []
+
+while True:
+    # 读取用户输入，输入 exit 退出循环
+    user_input = input("\n你：")
+    # 去除字符串首尾空白
+    if user_input.strip() == "exit":
+        break
+
+    # 把用户消息加入历史对话中
+    messages.append({"role": "user", "content": user_input})
+
+    # 将历史对话按 Qwen3 模板转为纯文本
+    # add_generation_prompt 在消息末尾附加模型回复的开始标记
+    text = tokenizer.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True, return_tensors="pt"
+    )
+    # 将文本编码为输入TokenID的列表(PyTorch tensor 格式)
+    model_inputs = tokenizer(text, return_tensors="pt")
+
+    # 其余采样参数取模型默认配置
+    # max_new_tokens=512 最多生成 512 个新 token
+    outputs = model.generate(**model_inputs, max_new_tokens=512)
+
+    # 解码出新增部分（去掉输入部分），跳过特殊 token
+    response = tokenizer.decode(
+        outputs[0][len(model_inputs["input_ids"][0]):], skip_special_tokens=True
+    )
+  
+    # 把模型回复加入历史，用于下一轮对话的上下文
+    messages.append({"role": "assistant", "content": response})
+
+    print("模型：" + response)
+```
+
+读取模型后，使用上面代码可以实现多轮对话，效果如下图：
+
+​![](/2026/llm-deploy-4.png)
+
+下面我们来逐步分析代码。首先是一个无限循环，读取用户输入，如果输入为exit则退出。然后输入被放到messages中，它存放着历史用户输入(role为user)和模型输出(role为assistant)的对话历史。例如当进行第三轮对话时，内容是这样的（太长的部分已省略）：
+
+```json
+[
+  { "role": "user", "content": "你好" },
+  {
+    "role": "assistant",
+    "content": "<think>\n好的，用户发来“你好”，我需要 ...省略\n</think>\n\n你好！有什么可以帮助你的吗？ 😊"
+  },
+  { "role": "user", "content": "你是谁" },
+  {
+    "role": "assistant",
+    "content": "<think>\n好的，用户问“你是谁”，我需要 ...省略\n</think>\n\n我是...省略。有什么可以帮助您的吗？ 😊"
+  },
+  { "role": "user", "content": "天空为什么是蓝色的" }
+]
+```
+
+messages的格式实际也是分词器要求的格式。首先使用分词器将messages套入模型对话模板，处理成纯文本。大模型实现多轮对话时如果需要理解上下文，需要将前面的对话也一并读取，因此这里是所有历史记录。下面是处理之后text的输出：
+
+```sh
+# 一轮对话text值
+<|im_start|>user
+你好<|im_end|>
+<|im_start|>assistant
+# 二轮对话text值
+<|im_start|>user
+你好<|im_end|>
+<|im_start|>assistant
+你好！有什么可以帮助你的吗？😊<|im_end|>
+<|im_start|>user
+你是谁<|im_end|>
+<|im_start|>assistant
+```
+
+注意这里分词器将模型思考内容`<think></think>`省略了。因此思考内容太长且保存意义不大。而且发现我们内容前后有一些特殊符号，这些是模型的对话模板格式，有消息开始/结束标记，角色标记等。不同的模型对话模板是不一致的。然后就是真正的分词，将文本分割为一个一个的token，然后转化为TokenID。输出outputs内容如下：
+
+```json
+{'input_ids': tensor([[151644,872,198, 108386, 151645,198,151644,77091,198]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1]])}
+```
+
+input_ids中是一个PyTorch tensor 格式的TokenID列表，对照模型文件中的词表可以将其转换为前面的文本。之所以是二维结构和有attention_mask，是因为它可以适配批量输入不同对话同时进入模型，这里我们使用不到因此忽略。下一步就是调用模型生成回复了，输入中`**model_inputs`是Python解包，将上述的结构解开后作为函数的入参。输出outputs结果如下：
+
+```json
+tensor([[151644,    872,    198, 108386, 151645,    198, 151644,  77091,    198,
+         151667,    198,  99692,   3837,  20002,  28291,  36407,  99593, 100908,
+         ...省略
+      ]])
+```
+
+可以看到输出也是TokenID列表，而且注意观察，输出中是包含了输入的TokenID列表的。因此下面将tokenID解析为文本前，需要将输出中的输入部分去掉再解析，这里说明一下去掉的过程。
+
+```python
+outputs
+# tensor([[xxx, xxx, ...]]) 输出TokenID二维列表 
+outputs[0]
+# [xxx, xxx, ...] 输出列表的第一行，也是实际有数据的那行
+
+model_inputs
+# {'input_ids': tensor([[xxx, xxx, ...]]) ... } # 输入结构
+model_inputs["input_ids"]
+# tensor([[xxx, xxx, ...]]) 输入TokenID二维列表 
+model_inputs["input_ids"][0]
+# [xxx, xxx, ...] 输入列表的第一行，也是实际有数据的那行
+len(model_inputs["input_ids"][0])
+# 9 输入列表的第一行的长度
+len(model_inputs["input_ids"][0]):
+# 9: Python语法，可以将数组内部分内容截取
+
+outputs[0][len(model_inputs["input_ids"][0]):]
+# 将outputs[0]的第9到最后一个元素截取出来
+```
+
+通过上面的语法，去掉输入部分，只将这次模型输出的TokenID截取出来，然后再给分词器进行解码，同时去掉模板标记的特殊字符，最后生成的response，就是模型输出的文本，也就是我们前面看到的结果了。
 
 ## 模型量化和格式
 
