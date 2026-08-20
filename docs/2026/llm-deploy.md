@@ -193,6 +193,7 @@ messages的格式实际也是分词器要求的格式。首先使用分词器将
 <|im_start|>user
 你好<|im_end|>
 <|im_start|>assistant
+
 # 二轮对话text值
 <|im_start|>user
 你好<|im_end|>
