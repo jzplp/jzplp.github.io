@@ -254,11 +254,14 @@ outputs[0][len(model_inputs["input_ids"][0]):]
 | - | - | - |
 | Safetensors | transformers | 最常用的格式 |
 | GGUF | llama.cpp | Ollama等工具使用 |
-| ONNX | ONNX Runtime | - |
+| ONNX | ONNX Runtime | 跨平台部署使用 |
 | .pt .pth .bin | PyTorch | 训练中使用 |
 | .ckpt .pb | TensorFlow | 训练中使用 |
 
-其中pt和pb都是训练中使用的格式，并不直接作为大模型存储分发的数据格式。Safetensors是存粹的数据格式，即里面放的都是权重数据本身，不包含可执行代码。GGUF里面还包含分词器，对话模板等数据。而ONNX不仅包含权重，还包含了模型结构定义等。 todo
+* pt和pb都是训练中使用的格式，并不直接作为大模型存储分发的数据格式。
+* Safetensors是存粹的数据格式，即里面放的都是权重数据本身，不包含可执行代码。还需要单独的模型配置文件，分词器，对话模板等。
+* GGUF里面还可以包含分词器，对话模板，模型配置文件等数据。
+* ONNX不仅包含权重，还包含了模型结构定义（计算图），但不包含分词器对话模板等。由于包含了模型结构，因此直接使用ONNX运行时即可运行模型。其他的格式都需要框架本身内置模型结构，例如前面的Qwen3ForCausalLM就是transformers中内置的模型结构。
 
 ### 量化
 
