@@ -57,3 +57,6 @@ pnpm deploy:win
 
 ## 自动构建部署
 push到GitHub仓库，GitHub Actions 会自动触发，在GtHub服务器上自动构建并部署。
+
+## 批量图片压缩
+默认在windows电脑进行，对超过200KB的图片进行压缩。具体查看skill。
