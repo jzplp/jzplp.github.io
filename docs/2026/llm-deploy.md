@@ -360,8 +360,68 @@ model.to(torch.float16)
 | torch.float32 | FP32 | 32 | 2.6GB |
 
 ## 量化
+### torchao量化
+在模型加载前和加载后，可以使用torchao，对加载后的模型进行解码，这里以INT8为例试一下。首先是在模型加载前就指定量化精度：
 
-### 量化INT8/INT4
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer, TorchAoConfig
+from torchao.quantization import Int8WeightOnlyConfig, quantize_, PerGroup
+
+# 模型目录
+MODEL_DIR = "./Qwen3-0.6B"
+# 加载分词器
+tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+# 创建量化配置 granularity参数表示128个参数共享一个缩放因子
+quant_config = Int8WeightOnlyConfig(granularity=PerGroup(128))
+# 包装成transformers可识别的格式
+quantization_config = TorchAoConfig(quant_type=quant_config)
+# 加载模型
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_DIR,
+    torch_dtype="auto",
+    device_map="auto",
+    quantization_config=quantization_config, # 指定量化配置
+)
+```
+
+前面介绍过INT8是整数，但使用时要通过共享的缩放因子转成浮点数运算。共享缩放因子的数量必须为模型向量维度可以整除的数字，例如本模型为必须被1024整除。虽然是INT8，但只有线性层，即模型结构中28层的参数被量化，词嵌入是没有被量化的。使用这种方式运行的Qwen3:0.6B，资源管理器内存消耗量为0.9GB。虽然内存小了，但我实测推理速度更慢了，因为运算时多了一个步骤：INT8要先转为FP16再进行计算，我也没有用GPU加速。
+
+使用这种方式量化的模型还可以直接保存成文件，分词器和模型单独保存。保存后会在目录中生成model.safetensors以及其它几个配置文件。我们使用一开始的读取模型代码，切换下目录，即可成功运行模型。
+
+```python
+# 模型保存目录
+SAVE_MODEL_DIR = "./Qwen3-0.6B-int8"
+# 保存量化模型
+model.save_pretrained(SAVE_MODEL_DIR)
+# 保存分词器
+tokenizer.save_pretrained(SAVE_MODEL_DIR)
+```
+
+如果加载模型时没有量化，还可以使用quantize_方法加载后再量化模型，但这种方式量化后的模型无法保存为文件。
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from torchao.quantization import Int8WeightOnlyConfig, quantize_, PerGroup
+import gc
+
+MODEL_DIR = "./Qwen3-0.6B"
+tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_DIR,
+    torch_dtype="auto",
+    device_map="auto",
+)
+# 创建量化配置
+quant_config = Int8WeightOnlyConfig(granularity=PerGroup(128))
+# 量化模型
+quantize_(model, quant_config)
+# 尝试清理内存
+gc.collect()
+```
+
+这种先加载再量化的方式我感觉意义不大，因为模型已经以较大的精度加载进来了，再进行量化既耗时，又多耗费内存。实测量化完之后，可能因为无用数据还没有被完全销毁，内存占用量是2.2GB，等我开始对话后才逐渐降到1GB多，比加载前量化的方式多耗费了很多内存。
+
+由于我这里使用intel的CPU运行，因此仅支持INT8的格式，INT4会报错。使用GPTQ/AWQ等量化方式一般在GPU上进行，CPU效率较低，且一些支持的工具已停止维护了，因此这里不讨论了。
 
 ### 量化GGUF
 
