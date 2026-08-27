@@ -1,10 +1,5 @@
 import { defineConfig } from "vitepress";
 
-const CONFIG = {
-  // 是否展示年度总结
-  showAnnualSummary: true,
-};
-
 // 目录列表
 const sidebarLists = [
   {
@@ -55,10 +50,12 @@ const sidebarLists = [
       {
         text: "【生活】工作、育儿、学习：程序员的时间管理难题",
         link: "/2026/life-study",
+        tags: ["LIFE"],
       },
       {
         text: "【生活】怀孕37周生产：从产房到NICU的闯关实录",
         link: "/2026/new-born",
+        tags: ["LIFE"],
       },
       {
         text: "Polyfill方式解决前端兼容性问题：core-js包结构与各种配置策略",
@@ -111,8 +108,9 @@ const sidebarLists = [
         link: "/2025/css-float",
       },
       {
-        text: "<非技术>从一公里到半程马拉松：我的一年跑步经历",
+        text: "【生活】从一公里到半程马拉松：我的一年跑步经历",
         link: "/2025/run-half-marathon",
+        tags: ["LIFE"],
       },
       {
         text: "谈一谈前端构建工具的本地代理配置(Webpack与Vite)",
@@ -292,25 +290,20 @@ const sidebarLists = [
   },
 ];
 
+// 需要隐藏的tag
+const hiddenTags = process.env.NODE_ENV === 'development' ? [] : ["LIFE", "SUMMARY"];
+
 function handleConfig(list: Array<any>) {
+  let flag = true;
   list.forEach((year) => {
     if (!year?.items.length) return;
-
-    // 转换tags为key-value结构
-    year?.items?.forEach((item) => {
-      if (item?.tags?.length) {
-        const tags = {};
-        item?.tags?.forEach((tag) => {
-          tags[tag] = true;
-        });
-        item.tags = tags;
-      }
-    });
-
-    // 针对配置进行过滤
+    // 针对tag过滤
     year.items = year?.items?.filter((item) => {
-      if (!CONFIG.showAnnualSummary && item?.tags?.SUMMARY) return false;
-      return true;
+      flag = true;
+      item?.tags?.forEach((tag: string) => {
+        if (hiddenTags.includes(tag)) flag = false;
+      });
+      return flag;
     });
   });
   return list;
