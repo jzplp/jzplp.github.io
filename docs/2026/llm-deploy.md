@@ -424,6 +424,21 @@ gc.collect()
 由于我这里使用intel的CPU运行，因此仅支持INT8的格式，INT4会报错。使用GPTQ/AWQ等量化方式一般在GPU上进行，CPU效率较低，且一些支持的工具已停止维护了，因此这里不讨论了。
 
 ### 量化GGUF
+### 格式转换
+与GGUF格式和K-Quant方法绑定的大模型框架叫做llama.cpp，这是一个C++编写的高性能大模型推理框架，前面介绍的Ollama就是基于它开发的。注意一般只用作推理，训练还是使用transformers。他有直接通过命令行终端使用的工具，也适配了各种编程语言使用。
+
+使用前面下载的模型文件，量化为GGUF需要两步，第一是首先将safetensors格式转换为GGUF，第二步才是量化。这里首先描述第一步。格式转换工具在llama.cpp的GitHub上，我们首先需要clone项目，然后安装依赖再执行转换。
+
+```bash
+# clone llama.cpp项目
+git clone https://github.com/ggml-org/llama.cpp
+
+```
+
+
+### 量化
+
+
 
 
 ## 参考
