@@ -1,5 +1,5 @@
 # 【AI】大模型的部署和量化（未完成）
-部署即在本地电脑中下载并运行模型，并使用这个模型进行推理。
+部署即在本地电脑中下载并运行模型，并使用这个模型进行推理。todo
 
 ## Ollama
 Ollama是一个大模型部署工具，用它只需要执行几个命令，就可以在本地电脑下载和部署大模型。官网列出了非常多可以部署的模型，有官方模型，也有用户训练/调整过的模型。
@@ -317,7 +317,7 @@ GGUF格式有一个专用的量化方式，叫做K-Quant方法。它将256个数
 
 还有两种硬件相关的精度格式：MXFP8和MXFP4。MXFP8还是使用FP8作为每个参数存储，同时32个参数为一组，共享一个8位的缩放因子。MXFP4只有4位，1位符号2位指数1位尾数。还由32个元素共享同一个8位的指数。这两个格式可以将一组数据直接提供给支持的硬件计算，因此计算速度更快。
 
-## 内存实验和运行精度
+## 精度转换和torchao量化
 ### mmap
 使用transformers加载的模型，在加载前后可以修改模型精度，我们通过观察电脑对应进程消耗的空间，即可直观感受到模型占用内存的大小。由于我目前的电脑是Windows且无显卡，因此模型是在电脑内存中运行，通过资源管理器直接查看对应Python进程消耗的空间即可，例如下图。
 
@@ -336,22 +336,22 @@ for p in model.parameters():
 
 在加载模型后model后，执行上述代码可以将参数全部放到内存中。对于Qwen3:0.6B默认的BF16格式，此时使用的内存为1.5GB。因为除了模型之外，还有Python本身，模型框架等需要占用内存。
 
-### 切换运行精度
-transformers支持在模型加载前和加载后切换模型精度，示例如下：
+### 转换运行精度
+transformers支持在模型加载前和加载后转换模型精度，示例如下：
 
 ```python
 import torch
-# 模型加载前切换精度
+# 模型加载前转换精度
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_DIR,
     torch_dtype=torch.bfloat16,
     device_map="auto",   # 自动分配到可用设备（GPU，无则 CPU）
 )
-# 模型加载后切换精度
+# 模型加载后转换精度
 model.to(torch.float16)
 ```
 
-这种精度切换不叫作量化，而且也只有几种选项可以选择。如果切换的精度与原精度不一致，那么实际效果也是全部读取一遍参数到内存中，就不需要前面的clone内存了。（实测再clone一遍，内存占用量会更大一点）。不同选项值和对应的资源管理器内存如下（auto等这里省略）。从表格可以看到，内存使用量与存储位数呈现明显的正相关关系。
+这种精度转换不叫作量化，而且也只有几种选项可以选择。如果转换的精度与原精度不一致，那么实际效果也是全部读取一遍参数到内存中，就不需要前面的clone内存了。（实测再clone一遍，内存占用量会更大一点）。不同选项值和对应的资源管理器内存如下（auto等这里省略）。从表格可以看到，内存使用量与存储位数呈现明显的正相关关系。
 
 | 选项值 | 精度格式 | 实际存储位数 | 资源管理器内存使用 |
 | - | - | - | - |
@@ -359,7 +359,6 @@ model.to(torch.float16)
 | torch.float16 | FP16 | 16 | 1.5GB |
 | torch.float32 | FP32 | 32 | 2.6GB |
 
-## 量化
 ### torchao量化
 在模型加载前和加载后，可以使用torchao，对加载后的模型进行解码，这里以INT8为例试一下。首先是在模型加载前就指定量化精度：
 
@@ -423,8 +422,8 @@ gc.collect()
 
 由于我这里使用intel的CPU运行，因此仅支持INT8的格式，INT4会报错。使用GPTQ/AWQ等量化方式一般在GPU上进行，CPU效率较低，且一些支持的工具已停止维护了，因此这里不讨论了。
 
-### 量化GGUF
-### 格式转换
+## GGUF量化
+### 生成GUFF文件
 与GGUF格式和K-Quant方法绑定的大模型框架叫做llama.cpp，这是一个C++编写的高性能大模型推理框架，前面介绍的Ollama就是基于它开发的。注意一般只用作推理，训练还是使用transformers。他有直接通过命令行终端使用的工具，也适配了各种编程语言使用。
 
 使用前面下载的模型文件，量化为GGUF需要两步，第一是首先将safetensors格式转换为GGUF，第二步才是量化。这里首先描述第一步。格式转换工具在llama.cpp的GitHub上，我们首先需要clone项目，然后安装依赖再执行转换。
@@ -432,13 +431,47 @@ gc.collect()
 ```bash
 # clone llama.cpp项目
 git clone https://github.com/ggml-org/llama.cpp
-
+# 创建Python局部虚拟环境到python-llama-venv文件夹，避免安装包污染全局 
+python -m venv python-llama-venv
+# 激活局部虚拟环境
+python-llama-venv\Scripts\activate
+# 安装依赖
+pip install -r requirements\requirements-convert_hf_to_gguf.txt
 ```
 
+下载后需要按照requirements文件需要安装依赖。它的依赖版本条件写的比较严格，如果直接安装会将全局Python安装包给覆盖掉，因此先使用venv创建了一个虚拟环境，这样安装的依赖包只影响局部。虽然版本条件严格，但可能是为了非常多模型的兼容性。我这里实测不完全遵守版本也能成功转换。安装完成后执行llama代码中的python脚本，即可完成转换：
 
-### 量化
+```bash
+# outfile 表示输出文件
+python convert_hf_to_gguf.py E:\llm\Qwen3-0.6B --outfile E:\llm\Qwen3-0.6B-model.gguf
+```
+
+需要在创建的venv虚拟环境中执行。注意这里输出的仅有单个gguf文件，这个文件中包含所有参数，词表，对话模板，配置文件等，一个模型文件即可实现模型的分发。默认输出的精度为BF16，因此模型文件大小为1.5GB。
+
+​![](/2026/llm-deploy-8.png)
+
+如何使用这个模型呢？GUFF格式可以被前面介绍过的Ollama识别，因此这里我们用Ollama尝试部署模型。首先创建一个文件，名称为Modelfile，没有扩展名，内容是GUFF的模型完整路径：
+
+```
+FROM E:\llm\Qwen3-0.6B-model.gguf
+```
+
+然后执行命令行，即可在Ollama部署该模型。注意Ollama会将这个模型复制到它的存储目录，后续就不会使用我们这个路径下的模型文件了。
+
+```bash
+# 导入模型
+ollama create Qwen3-0.6B-GUFF
+# 运行模型
+ollama run Qwen3-0.6B-GUFF
+```
+
+​![](/2026/llm-deploy-9.png)
+
+### llama运行GUFF
 
 
+
+### 各类量化精度
 
 
 ## 参考
