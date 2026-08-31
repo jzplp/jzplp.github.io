@@ -1,5 +1,5 @@
 # 【AI】大模型的部署和量化（未完成）
-部署即在本地电脑中下载并运行模型，并使用这个模型进行推理。todo
+部署即在本地电脑中下载并运行模型，就像使用网络上的大模型API一样，但区别在于模型是运行在本地的，不收费也不会泄露信息。但模型可能很大，本地电脑可能会内存不足，这时候就需要量化来尝试缩小模型存储空间，同时尽量避免模型性能损失。
 
 ## Ollama
 Ollama是一个大模型部署工具，用它只需要执行几个命令，就可以在本地电脑下载和部署大模型。官网列出了非常多可以部署的模型，有官方模型，也有用户训练/调整过的模型。
@@ -244,7 +244,7 @@ outputs[0][len(model_inputs["input_ids"][0]):]
 
 通过上面的语法，去掉输入部分，只将这次模型输出的TokenID截取出来，然后再给分词器进行解码，同时去掉模板标记的特殊字符，最后生成的response，就是模型输出的文本，也就是我们前面看到的结果了。
 
-## 格式和量化
+## 格式和量化简介
 虽然都是同一个大模型Qwen3:0.6B，但前面使用Ollama部署的模型格式和使用transformers加载的模型格式和文件大小是不相同的，这与模型存储格式与量化精度有关。
 
 ### 存储格式
@@ -468,11 +468,105 @@ ollama run Qwen3-0.6B-GUFF
 ​![](/2026/llm-deploy-9.png)
 
 ### llama运行GUFF
+这里我们类似前面的transformers，使用llama.cpp提供的Python工具llama-cpp-python来运行模型。如果使用纯CPU，可以使用这个指令安装：
 
+```bash
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+```
 
+安装之后，执行下面代码，即可运行模型实现多轮对话。代码与transformers的方式类似，但是省略了加载分词器的部分。
 
-### 各类量化精度
+```python
+from llama_cpp import Llama
 
+MODEL_PATH = "./Qwen3-0.6B-model.gguf"  # 模型文件路径
+
+# 加载模型
+llm = Llama(
+    model_path=MODEL_PATH,
+    n_ctx=4096,  # 上下文大小
+    n_threads=8,  # 指定 CPU 线程数
+    verbose=False,  # 不打印详细日志
+)
+
+# 保存对话历史
+messages = []
+
+while True:
+    user_input = input("你: ").strip()
+    if user_input.strip() == "exit":
+        break
+    # 将用户输入加入历史
+    messages.append({"role": "user", "content": user_input})
+    # 调用模型拿到回答
+    outputs = llm.create_chat_completion(
+        messages=messages,
+        max_tokens=512,
+    )
+    response = outputs["choices"][0]["message"]["content"].strip()
+    # 将助手回复加入历史
+    messages.append({"role": "assistant", "content": response})
+    print(f"模型: {response}\n")
+```
+
+虽然同样都是BF16的模型，但使用llama-cpp-python加载模型，实测比transformers快多了。这是因为llama.cpp转为部署模型设计，且针对CPU部署做了优化。而transformers多半用于训练场景。模型返回的output是一个嵌套的字典结构，包含信息如下：
+
+```json
+{
+  id: "chatcmpl-a4f95093-43f1-4033-baef-3ca6081ca213", // 标识符
+  object: "chat.completion", // 对象类型
+  created: 1788191746, // 创建时的时间戳
+  model: "./Qwen3-0.6B-model.gguf", // 使用的模型名称
+  choices: [ // 模型生成的回复列表，一般只有一个
+    {
+      index: 0, // 在列表中的索引
+      message: {
+        role: "assistant", // 角色，模型固定为 "assistant"
+        content: // 回复文本
+          "<think>\n 省略... \n</think>\n\n你好！有什么可以帮助你的吗？需要帮忙吗？",
+      },
+      logprobs: None,
+      finish_reason: "stop", // 生成结束的原因
+    },
+  ],
+  usage: {   // 统计本次请求消耗的 Token 数量
+    prompt_tokens: 9, //  输入（提示词）消耗的 Token 数
+    completion_tokens: 112, // 输出（回复）消耗的 Token 数
+    total_tokens: 121 // 两者总和
+  },
+}
+```
+
+同样的，运行模型也默认开启了mmap，这样内存中是看不出来模型真正的运行占用内存大小的。好在llama-cpp-python可以直接配置关闭mmap。关闭后运行模型，查看内存使用量为1.9GB。
+
+```python
+llm = Llama(
+    model_path=MODEL_PATH,
+    n_ctx=4096,
+    n_threads=8,
+    verbose=False,
+    use_mmap=False # 关闭mmap
+)
+```
+
+### 量化Q8Q4Q2
+使用llama-cpp-python包无法量化模型，这里我们直接下载预编译好的可执行文件来量化，地址在 https://github.com/ggml-org/llama.cpp/releases 。根据我的电脑类型，选择了Windows x64 (CPU)。下载后解压，到目录中执行命令行，然后等待一段时间就输出新的模型文件了。
+
+```bash
+# llama-quantize量化工具 输入模型 输出模型 量化精度
+.\llama-quantize.exe E:\llm\Qwen3-0.6B-model.gguf E:\llm\Qwen3-0.6B-q8-model.gguf Q8_0
+```
+
+这里可以使用GGUF的多种量化类型，我们尝试了多种不同精度的模型，并查看加载后的内存使用量：
+
+| 量化精度 | 位数 | 模型文件大小 | 实际运行内存 |
+| - | - | - | - |
+| BF16(转换后未量化) | 16位 | 1.4GB | 1.9GB |
+| Q8_0 | 8位 | 767MB | 1.29GB |
+| Q4_K_M | 4位为主 | 461MB | 980MB |
+| Q2_K | 2位 | 331MB | 850MB |
+
+我提问了几个简单问题，实测Q4_K_M还是可以正常输出的，但Q2_K的输出就只剩乱码，根本不可用了。
 
 ## 参考
 - Ollama\
@@ -487,3 +581,7 @@ ollama run Qwen3-0.6B-GUFF
   https://jzplp.github.io/2026/llm-stru.html
 - 魔搭社区\
   https://www.modelscope.cn/
+- GitHub llama.cpp\
+  https://github.com/ggml-org/llama.cpp
+- GitHub llama.cpp releases\
+  https://github.com/ggml-org/llama.cpp/releases
