@@ -6,6 +6,11 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
+        text: "【AI】大模型LoRA微调（未完成）",
+        link: "/2026/llm-lora",
+        tags: ["AI"],
+      },
+      {
         text: "【AI】大模型本地部署与量化：Ollama、transformers、llama.cpp实践",
         link: "/2026/llm-deploy",
         tags: ["AI"],
@@ -291,7 +296,8 @@ const sidebarLists = [
 ];
 
 // 需要隐藏的tag
-const hiddenTags = process.env.NODE_ENV === 'development' ? [] : ["LIFE", "SUMMARY"];
+const hiddenTags =
+  process.env.NODE_ENV === "development" ? [] : ["LIFE", "SUMMARY"];
 
 function handleConfig(list: Array<any>) {
   let flag = true;
