@@ -6,7 +6,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "【AI】大模型的部署和量化",
+        text: "【AI】大模型本地部署与量化：Ollama、transformers、llama.cpp实践",
         link: "/2026/llm-deploy",
         tags: ["AI"],
       },
