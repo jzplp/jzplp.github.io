@@ -328,4 +328,7 @@ export default defineConfig({
       level: "deep",
     },
   },
+  markdown: {
+    math: true,
+  },
 });

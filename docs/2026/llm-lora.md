@@ -5,6 +5,7 @@
 
 ### 自然对数In(x)
 
+$$ x = {-b \pm \sqrt{b^2-4ac} \over 2a} $$
 
 ## LoRA方法原理
 

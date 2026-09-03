@@ -125,7 +125,7 @@ VitePress在Markdown功能的基础上也进行了很多扩展，可以参考[Vi
 
 同时也支持在MarkDown中使用`<script>`和`<style>`等单文件组件的写法，也支持引入Components等。
 
-例如在我的博客中，使用Component来渲染Latex公式。文件位置：`components/latexDisplay.vue`
+例如之前在我的博客中，使用Component来渲染Latex公式。文件位置：`components/latexDisplay.vue`
 ```vue
 <template>
   <span ref="latex" class="katex" v-html="rawHTML"></span>
@@ -154,8 +154,8 @@ const rawHTML: string = katex.renderToString((slots.default || anyFun)()[0].chil
 import latexDisplay from '../../components/latexDisplay.vue'
 </script>
 ```
-效果：
-<latexDisplay> c = \pm\sqrt{a^2 + b^2} </latexDisplay>
+
+不过现在VitePress本身已经支持公式展示了，无需自己创建组件。
 
 ## 构建和发布博客网站
 当构建好博客之后，我们现在本地进行构建和预览。命令在上面的[安装过程](#安装过程)一节中有描述。
@@ -299,8 +299,3 @@ GitHub Actions的环境中提供了很多预置的配置和工具，例如Node.j
   https://docs.github.com/zh/actions
 - 漂流瓶jz的个人博客  
   https://jzplp.github.io/
-
-
-<script setup>
-import latexDisplay from '../../components/latexDisplay.vue'
-</script>

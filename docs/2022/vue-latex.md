@@ -46,7 +46,6 @@ export default {
 
 <style>
 </style>
-
 ```
 
 根据katex官方文档，有两种生成方式可以使用：
@@ -59,9 +58,6 @@ export default {
 ```html
 <common-latexDisplay> c = \\pm\\sqrt{a^2 + b^2} </common-latexDisplay> 
 ```
-渲染后：
-
-<latexDisplay> c = \pm\sqrt{a^2 + b^2} </latexDisplay>
 
 ## 说明 
 * 我把显示公式的component设置为了行内标签span，这样文字可以和标签可以在文字在同一行显示公式。如果需要单独一行显示公式，可以用Markdown的换行方法。
@@ -77,18 +73,10 @@ import "katex/dist/katex.css";
 * 文中方式虽然简单，但不能实现markdown中自动识别公式并渲染。网上有相关方法可以参考：[基于vue渲染Latex数学公式（simplemde-editor)](https://juejin.cn/post/6844904097242415112)，有兴趣可以研究一下。
 
 ## VitePress和Vue3
-使用VitePress和Vue3，只需要对上面的代码做一些小改动即可实现显示Latex公式。
-
-可以参考这个博客的github相关文件：
-* https://github.com/jzplp/jzplp.github.io/blob/master/components/latexDisplay.vue
-* https://github.com/jzplp/jzplp.github.io/blob/master/docs/2022/vue-latex.md
+使用VitePress和Vue3，只需要对上面的代码做一些小改动即可实现显示Latex公式。但现在VitePress已经支持公式，因此无需采用这种方式了。
 
 ## 参考
-- katex官方文档  
+- katex官方文档\
   https://katex.org/docs/api.html
-- 基于vue渲染Latex数学公式（simplemde-editor)  
+- 基于vue渲染Latex数学公式(simplemde-editor)\
   https://juejin.cn/post/6844904097242415112
-
-<script setup>
-import latexDisplay from '../../components/latexDisplay.vue'
-</script>

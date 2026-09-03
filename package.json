@@ -7,12 +7,12 @@
     "deploy:win": "powershell bin/autoDeploy.bat"
   },
   "devDependencies": {
+    "@types/node": "^26.4.0",
     "jsmind": "^0.8.5",
-    "katex": "^0.16.7",
     "leaflet": "^1.9.4",
+    "markdown-it-mathjax3": "^4.3.2",
     "vitepress": "^1.3.0",
-    "vue": "^3.3.2",
-    "@types/node": "^26.4.0"
+    "vue": "^3.3.2"
   },
   "pnpm": {
     "peerDependencyRules": {

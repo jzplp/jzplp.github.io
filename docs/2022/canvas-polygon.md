@@ -295,9 +295,9 @@ checkPointClose(point, pointList) {
 ### 小学数学做法
 小学数学课的时候，我们都学过如何求两个直线的交点。
 
-<latexDisplay>
+$$
 \begin{matrix} (x1,y1)&(x2,y2)\quad\overrightarrow{\scriptsize 构造直线方程}\quad y=ax+b\\(x3,y3)&(x4,y4)\quad\overrightarrow{\scriptsize 构造直线方程}\quad y=cx+d\end{matrix}\quad \overrightarrow{\scriptsize 联立求解}\quad(x,y)
-</latexDisplay>
+$$
 
 最后判断交点（x,y）是否属于两个顶点构成的线段内。  
 其中，如果a等于c，表示两个直线斜率一致，两个直线平行，无交点。如果同时b等于d，代表两个为同一条直线。最后判断交点是否在线段内非常简单，只需要判断交点的坐标是否在线段两个端点之间即可。  
@@ -308,7 +308,9 @@ checkPointClose(point, pointList) {
 ![图片](/2022/canvas-polygon-3.png)
 两个向量的叉乘定义为：
 
-<latexDisplay> \begin{vmatrix}x1&x2\\y1&y2\end{vmatrix}=x1*y2-x2*y1 </latexDisplay>
+$$
+\begin{vmatrix}x1&x2\\y1&y2\end{vmatrix}=x1*y2-x2*y1
+$$
 
 如果叉乘结果为正，则说明向量b在向量a的逆时针方向。如果为正则是顺时针方向。如果为0代表a和b共线。
 
@@ -469,7 +471,3 @@ checkPointConcave(point, pointList, isEnd) {
   https://blog.csdn.net/m0_50089378/article/details/122288557
 - 凸多边形判断 LeetCode 469. 凸多边形  
   https://blog.csdn.net/weixin_39913117/article/details/111372353
-
-<script setup>
-import latexDisplay from '../../components/latexDisplay.vue'
-</script>
