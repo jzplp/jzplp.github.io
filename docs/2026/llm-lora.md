@@ -169,6 +169,39 @@ $$
 
 ​![](/2026/llm-lora-3.png)
 
+### 偏导数
+首先来复习一下导数的概念。函数的导数也是一个函数，指的是函数在某一点的变化率，也可以被称作斜率。用极限公式表示如下：
+
+$$
+\begin{align*}
+&设\bigtriangleup x 为变量x在某一点的变化 \\
+&y = f(x)的导数函数为： \\
+&\frac{\mathrm{d} y}{\mathrm{d} x} = {f}'(x) = \lim_{\bigtriangleup x \to 0} \frac{f(x+\bigtriangleup x) - f(x)}{\bigtriangleup x} 
+\end{align*}
+$$
+
+当一个函数的变量有多个时，如果想求这个函数对其中一个变量的导数，那这就是偏导数。
+
+$$
+\begin{align*}
+&设函数 z = f(x, y)\\
+&函数对于x的偏导数表示为：\frac{\partial z}{\partial x} = \frac{\partial (f(x, y))}{\partial x} \\
+&函数对于y的偏导数表示为：\frac{\partial z}{\partial y} = \frac{\partial (f(x, y))}{\partial y} \\ 
+\end{align*}
+$$
+
+如何求偏导数的值呢？实际上和普通的求导方式一致，即把当前求导的变量看做变量，而把其它变量看作常数即可。这里举个简单的例子：
+
+$$
+\begin{align*}
+&设函数 z = x^2 + y^2 + xy\\
+&\frac{\partial z}{\partial x} = 2x + y \quad (相当于 \frac{\mathrm{d} z}{\mathrm{d} x}) \\
+&\frac{\partial z}{\partial y} = 2y + x \quad (相当于 \frac{\mathrm{d} z}{\mathrm{d} y}) \\
+\end{align*}
+$$
+
+从几何意义上来说，假设z=f(x,y)是一个三位曲面，则对x求偏导相当于曲面沿x轴方向的变化率，对y求偏导相当于曲面沿y轴方向的变化率。
+
 ## LoRA方法原理
 
 ### LoRA简介
