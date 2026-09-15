@@ -672,10 +672,10 @@ e^{a_i} \cdot \sum_{j=1}^{n}e^{a_j}
 = \frac{
 e^{a_i} ( \sum_{j=1}^{n}e^{a_j} - e^{a_i})
 }{ (\sum_{j=1}^{n}e^{a_j})^2 } \\
-&按照Softmax函数公式 p_i = softmax(a_i) = \frac{e^{a_i}}{\sum_{j=1}^{n}e^{a_j}} \\
-&且p_1 + ... + p_n = 1\\
-&原式 = p_i\frac{\sum_{j=1}^{n}e^{a_j} - e^{a_i}}{\sum_{j=1}^{n}e^{a_j}} \\
-&= p_i(1 - p_i)
+&按照Softmax函数公式 q_i = softmax(a_i) = \frac{e^{a_i}}{\sum_{j=1}^{n}e^{a_j}} \\
+&且q_1 + ... + q_n = 1\\
+&原式 = q_i\frac{\sum_{j=1}^{n}e^{a_j} - e^{a_i}}{\sum_{j=1}^{n}e^{a_j}} \\
+&= q_i(1 - q_i)
 \end{align*}
 $$
 
@@ -683,6 +683,7 @@ $$
 
 $$
 \begin{align*}
+\\
 &错误 \quad \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial q_i} \cdot  \frac{\partial q_i}{\partial a_i}\\
 &正确 \quad \frac{\partial L}{\partial a_i} = \sum_{k=1}^{n} \frac{\partial L}{\partial q_k} \cdot  \frac{\partial q_k}{\partial a_i}\\
 \end{align*}
