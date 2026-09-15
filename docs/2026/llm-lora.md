@@ -200,7 +200,41 @@ $$
 \end{align*}
 $$
 
-从几何意义上来说，假设z=f(x,y)是一个三位曲面，则对x求偏导相当于曲面沿x轴方向的变化率，对y求偏导相当于曲面沿y轴方向的变化率。
+从几何意义上来说，假设z=f(x,y)是一个三位曲面，则对x求偏导相当于曲面沿x轴方向的变化率，对y求偏导相当于曲面沿y轴方向的变化率。然后再说一下求导的链式法则，即复合函数的导数等于内层函数导数乘外层函数导数。这个法则对于导数和偏导数都适用：
+
+$$
+\begin{align*}
+& 设z = g(y) \quad y = f(x)  \quad 则 z = g(f(x)) \\ 
+& 链式法则：\frac{\mathrm{d} z}{\mathrm{d} x} = \frac{\mathrm{d} z}{\mathrm{d} y} \cdot \frac{\mathrm{d} y}{\mathrm{d} x} \\
+& 设z = g(x, y) \quad y = f(a)  \quad 则 z = g(x, f(a)) \\
+& 链式法则：\frac{\partial z}{\partial a} = \frac{\partial z}{\partial y} \cdot \frac{\partial y}{\partial a}
+\end{align*}
+$$
+
+这个法则在平时计算导数时也是经常使用的，我们看个求导的简单例子：
+
+$$
+\begin{align*}
+设：& z = ln(x^2)，求\frac{\mathrm{d} z}{\mathrm{d} x} \\
+解：& \\
+& 令y = x^2 \quad 则 z = ln(x^2) \Rightarrow \begin{cases}
+z = g(y) = \ln(y) \\
+y = f(x) = x^2
+\end{cases} \\
+& \frac{\mathrm{d} z}{\mathrm{d} x} = \frac{\mathrm{d} z}{\mathrm{d} y} \cdot \frac{\mathrm{d} y}{\mathrm{d} x}
+= \frac{1}{y}\cdot 2x = \frac{2x}{x^2}  = \frac{2}{x} 
+\end{align*}
+$$
+
+还有一些其它下面可能涉及到的求导公式：
+
+$$
+\begin{align*}
+(uv)' = u'v + uv' \\
+(\frac{u}{v})' = \frac{u'v - uv'}{v^2} \\
+\end{align*}
+$$
+
 
 ## LoRA方法原理
 
@@ -416,7 +450,7 @@ $$
 &设 A = [a_1, a_2, ..., a_n]为模型输出向量; \\
 &n为向量长度，p_i为第i个token的概率值 \\
 \\
-&p_i = softmax(a_i) = \frac{e^{a_i}}{\sum_{j=1}^{n}e^{a_i}}  \\
+&p_i = softmax(a_i) = \frac{e^{a_i}}{\sum_{j=1}^{n}e^{a_j}}  \\
 \end{align*}
 $$
 
@@ -588,13 +622,82 @@ $$
 $$
 \begin{align*}
 &设x为正确分布中发生的事件 \\ 
-&H(p,q) = -\sum_{i=0}^{n} P(i)log(Q(i)) \\
-&= -0\cdot log(Q(1)) -0\cdot log(Q(2)) ... -1\cdot log(Q(x)) ... -0\cdot log(Q(n)) \\
-&= -log(Q(x))
+&H(p,q) = -\sum_{i=0}^{n} P(i)ln(Q(i)) \\
+&= -0\cdot ln(Q(1)) -0\cdot ln(Q(2)) ... -1\cdot ln(Q(x)) ... -0\cdot ln(Q(n)) \\
+&= -ln(Q(x))
 \end{align*}
 $$
 
 ## 反向传播和梯度
+### 概念说明
+大模型接收token列表，通过多层深度神经网络处理，最后输出一个词表长度的向量，这个向量的名字叫做logits。然后再使用前面介绍的Softmax归一化为概率向量，再通过交叉熵损失函数最后求得loss值。这个完整的过程叫做前向传播，除了计算loss之外，和推理过程是基本一致的。loss值可以评价模型离“正确输出”有多远，使用loss值作为基础，从后到前反向通过每一层神经网络，指导每个参数应该如何更新，即修改参数值。这就是反向传播的过程。
+
+要知道大模型参数值非常巨大，如何根据loss值计算出每个参数应该更新多少呢？这就要通过梯度的方式。梯度实际上是每个参数对于loss的偏导数，即每个参数对于loss值的变化率。
+
+试想我们计算loss的目的是通过loss来修改参数值，最终使得loss值变小。训练时需要经过大量数据，每个数据都会产生一个loss值，都会去更新每个参数值；那么每个数据对于参数值的影响，即每次修改的参数值范围是很小的。这里就和偏导数的直观含义类似：即参数有一个微小变化时，会对loss值产生一个微小的影响，这个微小影响就是参数在这个值的变化率，即偏导数。
+
+因此，梯度就是偏导数。反向传播的概念就是通过loss值，一步一步从后向前计算出每个参数的偏导数。最后再将梯度输入优化器，通过优化器给参数一个微小改动，从而使得模型拥有学习和调整能力。注意优化器和修改参数值本身并不属于反向传播的过程。
+
+我们可以把神经网络看作是一个超大的函数。前向传播时，函数的变量是token向量，网络中的参数值是常量。但反向传播时，我们把神经网络入参看作是不变的常量，将网络中的参数值看作是变量，通过这种方式来求偏导数。
+
+### logits梯度
+前面介绍过，神经网络的输出在经过Softmax归一化之前的向量，叫做logits。梯度的计算的起点就是logits，这里首先要计算logits中的每一个值对于的loss的偏导数。如何计算呢？首先求归一化后的向量对于loss的偏导数是非常简单的，因为交叉熵的在大模型中的公式非常简化了：
+
+$$
+\begin{align*}
+\\
+&设Q=[q_1, ...q_n]为归一化后的输出向量\\
+&L为loss值；x为正确token。\\
+&\frac{\partial L}{\partial q_i} = \frac{\partial (-ln(q_x))}{\partial q_i}\\
+&= \begin{cases} -\frac{1}{q_x}  &当i=x \\ 0 &当i\ne x \end{cases} \\
+\\
+\end{align*}
+$$
+
+根据链式求导法则，如果想算loss对于logits的偏导数，可以分别求loss对于归一化向量的偏导数，乘以归一化向量对于logits的偏导数。第一个我们前面已经算出来了，第二个就是Softmax函数。
+
+$$
+\begin{align*}
+&设：Q=[q_1, ...q_n]为归一化后的输出向量\\
+&A=[a_1, ...a_n]为logits向量\\
+&\frac{\partial q_i}{\partial a_i} = \frac{\partial (\frac{e^{a_i}}{\sum_{j=1}^{n}e^{a_j}})}{\partial a_i}\\
+&=\frac{
+\frac{\partial (e^{a_i})}{\partial a_i} \cdot \sum_{j=1}^{n}e^{a_j}
+- e^{a_i} \cdot \frac{\partial (\sum_{j=1}^{n}e^{a_j})}{\partial a_i}
+}{ (\sum_{j=1}^{n}e^{a_j})^2 } \\
+&= \frac{
+e^{a_i} \cdot \sum_{j=1}^{n}e^{a_j}
+- e^{a_i} \cdot ^{a_i}
+}{ (\sum_{j=1}^{n}e^{a_j})^2 } 
+= \frac{
+e^{a_i} ( \sum_{j=1}^{n}e^{a_j} - e^{a_i})
+}{ (\sum_{j=1}^{n}e^{a_j})^2 } \\
+&按照Softmax函数公式 p_i = softmax(a_i) = \frac{e^{a_i}}{\sum_{j=1}^{n}e^{a_j}} \\
+&且p_1 + ... + p_n = 1\\
+&原式 = p_i\frac{\sum_{j=1}^{n}e^{a_j} - e^{a_i}}{\sum_{j=1}^{n}e^{a_j}} \\
+&= p_i(1 - p_i)
+\end{align*}
+$$
+
+再根据链式法则合起来计算Loss对于logits的偏导数。注意首先纠正一个错误的求法：
+
+$$
+\begin{align*}
+&错误 \quad \frac{\partial L}{\partial a_i} = \frac{\partial L}{\partial q_i} \cdot  \frac{\partial q_i}{\partial a_i}\\
+&正确 \quad \frac{\partial L}{\partial a_i} = \sum_{k=1}^{n} \frac{\partial L}{\partial q_k} \cdot  \frac{\partial q_k}{\partial a_i}\\
+\end{align*}
+$$
+
+
+
+
+### 梯度计算
+
+雅可比矩阵
+
+## 优化器
+SGD
+AdamW
 
 ## 参数训练流程
 
