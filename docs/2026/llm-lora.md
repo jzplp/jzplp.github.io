@@ -205,6 +205,7 @@ $$
 $$
 \begin{align*}
 \\
+(\frac{1}{u})' = -\frac{1}{u^2} \\
 (uv)' = u'v + uv' \\
 (\frac{u}{v})' = \frac{u'v - uv'}{v^2} \\
 \end{align*}
@@ -731,12 +732,68 @@ $$
 \end{align*}
 $$
 
+L即loss时一个数字，但是Q即概率是一个向量，这个向量里面的每个值都是一个关于A向量中所有值的函数，因此L对ai中实际上包含了Q的所有参数。因此需要这样计算：
+
+$$
+\begin{align*}
+&L = f_Q([q_1,...,q_n]); \quad q_i = f_A([a_1,...,q_n]); \\
+&因此按照偏导数的链式法则，应该这样计算：\\
+&\frac{\partial L}{\partial a_i} = 
+\frac{\partial L}{\partial q_1} \frac{\partial q_1}{\partial a_i} + 
+\frac{\partial L}{\partial q_2} \frac{\partial q_2}{\partial a_i} ... +
+\frac{\partial L}{\partial q_n} \frac{\partial q_n}{\partial a_i} \\
+&= \sum_{k=1}^{n} \frac{\partial L}{\partial q_k}\frac{\partial q_k}{\partial a_i}
+\end{align*}
+$$
+
+由于我们前面只求了Q和A中下标相等的场景，这里再求一下不相等时候的偏导数。
+
+$$
+\begin{align*}
+\frac{\partial q_x}{\partial a_y} &= \frac{\partial (\frac{e^{a_x}}{\sum_{j=1}^{n}e^{a_j}})}{\partial a_y}
+\quad 当x \ne y时 \\
+&= -\frac{e^{a_x}e^{a_y}}{(\sum_{j=1}^{n}e^{a_j})^2} \\
+&= -(\frac{e^{a_x}}{\sum_{j=1}^{n}e^{a_j}} \frac{e^{a_y}}{\sum_{j=1}^{n}e^{a_j}}) \\
+&= -q_xq_y
+\end{align*}
+$$
+
+那么现在分开的偏导数已经全部求出来了，现在将他们拼合起来，求L对于A的偏导数：
+
+$$
+\begin{align*}
+\\ \\
+\frac{\partial L}{\partial a_i} &= \sum_{k=1}^{n} \frac{\partial L}{\partial q_k}\frac{\partial q_k}{\partial a_i} \\
+&= 0\frac{\partial q_1}{\partial a_i} + ... + 0\frac{\partial q_n}{\partial a_i} +
+\frac{\partial L}{\partial q_x}\frac{\partial q_x}{\partial a_i} \\
+&= -\frac{1}{q_x}\frac{\partial q_x}{\partial a_i} = 
+\begin{cases} -\frac{1}{q_i}(q_i(1 - q_i)) & 当i=x\\ -\frac{1}{q_x}(-q_xq_i) &当i\ne x \end{cases} \\
+&= \begin{cases} q_i-1 & 当i=x\\ q_i &当i\ne x \end{cases} \\
+&= q_i-y_i \quad (当i = x时，y_i = 1；否则y_i = 0) \\
+\\
+\end{align*}
+$$
+
+废了一番功夫，这样我们就得到了和前面合并计算一样的梯度计算结果。虽然计算过程并不难，但确实比合并计算要麻烦，在模型实际运算中，因为合并计算公式简洁简单，因此都不选择分开计算。
+
+### 梯度传播
+我们求得logits向量的梯度，实际上只是反向传播的第一步。logits是大模型的“中间结果”，并不是我们直接要调整的参数，因此我们还要继续从后向前传播，算出前面每个参数的梯度值。这里我们以一个线性层来举例梯度在神经网络中是如何计算的。对于非线性层，也是类似的计算方式。
+
+设词表长度为m；大模型向量维度为n，则一个线性层的矩阵计算公式可以这样举例。其中Y是输出向量，X是输入向量，A和B分别是模型中的参数。
+
+$$
+Y_{m\times 1} = A_{m\times n}X_{n\times 1} + B_{m\times 1}
+$$
+
+在前向传播中，我们以X作为自变量计算结果。但是在反向传播计算梯度时，计算哪个参数的梯度，哪个参数就要作为自变量，其余的参数则作为常量。为了方便理解，这里我们可以假设Y就是logits向量。假设要求loss对AB等参数的梯度，按照链式求导法则，我们已经求得了L对Y的偏导数，因此只需要求Y对A和B的偏导数即可。
+
+在实际模型计算时，并不需要得到loss对AB等参数的真正梯度公式，只需要计算出值来就好了。因此在上一步logits向量的梯度计算后，我们拿到的是logits向量的梯度实际值，不需要再合并公式了。且模型层数越长，这个公式恐怕非常难表示。
 
 
-
-### 梯度计算
 
 雅可比矩阵
+对ABX分别求梯度。
+然后再向前。
 
 ## 优化器
 SGD
