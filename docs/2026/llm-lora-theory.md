@@ -777,7 +777,6 @@ $$
 
 废了一番功夫，这样我们就得到了和前面合并计算一样的梯度计算结果。虽然计算过程并不难，但确实比合并计算要麻烦，在模型实际运算中，因为合并计算公式简洁简单，因此都不选择分开计算。
 
-
 ### 雅可比矩阵
 向量如何对向量或者矩阵求梯度呢？这就需要介绍雅可比矩阵，它对于梯度的理解有重要的作用。我们先抛开大模型，重新假设X向量对Y向量求偏导数的场景。
 $$
@@ -805,23 +804,128 @@ $$
 
 这个矩阵就叫做雅可比矩阵。对应的我们前面计算过：单个数字对于向量求偏导，偏导数是向量；向量对于矩阵求偏导，结果是三维的雅可比张量；矩阵对矩阵求偏导，结果是四维雅可比张量。什么是张量？三维及以上维度的矩阵，就叫做张量。这也是深度学习相关工具（PyTorch，TensorFlow）中的数据表示形式。
 
-### 梯度传播
-我们求得logits向量的梯度，实际上只是反向传播的第一步。logits是大模型的“中间结果”，并不是我们直接要调整的参数，因此我们还要继续从后向前传播，算出前面每个参数的梯度值。这里我们以一个线性层来举例梯度在神经网络中是如何计算的。对于非线性层，也是类似的计算方式。
+### 线性层梯度计算和传播
+我们求得logits向量的梯度，实际上只是反向传播的第一步。logits是大模型的“中间结果”，并不是我们直接要调整的参数，因此我们还要继续从后向前传播，算出前面每个参数的梯度值。这里我们以一个线性层来举例梯度在神经网络中是如何计算的。对于非线性层，也是类似的计算和传播方式。
 
-设词表长度为m；大模型向量维度为n，则一个线性层的矩阵计算公式可以这样举例。其中Y是输出向量，X是输入向量，A和B分别是模型中的参数。
+设向量维度为m，则一个线性层的矩阵计算公式可以这样举例。其中Y是输出向量，X是输入向量，A和B分别是模型中的参数。（为了公式简单一点，这里统一维度为相同数字，实际大模型中经常是不同的，但计算方式一样，只不过公式写起来没这么好看）
 
 $$
-Y_{m\times 1} = A_{m\times n}X_{n\times 1} + B_{m\times 1}
+Y_{m\times 1} = A_{m\times m}X_{m\times 1} + B_{m\times 1}
 $$
 
 在前向传播中，我们以X作为自变量计算结果。但是在反向传播计算梯度时，计算哪个参数的梯度，哪个参数就要作为自变量，其余的参数则作为常量。为了方便理解，这里我们可以假设Y就是logits向量。假设要求loss对AB等参数的梯度，按照链式求导法则，我们已经求得了L对Y的偏导数，因此只需要求Y对A和B的偏导数即可。
 
-在实际模型计算时，并不需要得到loss对AB等参数的真正梯度公式，只需要计算Y对于参数的梯度公式来就好了。因此在上一步logits向量的梯度计算后，我们拿到的是logits向量的梯度实际值，不需要再合并公式了。且模型层数越长，这个公式恐怕非常难表示。
+在实际模型计算时，并不需要得到loss对AB等参数的真正梯度公式，只需要计算Y对于参数的梯度公式来就好了。因此在上一步logits向量的梯度计算后，我们拿到的是logits向量的梯度实际值，不需要再合并公式了。且模型层数越长，这个公式恐怕非常难表示。我们从简单的开始，首先对B求梯度。
 
-我们注意到，Y是一个向量，B是一个向量，A则是一个矩阵。
+$$
+\begin{align*}
+\frac{\partial Y}{\partial B} &= 
+\begin{bmatrix}  
+\frac{\partial y_1}{\partial b_1}& \frac{\partial y_1}{\partial b_2}& \cdots & \frac{\partial y_1}{\partial b_m} \\  
+\frac{\partial y_2}{\partial b_1}& \frac{\partial y_2}{\partial b_2}& \cdots & \frac{\partial y_2}{\partial b_m} \\  
+  \vdots & \vdots & \ddots & \vdots \\  
+\frac{\partial y_m}{\partial b_1}& \frac{\partial y_m}{\partial b_2}& \cdots & \frac{\partial y_m}{\partial b_m} 
+\end{bmatrix} \\
+\because & y_j = AX + b \quad 当i\ne j时，b = 0 \\
+&求偏导数时，AX为常数。因此i\ne j时，偏导数为0 \\
+原式 &= \begin{bmatrix}  
+1& 0& \cdots & 0 \\  
+0& 1& \cdots & 0 \\  
+  \vdots & \vdots & \ddots & \vdots \\  
+0& 0& \cdots & 1
+\end{bmatrix}
+\end{align*}
+$$
 
-对ABX分别求梯度。
-然后再向前。
+然后求Loss对于B的梯度。注意这里loss对Y的梯度是之前已经计算出的，这里直接套上实际的值来计算即可，没必要再合并公式了。且模型参数多层数长，这个公式恐怕非常难表示。
+
+$$
+\begin{align*}
+\\
+&\frac{\partial L}{\partial B} = \frac{\partial L}{\partial Y}\frac{\partial Y}{\partial B} \\
+&= \begin{bmatrix}
+\frac{\partial L}{\partial y_1} & \frac{\partial L}{\partial y_2} & ... & \frac{\partial L}{\partial y_m}
+\end{bmatrix}
+\begin{bmatrix} 1& 0& \cdots & 0 \\ 0& 1& \cdots & 0 \\  
+\vdots & \vdots & \ddots & \vdots \\ 0& 0& \cdots & 1 \end{bmatrix}
+=\begin{bmatrix}
+\frac{\partial L}{\partial y_1} \\ \frac{\partial L}{\partial y_2} \\
+... \\ \frac{\partial L}{\partial y_m}
+\end{bmatrix}
+\end{align*}
+$$
+
+然后再对A求梯度。因为A本身就是一个二维矩阵，因此雅可比张量是三维，这里就不列出张量了，我们直接写出矩阵中每个元素的偏导计算公式。（求对A偏导数时B直接变为0，因此这里就不列出了）
+
+$$
+\begin{align*}
+\\
+\frac{\partial y_k}{\partial a_{ij}} &= \frac{\partial (
+\begin{bmatrix} a_{k1} & ... & a_{km} \end{bmatrix}
+\begin{bmatrix} x_1 \\ ... \\ x_m \end{bmatrix}
+)}{\partial a_{ij}} \\
+&= \frac{\partial (a_{k1}x_1 + ... + a_{km}x_m)}{\partial a_{ij}} \\
+&=\begin{cases} \frac{\partial (a_{i1}x_1 + ... + a_{im}x_m)}{\partial a_{ij}} & 当k=i
+\\ \frac{\partial (a_{k1}x_1 + ... + a_{km}x_m)}{\partial a_{ij}} & 当k\ne i \end{cases} \\
+&=\begin{cases} \frac{\partial (a_{ij}x_j)}{\partial a_{ij}} & 当k=i
+\\ 0 & 当k\ne i \end{cases} \\
+&= \begin{cases} x_j & 当k=i \\ 0 & 当k\ne i \end{cases}
+\end{align*}
+$$
+
+然后我们再将L对Y的偏导数相乘，注意链式法则对于中间变量的连加。
+
+$$
+\begin{align*}
+\frac{\partial L}{\partial a_{ij}} &= 
+\sum_{k=1}^{m} \frac{\partial L}{\partial y_k}\frac{\partial y_k}{\partial a_{ij}} \\
+&注意k从1到m遍历，必然遇到一次k = i \\
+&= \frac{\partial L}{\partial y_i} \frac{\partial y_i}{\partial a_{ij}} = x_j\frac{\partial L}{\partial y_i}
+\end{align*}
+$$
+
+可以看到对A和B求的梯度都是非常简洁的。然后我们还需要对X求梯度。为什么？X并不是参数，我们不会根据梯度调整它的值，为什么要计算呢？这是因为在大模型中不止一层网络，一个公式，它是由好多线性或者非线性的公式一层一层向下计算的，上一个公式的输出Y，也就是下一个公式的输入X。因此我们计算了本公式X的梯度之后，这个梯度就是上一个公式中Y的梯度。然后再根据相同的计算方式向上继续求梯度即可，这对于线性层和非线性层都适用。因此，中间结果即使不用来调整参数，梯度还是照样计算的。
+
+$$
+\begin{align*}
+&设第一个函数的输出实际上就是第二个函数的输入，即Y_1=X_2\\
+&Y_1 = A_1X_1 + B_1 \\
+&Y_2 = A_2X_2 + B_2 \\
+&则首先计算出
+\frac{\partial L}{\partial X_2} = \frac{\partial L}{\partial Y_2}\frac{\partial Y_2}{\partial X_2} 
+= \frac{\partial L}{\partial Y_1} \\
+&则第一个公式就可以直接利用这个结果来计算梯度了：\\
+&\frac{\partial L}{\partial A_1} = \frac{\partial L}{\partial Y_1}\frac{\partial Y_1}{\partial A_1} \\
+&\frac{\partial L}{\partial B_1} = \frac{\partial L}{\partial Y_1}\frac{\partial Y_1}{\partial B_1} \\
+&如果还需要向前传播，则需要计算出
+\frac{\partial L}{\partial X_1} = \frac{\partial L}{\partial Y_1}\frac{\partial Y_1}{\partial X_1} \\
+\end{align*}
+$$
+
+我们再来真正的计算出X的梯度结果。
+
+$$
+\begin{align*}
+\\
+\frac{\partial y_k}{\partial x_i} &= \frac{\partial (
+\begin{bmatrix} a_{k1} & ... & a_{km} \end{bmatrix}
+\begin{bmatrix} x_1 \\ ... \\ x_m \end{bmatrix}
+)}{\partial x_i} \\
+&= \frac{\partial (a_{k1}x_1 + ... + a_{km}x_m)}{\partial x_i} \\
+&= \frac{\partial (a_{ki}x_i)}{\partial x_i}
+= a_{ki}
+\end{align*}
+$$
+
+最后求出loss对X的梯度结果。
+
+$$
+\begin{align*}
+\frac{\partial L}{\partial x_i} &= 
+\sum_{k=1}^{m} \frac{\partial L}{\partial y_k}\frac{\partial y_k}{\partial x_i} \\
+&= \sum_{k=1}^{m} a_{ki}\frac{\partial L}{\partial y_k} \\
+\end{align*}
+$$
 
 ## 优化器
 SGD
@@ -829,8 +933,12 @@ AdamW
 
 ## 总结
 
-还有很多在LoRA基础上改进的方法
-
+1. 还有很多在LoRA基础上改进的方法
+2. 这里讲的参数训练流程，包括损失函数，梯度，优化器等，都只讲了大模型中常用的一个方法，事实上这些流程中涉及到的方法有很多。
+2. 虽然之前听很多人说神经网络算法不可解释，但没想到实际上这些算法原理全都是数学
+3. 虽然是数学，但也不怎么难，这篇文章中我涉及的公式，基本也就是大学高等数学的水平。
+4. 不过也有一些难的公式我没有讲，因为理解这些对于原理来说已经足够了，且不能一开始希望把所有东西都搞懂，要循序渐进的学习。
+5. 我或许应该读研的时候就按照这种学习方式，或许人生路径会有另一种结果呢。
 
 ## 参考
 - 【AI】一文读懂大模型生态：分类/参数/结构/训练/GPU/评测/排行/社区\
