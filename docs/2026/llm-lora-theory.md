@@ -975,7 +975,44 @@ $$
 * 每一步的大小 -> 学习率
 * 当前所处的位置 -> 当前的参数值
 
-因此，梯度下降法，确实很像蒙眼下山的场景。我们注意到其中一点：为什么参数的负梯度值，即减去梯度值，就是最陡的方向？换成数学的话来说，一个多元函数（即多参数函数），每个参数可以看作是一个维度；每个参数的偏导数作为这个方向的分量，将所有的参数的偏导数组合为一个向量，这个向量的方向就是函数当前上升最快的方向。对应大模型这里，就是这个向量的反方向就是函数当前下降最快的方向。我们拿一个二元函数来举例：
+因此，梯度下降法，确实很像蒙眼下山的场景。我们注意到其中一点：为什么参数的负梯度值，即减去梯度值，就是最陡的方向？换成数学的话来说，一个多元函数（即多参数函数），每个参数可以看作是一个维度；每个参数的偏导数作为这个方向的分量，将所有的参数的偏导数组合为一个向量，这个向量的方向就是函数当前上升最快的方向。对应大模型这里，就是这个向量的反方向就是函数当前下降最快的方向。
+
+下面来证明这个结论。首先需要了解全增量和全微分的概念。
+
+$$
+\begin{align*}
+&设：X为n个参数组成的向量，展开表示为[x_1, ..., x_n] \\
+&\bigtriangleup X为向量增加一个微小量，展开表示为[\bigtriangleup x_1, ..., \bigtriangleup x_n] \\
+&z为函数值，在大模型场景中即为loss；\\
+&\bigtriangleup z为函数值在\bigtriangleup X下的变化量\\
+&公式表示为：z = f(X) \\
+\\
+&全增量: \bigtriangleup z = f(X + \bigtriangleup X) - f(X) \\
+&全微分: dz = \sum_{i=1}^{n}\frac{\partial z}{\partial x_i}\bigtriangleup x_i \\
+&= \frac{\partial z}{\partial x_1}\bigtriangleup x_1 + ... + \frac{\partial z}{\partial x_n}\bigtriangleup x_n \\
+\\
+&\bigtriangleup z \approx dz \\
+&当 \bigtriangleup X \longrightarrow 0时，\bigtriangleup z - dz = 二阶及以上的无穷小量 \\
+\end{align*}
+$$
+
+可以看到，全增量就是函数在入参遇到微小变化时，实际的函数值变化。全微分则是这个微小变化用每个参数的微分*变化值来线性的近似全增量的值。他们的差值是这个微小变化的二阶无穷小，基本可以忽略不计。带入梯度下降法场景，全增量是我们实际参数调整后模型的结果，全微分是我们希望参数调整后的模型的结果，它们是近似的。再用蒙眼下山场景类比，全增量是是我们实际踏出的一步走的海拔变化，全微分是我们走之前预估走的海拔变化。
+
+$$
+\begin{align*} 
+&设：\nabla f(x) 或 \nabla f 为X的偏导数组成的向量，
+展开表示为[\frac{\partial z}{\partial x_1}, ..., \frac{\partial z}{\partial x_n}] \\
+&dz = \frac{\partial z}{\partial x_1}\bigtriangleup x_1 + ... + \frac{\partial z}{\partial x_n}\bigtriangleup x_n \\
+&= \begin{bmatrix} \frac{\partial z}{\partial x_1} & ... & \frac{\partial z}{\partial x_n} \end{bmatrix} \cdot 
+\begin{bmatrix} \bigtriangleup x_1 \\ ... \\ \bigtriangleup x_n \end{bmatrix}
+= \nabla f \cdot \bigtriangleup X
+\end{align*}
+$$
+
+可以看到，全微分可以表示为两个向量相乘，我们的目标是
+
+
+我们拿一个二元函数来举例：
 
 
 
@@ -1004,6 +1041,7 @@ $$
 4. 不过也有一些难的公式我没有讲，因为理解这些对于原理来说已经足够了，且不能一开始希望把所有东西都搞懂，要循序渐进的学习。
 5. 我或许应该读研的时候就按照这种学习方式，或许人生路径会有另一种结果呢
 6. 搞清楚原理是一回事，代码实现是一回事，能不能通过实验得到好结果是另一回事。
+7. 我喜欢把计算过程陡展示出来，在不限制文章长度的情况下，不喜欢太多“略”，“显而易见”等。毕竟有可能我现在懂，但是后面再看的时候，这些显然易见我自己可能也证明不出来了。
 
 ## 参考
 - 【AI】一文读懂大模型生态：分类/参数/结构/训练/GPU/评测/排行/社区\
@@ -1028,3 +1066,5 @@ $$
   https://www.bilibili.com/video/BV1mkgwzZEN9
 - 别死记公式！8分钟带你通透损失函数本质！\
   https://www.bilibili.com/video/BV1GHS1BzE6J
+- 全微分 百度百科\
+  https://baike.baidu.com/item/全微分/8155184
