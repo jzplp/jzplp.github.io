@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  markdown-it-mathjax3@4.3.2:
+    hash: e26cdbd7e32fe72ae3613814df7a4e988bfe919bb5cc92e849eea2b3ad4a8fa9
+    path: patches/markdown-it-mathjax3@4.3.2.patch
+
 importers:
 
   .:
@@ -19,10 +24,10 @@ importers:
         version: 1.9.4
       markdown-it-mathjax3:
         specifier: ^4.3.2
-        version: 4.3.2
+        version: 4.3.2(patch_hash=e26cdbd7e32fe72ae3613814df7a4e988bfe919bb5cc92e849eea2b3ad4a8fa9)
       vitepress:
         specifier: ^1.6.0
-        version: 1.6.4(@algolia/client-search@5.39.0)(@types/node@26.4.0)(markdown-it-mathjax3@4.3.2)(postcss@8.5.6)(search-insights@2.17.3)
+        version: 1.6.4(@algolia/client-search@5.39.0)(@types/node@26.4.0)(markdown-it-mathjax3@4.3.2(patch_hash=e26cdbd7e32fe72ae3613814df7a4e988bfe919bb5cc92e849eea2b3ad4a8fa9))(postcss@8.5.6)(search-insights@2.17.3)
       vue:
         specifier: ^3.3.2
         version: 3.5.22
@@ -1629,7 +1634,7 @@ snapshots:
 
   mark.js@8.11.1: {}
 
-  markdown-it-mathjax3@4.3.2:
+  markdown-it-mathjax3@4.3.2(patch_hash=e26cdbd7e32fe72ae3613814df7a4e988bfe919bb5cc92e849eea2b3ad4a8fa9):
     dependencies:
       juice: 8.1.0
       mathjax-full: 3.2.2
@@ -1850,7 +1855,7 @@ snapshots:
       '@types/node': 26.4.0
       fsevents: 2.3.3
 
-  vitepress@1.6.4(@algolia/client-search@5.39.0)(@types/node@26.4.0)(markdown-it-mathjax3@4.3.2)(postcss@8.5.6)(search-insights@2.17.3):
+  vitepress@1.6.4(@algolia/client-search@5.39.0)(@types/node@26.4.0)(markdown-it-mathjax3@4.3.2(patch_hash=e26cdbd7e32fe72ae3613814df7a4e988bfe919bb5cc92e849eea2b3ad4a8fa9))(postcss@8.5.6)(search-insights@2.17.3):
     dependencies:
       '@docsearch/css': 3.8.2
       '@docsearch/js': 3.8.2(@algolia/client-search@5.39.0)(search-insights@2.17.3)
@@ -1871,7 +1876,7 @@ snapshots:
       vite: 5.4.20(@types/node@26.4.0)
       vue: 3.5.22
     optionalDependencies:
-      markdown-it-mathjax3: 4.3.2
+      markdown-it-mathjax3: 4.3.2(patch_hash=e26cdbd7e32fe72ae3613814df7a4e988bfe919bb5cc92e849eea2b3ad4a8fa9)
       postcss: 8.5.6
     transitivePeerDependencies:
       - '@algolia/client-search'

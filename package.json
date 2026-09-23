@@ -19,6 +19,9 @@
       "ignoreMissing": [
         "@algolia/client-search"
       ]
+    },
+    "patchedDependencies": {
+      "markdown-it-mathjax3@4.3.2": "patches/markdown-it-mathjax3@4.3.2.patch"
     }
   }
 }
