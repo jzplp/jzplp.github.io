@@ -1372,6 +1372,7 @@ L2正则化和梯度下降优化器是独立的，优化器将这个新的梯度
 
 $$
 \begin{align*}
+\\
 &Adam参数更新公式：\\
 & \theta_t = \theta_{t-1} - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon}\hat{m}_t \\
 &AdamW参数更新公式：\\
