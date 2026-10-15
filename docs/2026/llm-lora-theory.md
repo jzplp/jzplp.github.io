@@ -1618,8 +1618,8 @@ $$
 &平均Loss：L = \frac{1}{N} \sum_{t=1}^{N} L_t\\
 &\frac{\partial L}{\partial L_t} = \frac{1}{N}\\
 \\
-&用来更新参数的平均梯度值：\frac{\partial L}{\partial x_i} \\
-&= \sum_{t=1}^{N} \frac{\partial L}{\partial L_t} \frac{\partial L_t}{\partial x_i}
+&用来更新参数的平均梯度值：\\
+&\frac{\partial L}{\partial x_i} = \sum_{t=1}^{N} \frac{\partial L}{\partial L_t} \frac{\partial L_t}{\partial x_i}
 = \frac{1}{N}\sum_{t=1}^{N}\frac{\partial L_t}{\partial x_i}\\
 \end{align*}
 $$
