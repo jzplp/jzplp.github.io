@@ -6,7 +6,12 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "【AI】大模型LoRA和参数训练的原理分析（未完成）",
+        text: "【AI】大模型LoRA微调的原理和实验（未开始）",
+        link: "/2026/llm-lora",
+        tags: ["AI"],
+      },
+      {
+        text: "【AI】大模型参数训练的原理（未完成）",
         link: "/2026/llm-lora-theory",
         tags: ["AI"],
       },
