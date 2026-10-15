@@ -12,7 +12,7 @@ const sidebarLists = [
       },
       {
         text: "【AI】大模型参数训练的原理（未完成）",
-        link: "/2026/llm-lora-theory",
+        link: "/2026/llm-param",
         tags: ["AI"],
       },
       {
