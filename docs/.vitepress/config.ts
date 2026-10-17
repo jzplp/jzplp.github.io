@@ -11,7 +11,7 @@ const sidebarLists = [
         tags: ["AI"],
       },
       {
-        text: "【AI】大模型参数训练的原理（未完成）",
+        text: "【AI】大模型参数训练原理：Softmax/损失函数交叉熵/反向传播/梯度下降优化器/学习率调度器/训练数据划分",
         link: "/2026/llm-param",
         tags: ["AI"],
       },
