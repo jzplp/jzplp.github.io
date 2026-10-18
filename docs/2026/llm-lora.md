@@ -226,6 +226,22 @@ $$
 
 这就是LoRA中A矩阵初始化随机数的分布范围计算公式。带入fan_in的值为1024，最后计算出bound的结果为1/32 = 0.03125。因此均匀分布的范围就是 (-0.03125,0.03125)。
 
+## CMRC2018数据集
+
+### 数据集本身介绍
+文本抽取？
+
+### 为什么适用于本任务
+
+
+## 数据处理和训练前测试
+
+
+## lora代码
+
+## 训练过程和结果 
+
+
 ## 总结
 
 1. 还有很多在LoRA基础上改进的方法
@@ -241,3 +257,9 @@ $$
   https://zhuanlan.zhihu.com/p/646831196
 - 图解 Fine-tuning：LoRA 系列微调技术概述\
   https://zhuanlan.zhihu.com/p/990958034
+- GitHub CMRC 2018\
+  https://github.com/ymcui/cmrc2018
+- CMRC 2018 当时比赛排名\
+  https://ymcui.com/cmrc2018/
+- 第二届“讯飞杯”中文机器阅读理解评测 (CMRC 2018)\
+  https://hfl-rc.github.io/cmrc2018/
