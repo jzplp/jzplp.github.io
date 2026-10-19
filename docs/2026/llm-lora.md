@@ -229,7 +229,111 @@ $$
 ## CMRC2018数据集
 
 ### 数据集本身介绍
-文本抽取？
+CMRC2018是哈工大讯飞联合实验室（HFL）再2018年发布的基于篇章片段抽取的阅读理解（Span-Extraction Machine Reading Comprehension）数据集，在CMRC2018发布之前，有一些英文阅读理解类数据集，但中文的没有。CMRC2018是首个人工标注的中文篇章片段抽取型阅读理解数据集。其中一条训练数据格式如下，由于文案太长，其中省略了部分：
+
+```json
+[
+  {
+    "paragraphs": [
+      {
+        "id": "TRAIN_614",
+        "context": "江苏路街道是中国上海市长宁区下辖的一个街道办事处，位于长宁区最东部，东到镇宁路接邻静安区的静安寺街道，【...省略】 户籍人口5.26万人，下辖13个居委会。较著名的近代建筑有中西女中（今上海市第三女子中学）、王伯群及汪精卫公馆（今长宁区少年宫）、西园公寓等。江苏路、长宁路、延安西路（高架）等经过拓宽，已经形成上海市的交通干道。【...省略】",
+        "qas": [
+          {
+            "question": "江苏路街道在上海市的什么地方？",
+            "id": "TRAIN_614_QUERY_0",
+            "answers": [
+              {
+                "text": "长宁区",
+                "answer_start": 11
+              }
+            ]
+          },
+          {
+            "question": "江苏路街道下辖多少个居委会？",
+            "id": "TRAIN_614_QUERY_1",
+            "answers": [
+              {
+                "text": "下辖13个居委会。",
+                "answer_start": 126
+              }
+            ]
+          },
+          {
+            "question": "江苏路街道较著名的近代建筑有什么？",
+            "id": "TRAIN_614_QUERY_2",
+            "answers": [
+              {
+                "text": "较著名的近代建筑有中西女中（今上海市第三女子中学）、王伯群及汪精卫公馆（今长宁区少年宫）、西园公寓等。",
+                "answer_start": 237
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "id": "TRAIN_614",
+    "title": "江苏路街道 (上海市)"
+  }
+] 
+```
+
+
+测试数据
+
+```json
+[
+  {
+    "paragraphs": [
+      {
+        "id": "DEV_148",
+        "context": "西湾河电车厂（简称西电；，缩写：SWHD）是香港电车位于西湾河的电车厂。【...省略】",
+        "qas": [
+          {
+            "question": "西湾河电车厂简称什么？",
+            "id": "DEV_148_QUERY_0",
+            "answers": [
+              {
+                "text": "西电",
+                "answer_start": 9
+              },
+              {
+                "text": "西电",
+                "answer_start": 9
+              },
+              {
+                "text": "西电",
+                "answer_start": 9
+              }
+            ]
+          },
+          {
+            "question": "香港天文台发出什么信号时电车厂会暂停服务？",
+            "id": "DEV_148_QUERY_1",
+            "answers": [
+              {
+                "text": "一号戒备信号或三号强风信号",
+                "answer_start": 187
+              },
+              {
+                "text": "一号戒备信号或三号强风信号",
+                "answer_start": 187
+              },
+              {
+                "text": "预九号烈风或暴风增强信号或更高信号",
+                "answer_start": 230
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "id": "DEV_148",
+    "title": "西湾河电车厂"
+  }
+]
+```
+
 
 ### 为什么适用于本任务
 
@@ -263,3 +367,5 @@ $$
   https://ymcui.com/cmrc2018/
 - 第二届“讯飞杯”中文机器阅读理解评测 (CMRC 2018)\
   https://hfl-rc.github.io/cmrc2018/
+- Cui, Y., Liu, T., Che, W., Xiao, L., Chen, Z., Ma, W., Wang, S., & Hu, G. (2019). A span-extraction dataset for Chinese machine reading comprehension. In *Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)* (pp. 5886–5891). Association for Computational Linguistics.\
+  https://aclanthology.org/D19-1600/
