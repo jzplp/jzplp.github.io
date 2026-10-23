@@ -585,3 +585,5 @@ llm = Llama(
   https://github.com/ggml-org/llama.cpp
 - GitHub llama.cpp releases\
   https://github.com/ggml-org/llama.cpp/releases
+- GitHub llm-learn-jzplp\
+  https://github.com/jzplp/llm-learn-jzplp

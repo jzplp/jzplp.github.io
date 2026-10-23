@@ -397,7 +397,8 @@ F1 = 2 * 1 * 1/10 / (1 + 1/10) = 2/11 ~= 0.18
 
 最后把所有问题的F1值相加，除以问题总个数，就得到了平均F1值，乘以百分比输出结果。
 
-## 数据处理和训练前测试
+## 模型测试代码
+
 
 
 ## lora代码
@@ -408,6 +409,7 @@ F1 = 2 * 1 * 1/10 / (1 + 1/10) = 2/11 ~= 0.18
 ## 总结
 
 1. 还有很多在LoRA基础上改进的方法
+2. https://github.com/jzplp/llm-learn-jzplp 这个仓库中有相关代码
 
 ## 参考
 - LoRA这种微调方法和全参数比起来有什么劣势吗？\
@@ -428,3 +430,5 @@ F1 = 2 * 1 * 1/10 / (1 + 1/10) = 2/11 ~= 0.18
   https://hfl-rc.github.io/cmrc2018/
 - Cui, Y., Liu, T., Che, W., Xiao, L., Chen, Z., Ma, W., Wang, S., & Hu, G. (2019). A span-extraction dataset for Chinese machine reading comprehension. In *Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)* (pp. 5886–5891). Association for Computational Linguistics.\
   https://aclanthology.org/D19-1600/
+- GitHub llm-learn-jzplp\
+  https://github.com/jzplp/llm-learn-jzplp
