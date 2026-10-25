@@ -397,13 +397,145 @@ F1 = 2 * 1 * 1/10 / (1 + 1/10) = 2/11 ~= 0.18
 
 最后把所有问题的F1值相加，除以问题总个数，就得到了平均F1值，乘以百分比输出结果。
 
-## 模型测试代码
+## 模型测试
+在训练之前，我们先用数据集跑一遍模型，看看在不训练的场景下，模型能拿到什么样的分数，作为参考。同时也与训练后提升的分数做对比。同时测试代码也能用作训练中跑验证集，训练后跑测试集使用。
+
+### 测试代码
+这里使用PyTorch和transformers调用大模型，后面也用这两个库训练。
+
+```python
+import json
+import time
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# trial 数据集
+INPUT_FILE = "squad-style-data/cmrc2018_trial.json"
+# 预测结果输出文件
+OUTPUT_FILE = "squad-style-data/cmrc2018_trial_result.json"
+# 模型文件路径
+MODEL_NAME = "../Qwen3-0.6B"
+# 记录起点，用于统计总耗时
+START_TIME = time.perf_counter()
+
+# 读取squad格式数据集，输出数组中元素为{id, question, context}
+def load_samples(path):
+    dataset = json.load(open(path, encoding="utf-8"))
+    samples = []
+    for article in dataset["data"]:
+        for para in article["paragraphs"]:
+            for qa in para["qas"]:
+                samples.append(
+                    {
+                        "id": qa["id"],
+                        "question": qa["question"],
+                        "context": para["context"],
+                    }
+                )
+    return samples
+
+# 构造单轮对话消息，要求模型只输出材料中的原文答案
+def build_prompt(question, context):
+    return [
+        {
+            "role": "user",
+            "content": (
+                "请阅读下面的材料，回答问题。"
+                "答案必须来自材料原文，直接输出答案文本，不要输出其他任何内容。\n\n"
+                f"材料：{context}\n\n问题：{question}\n答案："
+            ),
+        }
+    ]
+
+# 对单条问题做一次生成答案字符串并返回
+def generate_answer(model, tokenizer, messages):
+    # 套用 Qwen3 的对话模板 enable_thinking=False 关闭思考模式
+    text = tokenizer.apply_chat_template(
+      messages, tokenize=False, add_generation_prompt=True, enable_thinking=False
+    )
+    inputs = tokenizer(text, return_tensors="pt").to(model.device)
+    # no_grad：推理阶段关闭梯度记录
+    with torch.no_grad():
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=512, # 最多生成512个token
+            do_sample=False, # 贪心解码
+        )
+    # 只解码新生成的部分（去掉输入的 prompt）
+    response = tokenizer.decode(
+        outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True
+    )
+    # 取第一行非空文本作为答案
+    return response or ""
+
+# ---- 主流程 ----
+# 加载问题数据
+samples = load_samples(INPUT_FILE)
+# 加载分词器
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+# 加载模型
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_NAME, torch_dtype="auto", device_map="auto"
+)
+# 推理模式，关闭 dropout
+model.eval()
+
+# 逐条提问，收集 {问题id: 答案}
+results = {}
+# enumerate 在遍历时同时给出下标和元素
+for i, sample in enumerate(samples):
+    # 本条问题的计时起点
+    q_start = time.perf_counter()
+    # 生成答案
+    answer = generate_answer(model, tokenizer, build_prompt(sample["question"], sample["context"]))
+    results[sample["id"]] = answer
+    # 本条问题耗时
+    q_time = time.perf_counter() - q_start
+    print(f"[{i + 1}/{len(samples)}] {sample['id']}: {answer}  ({q_time:.1f}s)")
+
+    # 每 50 条中间落盘一次，避免中途出错丢失结果
+    if (i + 1) % 50 == 0:
+        json.dump(results, open(OUTPUT_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+
+# 最终写入完整结果
+json.dump(results, open(OUTPUT_FILE, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+
+total_time = time.perf_counter() - START_TIME
+print(f"完成，共 {len(results)} 条，结果保存至 {OUTPUT_FILE}")
+print(f"总耗时 {total_time:.1f}s")
+```
+
+代码主要流程如下：
+
+1. 读取数据集，数组每个问题以{问题id, 问题, 文档}以形式放到数组中
+2. 读取模型和分词器
+3. 遍历每个问题，将问题和文档用提示词组装起来，套用对话模板
+4. 调用模型生成答案，解码并返回
+5. 将所有答案放到一个{问题id: 答案} 的map中，并保存到文件里
+
+实际上除了处理数据的部分外，调用大模型的流程和之前[【AI】大模型本地部署与量化：Ollama、transformers、llama.cpp实践](https://jzplp.github.io/2026/llm-deploy.html)文章中调用大模型的方式基本一致。
+
+### 修改计算结果代码
+数据库中给的cmrc2018_evaluate.py代码，是用Python2写的，在目前Python3的环境中无法执行。因此首先我们首先要将代码修改为Python3的形式，才能计算结果分数。
+
+
+
+### 测试结果输出
+
+
+
 
 
 
 ## lora代码
 
 ## 训练过程和结果 
+### 实验设计
+
+1. 是否思考模式（训练时开不开，推理时候开不开）
+2. 提示词不同
+3. 不同的训练参数
+4. 
 
 
 ## 总结
@@ -412,6 +544,12 @@ F1 = 2 * 1 * 1/10 / (1 + 1/10) = 2/11 ~= 0.18
 2. https://github.com/jzplp/llm-learn-jzplp 这个仓库中有相关代码
 
 ## 参考
+- 【AI】一文读懂大模型生态：分类/参数/结构/训练/GPU/评测/排行/社区\
+  https://jzplp.github.io/2026/llm-stru.html
+- 【AI】大模型本地部署与量化：Ollama、transformers、llama.cpp实践\
+  https://jzplp.github.io/2026/llm-deploy.html
+-【AI】大模型参数训练原理：Softmax/损失函数交叉熵/反向传播/梯度下降优化器/学习率调度器/训练数据划分\
+  https://jzplp.github.io/2026/llm-param.html
 - LoRA这种微调方法和全参数比起来有什么劣势吗？\
   https://www.zhihu.com/question/608674675
 - LoRA: Low-Rank Adaptation of Large Language Models\
