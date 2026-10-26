@@ -515,17 +515,35 @@ print(f"总耗时 {total_time:.1f}s")
 
 实际上除了处理数据的部分外，调用大模型的流程和之前[【AI】大模型本地部署与量化：Ollama、transformers、llama.cpp实践](https://jzplp.github.io/2026/llm-deploy.html)文章中调用大模型的方式基本一致。
 
-### 修改计算结果代码
-数据库中给的cmrc2018_evaluate.py代码，是用Python2写的，在目前Python3的环境中无法执行。因此首先我们首先要将代码修改为Python3的形式，才能计算结果分数。
+### 计算输出结果
+我使用纯CPU计算，经过两个多小时，终于跑完了1002条数据，此时命令行输出如下图：
 
+​![](/2026/llm-lora-2.png)
 
+然后就是通过数据集中的答案来计算评价指标了。数据集中给的cmrc2018_evaluate.py代码，是用Python2写的，在目前Python3的环境中无法执行。因此首先要将代码修改为Python3的形式，才能计算结果分数。我参考AI进行了迁移，改动后的代码我放到[llm-learn-jzplp这个GitHub仓库中的2026-lora/cmrc2018_evaluate_py3.py](https://github.com/jzplp/llm-learn-jzplp/blob/main/2026-lora/cmrc2018_evaluate_py3.py)。这里仅列出改动内容：
 
-### 测试结果输出
+1. Python3支持print，无需导入
+2. Python3的str本身就是unicode，无需设置各种编码解码
+3. Python3不支持 `ur` 前缀，改为`r`
+4. 打开文件改为显式指定UTF-8模式
 
+注意nltk在Python3时还需要下载punkt，这里我执行的命令为：
 
+```shell
+pip install nltk
+python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
+```
 
+然后执行这段Python脚本，输出的结果如下：
 
+```shell
+python cmrc2018_evaluate_py3.py cmrc2018_trial.json cmrc2018_trial_result.json
+{"AVERAGE": "35.149", "F1": "54.230", "EM": "16.068", "TOTAL": 1002, "SKIP": 0, "FILE": "cmrc2018_trial_result.json"}
+```
 
+可以看到这个结果在开放挑战排名中处于比较低的位置，模型可能还是有提升空间的。这里我们对比了几个数据，可以看到部分错误答案确实是存在问题的，例如知识总结不全等，但也有一些答案意思是一致的，只不过描述有区别。
+
+​![](/2026/llm-lora-3.png)
 
 ## lora代码
 
