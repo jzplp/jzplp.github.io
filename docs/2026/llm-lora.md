@@ -545,15 +545,176 @@ python cmrc2018_evaluate_py3.py cmrc2018_trial.json cmrc2018_trial_result.json
 
 ​![](/2026/llm-lora-3.png)
 
-## lora代码
+## LoRA训练代码
+由于代码有点多，这一节我们分步讲解训练代码的各个模块。
 
-## 训练过程和结果 
+### 数据处理代码
+首先是数据处理部分，是将训练数据集处理成大模型训练需要的形式。这里为了方便测试和后续流程处理，这部分代码支持命令行执行和作为模块被其它文件import。
+
+```python
+"""
+prepare_data.py
+读取 CMRC2018 训练数据，套入 Qwen3 对话模板，生成 torch 训练输入数据
+
+用法一（命令行测试）:
+    python prepare_data.py               # 处理全部数据
+    python prepare_data.py --limit 5     # 只处理前 5 条
+
+用法二（被其他脚本 import）:
+    from prepare_data import prepareData
+    loader, tokenizer = prepareData()          # 全量
+    loader, tokenizer = prepareData(limit=5)   # 前 5 条
+
+batch size = 1，无 padding
+"""
+import argparse
+import json
+
+import torch
+from torch.utils.data import DataLoader
+from transformers import AutoTokenizer
+
+# 训练数据文件
+TRAIN_JSON = "squad-style-data/cmrc2018_train.json"
+#模 型目录
+MODEL_DIR = "Qwen3-0.6B-train"
+
+def load_examples(path):
+    """读取 SQuAD 格式 json，返回 (上下文, 问题, 答案) 的列表。"""
+    with open(path, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+
+    examples = []
+    for article in raw["data"]:
+        for para in article["paragraphs"]:
+            for qa in para["qas"]:
+                answers = qa.get("answers") or []
+                if answers:
+                    examples.append(
+                        (para["context"], qa["question"], answers[0]["text"])
+                    )
+    return examples
+
+def build_prompt(question, context):
+    return [
+        {
+            "role": "user",
+            "content": (
+                "请阅读下面的材料，回答问题。"
+                "答案必须来自材料原文，直接输出答案文本，不要输出其他任何内容。\n\n"
+                f"材料：{context}\n\n问题：{question}\n答案："
+            ),
+        }
+    ]
+
+def encode(example, tokenizer):
+    """把一条问答转成训练用的 {input_ids, labels}。"""
+    context, question, answer = example
+
+    # 第 1 步：组合字符串模板（材料 + 问题）
+    user_messages = build_prompt(question, context)
+
+    # 第 2 步：用模板生成非答案部分（user + assistant 起始符）并直接分词
+    #   tokenize=True               直接输出 token id 列表
+    #   add_generation_prompt=True  追加 assistant 起始符，即模型开始生成答案的位置
+    #   enable_thinking=False       关闭思考模式
+    #   add_special_tokens=False    模板里已含特殊符号，不能让 tokenizer 再加 BOS/EOS
+    prompt_ids = tokenizer.apply_chat_template(
+        user_messages,
+        tokenize=True,
+        add_generation_prompt=True,
+        enable_thinking=False,
+        add_special_tokens=False,
+    )["input_ids"]
+
+    # 第 3 步：答案直接分词，末尾补 eos（<|im_end|>，id=151645），让模型学会停止
+    answer_ids = tokenizer(answer, add_special_tokens=False)["input_ids"]
+    answer_ids = answer_ids + [tokenizer.eos_token_id]
+
+    # 第 4 步：拼接成完整输入，前段是问题（不算 loss），后段是答案（算 loss）
+    input_ids = prompt_ids + answer_ids
+    labels = [-100] * len(prompt_ids) + answer_ids
+
+    # 第 5 步：转 tensor
+    #   dtype=torch.long   token id 必须是 int64
+    return {
+        "input_ids": torch.tensor(input_ids, dtype=torch.long),
+        "labels": torch.tensor(labels, dtype=torch.long),
+    }
+
+def prepareData(limit=0):
+    """读取训练数据并完成预处理，返回 (DataLoader, tokenizer)。
+
+    DataLoader: batch size 1，每个 epoch 打乱
+    tokenizer:  与样本同一份分词器，方便后续解码
+    """
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR, trust_remote_code=True)
+
+    examples = load_examples(TRAIN_JSON)
+    if limit > 0:
+        examples = examples[:limit]
+
+    samples = [encode(ex, tokenizer) for ex in examples]
+    return DataLoader(samples, batch_size=1, shuffle=True), tokenizer
+
+def main():
+    """命令行脚本入口：解析参数、生成数据并打印第 1 个 batch 检查。"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--limit", type=int, default=0, help="只取前 N 条（0=全部）")
+    args = parser.parse_args()
+
+    loader, tokenizer = prepareData(args.limit)
+    print(f"分词完成：{len(loader)} 条样本")
+
+    # 打印第 1 个 batch 供检查
+    first = next(iter(loader))
+    print("\n=== 第 1 个 batch ===")
+    for k, v in first.items():
+        print(f"{k}: shape={tuple(v.shape)}, dtype={v.dtype}")
+
+    prompt_len = int((first["labels"][0] == -100).sum())
+    total = first["input_ids"].shape[1]
+    print(f"prompt tokens = {prompt_len}, answer tokens = {total - prompt_len}")
+    print("input_ids 解码（完整）:")
+    print(tokenizer.decode(first["input_ids"][0], skip_special_tokens=True))
+    print("labels 解码（仅答案）:")
+    answer_ids = first["labels"][0][first["labels"][0] != -100].tolist()
+    print(tokenizer.decode(answer_ids, skip_special_tokens=False))
+
+# 命令行调用入口
+if __name__ == "__main__":
+    main()
+```
+
+简要描述一下数据处理流程：
+1. 首先读取训练数据文件，处理成(上下文, 问题, 答案)的列表。
+2. 材料和问题套入Qwen3对话模板，生成tokenId列表。
+3. 答案部分单独分词，并在最后加入结束标记，生成tokenId列表。
+4. 将问题和答案的tokenId列表合并，同时生成labels数组。
+5. 转成PyTorch的张量形式。
+6. 将数组创建DataLoader对象，内部会帮我们增加维度和打乱顺序。
+7. 模块形式就返回数据；命令行形式则输出数据统计和第一个例子。
+
+由于我使用的电脑CPU训练且内存只有16GB，batch只能设为1，因此省下了部分创建batch的操作。注意对于问答数据的训练，只有答案部分的预测计算loss和进行反向传播，问题和材料部分只作为答案预测的上下文。因此labels就是用来控制哪些位置是计算loss的，计算loss时参考的“正确答案”是啥。其中不计算loss的位置设置固定值-100；计算loss的位置赋值对应位置的tokenId。
+
+这里有人会好奇，labels是不是只有-100有意义。因为计算loss的位置的tokenId值，可以从input_ids里面拿到，不需要这里再赋值一遍。对于当前任务的大模型场景，确实这里只有-100有意义。但对于其它非大模型任务，例如部分翻译/改写时，存在输入token A，正确输出是token B的不一样的场景，此时B的值就应该放到labels中。
+
+### 下一个步骤todo
+
+
+## 配置与实验设计
+### 硬件和软件配置
+
 ### 实验设计
+
+同一份数据是否要测试多次，看结果是不是一样。
 
 1. 是否思考模式（训练时开不开，推理时候开不开）
 2. 提示词不同
 3. 不同的训练参数
 4. 
+
+## 实验结果
 
 
 ## 总结
