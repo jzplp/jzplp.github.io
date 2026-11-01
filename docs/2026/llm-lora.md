@@ -546,37 +546,38 @@ python cmrc2018_evaluate_py3.py cmrc2018_trial.json cmrc2018_trial_result.json
 ​![](/2026/llm-lora-3.png)
 
 ## LoRA训练代码
-由于代码有点多，这一节我们分步讲解训练代码的各个模块。
+这一节我们分步讲解训练代码的各个模块。
 
 ### 数据处理代码
-首先是数据处理部分，是将训练数据集处理成大模型训练需要的形式。这里为了方便测试和后续流程处理，这部分代码支持命令行执行和作为模块被其它文件import。
+首先是数据处理部分，是将训练和验证数据集处理成大模型训练需要的形式。这里为了方便测试和后续流程处理，这部分代码支持命令行执行和作为模块被其它文件import。
 
 ```python
 """
-prepare_data.py
 读取 CMRC2018 训练数据，套入 Qwen3 对话模板，生成 torch 训练输入数据
 
-用法一（命令行测试）:
-    python prepare_data.py               # 处理全部数据
-    python prepare_data.py --limit 5     # 只处理前 5 条
+用法一（命令行预览）:
+    python prepare_data.py               # 读取全部数据并预览训练集第 1 条
+    python prepare_data.py --split val   # 读取全部数据并预览验证集第 1 条
 
 用法二（被其他脚本 import）:
     from prepare_data import prepareData
-    loader, tokenizer = prepareData()          # 全量
-    loader, tokenizer = prepareData(limit=5)   # 前 5 条
+    train_dataset, val_dataset, tokenizer = prepareData()
+    train_dataset, val_dataset, tokenizer = prepareData(limit=5, val_limit=10)
 
-batch size = 1，无 padding
+每条样本含 input_ids / labels，无 padding；打乱由 Trainer 负责
 """
 import argparse
 import json
 
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
 # 训练数据文件
 TRAIN_JSON = "squad-style-data/cmrc2018_train.json"
-#模 型目录
+# 验证数据文件
+VAL_JSON = "squad-style-data/cmrc2018_trial.json"
+# 模型目录
 MODEL_DIR = "Qwen3-0.6B-train"
 
 def load_examples(path):
@@ -642,43 +643,70 @@ def encode(example, tokenizer):
         "labels": torch.tensor(labels, dtype=torch.long),
     }
 
-def prepareData(limit=0):
-    """读取训练数据并完成预处理，返回 (DataLoader, tokenizer)。
 
-    DataLoader: batch size 1，每个 epoch 打乱
-    tokenizer:  与样本同一份分词器，方便后续解码
-    """
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR, trust_remote_code=True)
+class QADataset(Dataset):
+    """包装样本列表，提供 PyTorch Dataset 接口，可直接交给 Trainer。"""
 
-    examples = load_examples(TRAIN_JSON)
+    def __init__(self, samples):
+        self.samples = samples
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        return self.samples[idx]
+
+
+def build_dataset(path, tokenizer, limit=0):
+    """读取指定 json 并预处理成 QADataset，训练集/验证集共用。"""
+    examples = load_examples(path)
     if limit > 0:
         examples = examples[:limit]
+    return QADataset([encode(ex, tokenizer) for ex in examples])
 
-    samples = [encode(ex, tokenizer) for ex in examples]
-    return DataLoader(samples, batch_size=1, shuffle=True), tokenizer
+
+def prepareData(limit=0, val_limit=0):
+    """读取训练集和验证集并完成预处理，返回 (Dataset, Dataset, tokenizer)。
+
+    train_dataset: 训练集，每条含 input_ids / labels
+    val_dataset:   验证集，同样含 input_ids / labels
+    tokenizer:     两边共用同一份分词器
+    """
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+
+    train_dataset = build_dataset(TRAIN_JSON, tokenizer, limit)
+    val_dataset = build_dataset(VAL_JSON, tokenizer, val_limit)
+    return train_dataset, val_dataset, tokenizer
+
 
 def main():
-    """命令行脚本入口：解析参数、生成数据并打印第 1 个 batch 检查。"""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--limit", type=int, default=0, help="只取前 N 条（0=全部）")
+    """命令行脚本入口：读取全部数据，预览指定数据集的第 1 条样本。"""
+    parser = argparse.ArgumentParser(description="预览 CMRC2018 预处理结果")
+    parser.add_argument(
+        "--split",
+        choices=["train", "val"],
+        default="train",
+        help="预览训练集还是验证集（默认 train）",
+    )
     args = parser.parse_args()
 
-    loader, tokenizer = prepareData(args.limit)
-    print(f"分词完成：{len(loader)} 条样本")
+    train_dataset, val_dataset, tokenizer = prepareData()
+    dataset = train_dataset if args.split == "train" else val_dataset
 
-    # 打印第 1 个 batch 供检查
-    first = next(iter(loader))
-    print("\n=== 第 1 个 batch ===")
-    for k, v in first.items():
+    print(f"训练集：{len(train_dataset)} 条，验证集：{len(val_dataset)} 条")
+
+    sample = dataset[0]
+    print("\n=== 第 1 条样本 ===")
+    for k, v in sample.items():
         print(f"{k}: shape={tuple(v.shape)}, dtype={v.dtype}")
 
-    prompt_len = int((first["labels"][0] == -100).sum())
-    total = first["input_ids"].shape[1]
-    print(f"prompt tokens = {prompt_len}, answer tokens = {total - prompt_len}")
+    prompt_len = int((sample["labels"] == -100).sum())
+    total_len = sample["input_ids"].shape[0]
+    print(f"prompt tokens = {prompt_len}, answer tokens = {total_len - prompt_len}")
     print("input_ids 解码（完整）:")
-    print(tokenizer.decode(first["input_ids"][0], skip_special_tokens=True))
+    print(tokenizer.decode(sample["input_ids"], skip_special_tokens=True))
     print("labels 解码（仅答案）:")
-    answer_ids = first["labels"][0][first["labels"][0] != -100].tolist()
+    answer_ids = sample["labels"][sample["labels"] != -100].tolist()
     print(tokenizer.decode(answer_ids, skip_special_tokens=False))
 
 # 命令行调用入口
@@ -686,20 +714,22 @@ if __name__ == "__main__":
     main()
 ```
 
-简要描述一下数据处理流程，由于我们的训练数据只有一万条，因此我们将数据整个读到内存备用。
-1. 首先读取训练数据文件，处理成(上下文, 问题, 答案)的列表。
+简要描述一下数据处理流程，由于我们的训练与验证数据只有一万条和一千条，因此我们将数据整个读到内存备用。
+1. 首先读取训练和验证数据文件，处理成(上下文, 问题, 答案)的列表。
 2. 材料和问题套入Qwen3对话模板，生成tokenId列表。
 3. 答案部分单独分词，并在最后加入结束标记，生成tokenId列表。
 4. 将问题和答案的tokenId列表合并，同时生成labels数组。
 5. 转成PyTorch的张量形式。
-6. 将数组创建DataLoader对象，内部会帮我们增加维度和打乱顺序。
-7. 模块形式就返回数据；命令行形式则输出数据统计和第一个例子。
+6. 创建QADataset类继承Dataset，将数组封装进内部。这是后面训练工具需要的格式。
+7. 模块形式返回数据；命令行形式则输出数据统计和第一个例子。
 
 由于我使用的电脑CPU训练且内存只有16GB，batch只能设为1，因此省下了部分创建batch的操作。注意对于问答数据的训练，只有答案部分的预测计算loss和进行反向传播，问题和材料部分只作为答案预测的上下文。因此labels就是用来控制哪些位置是计算loss的，计算loss时参考的“正确答案”是啥。其中不计算loss的位置设置固定值-100；计算loss的位置赋值对应位置的tokenId。
 
 这里有人会好奇，labels是不是只有-100有意义。因为计算loss的位置的tokenId值，可以从input_ids里面拿到，不需要这里再赋值一遍。对于当前任务的大模型场景，确实这里只有-100有意义。但对于其它非大模型任务，例如部分翻译/改写时，存在输入token A，正确输出是token B的不一样的场景，此时B的值就应该放到labels中。
 
-### 下一个步骤todo
+### 训练代码
+
+
 
 
 ## 配置与实验设计
