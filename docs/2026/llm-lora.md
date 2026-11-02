@@ -545,6 +545,12 @@ python cmrc2018_evaluate_py3.py cmrc2018_trial.json cmrc2018_trial_result.json
 
 ​![](/2026/llm-lora-3.png)
 
+## 训练原理补充
+在[【AI】大模型参数训练原理：Softmax/损失函数交叉熵/反向传播/梯度下降优化器/学习率调度器/训练数据划分](https://jzplp.github.io/2026/llm-param.html)中我们介绍了部分参数训练原理，但还有部分训练时默认启用的参数更新逻辑没有介绍到，这里我们补充介绍一下。
+
+### 梯度裁剪
+梯度裁剪的英文叫做Gradient Clipping
+
 ## LoRA训练代码
 这一节我们分步讲解训练代码的各个模块。
 
@@ -728,8 +734,143 @@ if __name__ == "__main__":
 这里有人会好奇，labels是不是只有-100有意义。因为计算loss的位置的tokenId值，可以从input_ids里面拿到，不需要这里再赋值一遍。对于当前任务的大模型场景，确实这里只有-100有意义。但对于其它非大模型任务，例如部分翻译/改写时，存在输入token A，正确输出是token B的不一样的场景，此时B的值就应该放到labels中。
 
 ### 训练代码
+然后就是真正的LoRA训练代码了。由于这里我们使用的是标准的LoRA方法和标准的训练流程，因此可以直接使用训练工具，无需自己编写训练流程代码。这里LoRA使用peft，训练流程使用Trainer。
+
+```python
+"""
+用 LoRA 微调 Qwen3-0.6B
+用法:
+    python train_lora.py  # 全量训练集 + 全量验证集
+    python train_lora.py --limit 100 --val_limit 50  # 训练集只用前100条，验证集前50条
+    python train_lora.py --resume Qwen3-0.6B-lora/checkpoint-200  # 从指定 checkpoint 继续训练
+
+暂停：训练中按 Ctrl+C；恢复时保持 --limit / --val_limit 等参数与上次一致
+"""
+import argparse
+
+import torch
+from peft import LoraConfig, TaskType, get_peft_model
+from transformers import AutoModelForCausalLM, Trainer, TrainingArguments
+
+# 模型目录与数据预处理函数复用 prepare_data.py
+from prepare_data import MODEL_DIR, prepareData
+
+# LoRA 权重输出目录（只保存适配器，不包含基座模型）
+OUTPUT_DIR = "Qwen3-0.6B-lora"
 
 
+def build_model():
+    """加载模型，并用 peft 给它挂上 LoRA 适配器。"""
+    # CPU 训练统一使用 fp32（原始权重是 bf16，这里会转换成 fp32）
+    model = AutoModelForCausalLM.from_pretrained(
+        MODEL_DIR,
+        dtype=torch.float32,
+    )
+    # 训练时关闭 KV cache：它只用于生成加速，训练阶段用不到
+    model.config.use_cache = False
+
+    # LoRA 配置：冻结原模型参数，只在指定线性层旁加可训练的低秩矩阵
+    lora_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,  # 因果语言模型任务
+        r=8,  # LoRA 秩，越大可训练参数越多、表达能力越强
+        lora_alpha=16,  # 缩放系数，实际缩放为 alpha / r，通常取 2*r
+        bias="none",  # 不训练 bias
+        # 作用在 Qwen3 注意力层的 q/k/v/o 投影矩阵上
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
+    )
+    # get_peft_model 会冻结基座参数，只保留 LoRA 参数可训练
+    model = get_peft_model(model, lora_config)
+    # 打印可训练参数量及占比，便于确认 LoRA 是否挂载成功
+    model.print_trainable_parameters()
+    return model
+
+
+def main():
+    # 命令行参数：训练集/验证集条数限制
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--limit", type=int, default=0, help="训练集只取前 N 条（0=全部）")
+    parser.add_argument("--val_limit", type=int, default=0, help="验证集只取前 N 条（0=全部）")
+    parser.add_argument(
+        "--resume",
+        type=str,
+        default=None,
+        help="从指定 checkpoint 目录继续训练，例如 Qwen3-0.6B-lora/checkpoint-200",
+    )
+    args = parser.parse_args()
+
+    # 复用 prepare_data.py：返回训练集、验证集，已套好 Qwen3 模板，prompt 部分的 labels 为 -100
+    train_dataset, val_dataset, tokenizer = prepareData(args.limit, args.val_limit)
+    print(f"训练样本数: {len(train_dataset)}，验证样本数: {len(val_dataset)}")
+
+    # 加载模型并挂 LoRA
+    model = build_model()
+
+    # 按 3 个 epoch 的总优化步数计算 3% 预热步数
+    steps_per_epoch = max(len(train_dataset) // 16, 1)
+    warmup_steps = int(steps_per_epoch * 3 * 0.03)
+
+    # TrainingArguments 只是训练配置容器，由 Trainer 读取后执行
+    training_args = TrainingArguments(
+        output_dir=OUTPUT_DIR,  # checkpoint 和最终权重保存目录
+        per_device_train_batch_size=1,  # batch size，与 prepare_data 一致
+        gradient_accumulation_steps=16,  # 累积 16 步再更新，等效增大 batch
+        num_train_epochs=3,  # 训练轮数
+        learning_rate=2e-4,  # LoRA 参数学习率，通常比全参微调大
+        lr_scheduler_type="cosine",  # 余弦退火学习率
+        warmup_steps=warmup_steps,  # 前 3% 步数线性预热
+        logging_steps=10,  # 每 10 步打印一次 loss
+        save_strategy="steps",  # 按步数保存 checkpoint
+        save_steps=10,  # 每 10 步保存一次
+        save_total_limit=2,  # 最多保留 2 个 checkpoint，节省磁盘
+        eval_strategy="steps",  # 按步数计算 val loss
+        eval_steps=200,  # 每 200 步验证一次
+        per_device_eval_batch_size=1,  # 验证 batch size
+        dataloader_pin_memory=False,  # CPU 训练没有加速器，关闭 pin memory
+        optim="adamw_torch",  # 使用 PyTorch 原生 AdamW
+        report_to="none",  # 不上报 wandb 等平台
+        seed=42,  # 随机种子，保证可复现
+    )
+
+    # Trainer 负责：按批读取数据、优化器、学习率调度、日志、保存等训练流程
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+    )
+
+    # 开始训练；args.resume 为 None 时从头开始
+    trainer.train(resume_from_checkpoint=args.resume)
+
+    # 只保存 LoRA 适配器（几十 MB），不保存整个模型
+    trainer.save_model(OUTPUT_DIR)
+    # 分词器一起保存，推理时直接加载该目录即可
+    tokenizer.save_pretrained(OUTPUT_DIR)
+    # 保存训练状态（含 log_history）到 trainer_state.json
+    trainer.save_state()
+
+    print(f"LoRA 适配器已保存到: {OUTPUT_DIR}")
+    print(f"训练日志已保存到: {OUTPUT_DIR}/trainer_state.json")
+
+if __name__ == "__main__":
+    main()
+```
+
+可以看到，通过使用预设好的训练工具，训练代码本身是非常简洁的。简要描述一下代码执行流程：
+
+1. 使用前面写好的输出处理模块prepareData获取训练集验证集数据。
+2. 加载基座模型本身，使用peft创建LoRA配置并挂载在模型上。
+3. 使用TrainingArguments创建训练配置，使用Trainer进行训练。
+4. 训练完成后保存模型和训练中的状态日志。
+
+
+
+
+
+
+### 训练代码试跑
+
+### 运行结果和合并
 
 
 ## 配置与实验设计
