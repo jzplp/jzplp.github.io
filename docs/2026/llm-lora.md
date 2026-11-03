@@ -746,6 +746,15 @@ if __name__ == "__main__":
 
 暂停：训练中按 Ctrl+C；恢复时保持 --limit / --val_limit 等参数与上次一致
 """
+"""
+用 LoRA 微调 Qwen3-0.6B
+用法:
+    python train_lora.py  # 全量训练集 + 全量验证集
+    python train_lora.py --limit 100 --val_limit 50  # 训练集只用前100条，验证集前50条
+    python train_lora.py --resume Qwen3-0.6B-lora/checkpoint-200  # 从指定 checkpoint 继续训练
+
+暂停：训练中按 Ctrl+C；恢复时保持 --limit / --val_limit 等参数与上次一致
+"""
 import argparse
 
 import torch
@@ -799,7 +808,7 @@ def main():
     args = parser.parse_args()
 
     # 复用 prepare_data.py：返回训练集、验证集，已套好 Qwen3 模板，prompt 部分的 labels 为 -100
-    train_dataset, val_dataset, tokenizer = prepareData(args.limit, args.val_limit)
+    train_dataset, val_dataset, _ = prepareData(args.limit, args.val_limit)
     print(f"训练样本数: {len(train_dataset)}，验证样本数: {len(val_dataset)}")
 
     # 加载模型并挂 LoRA
@@ -821,7 +830,7 @@ def main():
         logging_steps=10,  # 每 10 步打印一次 loss
         save_strategy="steps",  # 按步数保存 checkpoint
         save_steps=10,  # 每 10 步保存一次
-        save_total_limit=2,  # 最多保留 2 个 checkpoint，节省磁盘
+        save_total_limit=2,  # 最多保留 2 个 checkpoint
         eval_strategy="steps",  # 按步数计算 val loss
         eval_steps=200,  # 每 200 步验证一次
         per_device_eval_batch_size=1,  # 验证 batch size
@@ -842,10 +851,8 @@ def main():
     # 开始训练；args.resume 为 None 时从头开始
     trainer.train(resume_from_checkpoint=args.resume)
 
-    # 只保存 LoRA 适配器（几十 MB），不保存整个模型
+    # 只保存 LoRA 适配器（几十 MB），不保存整个模型和分词器
     trainer.save_model(OUTPUT_DIR)
-    # 分词器一起保存，推理时直接加载该目录即可
-    tokenizer.save_pretrained(OUTPUT_DIR)
     # 保存训练状态（含 log_history）到 trainer_state.json
     trainer.save_state()
 
@@ -907,9 +914,28 @@ if __name__ == "__main__":
 
 看最下面右侧，75表示总步数为75步，实际为100条数据集*epoch为3再除以每步的问题数4=75。训练代码执行了30分钟42秒，其中一步的训练时间为24.57秒。那么平均一个问题的训练时间为24.57/4‌≈‌6.1秒。
 
-todo 看一下训练结果文件里面有啥
+在训练结束后，在输出目录中会生成一些文件，如下图。其中以 checkpoint-* 命名的子目录是训练中为了暂停恢复保存的checkpoint，其中*表示当前为多少步。而外面为模型训练完成后保存的模型文件。注意我们这里只保存了LoRA新增的模块，并没有将这部分拼回模型，因此文件大小非常小，checkpoint目录总共有几十MB，训练完的模型则只有10MB左右。下面介绍一下这些文件的含义：
 
+​![](/2026/llm-lora-7.png)
 
+下面介绍一下这些文件的含义。首先是训练完成后保存的模型文件：
+
+* adapter_model.safetensors	训练完成的LoRA参数值
+* adapter_config.json LoRA配置，包含r, lora_alpha等，有它才能将LoRA挂回原模型
+* training_args.bin 训练参数TrainingArguments的记录，为二进制格式
+* trainer_state.json 训练日志，训练中打印在屏幕上的日志全部包含于此
+
+然后是训练中保存的checkpoint目录内容：
+
+* adapter_model.safetensors	当前训练的LoRA参数值
+* adapter_config.json LoRA配置
+* optimizer.pt AdamW优化器状态
+* scheduler.pt 学习率调度器状态
+* rng_state.pth 随机数状态，用于恢复后保持顺序等一致
+* training_args.bin 训练参数TrainingArguments的记录，为二进制格式
+* trainer_state.json 当前训练日志，训练中打印在屏幕上的日志全部包含于此
+
+可以看到，训练完成后的模型文件内容，checkpoint目录中是都有的。因此即使checkpoint没有训练完成，也可以使用它作为正常模型输出使用。而且由于checkpoint是在训练在进行中，因此里面会有一些模型训练的中间状态保存。
 
 ### 运行结果和合并
 
