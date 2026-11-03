@@ -479,7 +479,7 @@ samples = load_samples(INPUT_FILE)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 # 加载模型
 model = AutoModelForCausalLM.from_pretrained(
-    MODEL_NAME, torch_dtype="auto", device_map="auto"
+    MODEL_NAME, torch_dtype="auto"
 )
 # 推理模式，关闭 dropout
 model.eval()
@@ -743,17 +743,6 @@ if __name__ == "__main__":
     python train_lora.py  # 全量训练集 + 全量验证集
     python train_lora.py --limit 100 --val_limit 50  # 训练集只用前100条，验证集前50条
     python train_lora.py --resume Qwen3-0.6B-lora/checkpoint-200  # 从指定 checkpoint 继续训练
-
-暂停：训练中按 Ctrl+C；恢复时保持 --limit / --val_limit 等参数与上次一致
-"""
-"""
-用 LoRA 微调 Qwen3-0.6B
-用法:
-    python train_lora.py  # 全量训练集 + 全量验证集
-    python train_lora.py --limit 100 --val_limit 50  # 训练集只用前100条，验证集前50条
-    python train_lora.py --resume Qwen3-0.6B-lora/checkpoint-200  # 从指定 checkpoint 继续训练
-
-暂停：训练中按 Ctrl+C；恢复时保持 --limit / --val_limit 等参数与上次一致
 """
 import argparse
 
@@ -878,6 +867,8 @@ if __name__ == "__main__":
 
 但为了模仿batch size的场景，使用gradient_accumulation_steps参数，设置为16。作用为将每个数据训练后的梯度除以16再加到梯度值上，经过16个训练数据后，将现有的梯度值做一次参数更新，然后将保存的梯度值清零。通过这种方式，可以在batch size=1的场景下，获取和batch size=16一样的参数更新训练效果。后面我们将gradient_accumulation_steps参数* batch size值作为1步，也就是一次参数更新。
 
+注意虽然原模型是bf16，但这里我们使用fp32进行训练。这是因为我门使用CPU对bf16的支持程度不全，还不如计算fp32速度更快。
+
 训练参数更新方式和之前了解过的方式基本一致，例如使用Warmup + Cosine Decay作为学习率调度器，使用AdamW作为梯度下降优化器的之前，本次还用到了Trainer的一些实用的功能：
 
 * 自动跑验证集，计算val loss。这里设置了每200步自动计算一次，不需要我们手动计算
@@ -937,10 +928,76 @@ if __name__ == "__main__":
 
 可以看到，训练完成后的模型文件内容，checkpoint目录中是都有的。因此即使checkpoint没有训练完成，也可以使用它作为正常模型输出使用。而且由于checkpoint是在训练在进行中，因此里面会有一些模型训练的中间状态保存。
 
-### 运行结果和合并
+### 模型使用与合并
+训练之后的基座模型和LoRA模块部分是分开的，那么应该如何运行这个“新模型”呢？事实上非常简单，LoRA部分使用PeftModel加载，然后和原模型组合即可。注意不能使用device_map="auto"，使用了可能会修改到基座模型文件，表现为后面合并模型时会出错。
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
+
+# 原模型（基座模型）路径
+MODEL_NAME = "Qwen3-0.6B-train"
+# LoRA 权重路径
+LORA_PATH = "Qwen3-0.6B-lora"
+
+# 加载分词器（LoRA 目录不含分词器，使用基座模型的分词器）
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+# 加载基座模型
+base_model = AutoModelForCausalLM.from_pretrained(
+    MODEL_NAME, torch_dtype="auto"
+)
+# 在基座模型上加载 LoRA 适配器，得到微调后的模型
+model = PeftModel.from_pretrained(base_model, LORA_PATH)
+```
+
+后面的代码和之前模型测试部分的代码一模一样，使用模型做推理的方式没有任何变化。这样外挂的方式数据存储量小，假设有多个外挂模块时，不需要重复存储基座模型参数，使用也非常方便。注意到虽然基座模型是bf16，LoRA模块是fp32，但peft会将LoRA模块的精度格式自动转换为基座模型的格式，因此我们不用担心不配套而报错。同时我们训练出的LoRA模块也可以和原模型合并，成为一个完整的模型：
+
+```python
+"""
+将基座模型与 LoRA 权重合并为一个完整模型，并同时保存分词器
+用法:
+    python merge_lora.py
+"""
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# 原模型（基座模型）路径
+BASE_MODEL_PATH = "Qwen3-0.6B-train"
+# LoRA 权重路径
+LORA_PATH = "Qwen3-0.6B-lora"
+# 合并后完整模型的输出路径
+OUTPUT_DIR = "Qwen3-0.6B-merged"
+
+
+def main():
+    # 加载分词器（LoRA 目录不含分词器，使用基座模型的分词器）
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_PATH)
+    # 加载基座模型，dtype 与原始权重保持一致
+    base_model = AutoModelForCausalLM.from_pretrained(
+        BASE_MODEL_PATH, torch_dtype="auto"
+    )
+    # 在基座模型上加载 LoRA 适配器
+    model = PeftModel.from_pretrained(base_model, LORA_PATH)
+    # 把 LoRA 权重合并进基座权重，并移除适配器结构，得到普通模型
+    model = model.merge_and_unload()
+    # 推理模式，关闭 dropout
+    model.eval()
+
+    # 保存合并后的完整模型
+    model.save_pretrained(OUTPUT_DIR)
+    # 同时保存分词器
+    tokenizer.save_pretrained(OUTPUT_DIR)
+    print(f"合并完成，完整模型与分词器已保存到: {OUTPUT_DIR}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+可以看到合并也非常简单，注意这里要把分词器也一起放到新模型目录中，否则每次还要从原目录中拿分词器。合并完成后新模型的格式和使用方式就和原模型完全一样了。
 
 ### 自定义早停功能
-看是否需要
+看是否需要 先不做
 
 
 
