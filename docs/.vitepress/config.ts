@@ -6,12 +6,12 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "【AI】大模型推理时的解码处理（未开始）",
+        text: "【AI】大模型推理时的解码处理（未完成）",
         link: "/2026/llm-inference",
         tags: ["AI"],
       },
       {
-        text: "【AI】大模型LoRA微调的原理和实验（未完成）",
+        text: "【AI】大模型LoRA微调的原理和实验（实验中）",
         link: "/2026/llm-lora",
         tags: ["AI"],
       },
