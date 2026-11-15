@@ -1081,14 +1081,14 @@ if __name__ == "__main__":
     },
     {
         "role": "user",
-        f"content": "材料：{context}\n\n问题：{question}\n答案：",
+        "content": f"材料：{context}\n\n问题：{question}\n答案：",
     },
 ]
 # 提示词3
 [
     {
         "role": "user",
-        f"content": "材料：{context}\n\n问题：{question}\n答案：",
+        "content": f"材料：{context}\n\n问题：{question}\n答案：",
     }
 ]
 ```
