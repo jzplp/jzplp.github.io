@@ -522,7 +522,7 @@ $$
 遍历完成后，找出加噪声后最大的logit值，对应的tokenId就相当于Softmax和随机采样两个流程合并后的输出结果。注意是输出的tokenId相当于两个流程合并后的输出的tokenId，两者本身输出的最大值一个是logit值+噪声，一个是概率值，并不相等。Gumbel-Max方法原理生效的原理，我们后面介绍。
 
 ### 指数分布
-在介绍Gumbel-Max方法原理之前，我们先要了解一下指数分布的概念。首先列举一下相关公式：
+在介绍Gumbel-Max方法证明之前，我们先要了解一下指数分布的概念。首先列举一下相关公式：
 
 $$
 \begin{align*}
@@ -545,7 +545,7 @@ $$
 指数分布还有一个特点就是没有记忆性，即假设你已经等了五分钟没有电话接入，后面再等五分钟是否有电话的概率；和你一开始等的那五分钟是否有电话的概率是一致的。即不管你等多久，后面固定时间电话来不来的概率都一样。
 
 ### 全概率公式
-Gumbel-Max方法原理中会用到全概率公式，这里我们先来了解一下。但是在了解之前，我们需要先学习几个离散的概率符号：
+Gumbel-Max方法证明中会用到全概率公式，这里我们先来了解一下。但是在了解之前，我们需要先学习几个离散的概率符号：
 
 * P(A) 事件A发生的概率
 * P(A ∩ B) 事件A和B同时发生的概率，是交集概率
@@ -608,25 +608,113 @@ $$
 
 $$
 \begin{align*}
-&设：z_i为logits向量中的第i个值，长度为N\\
+&设：z_i为logits向量中的第i个值，长度为n\\
 &G_i为z_i对应的噪声，符合标准Gumbel分布 \quad G_i \sim Gumbel(0,1)\\
 \\
 &问题可以表述为：\\
-&P(k = argmax_{i\in \{1,...,N\}}(z_i + G_i)) = softmax(k) \\
+&P(k = argmax_{i\in \{1,...,n\}}(z_i + G_i)) = softmax(k) \\
 &\Longrightarrow \\
-&P((z_k + G_k) \ge  (z_i + G_i) \quad 当i \ne k时) = \frac{e^{z_k}}{\sum_{j=1}^{N}e^{z_j}}\\
+&P((z_k + G_k) \ge  (z_i + G_i) \quad 当i \ne k时) = \frac{e^{z_k}}{\sum_{j=1}^{n}e^{z_j}}\\
 \end{align*}
 $$
 
-然后开始证明：
+然后开始证明，首先利用Gi是标准Gumbel分布的条件。当Gi取值不同时，对应不同条件下P(..)的概率不同，因此可以写成如下全概率公示的形式。因为这里除了第k个值之外，其余的值都要更小，因此需要连乘其它值更小的概率。
 
 $$
 \begin{align*}
-
+设：& f_{Gumbel}(x) 为Gumbel标准分布的概率密度函数\\
+&\prod 为连乘符号\\
+\\
+&P((z_k + G_k) \ge  (z_i + G_i) \quad 当i \ne k时)\\
+=&\int_{-\infty}^{+\infty} f_{Gumbel}(x)\prod_{i=1 且 i \ne k}^{n}P((z_k + x) \ge (z_i + G_i)) dx \\
 \end{align*}
 $$
 
+然后求解其中的概率部分，将其转换为标准Gumbel分布的CDF形式：
 
+$$
+\begin{align*}
+设：&F_{Gumbel}(t) = P(G_i \le t) 为Gumbel标准分布的CDF\\
+\\
+&P((z_k + x) \ge  (z_i + G_i))\\
+=& P((z_i + G_i) \le (z_k + x))\\
+=& P(G_i \le (z_k + x - z_i)) = F_{Gumbel}(z_k + x - z_i)\\
+&带入Gumbel标准分布的CDF函数公式\\
+=& exp(-e^{z_i-z_k - x})
+\end{align*}
+$$
+
+然后再放回积分形式的全概率公式，再利用指数运算规则进行化简：
+
+$$
+\begin{align*}
+&\int_{-\infty}^{+\infty} f_{Gumbel}(x)\prod_{i=1 且 i \ne k}^{n}P((z_k + x) \ge (z_i + G_i)) dx\\
+=&\int_{-\infty}^{+\infty} f_{Gumbel}(x)\prod_{i=1 且 i \ne k}^{n}exp(-e^{z_i-z_k - x}) dx\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x})\prod_{i=1 且 i \ne k}^{n}exp(-e^{z_i-z_k - x}) dx\\
+&利用指数运算规则：a^ma^n = a^{m+n}\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x})\prod_{i=1 且 i \ne k}^{n}exp(-e^{z_i-z_k} e^{- x}) dx\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x})exp(\sum_{i=1 且 i \ne k}^{n}-e^{z_i-z_k} e^{- x})dx\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x}+\sum_{i=1 且 i \ne k}^{n}-e^{z_i-z_k} e^{- x})dx\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x}-e^{- x}\sum_{i=1 且 i \ne k}^{n}e^{z_i-z_k})dx\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x}(1+\sum_{i=1 且 i \ne k}^{n}e^{z_i-z_k}))dx\\
+\end{align*}
+$$
+
+然后对中间的连加继续化简，最后可以直接表示成softamx函数的形式：
+
+$$
+\begin{align*}
+&1+\sum_{i=1 且 i \ne k}^{n}e^{z_i-z_k}\\
+=&1 + \sum_{i=1 且 i \ne k}^{n}e^{z_i}e^{-z_k}\\
+=&1 + e^{-z_k}\sum_{i=1 且 i \ne k}^{n}e^{z_i}\\
+=&1 + \frac{\sum_{i=1 且 i \ne k}^{n}e^{z_i}}{e^{z_k}}\\
+=& \frac{e^{z_k} + \sum_{i=1 且 i \ne k}^{n}e^{z_i}}{e^{z_k}}\\
+=& \frac{\sum_{i=1}^{n}e^{z_i}}{e^{z_k}} = \frac{1}{softmax(k)} \\
+\end{align*}
+$$
+
+然后再放回积分形式的全概率公式，再利用换元积分法处理：
+
+$$
+\begin{align*}
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x}(1+\sum_{i=1 且 i \ne k}^{n}e^{z_i-z_k}))dx\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x}(\frac{\sum_{i=1}^{n}e^{z_i}}{e^{z_k}}))dx\\
+&其中\sum_{i=1}^{n}e^{z_i}在积分中为常数，这里使用S表示\\
+=&\int_{-\infty}^{+\infty} exp(-x -e^{-x}\frac{S}{e^{z_k}})dx\\
+=&\int_{-\infty}^{+\infty} exp(-x) exp(-e^{-x}\frac{S}{e^{z_k}})dx\\
+&再使用换元积分法，令u=e^{-x}，则u' = -e^{-x}\\
+&x=-\infty 时，u = e^{+\infty} = +\infty\\
+&x=+\infty 时，u = e^{-\infty} = 0\\
+=&\int_{+\infty}^{0} -exp(-u\frac{S}{e^{z_k}})du\\
+=&\int_{0}^{+\infty} exp(-u\frac{S}{e^{z_k}})du\\
+\end{align*}
+$$
+
+然后我们终于可以直接求解这个定积分了，最后得到的居然就是Softmax函数的形式：
+
+$$
+\begin{align*}
+&由于\int e^{-ax}dx = -\frac{1}{a} e^{-ax} + C\\
+&带回前面的公式：\\
+&\int_{0}^{+\infty} exp(-u\frac{S}{e^{z_k}})du\\
+=&\left [-\frac{e^{z_k}}{S}exp(-u\frac{S}{e^{z_k}})  \right ]^{+\infty}_{0}\\
+=& -\frac{e^{z_k}}{S}exp(-\infty\frac{S}{e^{z_k}}) + \frac{e^{z_k}}{S}exp(-0\frac{S}{e^{z_k}})\\
+=& -\frac{e^{z_k}}{S}exp(-\infty) + \frac{e^{z_k}}{S}exp(0)\\
+=& -\frac{e^{z_k}}{S}0+ \frac{e^{z_k}}{S}\\
+=& \frac{e^{z_k}}{S} = softmax(k)\\
+\end{align*}
+$$
+
+到这里，我们就得到了最终的结论，即使用Gumbel-Max方法处理过后的logits向量，其中的每个值是最大值的概率（相当于被选中的概率），就等于softmax函数求得的概率值。
+
+$$
+\begin{align*}
+& P(k = argmax_{i\in \{1,...,n\}}(z_i + G_i))\\
+=& P((z_k + G_k) \ge  (z_i + G_i) \quad 当i \ne k时) \\
+=& \frac{e^{z_k}}{\sum_{j=1}^{n}e^{z_j}}\\
+=& \frac{e^{z_k}}{S} = softmax(k)\\
+\end{align*}
+$$
 
 ## 推理时的其它操作
 ### 精度转换
