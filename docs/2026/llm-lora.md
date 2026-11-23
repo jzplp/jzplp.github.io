@@ -1130,9 +1130,116 @@ if __name__ == "__main__":
 | 8 | 46.086 | 13.700 |
 | 9 | 46.161 | 8.357 |
 
-### 对比分析
+### 实验分析
 
+1. 计算评测指标后，发现6个实验都非常有效果，对比训练前都有很大提升，这说明LoRA方法微调方法的有效性，且这个任务也非常适合使用LoRA处理。
+2. LoRA的不同r值差距不是特别明显，而且有点奇怪，即验证集8-32的效果逐渐微小下降，但是64又提升了；但对比测试集又不能得出这个结果。鉴于效果差距很小，猜测应该过拟合问题或数据本身操作的误差。
+3. 在训练前，不同提示词的生成效果差距很大，尤其是作为的消融的实验9，未训练的效果非常差。但训练后不同提示词的效果差距就很小了，说明训练可以抹平提示词带来的差距。不管训练前还是训练后，基本都是提示词1效果最好。
+4. loss曲线图的形状也非常接近：
+  * 三个epoch中的train loss值明显是三个台阶，每一个新epoch时，train loss都会下降较多
+  * 从第一个loss开始，train loss就比验证集val loss要低了
+  * 第二个epoch结束后，train loss继续下降，但val loss出现上升，因此第三个epoch可能出现了过拟合，后面训练可能会导致效果下降
 
+由于这是第一次训练大模型，想先使用简单的工具，因此用Trainer作为训练工具。它可以早停，但这样会导致保存checkpoint时必须跑一遍验证集得到val loss。可是由于电脑性能不足，跑一遍要较长时间，如果降低保存checkpoint频率，又会导致模型暂停训练时损失较多进度。因此本次没有做早停功能，后续再进行其它训练时可能会使用早停。
+
+### 画图代码
+前面列出的loss曲线图，是使用python中的matplotlib库绘制的，这里也提供一下根据loss数据绘制曲线图的代码：
+
+```python
+r"""根据训练日志 trainer_state.json 绘制训练集 loss 与验证集 loss 曲线。
+
+    # 画曲线，图片默认输出到 test1\Qwen3-0.6B-lora\loss_curve.png
+    python plot_loss.py test1\Qwen3-0.6B-lora\trainer_state.json
+
+    # 指定图片输出路径
+    python plot_loss.py test1\Qwen3-0.6B-lora\trainer_state.json -o test1\loss.png
+
+    # 指定标题前缀，标题变为 "test1 Training / Validation Loss"
+    python plot_loss.py test1\Qwen3-0.6B-lora\trainer_state.json -t test1
+"""
+
+import argparse
+import json
+
+import matplotlib.pyplot as plt
+
+# 解析命令行参数：必填的 trainer_state.json 路径，以及可选的图片输出路径
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="根据 trainer_state.json 绘制训练集 loss 与验证集 loss 曲线"
+    )
+    # 位置参数：训练日志文件路径，必须提供
+    parser.add_argument(
+        "trainer_state",
+        help="trainer_state.json 路径",
+    )
+    # 可选参数：不传时按输入路径自动生成 loss_curve.png
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        help="图片输出路径，默认与输入同名的 loss_curve.png",
+    )
+    # 可选参数：标题前缀，例如传入 test1，最终标题为 "test1 Training / Validation Loss"
+    parser.add_argument(
+        "-t",
+        "--title-prefix",
+        default="",
+        help="图表标题前缀，例如 test1",
+    )
+    return parser.parse_args()
+
+# 从 log_history 中拆出训练 loss 和验证 loss 两条曲线
+def load_losses(path):
+    # trainer_state.json 的 log_history 是一个列表，训练记录带 loss 字段，
+    # 验证记录带 eval_loss 字段，按字段区分后各取 step 和 loss
+    log_history = json.load(open(path, encoding="utf-8"))["log_history"]
+    # 训练集 loss
+    train_steps = [e["step"] for e in log_history if "loss" in e]
+    train_loss = [e["loss"] for e in log_history if "loss" in e]
+    # 验证集 loss
+    eval_steps = [e["step"] for e in log_history if "eval_loss" in e]
+    eval_loss = [e["eval_loss"] for e in log_history if "eval_loss" in e]
+    return train_steps, train_loss, eval_steps, eval_loss
+
+# 未指定 -o 时，由输入路径推导输出图片路径
+# 例：test1\Qwen3-0.6B-lora\trainer_state.json -> test1\Qwen3-0.6B-lora\loss_curve.png
+def default_output_path(input_path):
+    return input_path.replace(".json", "").replace("trainer_state", "loss_curve") + ".png"
+
+def main():
+    # 解析命令行参数
+    args = parse_args()
+    # 确定图片保存路径：优先用 -o，否则自动生成
+    output = args.output or default_output_path(args.trainer_state)
+
+    # 读取训练日志，拿到两条曲线的数据
+    train_steps, train_loss, eval_steps, eval_loss = load_losses(args.trainer_state)
+
+    # 画图：训练 loss 用连续折线，验证 loss 用带数据点的折线以便区分
+    plt.figure(figsize=(9, 5))
+    plt.plot(train_steps, train_loss, label="train loss", linewidth=1.5)
+    plt.plot(eval_steps, eval_loss, marker="o", markersize=4, label="eval loss")
+
+    # 设置坐标轴标题、网格和图例
+    plt.xlabel("step")
+    plt.ylabel("loss")
+    # 图表标题，拼上可选的前缀
+    title = f"{args.title_prefix} Training / Validation Loss".strip()
+    plt.title(title)
+    # 绘制网格，alpha 控制网格线透明度
+    plt.grid(alpha=0.3)
+    # 显示图例（根据 label 字段生成）
+    plt.legend()
+    # 自动调整边距，避免标签被裁剪
+    plt.tight_layout()
+    # 保存图片
+    plt.savefig(output, dpi=150)
+    print(f"图片已保存至 {output}")
+
+if __name__ == "__main__":
+    main()
+```
 
 
 ## 总结

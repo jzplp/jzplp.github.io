@@ -6,7 +6,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "【AI】大模型推理时的解码处理（未完成）",
+        text: "【AI】大模型推理解码全解析：惩罚项、温度、截断与采样",
         link: "/2026/llm-inference",
         tags: ["AI"],
       },
