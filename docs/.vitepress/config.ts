@@ -16,7 +16,7 @@ const sidebarLists = [
         tags: ["AI"],
       },
       {
-        text: "【AI】大模型LoRA微调的原理和实验（实验中）",
+        text: "【AI】大模型LoRA微调原理与实验：基于CMRC2018与Qwen3-0.6B训练实测",
         link: "/2026/llm-lora",
         tags: ["AI"],
       },
