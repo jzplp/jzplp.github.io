@@ -6,7 +6,7 @@ const sidebarLists = [
     text: "2026",
     items: [
       {
-        text: "【AI】大模型推理时的置-inf（未开始）",
+        text: "【AI】大模型推理时的置-inf（未完成）",
         link: "/2026/llm-inf",
         tags: ["AI"],
       },
