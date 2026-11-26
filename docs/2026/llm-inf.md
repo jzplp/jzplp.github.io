@@ -94,13 +94,67 @@ while True:
 因此我们也获得了跨模型对话的能力，即A模型的对话历史给B模型，B模型也可以正常读取对话历史并继续回答。例如OpenCode等Agent提供了对话中切换模型的能力，同一个上下文可随时切换模型回答。不过这时候系统提示依然是“对话中第一个模型”的，因此新模型可能并不知道自己是被“切换”后才来回答的，甚至可能将自己误认为是第一个模型。
 
 ### 输出长度控制
-1. 太短的处理
+在大模型推理时，经常开启输出token的长度控制，防止模型过早停止或者一直不停的输出。一般有最大值和最小值两种控制，实现都非常简单。例如前面的推理代码中，就包含了max_new_tokens这个最大输出长度控制。
+
+首先描述输出最小值控制，流程为：每次输出时判断当前输出token序列长度，如果大于最小值，则不做处理。如果小于最小值，则将EOS这个token对应的logit值设置为-inf，使其输出的概率为0，无法被选中。使用python形式的伪代码流程如下：
+
+```python
+# EOS的tokenId
+EOS_IDS = [151643, 151645]
+# 最小长度
+MIN_LENGTHS = 512
+# 输出token序列
+output_token = []
+
+while True:
+  # 生成logits
+  logits = gen_logits()
+  # 如果小于最小值
+  if len(output_token) < MIN_LENGTHS:
+    # EOS对应的logit赋值-inf
+    logits[EOS_IDS] = -torch.inf
+  # 获取tokenId
+  token_id = get_token(logits)
+  # 模型输出EOS，终止输出
+  if token_id in EOS_IDS:
+    break
+  # 放入输出序列
+  output_token.append(token_id)
+```
+
+然后再说最大值控制。这个就更简单了，到长度了直接截断，不再继续生成即可。伪代码形式如下；
+
+```python
+# EOS的tokenId
+EOS_IDS = [151643, 151645]
+# 最大长度
+MAX_LENGTHS = 512
+# 输出token序列
+output_token = []
+
+while True:
+  # 生成logits
+  logits = gen_logits()
+  # 获取tokenId
+  token_id = get_token(logits)
+  # 模型输出EOS，终止输出
+  if token_id in EOS_IDS:
+    break
+  # 放入输出序列
+  output_token.append(token_id)
+  # 如果等于最大值，便不再继续输出
+  if len(output_token) >= MAX_LENGTHS:
+    break
+```
+
+
+
+
 2. 太长的处理
   截断（大部分）
-  输出到最后一个的时候只保留eos是非-inf，但现在llm没人用了
-
+3. 输出到最后一个的时候只保留eos是非-inf，但现在llm没人用了
 为啥之前要那么做？
-
+4. hf 逻辑不一样，他是把输入也包含进去
 
 ## no-repeat-ngram
 看下要讲么？
