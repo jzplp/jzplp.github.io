@@ -94,9 +94,9 @@ while True:
 因此我们也获得了跨模型对话的能力，即A模型的对话历史给B模型，B模型也可以正常读取对话历史并继续回答。例如OpenCode等Agent提供了对话中切换模型的能力，同一个上下文可随时切换模型回答。不过这时候系统提示依然是“对话中第一个模型”的，因此新模型可能并不知道自己是被“切换”后才来回答的，甚至可能将自己误认为是第一个模型。
 
 ### 输出长度控制
-在大模型推理时，经常开启输出token的长度控制，防止模型过早停止或者一直不停的输出。一般有最大值和最小值两种控制，实现都非常简单。例如前面的推理代码中，就包含了max_new_tokens这个最大输出长度控制。
+在大模型推理时，经常开启输出token的长度控制，防止模型过早停止或者一直不停的输出。一般有最大长度和最小长度两种控制，实现都非常简单。例如前面的推理代码中，就包含了max_new_tokens这个最大输出长度控制。
 
-首先描述输出最小值控制，流程为：每次输出时判断当前输出token序列长度，如果大于最小值，则不做处理。如果小于最小值，则将EOS这个token对应的logit值设置为-inf，使其输出的概率为0，无法被选中。使用python形式的伪代码流程如下：
+首先描述输出最小长度控制，流程为：每次输出时判断当前输出token序列长度，如果大于最小长度，则不做处理。如果小于最小长度，则将EOS这个token对应的logit值设置为-inf，使其输出的概率为0，无法被选中。使用python形式的伪代码流程如下：
 
 ```python
 # EOS的tokenId
@@ -109,7 +109,7 @@ output_token = []
 while True:
   # 生成logits
   logits = gen_logits()
-  # 如果小于最小值
+  # 如果小于最小长度
   if len(output_token) < MIN_LENGTHS:
     # EOS对应的logit赋值-inf
     logits[EOS_IDS] = -torch.inf
@@ -122,7 +122,7 @@ while True:
   output_token.append(token_id)
 ```
 
-然后再说最大值控制。这个就更简单了，到长度了直接截断，不再继续生成即可。伪代码形式如下；
+然后再说最大长度控制。这个就更简单了，到长度了直接截断，不再继续生成即可。这是大部分推理引擎的做法。伪代码形式如下：
 
 ```python
 # EOS的tokenId
@@ -142,22 +142,54 @@ while True:
     break
   # 放入输出序列
   output_token.append(token_id)
-  # 如果等于最大值，便不再继续输出
+  # 如果等于最大长度，便不再继续输出
   if len(output_token) >= MAX_LENGTHS:
     break
 ```
 
+transformers还支持另外一种截断方式，它并不是到了长度截断，而是在MAX_LENGTHS - 1长度的时候，模型正常输出将logits。然后将其中表示非EOS标记的值都置为-inf，EOS标记对应的logit值设置为0。经过softmax函数时，非EOS标记的概率为0，EOS标记的概率为非0。这样模型最后一个输出token必然是EOS标记，也就是实现了终止输出的效果。伪代码形式如下：
 
+```python
+# EOS的tokenId
+EOS_IDS = [151643, 151645]
+# 最大长度
+MAX_LENGTHS = 512
+# 输出token序列
+output_token = []
 
+while True:
+  # 生成logits
+  logits = gen_logits()
+  # 当前距离最大长度为1
+  if len(output_token) + 1 >= MAX_LENGTHS:
+    # logits全部值设置为-inf
+    logits[:] = -torch.inf
+    # EOS对应的logit赋值0
+    logits[EOS_IDS] = 0
+  # 获取tokenId
+  token_id = get_token(logits)
+  # 模型输出EOS，终止输出
+  if token_id in EOS_IDS:
+    break
+  # 放入输出序列
+  output_token.append(token_id)
+```
 
-2. 太长的处理
-  截断（大部分）
-3. 输出到最后一个的时候只保留eos是非-inf，但现在llm没人用了
-为啥之前要那么做？
-4. hf 逻辑不一样，他是把输入也包含进去
+这种方式实际上让模型多做了一次没用的前向计算。虽然在实际大规模推理场景中，都是一批batch并行处理的，多算一步也不会怎么浪费性能，但看起来确实有点奇怪。在大模型时代之前，模型参数量和硬件要求没这么大，多算一步也无所谓。但现在基本所有模型都不会使用这种方式，即使在transformers中也是默认关闭的。
+
+另外transformers不一样的一点是，transformers中的max_length配置指的是输入问题（+对话上下文）和回答一起的总长度，而其它推理引擎使用的max_tokens配置一般都指的是纯输出长度。transformers如果希望指定纯输出长度，需要使用max_new_tokens配置。
 
 ## no-repeat-ngram
-看下要讲么？
+
+### 方法介绍
+no-repeat-ngram的含义是禁止重复n-gram，n-gram表示长度为n的序列，可以是词，也可以是字母，在大模型场景中指的就是token，即长度为n的token序列不允许出现重复。它是绝对“不允许出现”，但不管是代码，还是创意文本，都存在重复但是需要输出的场景，因此no-repeat-ngram方法在大模型时代已经基本不被采用了。但它的实现比较简单，思路有可借鉴之处，也切合本文主题（置-inf），因此我们还是学习一下它的方法。
+
+首先提前设置一个常数n，表示禁止重复的序列长度。依然是在大模型推理时，每次新生成logits值之后处理：
+
+1. 
+
+
+
 
 ## 禁用词字典树
 包含AC自动机？
